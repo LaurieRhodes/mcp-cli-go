@@ -1,0 +1,181 @@
+package domain
+
+import (
+	"context"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// BatchProcessor defines the interface for batch processing operations
+type BatchProcessor interface {
+	// ProcessBatch processes a batch request and returns the response
+	ProcessBatch(ctx context.Context, req *BatchRequest) (*BatchResponse, error)
+	
+	// ValidateConfig validates the batch configuration
+	ValidateConfig() error
+}
+
+// BatchRequest represents a batch processing request
+type BatchRequest struct {
+	BasePrompt   string                 `json:"base_prompt"`
+	InputData    string                 `json:"input_data"`
+	Switches     []string               `json:"switches"`
+	Template     string                 `json:"template"`
+	Metadata     map[string]interface{} `json:"metadata"`
+	ExecutionID  string                 `json:"execution_id"`
+}
+
+// BatchResponse represents a batch processing response
+type BatchResponse struct {
+	Content      string                 `json:"content"`
+	Metadata     map[string]interface{} `json:"metadata"`
+	ToolCalls    []ToolCall            `json:"tool_calls,omitempty"`
+	ExecutionID  string                `json:"execution_id"`
+	Timestamp    time.Time             `json:"timestamp"`
+	Status       string                `json:"status"`
+	Error        *BatchError           `json:"error,omitempty"`
+	Usage        *Usage                `json:"usage,omitempty"`
+	Provider     string                `json:"provider,omitempty"`
+	Model        string                `json:"model,omitempty"`
+	TimeTaken    time.Duration         `json:"time_taken"`
+}
+
+// BatchError represents a structured error in batch processing
+type BatchError struct {
+	Code    string                 `json:"code"`
+	Message string                 `json:"message"`
+	Details map[string]interface{} `json:"details,omitempty"`
+}
+
+// BatchModeConfig represents the batch mode configuration
+type BatchModeConfig struct {
+	Enabled       bool                      `json:"enabled"`
+	Switches      []string                  `json:"switches"`
+	BasePrompt    string                    `json:"base_prompt"`
+	InputHandling *BatchInputConfig         `json:"input_handling,omitempty"`
+	Output        *BatchOutputConfig        `json:"output,omitempty"`
+	Templates     map[string]*BatchTemplate `json:"templates,omitempty"`
+	Security      *BatchSecurityConfig      `json:"security,omitempty"`
+}
+
+// BatchInputConfig represents input handling configuration for batch mode
+type BatchInputConfig struct {
+	StdinAppend   bool   `json:"stdin_append"`
+	StdinPrefix   string `json:"stdin_prefix"`
+	MaxInputSize  string `json:"max_input_size"`
+}
+
+// BatchOutputConfig represents output formatting configuration for batch mode
+type BatchOutputConfig struct {
+	Format          string `json:"format"`
+	IncludeMetadata bool   `json:"include_metadata"`
+	ErrorHandling   string `json:"error_handling"`
+}
+
+// BatchTemplate represents a batch processing template
+type BatchTemplate struct {
+	BasePrompt      string            `json:"base_prompt"`
+	Switches        []string          `json:"switches"`
+	ToolsRequired   []string          `json:"tools_required,omitempty"`
+	Description     string            `json:"description,omitempty"`
+	Variables       map[string]string `json:"variables,omitempty"`
+	ServerName      string            `json:"server_name,omitempty"`
+	ProviderName    string            `json:"provider_name,omitempty"`
+	Model           string            `json:"model,omitempty"`
+	SystemPrompt    string            `json:"system_prompt,omitempty"`
+}
+
+// BatchSecurityConfig represents security configuration for batch mode
+type BatchSecurityConfig struct {
+	MaxInputSize      string           `json:"max_input_size"`
+	InputValidation   bool             `json:"input_validation"`
+	SanitizeOutput    bool             `json:"sanitize_output"`
+	RateLimiting      *RateLimitConfig `json:"rate_limiting,omitempty"`
+}
+
+// RateLimitConfig represents rate limiting configuration
+type RateLimitConfig struct {
+	RequestsPerMinute int `json:"requests_per_minute"`
+	RequestsPerHour   int `json:"requests_per_hour"`
+	RequestsPerDay    int `json:"requests_per_day"`
+}
+
+// BatchStatus represents the status of a batch operation
+type BatchStatus string
+
+const (
+	BatchStatusPending    BatchStatus = "pending"
+	BatchStatusProcessing BatchStatus = "processing"
+	BatchStatusCompleted  BatchStatus = "completed"
+	BatchStatusFailed     BatchStatus = "failed"
+	BatchStatusCancelled  BatchStatus = "cancelled"
+)
+
+// BatchMetrics represents execution metrics for batch operations
+type BatchMetrics struct {
+	StartTime         time.Time     `json:"start_time"`
+	EndTime           time.Time     `json:"end_time"`
+	TotalDuration     time.Duration `json:"total_duration"`
+	ProcessingTime    time.Duration `json:"processing_time"`
+	ToolExecutionTime time.Duration `json:"tool_execution_time"`
+	TokensUsed        *Usage        `json:"tokens_used,omitempty"`
+	ToolCallsCount    int           `json:"tool_calls_count"`
+	ErrorCount        int           `json:"error_count"`
+}
+
+// ValidateTemplate validates a batch template configuration
+func (t *BatchTemplate) ValidateTemplate() error {
+	if t.BasePrompt == "" {
+		return NewDomainError(ErrCodeRequestInvalid, "batch template missing base prompt")
+	}
+	
+	return nil
+}
+
+// GetMaxInputSizeBytes converts the max input size string to bytes
+func (c *BatchInputConfig) GetMaxInputSizeBytes() (int64, error) {
+	if c.MaxInputSize == "" {
+		return 1024 * 1024, nil // Default 1MB
+	}
+	
+	return parseSize(c.MaxInputSize)
+}
+
+// GetMaxInputSizeBytes converts the max input size string to bytes
+func (c *BatchSecurityConfig) GetMaxInputSizeBytes() (int64, error) {
+	if c.MaxInputSize == "" {
+		return 1024 * 1024, nil // Default 1MB
+	}
+	
+	return parseSize(c.MaxInputSize)
+}
+
+// parseSize parses size strings like "1MB", "500KB", etc.
+func parseSize(sizeStr string) (int64, error) {
+	// This is a simplified parser - in production you'd want more robust parsing
+	switch {
+	case strings.HasSuffix(sizeStr, "MB"):
+		val := strings.TrimSuffix(sizeStr, "MB")
+		if num, err := strconv.ParseInt(val, 10, 64); err == nil {
+			return num * 1024 * 1024, nil
+		}
+	case strings.HasSuffix(sizeStr, "KB"):
+		val := strings.TrimSuffix(sizeStr, "KB")
+		if num, err := strconv.ParseInt(val, 10, 64); err == nil {
+			return num * 1024, nil
+		}
+	case strings.HasSuffix(sizeStr, "B"):
+		val := strings.TrimSuffix(sizeStr, "B")
+		if num, err := strconv.ParseInt(val, 10, 64); err == nil {
+			return num, nil
+		}
+	}
+	
+	// Try parsing as plain number (assume bytes)
+	if num, err := strconv.ParseInt(sizeStr, 10, 64); err == nil {
+		return num, nil
+	}
+	
+	return 0, NewDomainError(ErrCodeRequestInvalid, "invalid size format: "+sizeStr)
+}
