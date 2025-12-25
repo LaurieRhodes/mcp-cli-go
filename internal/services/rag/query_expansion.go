@@ -188,5 +188,137 @@ func (qe *QueryExpander) expandAcronyms(query string) []string {
 	return expanded
 }
 
-// expandDomainTerms expands`
+// expandDomainTerms expands domain-specific terms in the query
+func (qe *QueryExpander) expandDomainTerms(query string) []string {
+	expanded := []string{query}
+	
+	if len(qe.config.DomainTerms) == 0 {
+		return expanded
+	}
+	
+	words := qe.tokenizeQuery(query)
+	
+	for _, word := range words {
+		searchWord := word
+		if !qe.config.CaseSensitive {
+			searchWord = strings.ToLower(word)
+		}
+		
+		if domainExpansions, exists := qe.config.DomainTerms[searchWord]; exists {
+			for _, expansion := range domainExpansions {
+				expandedQuery := qe.replaceWordInQuery(query, word, expansion)
+				if expandedQuery != query {
+					expanded = append(expanded, expandedQuery)
+				}
+			}
+		}
+	}
+	
+	return expanded
 }
+
+// generatePerspectiveQueries generates queries from different perspectives
+func (qe *QueryExpander) generatePerspectiveQueries(query string, perspectives []string) []PerspectiveQuery {
+	var perspectiveQueries []PerspectiveQuery
+	
+	for _, perspective := range perspectives {
+		pq := PerspectiveQuery{
+			Perspective: perspective,
+			Query:      qe.reframeQuery(query, perspective),
+			Context:    fmt.Sprintf("Viewing from %s perspective", perspective),
+		}
+		perspectiveQueries = append(perspectiveQueries, pq)
+	}
+	
+	return perspectiveQueries
+}
+
+// generateQueryVariants generates additional query variants
+func (qe *QueryExpander) generateQueryVariants(query string, count int) []string {
+	variants := []string{}
+	
+	// Generate question variants
+	if !strings.HasSuffix(query, "?") {
+		variants = append(variants, query+" ?")
+	}
+	
+	// Generate imperative variants
+	if !strings.HasPrefix(strings.ToLower(query), "find") {
+		variants = append(variants, "Find "+query)
+	}
+	
+	// Generate noun phrase variants
+	words := strings.Fields(query)
+	if len(words) > 1 {
+		// Try different word orders for short queries
+		if len(words) == 2 {
+			variants = append(variants, words[1]+" "+words[0])
+		}
+	}
+	
+	// Limit to requested count
+	if len(variants) > count {
+		variants = variants[:count]
+	}
+	
+	return variants
+}
+
+// Helper methods
+
+func (qe *QueryExpander) tokenizeQuery(query string) []string {
+	// Simple word tokenization - could be enhanced with NLP
+	return regexp.MustCompile(`\w+`).FindAllString(query, -1)
+}
+
+func (qe *QueryExpander) replaceWordInQuery(query, oldWord, newWord string) string {
+	// Use word boundary regex for accurate replacement
+	pattern := `\b` + regexp.QuoteMeta(oldWord) + `\b`
+	if !qe.config.CaseSensitive {
+		pattern = `(?i)` + pattern
+	}
+	re := regexp.MustCompile(pattern)
+	return re.ReplaceAllString(query, newWord)
+}
+
+func (qe *QueryExpander) reframeQuery(query string, perspective string) string {
+	// Simple perspective reframing - could be enhanced with LLM
+	lowerPerspective := strings.ToLower(perspective)
+	
+	switch {
+	case strings.Contains(lowerPerspective, "technical"):
+		return fmt.Sprintf("From a technical standpoint: %s", query)
+	case strings.Contains(lowerPerspective, "business"):
+		return fmt.Sprintf("From a business perspective: %s", query)
+	case strings.Contains(lowerPerspective, "user"):
+		return fmt.Sprintf("From the user's point of view: %s", query)
+	case strings.Contains(lowerPerspective, "historical"):
+		return fmt.Sprintf("Looking at the history of: %s", query)
+	default:
+		return fmt.Sprintf("Considering %s: %s", perspective, query)
+	}
+}
+
+func (qe *QueryExpander) deduplicateAndLimit(queries []string, limit int) []string {
+	seen := make(map[string]bool)
+	var unique []string
+	
+	for _, query := range queries {
+		normalizedQuery := query
+		if !qe.config.CaseSensitive {
+			normalizedQuery = strings.ToLower(query)
+		}
+		
+		if !seen[normalizedQuery] {
+			seen[normalizedQuery] = true
+			unique = append(unique, query)
+			
+			if len(unique) >= limit {
+				break
+			}
+		}
+	}
+	
+	return unique
+}
+

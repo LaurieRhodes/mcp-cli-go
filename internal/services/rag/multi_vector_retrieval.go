@@ -513,8 +513,7 @@ func (mvr *MultiVectorRetriever) parseSearchResults(rawResult, source string, te
 	}
 	
 	// Simple parsing for demonstration - would need more sophisticated parsing for production
-	lines := strings.Split(strings.TrimSpace(rawResult), "\
-")
+	lines := strings.Split(strings.TrimSpace(rawResult), "\n")
 	var results []SearchResult
 	
 	for i, line := range lines {
