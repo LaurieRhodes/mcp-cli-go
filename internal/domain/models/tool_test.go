@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 )
 
@@ -75,7 +76,7 @@ func TestToolResultIsSuccess(t *testing.T) {
 			result: &ToolResult{
 				ToolCallID: "call-2",
 				Output:     "",
-				Error:      json.Unmarshal([]byte("bad"), nil),
+				Error:      errors.New("test error"),
 			},
 			success: false,
 		},
