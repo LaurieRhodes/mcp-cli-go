@@ -8,8 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
+	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
@@ -22,9 +23,14 @@ type Service struct {
 // NewService creates a new AI service
 func NewService() *Service {
 	return &Service{
-		configService: config.NewService(),
+		configService: infraConfig.NewService(),
 		factory:       NewProviderFactory(),
 	}
+}
+
+// GetProviderFactory returns the provider factory for creating providers
+func (s *Service) GetProviderFactory() domain.ProviderFactory {
+	return s.factory
 }
 
 // InitializeProvider initializes an AI provider based on config and command-line overrides
@@ -63,7 +69,7 @@ func (s *Service) InitializeProvider(configFile, providerOverride, modelOverride
 	}
 
 	// Try environment variable for API key if not in config
-	if providerConfig.APIKey == "" && interfaceType != domain.OllamaNative {
+	if providerConfig.APIKey == "" && interfaceType != config.OllamaNative {
 		envKey := s.getAPIKeyFromEnv(providerName)
 		if envKey != "" {
 			providerConfig.APIKey = envKey
@@ -95,7 +101,7 @@ func (s *Service) InitializeProvider(configFile, providerOverride, modelOverride
 }
 
 // getProviderConfiguration retrieves provider config from the modular hierarchy
-func (s *Service) getProviderConfiguration(appConfig *domain.ApplicationConfig, providerName string) (*domain.ProviderConfig, domain.InterfaceType, error) {
+func (s *Service) getProviderConfiguration(appConfig *config.ApplicationConfig, providerName string) (*config.ProviderConfig, config.InterfaceType, error) {
 	if appConfig.AI == nil {
 		return nil, "", domain.ErrConfigNotFound.WithDetails("AI configuration missing")
 	}
@@ -121,18 +127,18 @@ func (s *Service) getProviderConfiguration(appConfig *domain.ApplicationConfig, 
 }
 
 // inferInterfaceType determines interface type from provider name
-func (s *Service) inferInterfaceType(providerName string) domain.InterfaceType {
+func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 	switch strings.ToLower(providerName) {
 	case "anthropic":
-		return domain.AnthropicNative
+		return config.AnthropicNative
 	case "ollama":
-		return domain.OllamaNative
+		return config.OllamaNative
 	case "gemini":
-		return domain.GeminiNative
-	case "openai", "deepseek", "openrouter":
-		return domain.OpenAICompatible
+		return config.GeminiNative
+	case "openai", "deepseek", "openrouter", "lmstudio":
+		return config.OpenAICompatible
 	default:
-		return domain.OpenAICompatible // Safe default
+		return config.OpenAICompatible // Safe default
 	}
 }
 
@@ -151,6 +157,8 @@ func (s *Service) mapProviderNameToType(providerName string) (domain.ProviderTyp
 		return domain.ProviderGemini, nil
 	case "openrouter":
 		return domain.ProviderOpenRouter, nil
+	case "lmstudio":
+		return domain.ProviderLMStudio, nil
 	default:
 		return "", fmt.Errorf("unsupported provider: %s", providerName)
 	}
@@ -164,6 +172,7 @@ func (s *Service) getAPIKeyFromEnv(providerName string) string {
 		"gemini":     "GEMINI_API_KEY",
 		"deepseek":   "DEEPSEEK_API_KEY",
 		"openrouter": "OPENROUTER_API_KEY",
+		// LMStudio doesn't need an API key (local service)
 	}
 
 	if envVar, exists := envVars[strings.ToLower(providerName)]; exists {
@@ -174,18 +183,19 @@ func (s *Service) getAPIKeyFromEnv(providerName string) string {
 }
 
 // validateProviderConfig ensures provider has required configuration
-func (s *Service) validateProviderConfig(providerName string, config *domain.ProviderConfig, interfaceType domain.InterfaceType) error {
-	if config.DefaultModel == "" {
+func (s *Service) validateProviderConfig(providerName string, cfg *config.ProviderConfig, interfaceType config.InterfaceType) error {
+	if cfg.DefaultModel == "" {
 		return domain.ErrConfigInvalid.WithDetails(fmt.Sprintf("provider '%s' missing default model", providerName))
 	}
 
-	// API key required for cloud providers (including Gemini)
-	if interfaceType != domain.OllamaNative && config.APIKey == "" {
+	// API key required for cloud providers (excluding Ollama and LMStudio)
+	providerLower := strings.ToLower(providerName)
+	if interfaceType != config.OllamaNative && providerLower != "lmstudio" && cfg.APIKey == "" {
 		return domain.ErrProviderAuth.WithDetails(fmt.Sprintf("provider '%s' missing API key", providerName))
 	}
 
 	// Endpoint required for Ollama
-	if interfaceType == domain.OllamaNative && config.APIEndpoint == "" {
+	if interfaceType == config.OllamaNative && cfg.APIEndpoint == "" {
 		return domain.ErrConfigInvalid.WithDetails(fmt.Sprintf("provider '%s' missing API endpoint", providerName))
 	}
 

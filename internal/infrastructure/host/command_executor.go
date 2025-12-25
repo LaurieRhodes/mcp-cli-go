@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
@@ -75,9 +76,11 @@ func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFi
 
 	// Get the connections
 	connections := manager.GetConnections()
+	
+	// IMPORTANT: Allow zero connections for pure LLM queries
+	// Only log a warning, don't fail - the command function will decide if it needs servers
 	if len(connections) == 0 {
-		logging.Error("No valid server connections established")
-		return fmt.Errorf("no valid server connections established")
+		logging.Info("No server connections established - running with LLM only")
 	}
 
 	// Apply stderr suppression if requested (not recommended)
@@ -112,8 +115,7 @@ func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFi
 }
 
 // ProcessOptions processes command-line options and returns the server names
-// FIXED: Now dynamically loads available servers from configuration instead of hardcoding "filesystem"
-func ProcessOptions(serverFlag string, disableFilesystem bool, provider string, model string) ([]string, map[string]bool) {
+func ProcessOptions(configFile, serverFlag string, disableFilesystem bool, provider string, model string) ([]string, map[string]bool) {
 	logging.Debug("Processing options: server=%s, disableFilesystem=%v, provider=%s, model=%s",
 		serverFlag, disableFilesystem, provider, model)
 	
@@ -128,64 +130,42 @@ func ProcessOptions(serverFlag string, disableFilesystem bool, provider string, 
 		}
 	}
 
-	// If no servers specified, dynamically load all available servers from configuration
-	if len(serverNames) == 0 {
-		serverNames = getAvailableServersFromConfig()
-		if len(serverNames) == 0 {
-			logging.Warn("No servers configured in configuration file")
-			// Only show message if not in error-only logging mode
-			if logging.GetDefaultLevel() < logging.ERROR {
-				fmt.Fprintln(os.Stdout, "Warning: No servers configured in configuration file")
+	// If no servers specified and filesystem not disabled, load ALL servers from config
+	if len(serverNames) == 0 && !disableFilesystem {
+		// Use the new modular config service to load all servers
+		configService := config.NewService()
+		appConfig, err := configService.LoadConfig(configFile)
+		if err == nil && appConfig != nil && len(appConfig.Servers) > 0 {
+			// Add ALL configured servers
+			for serverName := range appConfig.Servers {
+				serverNames = append(serverNames, serverName)
+				logging.Debug("Adding server from config: %s", serverName)
+			}
+			logging.Info("Loaded %d server(s) from config", len(serverNames))
+			
+			// Only show message if in verbose mode (to stderr, not stdout!)
+			outputMgr := output.GetGlobalManager()
+			if outputMgr.ShouldShowConnectionMessages() {
+				fmt.Fprintf(os.Stderr, "Loading all %d configured servers.\n", len(serverNames))
 			}
 		} else {
-			logging.Info("No servers specified. Using all available servers from configuration: %v", serverNames)
-			// Only show message if not in error-only logging mode
-			if logging.GetDefaultLevel() < logging.ERROR {
-				fmt.Fprintf(os.Stdout, "No servers specified. Using all available servers: %s\n", strings.Join(serverNames, ", "))
-			}
+			logging.Debug("No servers found in config or config load failed")
 		}
+		// If still no servers, leave empty - let caller handle it
 	}
 
 	// Create a map of user-specified servers
 	userSpecified := make(map[string]bool)
-	for _, name := range serverNames {
-		userSpecified[name] = true
-	}
-
-	logging.Debug("Final server names: %v", serverNames)
-	return serverNames, userSpecified
-}
-
-// getAvailableServersFromConfig dynamically loads all available servers from configuration
-func getAvailableServersFromConfig() []string {
-	// Try to load from default config location
-	configService := config.NewService()
-	
-	// Try standard config file locations
-	configFiles := []string{
-		"server_config.json",
-		"config.json",
-		"mcp-config.json",
-	}
-	
-	for _, configFile := range configFiles {
-		if _, err := os.Stat(configFile); err == nil {
-			_, err := configService.LoadConfig(configFile)
-			if err != nil {
-				logging.Debug("Failed to load config from %s: %v", configFile, err)
-				continue
-			}
-			
-			servers := configService.ListServers()
-			if len(servers) > 0 {
-				logging.Debug("Found %d servers in %s: %v", len(servers), configFile, servers)
-				return servers
-			}
+	if serverFlag != "" {
+		// Only servers explicitly specified via --server flag are marked as user-specified
+		for _, name := range serverNames {
+			userSpecified[name] = true
 		}
 	}
-	
-	logging.Debug("No servers found in any configuration file")
-	return []string{}
+	// Auto-loaded servers from config are NOT marked as user-specified
+
+	logging.Debug("Server names: %v", serverNames)
+	return serverNames, userSpecified
 }
 
 // Helper to split and trim a string

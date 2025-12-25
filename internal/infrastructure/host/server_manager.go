@@ -5,6 +5,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/initialize"
@@ -31,19 +32,19 @@ type ServerConnection struct {
 
 // ServerManager manages connections to MCP servers
 type ServerManager struct {
-	connections      []*ServerConnection
-	mu               sync.Mutex
-	suppressConsole  bool  // Controls connection message visibility
+	connections     []*ServerConnection
+	mu              sync.Mutex
+	suppressConsole bool // Controls connection message visibility
 }
 
 // NewServerManager creates a new server manager
 func NewServerManager() *ServerManager {
 	logging.Debug("Creating new server manager")
-	
-	// Determine console suppression based on logging level
-	// If logging is ERROR or above, suppress connection messages for clean output
-	suppressConsole := logging.GetDefaultLevel() >= logging.ERROR
-	
+
+	// Get output manager to determine console suppression
+	outputMgr := output.GetGlobalManager()
+	suppressConsole := !outputMgr.ShouldShowConnectionMessages()
+
 	return &ServerManager{
 		connections:     []*ServerConnection{},
 		suppressConsole: suppressConsole,
@@ -67,13 +68,17 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig config.S
 	logging.Info("Connecting to server: %s", serverName)
 	logging.Debug("Server command: %s %v", serverConfig.Command, serverConfig.Args)
 
+	// Get output manager for stderr suppression
+	outputMgr := output.GetGlobalManager()
+	suppressStderr := outputMgr.ShouldSuppressServerStderr()
+
 	// Create the stdio client with intelligent stderr handling
 	params := stdio.StdioServerParameters{
 		Command: serverConfig.Command,
 		Args:    serverConfig.Args,
 		Env:     serverConfig.Env,
 	}
-	client := stdio.NewStdioClientWithOptions(params, m.suppressConsole)
+	client := stdio.NewStdioClientWithStderrOption(params, suppressStderr)
 
 	// Start the client
 	logging.Debug("Starting stdio client for server: %s", serverName)
@@ -102,7 +107,7 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig config.S
 
 	// Add to connections
 	m.connections = append(m.connections, conn)
-	logging.Info("Successfully connected to server: %s (%s v%s)", 
+	logging.Info("Successfully connected to server: %s (%s v%s)",
 		serverName, conn.ServerInfo.Name, conn.ServerInfo.Version)
 
 	return conn, nil
@@ -111,28 +116,37 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig config.S
 // ConnectToServers connects to multiple servers from the configuration
 func (m *ServerManager) ConnectToServers(configFile string, serverNames []string, userSpecified map[string]bool) error {
 	logging.Info("Connecting to servers from config file: %s", configFile)
-	
-	// Load the configuration using the service
-	cfg, err := config.LoadConfig(configFile)
+
+	// Load the configuration using the new modular config service
+	configService := config.NewService()
+	appConfig, err := configService.LoadConfig(configFile)
 	if err != nil {
 		logging.Error("Failed to load configuration: %v", err)
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
 
-	logging.Debug("Loaded configuration with %d server entries", len(cfg.Servers))
+	logging.Debug("Loaded configuration with %d server entries", len(appConfig.Servers))
 
 	// Connect to each server
 	for _, name := range serverNames {
 		logging.Debug("Processing server: %s", name)
-		
-		// Get the server configuration using the wrapper function
-		serverConfig, err := config.GetServerConfigFromConfig(cfg, name)
-		if err != nil {
-			logging.Warn("Server configuration not found for %s: %v", name, err)
+
+		// Get the server configuration
+		serverConfigDomain, exists := appConfig.Servers[name]
+		if !exists {
+			logging.Warn("Server configuration not found for %s", name)
 			if !m.suppressConsole {
-				fmt.Fprintf(os.Stderr, "Warning: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Warning: server %s not found in configuration\n", name)
 			}
 			continue
+		}
+
+		// Convert domain ServerConfig to infrastructure ServerConfig
+		serverConfig := config.ServerConfig{
+			Command:      serverConfigDomain.Command,
+			Args:         serverConfigDomain.Args,
+			Env:          serverConfigDomain.Env,
+			SystemPrompt: serverConfigDomain.SystemPrompt,
 		}
 
 		// Connect to the server
@@ -146,19 +160,24 @@ func (m *ServerManager) ConnectToServers(configFile string, serverNames []string
 			continue
 		}
 
-		// Only print the connection message if console output is not suppressed
-		if !m.suppressConsole {
-			fmt.Printf("Connected to server: %s\n", name)
-		}
+		// Connection successful - no need to print message in normal mode
+		// Message will be in logs if verbose mode is enabled
 	}
 
 	// Check if we have any connections
+	// IMPORTANT: Allow zero connections when no servers were requested
+	// This is valid for pure LLM queries that don't need MCP tools
+	if len(serverNames) > 0 && len(m.connections) == 0 {
+		logging.Error("Failed to connect to any of the requested servers")
+		return fmt.Errorf("failed to connect to any of the requested servers")
+	}
+	
 	if len(m.connections) == 0 {
-		logging.Error("Failed to connect to any servers")
-		return fmt.Errorf("failed to connect to any servers")
+		logging.Info("No server connections - running with LLM only")
+	} else {
+		logging.Info("Connected to %d server(s) successfully", len(m.connections))
 	}
 
-	logging.Info("Connected to %d servers successfully", len(m.connections))
 	return nil
 }
 

@@ -1,3 +1,16 @@
+# ============================================================================
+# MCP-CLI-GO .gitignore
+# ============================================================================
+# This file prevents sensitive configuration and credentials from being
+# committed to version control.
+#
+# NEVER commit:
+# - API keys (OpenAI, Anthropic, etc.)
+# - Server configurations with credentials
+# - Environment variables with secrets
+# - Personal configuration files
+# ============================================================================
+
 # Compiled binaries
 mcp-cli
 mcp-cli.exe
@@ -7,6 +20,11 @@ test_services.exe
 *.dll
 *.so
 *.dylib
+
+# Build artifacts
+dist/
+release/
+*.sha256
 
 # Test files
 architecture_test.go
@@ -38,17 +56,30 @@ ehthumbs.db
 Thumbs.db
 
 # Configuration files with sensitive data
+# CRITICAL: These contain API keys, endpoints, and server configurations
+config/
+config/*
 server_config.json
 server_config.json.txt
 server_config.json.private
 *.private
+
+# Environment files
 .env
+.env.*
 .env.local
 .env.*.local
+*.env
 
 # Log files
 *.log
 logs/
+
+# Output and data directories
+output/
+outputs/
+data/
+*.output
 
 # Runtime data
 pids

@@ -1,0 +1,230 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+permissions:
+  contents: write  # Required for creating releases
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        include:
+          # Linux builds
+          - os: linux
+            arch: amd64
+            goos: linux
+            goarch: amd64
+          - os: linux
+            arch: arm64
+            goos: linux
+            goarch: arm64
+          
+          # macOS builds
+          - os: darwin
+            arch: amd64
+            goos: darwin
+            goarch: amd64
+          - os: darwin
+            arch: arm64
+            goos: darwin
+            goarch: arm64
+          
+          # Windows builds
+          - os: windows
+            arch: amd64
+            goos: windows
+            goarch: amd64
+            ext: .exe
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'  # Match your Go version
+      
+      - name: Get dependencies
+        run: go mod download
+      
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          # Create output directory
+          mkdir -p dist
+          
+          # Set binary name
+          BINARY_NAME="mcp-cli-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}"
+          
+          # Build with version info
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          GIT_COMMIT="${GITHUB_SHA::7}"
+          
+          # Static linking flags
+          LDFLAGS="-s -w"
+          LDFLAGS="$LDFLAGS -X main.Version=${VERSION}"
+          LDFLAGS="$LDFLAGS -X main.BuildTime=${BUILD_TIME}"
+          LDFLAGS="$LDFLAGS -X main.GitCommit=${GIT_COMMIT}"
+          LDFLAGS="$LDFLAGS -extldflags '-static'"
+          
+          go build \
+            -a \
+            -tags netgo \
+            -installsuffix netgo \
+            -ldflags="$LDFLAGS" \
+            -o "dist/${BINARY_NAME}" \
+            .
+          
+          # Create checksum
+          cd dist
+          sha256sum "${BINARY_NAME}" > "${BINARY_NAME}.sha256"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-cli-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            dist/mcp-cli-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
+            dist/mcp-cli-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}.sha256
+          retention-days: 7
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+      
+      - name: Display structure of downloaded files
+        run: ls -R dist
+      
+      - name: Flatten artifacts
+        run: |
+          mkdir -p release
+          find dist -type f -exec mv {} release/ \;
+          ls -lh release/
+      
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## MCP-CLI Release ${{ github.ref_name }}
+          
+          ### Installation
+          
+          Download the appropriate binary for your platform:
+          
+          **Linux (x86_64):**
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-linux-amd64
+          chmod +x mcp-cli-linux-amd64
+          sudo mv mcp-cli-linux-amd64 /usr/local/bin/mcp-cli
+          ```
+          
+          **Linux (ARM64):**
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-linux-arm64
+          chmod +x mcp-cli-linux-arm64
+          sudo mv mcp-cli-linux-arm64 /usr/local/bin/mcp-cli
+          ```
+          
+          **macOS (Intel):**
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-darwin-amd64
+          chmod +x mcp-cli-darwin-amd64
+          sudo mv mcp-cli-darwin-amd64 /usr/local/bin/mcp-cli
+          ```
+          
+          **macOS (Apple Silicon):**
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-darwin-arm64
+          chmod +x mcp-cli-darwin-arm64
+          sudo mv mcp-cli-darwin-arm64 /usr/local/bin/mcp-cli
+          ```
+          
+          **Windows (x86_64):**
+          Download `mcp-cli-windows-amd64.exe` and add to your PATH.
+          
+          ### Verification
+          
+          Verify your download using the SHA256 checksums:
+          ```bash
+          sha256sum -c mcp-cli-<platform>-<arch>.sha256
+          ```
+          
+          ### Documentation
+          
+          - [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/docs/getting-started/quick-start.md)
+          - [Full Documentation](https://github.com/${{ github.repository }}/blob/main/docs/)
+          
+          ### What's New
+          
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+          EOF
+          
+          cat release_notes.md
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    name: Test build artifacts
+    needs: build
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: mcp-cli-linux-amd64
+          - os: macos-latest
+            artifact: mcp-cli-darwin-arm64
+          - os: windows-latest
+            artifact: mcp-cli-windows-amd64.exe
+    
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: .
+      
+      - name: Make binary executable (Unix)
+        if: runner.os != 'Windows'
+        run: chmod +x ${{ matrix.artifact }}
+      
+      - name: Test binary (Unix)
+        if: runner.os != 'Windows'
+        run: ./${{ matrix.artifact }} --version
+      
+      - name: Test binary (Windows)
+        if: runner.os == 'Windows'
+        run: .\${{ matrix.artifact }} --version

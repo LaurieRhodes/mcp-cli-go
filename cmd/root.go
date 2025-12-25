@@ -3,8 +3,11 @@ package cmd
 import (
 	"os"
 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -26,53 +29,114 @@ var (
 	// RootCmd represents the base command when called without any subcommands
 	RootCmd = &cobra.Command{
 		Use:   "mcp-cli",
-		Short: "MCP Command-Line Tool",
-		Long: `MCP Command-Line Tool - A protocol-level CLI designed to interact with Model Context Provider servers.
-The client allows users to send commands, query data, and interact with various resources provided by the server.
+		Short: "MCP Command-Line Tool - Interact with AI models and MCP servers",
+		Long: `================================================================================
+                          MCP Command-Line Tool
+          Protocol-level CLI for Model Context Provider servers
+================================================================================
 
-Workflow Templates:
-  Use --template to execute predefined workflow templates that can chain multiple AI requests
-  with different providers and pass data between steps.
+A versatile command-line interface for interacting with AI models through the
+Model Context Protocol (MCP). Supports multiple AI providers, workflow templates,
+embeddings generation, and can run as an MCP server itself.
 
-Examples:
-  mcp-cli --template "analyze_file"
-  mcp-cli --template "search_and_summarize" --input-data "AI trends"
-  mcp-cli --list-templates
++----------------------------------------------------------------------------+
+| First Time Setup                                                           |
++----------------------------------------------------------------------------+
+| mcp-cli init --quick         Quick setup (30 seconds)                     |
+| mcp-cli init                 Interactive guided setup                     |
+| mcp-cli init --full          Complete setup with all options              |
++----------------------------------------------------------------------------+
 
-First Time Setup:
-  If no config file exists, an example will be created automatically with:
-  - Sample servers (filesystem, brave-search)  
-  - Multiple AI provider options (OpenAI, Anthropic, Ollama)
-  - Example workflow templates for file analysis and web research`,
++----------------------------------------------------------------------------+
+| Basic Usage                                                                |
++----------------------------------------------------------------------------+
+| mcp-cli                      Start interactive chat (default)             |
+| mcp-cli chat                 Explicitly start chat mode                   |
+| mcp-cli query "question"     Ask a single question                        |
+| mcp-cli interactive          Interactive mode with slash commands         |
++----------------------------------------------------------------------------+
+
++----------------------------------------------------------------------------+
+| Workflow Templates                                                         |
++----------------------------------------------------------------------------+
+| Templates chain multiple AI requests with different providers and pass    |
+| data between steps for complex, automated workflows.                      |
+|                                                                            |
+| mcp-cli --list-templates                List available templates          |
+| mcp-cli --template analyze              Run 'analyze' template            |
+| mcp-cli --template analyze --input-data "data"  With input data           |
+| echo "data" | mcp-cli --template analyze        From stdin                |
++----------------------------------------------------------------------------+
+
++----------------------------------------------------------------------------+
+| MCP Server Mode                                                            |
++----------------------------------------------------------------------------+
+| Run mcp-cli as an MCP server, exposing workflow templates as callable     |
+| tools that other applications (like Claude Desktop) can use.              |
+|                                                                            |
+| mcp-cli serve config/runas/agent.yaml   Start MCP server                  |
+| mcp-cli serve --verbose agent.yaml      With detailed logging             |
++----------------------------------------------------------------------------+
+
++----------------------------------------------------------------------------+
+| Embeddings & Vector Search                                                 |
++----------------------------------------------------------------------------+
+| mcp-cli embeddings "text"                    Generate embeddings          |
+| mcp-cli embeddings --input-file doc.txt      From file                    |
+| mcp-cli embeddings --model text-embedding-3-large  Specific model         |
+| echo "text" | mcp-cli embeddings             From stdin                   |
++----------------------------------------------------------------------------+
+
++----------------------------------------------------------------------------+
+| Configuration                                                              |
++----------------------------------------------------------------------------+
+| mcp-cli config validate                      Validate configuration       |
+| mcp-cli config --help                        See all config commands      |
++----------------------------------------------------------------------------+`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			// Set up color output based on --no-color flag
-			if noColor {
-				logging.SetColorOutput(false)
-				logging.Debug("Color output disabled via --no-color flag")
+			// Skip config check for init command, help, and serve (serve handles config loading internally)
+			cmdName := cmd.Name()
+			if cmdName == "init" || cmdName == "help" || cmdName == "completion" || cmdName == "serve" {
+				return
 			}
 			
-			// Different logging behavior based on command and flags
+			// Check if config exists (except for init command)
+			checkConfigExists(configFile)
+			
+			// Determine output configuration based on command and flags
+			var outputConfig *models.OutputConfig
+			
 			isQueryCommand := cmd.Name() == "query"
 			isTemplateMode := templateName != ""
+			isEmbeddingsCommand := cmd.Name() == "embeddings"
 			
 			if verbose {
-				// Verbose flag always enables debug logging regardless of command
-				logging.SetDefaultLevel(logging.DEBUG)
-				logging.Debug("Debug logging enabled via --verbose flag")
-			} else if isQueryCommand || isTemplateMode {
-				// Query mode and Template mode: Clean output for workflow automation (ERROR level only)
-				// This suppresses INFO and DEBUG logs but preserves critical errors
-				logging.SetDefaultLevel(logging.ERROR)
+				// Verbose flag: Show everything
+				outputConfig = models.NewVerboseOutputConfig()
+			} else if isQueryCommand || isTemplateMode || isEmbeddingsCommand {
+				// Query/template/embeddings: Quiet mode for clean output
+				outputConfig = models.NewQuietOutputConfig()
 			} else {
-				// Other commands (chat, interactive): Normal INFO level
-				logging.SetDefaultLevel(logging.INFO)
+				// Chat and other commands: Normal mode
+				outputConfig = models.NewDefaultOutputConfig()
 			}
+			
+			// Apply no-color flag
+			if noColor {
+				outputConfig.ShowColors = false
+			}
+			
+			// Set global output manager
+			outputManager := output.NewManager(outputConfig)
+			output.SetGlobalManager(outputManager)
+			
+			// Configure legacy logging to match output level
+			configureLegacyLogging(outputConfig)
 			
 			// Try to load default provider from config if not specified
 			if providerName == "" {
-				// Try to load from config using auto-generation if needed
 				configService := config.NewService()
-				if appConfig, _, err := configService.LoadConfigOrCreateExample(configFile); err == nil {
+				if appConfig, err := configService.LoadConfig(configFile); err == nil {
 					if appConfig.AI != nil && appConfig.AI.DefaultProvider != "" {
 						providerName = appConfig.AI.DefaultProvider
 						logging.Debug("Using default provider from config: %s", providerName)
@@ -115,31 +179,39 @@ func Execute() error {
 
 func init() {
 	// Global flags
-	RootCmd.PersistentFlags().StringVar(&configFile, "config", "server_config.json", "Path to the JSON configuration file")
-	RootCmd.PersistentFlags().StringVarP(&serverName, "server", "s", "", "Specifies specific server(s) to use (comma-separated). If not specified, uses all configured servers.")
-	RootCmd.PersistentFlags().StringVarP(&providerName, "provider", "p", "", "Specifies the AI provider to use (openai, anthropic, ollama)")
-	RootCmd.PersistentFlags().StringVarP(&modelName, "model", "m", "", "Specifies the model to use")
-	RootCmd.PersistentFlags().BoolVar(&disableFilesystem, "disable-filesystem", false, "Disable filesystem access for the LLM")
-	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
-	RootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colored output")
+	RootCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml", "Path to configuration file (YAML/JSON)")
+	RootCmd.PersistentFlags().StringVarP(&serverName, "server", "s", "", "MCP server(s) to use (comma-separated, e.g., 'filesystem,brave-search')")
+	RootCmd.PersistentFlags().StringVarP(&providerName, "provider", "p", "", "AI provider (openai, anthropic, ollama, deepseek, gemini, openrouter)")
+	RootCmd.PersistentFlags().StringVarP(&modelName, "model", "m", "", "Model to use (e.g., gpt-4o, claude-sonnet-4, qwen2.5:32b)")
+	RootCmd.PersistentFlags().BoolVar(&disableFilesystem, "disable-filesystem", false, "Disable filesystem server (prevents file access)")
+	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging (shows all internal operations)")
+	RootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colored output (for piping or logging)")
 	
 	// Template-based workflow flags
-	RootCmd.PersistentFlags().StringVar(&templateName, "template", "", "Execute a specific workflow template")
-	RootCmd.PersistentFlags().StringVar(&inputData, "input-data", "", "Input data for the workflow template (can be JSON or plain text)")
+	RootCmd.PersistentFlags().StringVar(&templateName, "template", "", "Execute workflow template by name")
+	RootCmd.PersistentFlags().StringVar(&inputData, "input-data", "", "Input data for template (JSON or plain text)")
 	RootCmd.PersistentFlags().BoolVar(&listTemplates, "list-templates", false, "List all available workflow templates")
 
 	// Add subcommands
 	RootCmd.AddCommand(ChatCmd)
 	RootCmd.AddCommand(InteractiveCmd)
 	RootCmd.AddCommand(QueryCmd)
+	RootCmd.AddCommand(EmbeddingsCmd)
+	RootCmd.AddCommand(ConfigCmd)
+	RootCmd.AddCommand(InitCmd)  // Setup wizard
+	// Note: ServeCmd is added in serve.go's init() function
 
-	// Configuration-based initialization with auto-generation
+	// Configuration-based initialization
 	cobra.OnInitialize(func() {
+		// Skip if running init command
+		if isInitCommand() {
+			return
+		}
+		
 		// Only load provider and model if not already specified on command line
 		if providerName == "" || modelName == "" {
-			// Try to load from config using auto-generation if needed
 			configService := config.NewService()
-			if appConfig, _, err := configService.LoadConfigOrCreateExample(configFile); err == nil && appConfig.AI != nil {
+			if appConfig, err := configService.LoadConfig(configFile); err == nil && appConfig.AI != nil {
 				// If provider not specified, use from config
 				if providerName == "" && appConfig.AI.DefaultProvider != "" {
 					providerName = appConfig.AI.DefaultProvider
@@ -157,4 +229,73 @@ func init() {
 			}
 		}
 	})
+	
+	// Set custom help template with colors
+	setColoredHelpTemplate()
+}
+
+// setColoredHelpTemplate configures colored output for help text
+func setColoredHelpTemplate() {
+	// Define color functions
+	cyan := color.New(color.FgCyan, color.Bold).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	blue := color.New(color.FgBlue, color.Bold).SprintFunc()
+	
+	// Custom usage template with colors
+	cobra.AddTemplateFunc("styleHeading", func(s string) string {
+		return cyan(s)
+	})
+	cobra.AddTemplateFunc("styleCommand", func(s string) string {
+		return green(s)
+	})
+	cobra.AddTemplateFunc("styleFlag", func(s string) string {
+		return yellow(s)
+	})
+	cobra.AddTemplateFunc("styleExample", func(s string) string {
+		return blue(s)
+	})
+	
+	usageTemplate := `{{styleHeading "Usage:"}}{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+{{styleHeading "Aliases:"}}
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+{{styleHeading "Examples:"}}
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+{{styleHeading "Available Commands:"}}{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad (styleCommand .Name) .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+{{styleHeading "Flags:"}}
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+{{styleHeading "Global Flags:"}}
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+{{styleHeading "Additional help topics:"}}{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`
+	
+	RootCmd.SetUsageTemplate(usageTemplate)
+}
+
+// configureLegacyLogging configures the legacy logging system to match OutputConfig
+func configureLegacyLogging(config *models.OutputConfig) {
+	// Map OutputLevel to logging level
+	switch config.Level {
+	case models.OutputQuiet:
+		logging.SetDefaultLevel(logging.ERROR)
+	case models.OutputNormal:
+		logging.SetDefaultLevel(logging.WARN)
+	case models.OutputVerbose:
+		logging.SetDefaultLevel(logging.DEBUG)
+	}
+	
+	// Configure color output
+	logging.SetColorOutput(config.ShowColors)
 }

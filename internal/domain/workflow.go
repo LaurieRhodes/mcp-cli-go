@@ -22,20 +22,19 @@ type WorkflowStep struct {
 	Step            int                    `json:"step"`
 	Name            string                 `json:"name"`
 	BasePrompt      string                 `json:"base_prompt"`
+	SystemPrompt    string                 `json:"system_prompt,omitempty"`
 	Provider        string                 `json:"provider,omitempty"`
 	Model           string                 `json:"model,omitempty"`
 	Servers         []string               `json:"servers,omitempty"`
 	ToolsRequired   []string               `json:"tools_required,omitempty"`
-	InputVariables  []string               `json:"input_variables,omitempty"`
-	OutputVariable  string                 `json:"output_variable,omitempty"`
 	InputHandling   *WorkflowInputConfig   `json:"input_handling,omitempty"`
 	Output          *WorkflowOutputConfig  `json:"output,omitempty"`
 	Conditions      *WorkflowConditions    `json:"conditions,omitempty"`
 	Timeout         string                 `json:"timeout,omitempty"`
 	RetryPolicy     *WorkflowRetryPolicy   `json:"retry_policy,omitempty"`
-	SystemPrompt    string                 `json:"system_prompt,omitempty"`
 	Temperature     float64                `json:"temperature,omitempty"`
 	MaxTokens       int                    `json:"max_tokens,omitempty"`
+	Embedding       *EmbeddingConfig       `json:"embedding,omitempty"`     // Embedding configuration for RAG
 }
 
 // WorkflowInputConfig handles input processing for workflow steps
@@ -189,44 +188,6 @@ func (wt *WorkflowTemplate) ValidateWorkflowTemplate() error {
 		if step.BasePrompt == "" {
 			return NewDomainError(ErrCodeRequestInvalid, 
 				fmt.Sprintf("step %d (%s) is missing base_prompt", step.Step, step.Name))
-		}
-		
-		// Validate input variables reference existing output variables
-		if err := wt.validateStepVariables(step, i); err != nil {
-			return err
-		}
-	}
-	
-	return nil
-}
-
-// validateStepVariables validates that input variables reference valid output variables from previous steps
-func (wt *WorkflowTemplate) validateStepVariables(step WorkflowStep, stepIndex int) error {
-	if len(step.InputVariables) == 0 {
-		return nil
-	}
-	
-	// Collect available variables from previous steps
-	availableVars := make(map[string]bool)
-	
-	// Add global template variables
-	for varName := range wt.Variables {
-		availableVars[varName] = true
-	}
-	
-	// Add output variables from previous steps
-	for i := 0; i < stepIndex; i++ {
-		if wt.Steps[i].OutputVariable != "" {
-			availableVars[wt.Steps[i].OutputVariable] = true
-		}
-	}
-	
-	// Check that all input variables are available
-	for _, inputVar := range step.InputVariables {
-		if !availableVars[inputVar] {
-			return NewDomainError(ErrCodeRequestInvalid, 
-				fmt.Sprintf("step %d (%s) references undefined variable '%s'", 
-					step.Step, step.Name, inputVar))
 		}
 	}
 	
