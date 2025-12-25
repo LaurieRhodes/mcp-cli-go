@@ -69,22 +69,27 @@ jobs:
           BINARY_NAME="mcp-cli-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}"
           
           # Build with version info
-          VERSION="${GITHUB_REF_NAME:-dev}"
+          VERSION="${GITHUB_REF_NAME}"
           BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          GIT_COMMIT="${GITHUB_SHA::7}"
+          GIT_COMMIT="${GITHUB_SHA:0:7}"
           
           # Static linking flags
           LDFLAGS="-s -w"
-          LDFLAGS="$LDFLAGS -X main.Version=${VERSION}"
-          LDFLAGS="$LDFLAGS -X main.BuildTime=${BUILD_TIME}"
-          LDFLAGS="$LDFLAGS -X main.GitCommit=${GIT_COMMIT}"
+          LDFLAGS="$LDFLAGS -X 'main.Version=${VERSION}'"
+          LDFLAGS="$LDFLAGS -X 'main.BuildTime=${BUILD_TIME}'"
+          LDFLAGS="$LDFLAGS -X 'main.GitCommit=${GIT_COMMIT}'"
           LDFLAGS="$LDFLAGS -extldflags '-static'"
+          
+          echo "Building ${BINARY_NAME}"
+          echo "Version: ${VERSION}"
+          echo "Build Time: ${BUILD_TIME}"
+          echo "Git Commit: ${GIT_COMMIT}"
           
           go build \
             -a \
             -tags netgo \
             -installsuffix netgo \
-            -ldflags="$LDFLAGS" \
+            -ldflags="${LDFLAGS}" \
             -o "dist/${BINARY_NAME}" \
             .
           

@@ -31,9 +31,9 @@ mkdir -p "$BUILD_DIR"
 
 # Build flags
 LDFLAGS="-s -w"
-LDFLAGS="$LDFLAGS -X main.Version=${VERSION}"
-LDFLAGS="$LDFLAGS -X main.BuildTime=${BUILD_TIME}"
-LDFLAGS="$LDFLAGS -X main.GitCommit=${GIT_COMMIT}"
+LDFLAGS="$LDFLAGS -X 'main.Version=${VERSION}'"
+LDFLAGS="$LDFLAGS -X 'main.BuildTime=${BUILD_TIME}'"
+LDFLAGS="$LDFLAGS -X 'main.GitCommit=${GIT_COMMIT}'"
 LDFLAGS="$LDFLAGS -extldflags '-static'"
 
 # Build tags for static linking
