@@ -326,10 +326,8 @@ Examples:
 						return fmt.Errorf("failed to write output file: %w", err)
 					}
 				} else {
-					// Use platform-aware output writer
-					writer := output.NewWriter()
-					defer writer.Close()
-					writer.Println(result.Response)
+					// Output plain text to stdout
+					fmt.Println(result.Response)
 				}
 			}
 		}
