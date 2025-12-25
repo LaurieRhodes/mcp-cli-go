@@ -205,10 +205,13 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact: mcp-cli-linux-amd64
+            binary: mcp-cli-linux-amd64
           - os: macos-latest
             artifact: mcp-cli-darwin-arm64
+            binary: mcp-cli-darwin-arm64
           - os: windows-latest
-            artifact: mcp-cli-windows-amd64.exe
+            artifact: mcp-cli-windows-amd64
+            binary: mcp-cli-windows-amd64.exe
     
     steps:
       - name: Download artifact
@@ -219,12 +222,12 @@ jobs:
       
       - name: Make binary executable (Unix)
         if: runner.os != 'Windows'
-        run: chmod +x ${{ matrix.artifact }}
+        run: chmod +x ${{ matrix.binary }}
       
       - name: Test binary (Unix)
         if: runner.os != 'Windows'
-        run: ./${{ matrix.artifact }} --version
+        run: ./${{ matrix.binary }} --version
       
       - name: Test binary (Windows)
         if: runner.os == 'Windows'
-        run: .\${{ matrix.artifact }} --version
+        run: .\${{ matrix.binary }} --version
