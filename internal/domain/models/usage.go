@@ -16,7 +16,7 @@ func (u *Usage) Add(other Usage) {
 
 // IsEmpty returns true if no tokens were used
 func (u *Usage) IsEmpty() bool {
-	return u.TotalTokens == 0
+	return u.PromptTokens == 0 && u.CompletionTokens == 0 && u.TotalTokens == 0
 }
 
 // ContextWindow represents context window constraints

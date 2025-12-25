@@ -133,7 +133,7 @@ func (u *UI) EndStreamingResponse() {
 	}
 	
 	// Add a newline at the end
-	fmt.Println("\n")
+	fmt.Println()
 	
 	// Reset stream status
 	u.streamStarted = false

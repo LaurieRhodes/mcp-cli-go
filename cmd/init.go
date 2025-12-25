@@ -103,7 +103,7 @@ type InitConfig struct {
 
 func printWelcome() {
 	color.New(color.FgCyan, color.Bold).Println("\n🚀 MCP CLI Setup Wizard")
-	fmt.Println("This will help you set up mcp-cli for the first time.\n")
+	fmt.Println("This will help you set up mcp-cli for the first time.")
 }
 
 func createQuickConfig() *InitConfig {

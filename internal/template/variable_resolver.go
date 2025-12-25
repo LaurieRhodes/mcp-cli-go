@@ -357,51 +357,51 @@ func (vr *VariableResolver) ResolveExpression(expr string) (interface{}, error) 
 
 // EvaluateCondition evaluates a condition expression
 func (vr *VariableResolver) EvaluateCondition(condition string) (bool, error) {
-	// First, resolve any {{variable}} references in the condition
-	resolved, err := vr.ResolveString(condition)
-	if err != nil {
-		return false, err
+	// Remove {{ }} if present
+	condition = strings.TrimSpace(condition)
+	if strings.HasPrefix(condition, "{{") && strings.HasSuffix(condition, "}}") {
+		condition = strings.TrimSpace(condition[2 : len(condition)-2])
 	}
 
-	// Simple condition evaluation
-	// This is a basic implementation - can be enhanced with a proper expression parser
-	
 	// Handle simple equality
-	if strings.Contains(resolved, "==") {
-		parts := strings.SplitN(resolved, "==", 2)
+	if strings.Contains(condition, "==") {
+		parts := strings.SplitN(condition, "==", 2)
 		left := strings.TrimSpace(parts[0])
 		right := strings.TrimSpace(parts[1])
 		
-		// Try to resolve left side as a variable if it's not already resolved
+		// Resolve left side as a variable
 		if val, ok := vr.variables[left]; ok {
 			left = vr.valueToString(val)
 		}
 		
-		// Remove quotes if present
-		left = strings.Trim(left, "'\"")
+		// Remove quotes from right side
 		right = strings.Trim(right, "'\"")
+		left = strings.Trim(left, "'\"")
+		
 		return left == right, nil
 	}
 
 	// Handle inequality
-	if strings.Contains(resolved, "!=") {
-		parts := strings.SplitN(resolved, "!=", 2)
+	if strings.Contains(condition, "!=") {
+		parts := strings.SplitN(condition, "!=", 2)
 		left := strings.TrimSpace(parts[0])
 		right := strings.TrimSpace(parts[1])
 		
-		// Try to resolve left side as a variable if it's not already resolved
+		// Resolve left side as a variable
 		if val, ok := vr.variables[left]; ok {
 			left = vr.valueToString(val)
 		}
 		
-		left = strings.Trim(left, "'\"")
+		// Remove quotes from right side
 		right = strings.Trim(right, "'\"")
+		left = strings.Trim(left, "'\"")
+		
 		return left != right, nil
 	}
 
 	// Handle 'or' operator
-	if strings.Contains(resolved, " or ") {
-		parts := strings.Split(resolved, " or ")
+	if strings.Contains(condition, " or ") {
+		parts := strings.Split(condition, " or ")
 		for _, part := range parts {
 			result, err := vr.EvaluateCondition(strings.TrimSpace(part))
 			if err != nil {
@@ -415,8 +415,8 @@ func (vr *VariableResolver) EvaluateCondition(condition string) (bool, error) {
 	}
 
 	// Handle 'and' operator
-	if strings.Contains(resolved, " and ") {
-		parts := strings.Split(resolved, " and ")
+	if strings.Contains(condition, " and ") {
+		parts := strings.Split(condition, " and ")
 		for _, part := range parts {
 			result, err := vr.EvaluateCondition(strings.TrimSpace(part))
 			if err != nil {
@@ -429,19 +429,40 @@ func (vr *VariableResolver) EvaluateCondition(condition string) (bool, error) {
 		return true, nil
 	}
 
-	// Handle boolean values
-	resolved = strings.ToLower(strings.TrimSpace(resolved))
-	if resolved == "true" {
+	// Try to resolve as a variable first
+	if val, ok := vr.variables[condition]; ok {
+		return vr.valueToBoolean(val), nil
+	}
+
+	// Handle boolean literals
+	condition = strings.ToLower(strings.TrimSpace(condition))
+	if condition == "true" {
 		return true, nil
 	}
-	if resolved == "false" {
+	if condition == "false" {
 		return false, nil
 	}
 
 	// Handle non-empty string as true
-	if resolved != "" && resolved != "0" {
+	if condition != "" && condition != "0" {
 		return true, nil
 	}
 
 	return false, nil
+}
+
+// valueToBoolean converts a value to boolean
+func (vr *VariableResolver) valueToBoolean(value interface{}) bool {
+	switch v := value.(type) {
+	case bool:
+		return v
+	case string:
+		return v != "" && v != "0" && strings.ToLower(v) != "false"
+	case int, int32, int64, uint, uint32, uint64:
+		return v != 0
+	case float32, float64:
+		return v != 0.0
+	default:
+		return value != nil
+	}
 }
