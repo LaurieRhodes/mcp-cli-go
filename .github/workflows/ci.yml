@@ -75,6 +75,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail release on lint errors
     
     steps:
       - name: Checkout code

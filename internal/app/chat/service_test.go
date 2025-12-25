@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"io"
 	"strings"
 	"testing"
 
@@ -22,7 +23,7 @@ func (m *MockProvider) CreateCompletion(ctx context.Context, req *ports.Completi
 	return m.response, nil
 }
 
-func (m *MockProvider) StreamCompletion(ctx context.Context, req *ports.CompletionRequest, writer interface{}) (*ports.CompletionResponse, error) {
+func (m *MockProvider) StreamCompletion(ctx context.Context, req *ports.CompletionRequest, writer io.Writer) (*ports.CompletionResponse, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
