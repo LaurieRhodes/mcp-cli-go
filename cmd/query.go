@@ -10,7 +10,6 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/query"
 	"github.com/spf13/cobra"
 )
