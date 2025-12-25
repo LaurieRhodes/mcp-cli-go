@@ -50,7 +50,7 @@ func SendToolsList(client *stdio.StdioClient, names []string) (*ToolsListResult,
 		for msg := range client.Read() {
 			readCount++
 			logging.Debug("Received message #%d with ID: %s", readCount, msg.ID)
-			if msg.ID == requestID {
+			if msg.ID.EqualsString(requestID) {
 				logging.Debug("Found matching response for request ID: %s", requestID)
 				select {
 				case responseCh <- msg:
@@ -148,7 +148,7 @@ func SendToolsCall(client *stdio.StdioClient, name string, arguments map[string]
 		for msg := range client.Read() {
 			readCount++
 			logging.Debug("Received message #%d with ID: %s", readCount, msg.ID)
-			if msg.ID == requestID {
+			if msg.ID.EqualsString(requestID) {
 				logging.Debug("Found matching response for request ID: %s", requestID)
 				select {
 				case responseCh <- msg:

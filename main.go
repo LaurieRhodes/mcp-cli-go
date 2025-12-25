@@ -10,7 +10,19 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
+// Version information - set at build time
+var (
+	Version   = "dev"
+	BuildTime = "unknown"
+	GitCommit = "unknown"
+)
+
 func init() {
+	// Set version information in cmd package
+	cmd.Version = Version
+	cmd.BuildTime = BuildTime
+	cmd.GitCommit = GitCommit
+	
 	// Setup signal handling
 	setupSignalHandler()
 }

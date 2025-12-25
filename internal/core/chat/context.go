@@ -5,7 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/core/tokens"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+    "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config" 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
@@ -20,11 +22,17 @@ type ChatContext struct {
 	// System prompt template
 	SystemPrompt string
 
-	// Maximum number of messages to retain in history
+	// Maximum number of messages to retain in history (fallback)
 	MaxHistorySize int
 
-	// Maximum tokens to retain in context
-	MaxTokens int
+	// Token manager for sophisticated context management
+	TokenManager *tokens.TokenManager
+
+	// Current model being used
+	CurrentModel string
+
+	// Current provider configuration
+	ProviderConfig *config.ProviderConfig
 }
 
 // ToolCallHistory tracks the execution of a tool
@@ -37,6 +45,16 @@ type ToolCallHistory struct {
 
 // NewChatContext creates a new chat context
 func NewChatContext(systemPrompt string) *ChatContext {
+	return NewChatContextWithProvider(systemPrompt, "", nil)
+}
+
+// NewChatContextWithModel creates a new chat context for a specific model (backward compatibility)
+func NewChatContextWithModel(systemPrompt string, model string) *ChatContext {
+	return NewChatContextWithProvider(systemPrompt, model, nil)
+}
+
+// NewChatContextWithProvider creates a new chat context with provider configuration
+func NewChatContextWithProvider(systemPrompt string, model string, providerConfig *config.ProviderConfig) *ChatContext {
 	// If no system prompt provided, use default one
 	if systemPrompt == "" {
 		systemPrompt = `You are a helpful assistant with access to tools. The tools are provided by Model Context Protocol (MCP) servers.
@@ -58,13 +76,87 @@ For file system interactions, make sure to respect file paths and check if opera
 `
 	}
 
-	return &ChatContext{
-		Messages:      []domain.Message{},
-		ToolCalls:     []ToolCallHistory{},
-		SystemPrompt:  systemPrompt,
-		MaxHistorySize: 50,  // Reasonable default for most models
-		MaxTokens:     8000, // Approximating a 16k context window
+	context := &ChatContext{
+		Messages:       []domain.Message{},
+		ToolCalls:      []ToolCallHistory{},
+		SystemPrompt:   systemPrompt,
+		MaxHistorySize: 50, // Reasonable fallback for models without token management
+		CurrentModel:   model,
+		ProviderConfig: providerConfig,
 	}
+
+	// Initialize token manager if model and provider config are provided
+	if model != "" && providerConfig != nil {
+		tokenManager, err := tokens.NewTokenManagerFromProvider(model, providerConfig)
+		if err != nil {
+			logging.Warn("Failed to create provider-aware token manager for model %s: %v, falling back to simple message-based trimming", model, err)
+		} else {
+			context.TokenManager = tokenManager
+			logging.Info("Initialized provider-aware token management for model %s", model)
+		}
+	} else if model != "" {
+		// Fallback to model-only token manager for backward compatibility
+		tokenManager, err := tokens.NewTokenManagerFallback(model)
+		if err != nil {
+			logging.Warn("Failed to create fallback token manager for model %s: %v, using simple message-based trimming", model, err)
+		} else {
+			context.TokenManager = tokenManager
+			logging.Info("Initialized fallback token management for model %s", model)
+		}
+	}
+
+	return context
+}
+
+// UpdateProvider updates the model and provider configuration and reinitializes token management
+func (c *ChatContext) UpdateProvider(model string, providerConfig *config.ProviderConfig) error {
+	if model == c.CurrentModel && providerConfig == c.ProviderConfig {
+		return nil // No change needed
+	}
+
+	c.CurrentModel = model
+	c.ProviderConfig = providerConfig
+	
+	if model == "" {
+		c.TokenManager = nil
+		return nil
+	}
+
+	var tokenManager *tokens.TokenManager
+	var err error
+
+	if providerConfig != nil {
+		tokenManager, err = tokens.NewTokenManagerFromProvider(model, providerConfig)
+		if err != nil {
+			logging.Warn("Failed to create provider-aware token manager for model %s: %v, falling back to simple token manager", model, err)
+			tokenManager, err = tokens.NewTokenManagerFallback(model)
+		} else {
+			logging.Info("Updated to provider-aware token management for model %s", model)
+		}
+	} else {
+		tokenManager, err = tokens.NewTokenManagerFallback(model)
+		if err == nil {
+			logging.Info("Updated to fallback token management for model %s", model)
+		}
+	}
+
+	if err != nil {
+		logging.Warn("Failed to create token manager for model %s: %v, falling back to simple message-based trimming", model, err)
+		c.TokenManager = nil
+		return err
+	}
+
+	c.TokenManager = tokenManager
+	
+	// Immediately trim messages if we're over the new limit
+	c.TrimHistory()
+	
+	return nil
+}
+
+// UpdateModel updates the model and reinitializes token management (backward compatibility)
+func (c *ChatContext) UpdateModel(model string) error {
+	return c.UpdateProvider(model, c.ProviderConfig)
 }
 
 // AddMessage adds a message to the context
@@ -137,6 +229,25 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 	
 	// Add the processed messages
 	messages = append(messages, processedMessages...)
+
+	// Apply token-based trimming if token manager is available
+	if c.TokenManager != nil {
+		messages = c.TokenManager.TrimMessagesToFit(messages, 0) // Use default reserve tokens
+		
+		// Log context utilization
+		utilization := c.TokenManager.GetContextUtilization(messages)
+		if utilization > 80.0 {
+			logging.Warn("High context utilization: %.1f%% (%d/%d tokens)", 
+				utilization, 
+				c.TokenManager.CountTokensInMessages(messages),
+				c.TokenManager.GetMaxTokens())
+		} else {
+			logging.Debug("Context utilization: %.1f%% (%d/%d tokens)", 
+				utilization,
+				c.TokenManager.CountTokensInMessages(messages),
+				c.TokenManager.GetMaxTokens())
+		}
+	}
 	
 	// Log the message structure for debugging
 	logging.Debug("Sending %d messages to LLM", len(messages))
@@ -160,7 +271,7 @@ func (c *ChatContext) BuildSystemPrompt() string {
 	if len(c.ToolCalls) > 0 {
 		toolHistory := c.FormatToolHistoryForLLM()
 		if toolHistory != "" {
-			prompt += "\n\n" + toolHistory
+			prompt += "" + toolHistory
 		}
 	}
 	
@@ -168,16 +279,52 @@ func (c *ChatContext) BuildSystemPrompt() string {
 	return prompt
 }
 
-// TrimHistory trims the history if it exceeds the maximum size
+// TrimHistory trims the history based on available token management or message count
 func (c *ChatContext) TrimHistory() {
-	// Simple implementation that truncates based on message count
-	if len(c.Messages) > c.MaxHistorySize {
-		logging.Debug("Trimming history from %d messages to %d messages", 
-			len(c.Messages), c.MaxHistorySize)
-		c.Messages = c.Messages[len(c.Messages)-c.MaxHistorySize:]
+	if c.TokenManager != nil {
+		// Use sophisticated token-based trimming
+		originalCount := len(c.Messages)
+		originalTokens := c.TokenManager.CountTokensInMessages(c.Messages)
+		
+		c.Messages = c.TokenManager.TrimMessagesToFit(c.Messages, 0) // Use default reserve tokens
+		
+		newCount := len(c.Messages)
+		newTokens := c.TokenManager.CountTokensInMessages(c.Messages)
+		
+		if newCount != originalCount {
+			logging.Info("Token-based trimming: %d→%d messages, %d→%d tokens", 
+				originalCount, newCount, originalTokens, newTokens)
+		}
+	} else {
+		// Fallback to simple message-based trimming
+		if len(c.Messages) > c.MaxHistorySize {
+			originalCount := len(c.Messages)
+			c.Messages = c.Messages[len(c.Messages)-c.MaxHistorySize:]
+			logging.Info("Message-based trimming: %d→%d messages", originalCount, len(c.Messages))
+		}
+	}
+}
+
+// GetContextStats returns context utilization statistics
+func (c *ChatContext) GetContextStats() map[string]interface{} {
+	stats := make(map[string]interface{})
+	
+	stats["message_count"] = len(c.Messages)
+	stats["tool_call_count"] = len(c.ToolCalls)
+	stats["model"] = c.CurrentModel
+	
+	if c.TokenManager != nil {
+		tokenStats := c.TokenManager.GetContextStats(c.Messages)
+		for key, value := range tokenStats {
+			stats[key] = value
+		}
+		stats["token_management"] = "enabled"
+	} else {
+		stats["max_history_size"] = c.MaxHistorySize
+		stats["token_management"] = "disabled"
 	}
 	
-	// TODO: Implement more sophisticated token counting and trimming
+	return stats
 }
 
 // FormatToolHistoryForLLM formats the tool history for the LLM
@@ -194,25 +341,25 @@ func (c *ChatContext) FormatToolHistoryForLLM() string {
 		return ""
 	}
 	
-	history.WriteString("Here are the results of recent tool calls:\n\n")
+	history.WriteString("Here are the results of recent tool calls:")
 	
 	for i, toolCall := range recentCalls {
-		history.WriteString(fmt.Sprintf("Tool call %d:\n", i+1))
-		history.WriteString(fmt.Sprintf("- Name: %s\n", toolCall.ToolCall.Function.Name))
-		history.WriteString(fmt.Sprintf("- Arguments: %s\n", string(toolCall.ToolCall.Function.Arguments)))
+		history.WriteString(fmt.Sprintf("Tool call %d:", i+1))
+		history.WriteString(fmt.Sprintf("- Name: %s", toolCall.ToolCall.Function.Name))
+		history.WriteString(fmt.Sprintf("- Arguments: %s", string(toolCall.ToolCall.Function.Arguments)))
 		
 		if toolCall.Error != "" {
-			history.WriteString(fmt.Sprintf("- Error: %s\n", toolCall.Error))
+			history.WriteString(fmt.Sprintf("- Error: %s", toolCall.Error))
 		} else {
 			// Truncate very long results
 			result := toolCall.Result
 			if len(result) > 500 {
 				result = result[:500] + "... (truncated)"
 			}
-			history.WriteString(fmt.Sprintf("- Result: %s\n", result))
+			history.WriteString(fmt.Sprintf("- Result: %s", result))
 		}
 		
-		history.WriteString("\n")
+		history.WriteString("")
 	}
 	
 	return history.String()

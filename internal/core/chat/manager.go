@@ -1,3 +1,4 @@
+
 package chat
 
 import (
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+    "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config" 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
@@ -39,11 +41,16 @@ type ChatManager struct {
 
 // NewChatManager creates a new chat manager
 func NewChatManager(provider domain.LLMProvider, connections []*host.ServerConnection) *ChatManager {
+	return NewChatManagerWithConfig(provider, connections, nil, "")
+}
+
+// NewChatManagerWithConfig creates a new chat manager with provider configuration
+func NewChatManagerWithConfig(provider domain.LLMProvider, connections []*host.ServerConnection, providerConfig *config.ProviderConfig, model string) *ChatManager {
 	systemPrompt := "You are a helpful assistant with access to tools. Use the tools when necessary to fulfill user requests."
 	return &ChatManager{
 		LLMProvider:     provider,
 		Connections:     connections,
-		Context:         NewChatContext(systemPrompt),
+		Context:         NewChatContextWithProvider(systemPrompt, model, providerConfig),
 		UI:              NewUI(),
 		StreamResponses: true,
 		toolsCache:      make(map[string][]tools.Tool),
@@ -622,6 +629,10 @@ func (m *ChatManager) StartChat() error {
 				// TODO: Implement this
 				m.UI.PrintSystem("System prompt setting not implemented yet.")
 				continue
+			case "/context":
+				// Print context statistics
+				m.PrintContextStats()
+				continue
 			default:
 				m.UI.PrintSystem("Unknown command: %s", cmd)
 				continue
@@ -650,7 +661,7 @@ func (m *ChatManager) PrintAvailableTools() {
 		m.UI.PrintSystem("Server: %s", conn.Name)
 		
 		for _, tool := range serverTools {
-			fmt.Printf("  - %s: %s\n", tool.Name, tool.Description)
+			fmt.Printf("  - %s: %s", tool.Name, tool.Description)
 		}
 	}
 	
@@ -683,6 +694,30 @@ func (m *ChatManager) PrintChatHistory() {
 			}
 			fmt.Println(content)
 		}
+	}
+	
+	fmt.Println()
+}
+
+// PrintContextStats prints context utilization statistics
+func (m *ChatManager) PrintContextStats() {
+	stats := m.Context.GetContextStats()
+	
+	m.UI.PrintSystem("Context Statistics:")
+	fmt.Printf("  Model: %v", stats["model"])
+	fmt.Printf("  Messages: %v", stats["message_count"])
+	fmt.Printf("  Tool Calls: %v", stats["tool_call_count"])
+	fmt.Printf("  Token Management: %v", stats["token_management"])
+	
+	if stats["token_management"] == "enabled" {
+		fmt.Printf("  Current Tokens: %v", stats["current_tokens"])
+		fmt.Printf("  Max Tokens: %v", stats["max_tokens"])
+		fmt.Printf("  Reserve Tokens: %v", stats["reserve_tokens"])
+		fmt.Printf("  Effective Limit: %v", stats["effective_limit"])
+		fmt.Printf("  Utilization: %.1f%%", stats["utilization_percent"])
+		fmt.Printf("  Provider Configured: %v", stats["provider_configured"])
+	} else {
+		fmt.Printf("  Max History Size: %v", stats["max_history_size"])
 	}
 	
 	fmt.Println()

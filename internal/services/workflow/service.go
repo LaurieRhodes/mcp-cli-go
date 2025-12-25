@@ -10,53 +10,31 @@ import (
 	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
 // Service implements the WorkflowProcessor interface
 type Service struct {
-	config           *domain.ApplicationConfig
+	config           *config.ApplicationConfig
 	configService    domain.ConfigurationService
-	providerService  domain.LLMProvider
+	provider         domain.LLMProvider
 	serverManager    domain.MCPServerManager
-}
-
-// generateExecutionID generates a unique execution ID
-func generateExecutionID() string {
-	bytes := make([]byte, 16)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
 }
 
 // NewService creates a new workflow service
 func NewService(
-	config *domain.ApplicationConfig,
+	appConfig *config.ApplicationConfig,
 	configService domain.ConfigurationService,
-	providerService domain.LLMProvider,
+	provider domain.LLMProvider,
 	serverManager domain.MCPServerManager,
-) (*Service, error) {
-	if config == nil {
-		return nil, domain.NewDomainError(domain.ErrCodeConfigInvalid, "configuration is required")
-	}
-	
-	if configService == nil {
-		return nil, domain.NewDomainError(domain.ErrCodeConfigInvalid, "configuration service is required")
-	}
-	
-	if providerService == nil {
-		return nil, domain.NewDomainError(domain.ErrCodeConfigInvalid, "provider service is required")
-	}
-	
-	if serverManager == nil {
-		return nil, domain.NewDomainError(domain.ErrCodeConfigInvalid, "server manager is required")
-	}
-
+) *Service {
 	return &Service{
-		config:          config,
-		configService:   configService,
-		providerService: providerService,
-		serverManager:   serverManager,
-	}, nil
+		config:        appConfig,
+		configService: configService,
+		provider:      provider,
+		serverManager: serverManager,
+	}
 }
 
 // ProcessWorkflow executes a complete workflow template
@@ -65,17 +43,21 @@ func (s *Service) ProcessWorkflow(ctx context.Context, req *domain.WorkflowReque
 	
 	// Generate execution ID if not provided
 	if req.ExecutionID == "" {
-		req.ExecutionID = generateExecutionID()
+		bytes := make([]byte, 16)
+		rand.Read(bytes)
+		req.ExecutionID = hex.EncodeToString(bytes)
 	}
 	
 	logging.Info("Starting workflow execution: %s (template: %s)", req.ExecutionID, req.TemplateName)
 	
-	// Get workflow template
-	template, exists := s.config.GetWorkflowTemplate(req.TemplateName)
+	// Get workflow template from config
+	configTemplate, exists := s.config.GetWorkflowTemplate(req.TemplateName)
 	if !exists {
-		return nil, domain.NewDomainError(domain.ErrCodeRequestInvalid, 
-			fmt.Sprintf("workflow template '%s' not found", req.TemplateName))
+		return nil, fmt.Errorf("workflow template '%s' not found", req.TemplateName)
 	}
+	
+	// Convert config template to domain template
+	template := convertConfigTemplateToDomain(configTemplate)
 	
 	// Validate workflow template
 	if err := s.ValidateWorkflow(template); err != nil {
@@ -98,74 +80,26 @@ func (s *Service) ProcessWorkflow(ctx context.Context, req *domain.WorkflowReque
 	
 	// Process each step
 	for _, step := range template.Steps {
-		// Check if we should start from a specific step
-		if req.StartFromStep > 0 && step.Step < req.StartFromStep {
-			stepResult := domain.WorkflowStepResult{
-				Step:   step.Step,
-				Name:   step.Name,
-				Status: domain.StepStatusSkipped,
-			}
-			response.StepResults = append(response.StepResults, stepResult)
-			continue
-		}
-		
-		// Check if we should stop at a specific step
-		if req.StopAtStep > 0 && step.Step > req.StopAtStep {
-			break
-		}
-		
-		// Check step conditions
-		if !step.ShouldExecute(response.Variables) {
-			stepResult := domain.WorkflowStepResult{
-				Step:   step.Step,
-				Name:   step.Name,
-				Status: domain.StepStatusSkipped,
-			}
-			response.StepResults = append(response.StepResults, stepResult)
-			logging.Debug("Step %d (%s) skipped due to conditions", step.Step, step.Name)
-			continue
-		}
-		
 		// Process the step
 		stepResult, err := s.ProcessStep(ctx, &step, response.Variables)
 		if err != nil {
 			stepResult.Status = domain.StepStatusFailed
 			stepResult.Error = &domain.WorkflowError{
-				Code:      "STEP_EXECUTION_ERROR",
-				Message:   err.Error(),
-				Step:      step.Step,
-				StepName:  step.Name,
-				Retryable: s.isRetryableError(err),
+				Code:    "STEP_EXECUTION_ERROR",
+				Message: err.Error(),
+				Step:    step.Step,
 			}
 			
 			response.StepResults = append(response.StepResults, *stepResult)
-			
-			// Check if we should fail the entire workflow
-			if template.Settings != nil && template.Settings.FailOnStepError {
-				response.Status = domain.WorkflowStatusFailed
-				response.Error = stepResult.Error
-				break
-			} else {
-				logging.Warn("Step %d (%s) failed but continuing: %v", step.Step, step.Name, err)
-				continue
-			}
+			response.Status = domain.WorkflowStatusFailed
+			response.Error = stepResult.Error
+			break
 		}
 		
 		response.StepResults = append(response.StepResults, *stepResult)
 		
-		// Save step output to variables if specified
-		if step.OutputVariable != "" && stepResult.Output != "" {
-			response.Variables[step.OutputVariable] = stepResult.Output
-		}
-		
-		// Update variables from step result
-		if stepResult.Variables != nil {
-			for key, value := range stepResult.Variables {
-				response.Variables[key] = value
-			}
-		}
-		
-		logging.Debug("Step %d (%s) completed successfully", step.Step, step.Name)
+		// Store step output in variables
+		response.Variables[fmt.Sprintf("step%d_output", step.Step)] = stepResult.Output
 	}
 	
 	// Set final status if not already failed
@@ -173,7 +107,7 @@ func (s *Service) ProcessWorkflow(ctx context.Context, req *domain.WorkflowReque
 		response.Status = domain.WorkflowStatusCompleted
 	}
 	
-	// Set final output (last step's output or specified output variable)
+	// Set final output
 	if len(response.StepResults) > 0 {
 		lastStep := response.StepResults[len(response.StepResults)-1]
 		if lastStep.Status == domain.StepStatusCompleted {
@@ -189,7 +123,7 @@ func (s *Service) ProcessWorkflow(ctx context.Context, req *domain.WorkflowReque
 	return response, nil
 }
 
-// ProcessStep executes a single workflow step with tool follow-up support (like query mode)
+// ProcessStep executes a single workflow step with tool follow-up support
 func (s *Service) ProcessStep(ctx context.Context, step *domain.WorkflowStep, variables map[string]interface{}) (*domain.WorkflowStepResult, error) {
 	startTime := time.Now()
 	
@@ -202,20 +136,10 @@ func (s *Service) ProcessStep(ctx context.Context, step *domain.WorkflowStep, va
 	
 	logging.Debug("Processing step %d: %s", step.Step, step.Name)
 	
-	// Get timeout for this step
-	timeout, err := step.GetTimeout()
-	if err != nil {
-		return result, err
-	}
-	
-	// Create context with timeout
-	stepCtx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	
 	// Process the prompt with variable substitution
 	template := s.getWorkflowTemplate(step)
 	if template == nil {
-		return result, domain.NewDomainError(domain.ErrCodeRequestInvalid, "workflow template not found")
+		return result, fmt.Errorf("workflow template not found")
 	}
 	
 	processedPrompt := template.ProcessVariables(step.BasePrompt, variables)
@@ -244,22 +168,16 @@ func (s *Service) ProcessStep(ctx context.Context, step *domain.WorkflowStep, va
 		MaxTokens:    step.MaxTokens,
 	}
 	
-	// Execute initial request with retry policy if configured
-	var completionResp *domain.CompletionResponse
-	if step.RetryPolicy != nil {
-		completionResp, err = s.executeWithRetry(stepCtx, completionReq, step.RetryPolicy)
-	} else {
-		completionResp, err = s.providerService.CreateCompletion(stepCtx, completionReq)
-	}
-	
+	// Execute initial request
+	completionResp, err := s.provider.CreateCompletion(ctx, completionReq)
 	if err != nil {
 		return result, fmt.Errorf("completion failed: %w", err)
 	}
 	
 	logging.Debug("Initial LLM response: %s", completionResp.Response)
 	
-	// Handle tool calls with follow-ups (same logic as query mode)
-	maxFollowUps := 2 // Same default as query mode
+	// Handle tool calls with follow-ups
+	maxFollowUps := 2
 	followUpsUsed := 0
 	
 	for followUpsUsed < maxFollowUps && len(completionResp.ToolCalls) > 0 {
@@ -284,16 +202,13 @@ func (s *Service) ProcessStep(ctx context.Context, step *domain.WorkflowStep, va
 			}
 			
 			// Execute tool
-			output, err := s.serverManager.ExecuteTool(stepCtx, toolCall.Function.Name, args)
+			output, err := s.serverManager.ExecuteTool(ctx, toolCall.Function.Name, args)
 			if err != nil {
 				logging.Error("Tool execution failed for %s: %v", toolCall.Function.Name, err)
 				output = fmt.Sprintf("Error: %s", err.Error())
 			}
 			
 			// Store tool result in variables
-			if result.Variables == nil {
-				result.Variables = make(map[string]interface{})
-			}
 			result.Variables[fmt.Sprintf("tool_%s_result", toolCall.Function.Name)] = output
 			
 			// Add tool result message
@@ -309,7 +224,7 @@ func (s *Service) ProcessStep(ctx context.Context, step *domain.WorkflowStep, va
 		
 		// Get follow-up response from LLM
 		completionReq.Messages = messages
-		followUpResponse, err := s.providerService.CreateCompletion(stepCtx, completionReq)
+		followUpResponse, err := s.provider.CreateCompletion(ctx, completionReq)
 		if err != nil {
 			return result, fmt.Errorf("LLM follow-up request failed: %w", err)
 		}
@@ -320,25 +235,15 @@ func (s *Service) ProcessStep(ctx context.Context, step *domain.WorkflowStep, va
 		logging.Debug("Follow-up response #%d: %s", followUpsUsed, completionResp.Response)
 	}
 	
-	// Set result data (final response after all tool calls)
+	// Set result data
 	result.Output = completionResp.Response
-	result.Provider = string(s.providerService.GetProviderType())
+	result.Provider = string(s.provider.GetProviderType())
 	result.Usage = completionResp.Usage
-	result.ToolCalls = completionResp.ToolCalls // This will be the final set of tool calls
+	result.ToolCalls = completionResp.ToolCalls
 	result.ExecutionTime = time.Since(startTime)
 	result.Status = domain.StepStatusCompleted
 	
-	// Add debug logging to understand what's happening
 	logging.Debug("Step %d final output: %s", step.Step, result.Output)
-	logging.Debug("Step %d final status: %s", step.Step, result.Status)
-	
-	// Process output configuration
-	if step.Output != nil {
-		err = s.processStepOutput(result, step.Output)
-		if err != nil {
-			return result, fmt.Errorf("output processing failed: %w", err)
-		}
-	}
 	
 	return result, nil
 }
@@ -351,10 +256,10 @@ func (s *Service) ValidateWorkflow(template *domain.WorkflowTemplate) error {
 // getWorkflowTemplate retrieves the workflow template for a step
 func (s *Service) getWorkflowTemplate(step *domain.WorkflowStep) *domain.WorkflowTemplate {
 	// Find the template that contains this step
-	for _, template := range s.config.Templates {
-		for _, templateStep := range template.Steps {
+	for _, configTemplate := range s.config.Templates {
+		for _, templateStep := range configTemplate.Steps {
 			if templateStep.Step == step.Step && templateStep.Name == step.Name {
-				return template
+				return convertConfigTemplateToDomain(configTemplate)
 			}
 		}
 	}
@@ -370,21 +275,21 @@ func (s *Service) initializeVariables(variables map[string]interface{}, template
 		}
 	}
 	
-	// Add request variables (override template variables)
+	// Add request variables
 	if req.Variables != nil {
 		for key, value := range req.Variables {
 			variables[key] = value
 		}
 	}
 	
-	// Add input data if provided - support both {{stdin}} and {{input_data}} for flexibility
+	// Add input data
 	if req.InputData != "" {
 		variables["input_data"] = req.InputData
-		variables["stdin"] = req.InputData  // Cleaner alias for function app use cases
+		variables["stdin"] = req.InputData
 	}
 }
 
-// getStepTools retrieves available tools for a workflow step following MCP principles
+// getStepTools retrieves available tools for a workflow step
 func (s *Service) getStepTools(step *domain.WorkflowStep) ([]domain.Tool, error) {
 	// Get all available tools from servers
 	allTools, err := s.serverManager.GetAvailableTools()
@@ -392,15 +297,13 @@ func (s *Service) getStepTools(step *domain.WorkflowStep) ([]domain.Tool, error)
 		return nil, fmt.Errorf("failed to get available tools: %w", err)
 	}
 	
-	// If no specific tools required, provide ALL tools from connected servers
-	// This follows MCP principles of automatic tool discovery and advertising
+	// If no specific tools required, provide all tools
 	if len(step.ToolsRequired) == 0 {
-		logging.Debug("No specific tools required, providing all %d available tools from connected servers", len(allTools))
+		logging.Debug("No specific tools required, providing all %d available tools", len(allTools))
 		return allTools, nil
 	}
 	
-	// If specific tools are required, filter to only those tools
-	// This is for cases where you want to restrict tool access for security/performance
+	// Filter to only required tools
 	var stepTools []domain.Tool
 	for _, requiredTool := range step.ToolsRequired {
 		for _, tool := range allTools {
@@ -427,138 +330,24 @@ func (s *Service) getStepTools(step *domain.WorkflowStep) ([]domain.Tool, error)
 			}
 		}
 		
-		return nil, domain.NewDomainError(domain.ErrCodeToolNotFound, 
-			fmt.Sprintf("required tools not available: %s", strings.Join(missing, ", ")))
+		return nil, fmt.Errorf("required tools not available: %s", strings.Join(missing, ", "))
 	}
 	
 	logging.Debug("Providing %d specific required tools", len(stepTools))
 	return stepTools, nil
 }
 
-// executeWithRetry executes a completion request with retry policy
-func (s *Service) executeWithRetry(ctx context.Context, req *domain.CompletionRequest, retryPolicy *domain.WorkflowRetryPolicy) (*domain.CompletionResponse, error) {
-	var lastErr error
-	
-	for attempt := 0; attempt <= retryPolicy.MaxRetries; attempt++ {
-		if attempt > 0 {
-			// Calculate delay with backoff
-			delay, err := retryPolicy.GetRetryDelay()
-			if err != nil {
-				return nil, err
-			}
-			
-			if retryPolicy.BackoffFactor > 1.0 {
-				delay = time.Duration(float64(delay) * retryPolicy.BackoffFactor * float64(attempt))
-			}
-			
-			logging.Debug("Retrying completion request (attempt %d/%d) after %v", 
-				attempt+1, retryPolicy.MaxRetries+1, delay)
-			
-			select {
-			case <-time.After(delay):
-				// Continue with retry
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			}
-		}
-		
-		resp, err := s.providerService.CreateCompletion(ctx, req)
-		if err == nil {
-			return resp, nil
-		}
-		
-		lastErr = err
-		
-		// Check if error is retryable
-		if !s.isRetryableError(err) {
-			break
-		}
-	}
-	
-	return nil, fmt.Errorf("completion failed after %d retries: %w", retryPolicy.MaxRetries, lastErr)
-}
-
-// isRetryableError determines if an error is retryable
-func (s *Service) isRetryableError(err error) bool {
-	// This is a simplified implementation
-	// In production, you'd want more sophisticated error classification
-	errStr := err.Error()
-	
-	// Network-related errors are typically retryable
-	retryableErrors := []string{
-		"timeout",
-		"connection",
-		"network",
-		"rate limit",
-		"429",
-		"500",
-		"502",
-		"503",
-		"504",
-	}
-	
-	for _, retryable := range retryableErrors {
-		if strings.Contains(strings.ToLower(errStr), retryable) {
-			return true
-		}
-	}
-	
-	return false
-}
-
-// processStepOutput processes step output according to configuration
-func (s *Service) processStepOutput(result *domain.WorkflowStepResult, outputConfig *domain.WorkflowOutputConfig) error {
-	// Format output according to configuration
-	switch outputConfig.Format {
-	case "json":
-		// Try to parse and reformat as JSON
-		var jsonData interface{}
-		if err := json.Unmarshal([]byte(result.Output), &jsonData); err == nil {
-			formatted, err := json.MarshalIndent(jsonData, "", "  ")
-			if err == nil {
-				result.Output = string(formatted)
-			}
-		}
-	case "structured":
-		// Create structured output with metadata
-		structured := map[string]interface{}{
-			"content": result.Output,
-		}
-		
-		if outputConfig.IncludeMetadata {
-			structured["metadata"] = map[string]interface{}{
-				"step":           result.Step,
-				"name":           result.Name,
-				"provider":       result.Provider,
-				"execution_time": result.ExecutionTime.String(),
-				"usage":          result.Usage,
-			}
-		}
-		
-		formatted, err := json.MarshalIndent(structured, "", "  ")
-		if err != nil {
-			return fmt.Errorf("failed to format structured output: %w", err)
-		}
-		result.Output = string(formatted)
-	}
-	
-	// Save to variable if specified
-	if outputConfig.SaveToVariable != "" {
-		if result.Variables == nil {
-			result.Variables = make(map[string]interface{})
-		}
-		result.Variables[outputConfig.SaveToVariable] = result.Output
-	}
-	
-	return nil
-}
-
 // ExecuteWorkflow is a convenience method that creates a workflow request and executes it
 func (s *Service) ExecuteWorkflow(ctx context.Context, templateName string, inputData string) (*domain.WorkflowResponse, error) {
+	// Generate execution ID
+	bytes := make([]byte, 16)
+	rand.Read(bytes)
+	executionID := hex.EncodeToString(bytes)
+	
 	req := &domain.WorkflowRequest{
 		TemplateName: templateName,
 		InputData:    inputData,
-		ExecutionID:  generateExecutionID(),
+		ExecutionID:  executionID,
 		Variables:    make(map[string]interface{}),
 		Metadata: map[string]interface{}{
 			"created_at": time.Now(),
@@ -575,16 +364,46 @@ func (s *Service) ListAvailableTemplates() []string {
 
 // GetTemplateInfo returns information about a specific workflow template
 func (s *Service) GetTemplateInfo(templateName string) (*domain.WorkflowTemplate, error) {
-	template, exists := s.config.GetWorkflowTemplate(templateName)
+	configTemplate, exists := s.config.GetWorkflowTemplate(templateName)
 	if !exists {
-		return nil, domain.NewDomainError(domain.ErrCodeRequestInvalid, 
-			fmt.Sprintf("workflow template '%s' not found", templateName))
+		return nil, fmt.Errorf("workflow template '%s' not found", templateName)
 	}
 	
-	return template, nil
+	return convertConfigTemplateToDomain(configTemplate), nil
 }
 
 // ValidateTemplateConfiguration validates all workflow templates in the configuration
 func (s *Service) ValidateTemplateConfiguration() error {
 	return s.config.ValidateWorkflowTemplates()
+}
+
+// convertConfigTemplateToDomain converts config.WorkflowTemplate to domain.WorkflowTemplate
+func convertConfigTemplateToDomain(configTemplate *config.WorkflowTemplate) *domain.WorkflowTemplate {
+	if configTemplate == nil {
+		return nil
+	}
+	
+	// Convert steps
+	domainSteps := make([]domain.WorkflowStep, len(configTemplate.Steps))
+	for i, configStep := range configTemplate.Steps {
+		domainSteps[i] = domain.WorkflowStep{
+			Step:          configStep.Step,
+			Name:          configStep.Name,
+			BasePrompt:    configStep.BasePrompt,
+			SystemPrompt:  configStep.SystemPrompt,
+			Provider:      configStep.Provider,
+			Model:         configStep.Model,
+			Servers:       configStep.Servers,
+			ToolsRequired: configStep.ToolsRequired,
+			Temperature:   configStep.Temperature,
+			MaxTokens:     configStep.MaxTokens,
+		}
+	}
+	
+	return &domain.WorkflowTemplate{
+		Name:        configTemplate.Name,
+		Description: configTemplate.Description,
+		Steps:       domainSteps,
+		Variables:   configTemplate.Variables,
+	}
 }

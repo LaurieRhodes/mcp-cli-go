@@ -64,7 +64,7 @@ func SendInitialize(client *stdio.StdioClient) (*InitializeResult, error) {
 		logging.Debug("Starting goroutine to listen for initialize response")
 		for msg := range client.Read() {
 			logging.Debug("Received message with ID: %s", msg.ID)
-			if msg.ID == requestID {
+			if msg.ID.EqualsString(requestID) {
 				logging.Debug("Found matching response for request ID: %s", requestID)
 				responseCh <- msg
 				return

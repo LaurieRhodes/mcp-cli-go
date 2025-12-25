@@ -81,11 +81,29 @@ func NewStdioClientWithOptions(params StdioServerParameters, suppressConsole boo
 	}
 }
 
+// NewStdioClientWithStderrOption creates a new stdio client with stderr suppression option
+func NewStdioClientWithStderrOption(params StdioServerParameters, suppressStderr bool) *StdioClient {
+	ctx, cancel := context.WithCancel(context.Background())
+	
+	// suppressStderr controls whether to show server debug output
+	return &StdioClient{
+		params:          params,
+		readChan:        make(chan *messages.JSONRPCMessage, 10),
+		writeChan:       make(chan *messages.JSONRPCMessage, 10),
+		done:            make(chan struct{}),
+		ctx:             ctx,
+		cancel:          cancel,
+		suppressConsole: suppressStderr, // Use suppressStderr to control console output
+		stderrBuffer:    &bytes.Buffer{},
+		hasRealErrors:   false,
+	}
+}
+
 // isRealError determines if a stderr line represents an actual error vs normal logging
 func isRealError(line string) bool {
 	lowerLine := strings.ToLower(line)
 	
-	// Ignore normal logging patterns
+	// Ignore normal logging patterns and configuration messages
 	if strings.HasPrefix(lowerLine, "debug:") ||
 	   strings.HasPrefix(lowerLine, "info:") ||
 	   strings.Contains(lowerLine, "loading configuration") ||
@@ -93,22 +111,32 @@ func isRealError(line string) bool {
 	   strings.Contains(lowerLine, "api call succeeded") ||
 	   strings.Contains(lowerLine, "configuration loaded") ||
 	   strings.Contains(lowerLine, "server started") ||
+	   strings.Contains(lowerLine, "starting on stdin/stdout") ||
 	   strings.Contains(lowerLine, "registered") ||
 	   strings.Contains(lowerLine, "processing") ||
 	   strings.Contains(lowerLine, "sending:") ||
 	   strings.Contains(lowerLine, "received:") ||
-	   strings.Contains(lowerLine, "parsed message") {
+	   strings.Contains(lowerLine, "response:") ||
+	   strings.Contains(lowerLine, "sending response:") ||
+	   strings.Contains(lowerLine, "received message:") ||
+	   strings.Contains(lowerLine, "parsed message") ||
+	   strings.Contains(lowerLine, "command timeout:") || // Configuration message, not error
+	   strings.Contains(lowerLine, "timeout:") || // Generic timeout config messages
+	   strings.Contains(lowerLine, "looking for config") ||
+	   strings.Contains(lowerLine, "reading config") ||
+	   strings.Contains(lowerLine, "executable directory") {
 		return false
 	}
 	
-	// These indicate actual problems
+	// These indicate actual problems (but not timeout configs)
 	return strings.Contains(lowerLine, "error:") ||
 	       strings.Contains(lowerLine, "failed:") ||
 	       strings.Contains(lowerLine, "panic:") ||
 	       strings.Contains(lowerLine, "fatal:") ||
 	       strings.Contains(lowerLine, "authentication failed") ||
 	       strings.Contains(lowerLine, "connection refused") ||
-	       strings.Contains(lowerLine, "timeout") ||
+	       strings.Contains(lowerLine, "timed out") || // Actual timeout event, not config
+	       strings.Contains(lowerLine, "timeout exceeded") || // Actual timeout event
 	       strings.Contains(lowerLine, "permission denied")
 }
 

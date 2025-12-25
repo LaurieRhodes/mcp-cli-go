@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai/streaming"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
@@ -42,27 +43,27 @@ type AnthropicClient struct {
 	client     *http.Client
 	model      string
 	apiKey     string
-	config     *domain.ProviderConfig
+	config     *config.ProviderConfig
 	timeout    time.Duration
 	maxRetries int
 }
 
 // NewAnthropicClient creates a new Anthropic client
-func NewAnthropicClient(config *domain.ProviderConfig) (domain.LLMProvider, error) {
-	if config == nil {
+func NewAnthropicClient(cfg *config.ProviderConfig) (domain.LLMProvider, error) {
+	if cfg == nil {
 		return nil, fmt.Errorf("configuration is required")
 	}
 	
-	if config.APIKey == "" {
+	if cfg.APIKey == "" {
 		return nil, fmt.Errorf("Anthropic API key is required")
 	}
 
-	if !strings.HasPrefix(config.APIKey, "sk-ant-") {
+	if !strings.HasPrefix(cfg.APIKey, "sk-ant-") {
 		logging.Warn("Anthropic API key should start with 'sk-ant-'")
 	}
 
 	// Format model name to ensure it uses the correct format
-	model := formatClaudeModel(config.DefaultModel)
+	model := formatClaudeModel(cfg.DefaultModel)
 	
 	// Verify that we're using a supported model
 	if !supportedClaudeModels[model] {
@@ -74,14 +75,14 @@ func NewAnthropicClient(config *domain.ProviderConfig) (domain.LLMProvider, erro
 
 	// Set timeout from config or use default
 	timeout := defaultTimeout
-	if config.TimeoutSeconds > 0 {
-		timeout = time.Duration(config.TimeoutSeconds) * time.Second
+	if cfg.TimeoutSeconds > 0 {
+		timeout = time.Duration(cfg.TimeoutSeconds) * time.Second
 	}
 
 	// Set max retries from config or use default
 	maxRetries := defaultMaxRetries
-	if config.MaxRetries > 0 {
-		maxRetries = config.MaxRetries
+	if cfg.MaxRetries > 0 {
+		maxRetries = cfg.MaxRetries
 	}
 
 	// Create an HTTP client with extended timeouts
@@ -92,8 +93,8 @@ func NewAnthropicClient(config *domain.ProviderConfig) (domain.LLMProvider, erro
 	return &AnthropicClient{
 		client:     httpClient,
 		model:      model,
-		apiKey:     config.APIKey,
-		config:     config,
+		apiKey:     cfg.APIKey,
+		config:     cfg,
 		timeout:    timeout,
 		maxRetries: maxRetries,
 	}, nil
@@ -286,14 +287,29 @@ func (c *AnthropicClient) StreamCompletion(ctx context.Context, req *domain.Comp
 	return nil, fmt.Errorf("failed after %d attempts: %w", c.maxRetries+1, lastErr)
 }
 
+// CreateEmbeddings - Anthropic doesn't support embeddings, return error
+func (c *AnthropicClient) CreateEmbeddings(ctx context.Context, req *domain.EmbeddingRequest) (*domain.EmbeddingResponse, error) {
+	return nil, fmt.Errorf("embeddings are not supported by Anthropic provider - use OpenAI or compatible provider instead")
+}
+
+// GetSupportedEmbeddingModels returns empty list as Anthropic doesn't support embeddings
+func (c *AnthropicClient) GetSupportedEmbeddingModels() []string {
+	return []string{} // Anthropic doesn't support embeddings
+}
+
+// GetMaxEmbeddingTokens returns 0 as Anthropic doesn't support embeddings
+func (c *AnthropicClient) GetMaxEmbeddingTokens(model string) int {
+	return 0 // Anthropic doesn't support embeddings
+}
+
 // GetProviderType returns the provider type
 func (c *AnthropicClient) GetProviderType() domain.ProviderType {
 	return domain.ProviderAnthropic
 }
 
 // GetInterfaceType returns the interface type
-func (c *AnthropicClient) GetInterfaceType() domain.InterfaceType {
-	return domain.AnthropicNative
+func (c *AnthropicClient) GetInterfaceType() config.InterfaceType {
+	return config.AnthropicNative
 }
 
 // ValidateConfig validates the provider configuration
@@ -484,7 +500,7 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 	
 	// Add system prompt from request if provided
 	if systemPrompt != "" {
-		systemContent = systemPrompt + "\n"
+		systemContent = systemPrompt + ""
 	}
 	
 	// Filter out system messages as they are handled differently in Anthropic's API
@@ -492,7 +508,7 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 	
 	for _, msg := range messages {
 		if msg.Role == "system" {
-			systemContent += msg.Content + "\n"
+			systemContent += msg.Content + ""
 		} else {
 			nonSystemMessages = append(nonSystemMessages, msg)
 		}

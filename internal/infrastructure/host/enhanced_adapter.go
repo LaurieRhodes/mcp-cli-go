@@ -18,10 +18,10 @@ func EnhancedAIOptionsAdapter(enhancedOptions *EnhancedAIOptions) *AIOptions {
 // GetProviderInterface returns the interface type for a given provider
 func GetProviderInterface(provider string, configFile string) config.InterfaceType {
 	// Try to determine from the config file first
-	cfg, err := config.LoadConfig(configFile)
-	if err == nil && cfg != nil && cfg.AI != nil && cfg.AI.Interfaces != nil {
+	enhancedCfg, err := config.LoadEnhancedConfig(configFile)
+	if err == nil && enhancedCfg != nil && enhancedCfg.AI != nil && enhancedCfg.AI.Interfaces != nil {
 		// Look for the provider in each interface
-		for interfaceType, interfaceConfig := range cfg.AI.Interfaces {
+		for interfaceType, interfaceConfig := range enhancedCfg.AI.Interfaces {
 			if _, ok := interfaceConfig.Providers[provider]; ok {
 				logging.Debug("Found provider %s in interface %s from config", provider, interfaceType)
 				return interfaceType
@@ -47,8 +47,8 @@ func GetProviderInterface(provider string, configFile string) config.InterfaceTy
 // ProcessOptionsEnhanced processes the server options for enhanced commands
 // This version ensures the interface type is properly set for the provider
 func ProcessOptionsEnhanced(configFile string, serverName string, disableFilesystem bool, providerName, modelName string) ([]string, map[string]bool, config.InterfaceType) {
-	// First get the basic server names and user specified map
-	serverNames, userSpecified := ProcessOptions(serverName, disableFilesystem, providerName, modelName)
+	// First get the basic server names and user specified map - pass configFile
+	serverNames, userSpecified := ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
 	
 	// Now determine the interface type
 	var interfaceType config.InterfaceType
@@ -58,14 +58,11 @@ func ProcessOptionsEnhanced(configFile string, serverName string, disableFilesys
 		interfaceType = GetProviderInterface(providerName, configFile)
 	} else {
 		// Try to get the default provider from config and then its interface
-		cfg, err := config.LoadConfig(configFile)
-		if err == nil && cfg != nil {
-			defaultProvider := config.GetDefaultProviderFromConfig(cfg)
-			if defaultProvider != "" {
-				providerName = defaultProvider
-				logging.Debug("Using default provider from config: %s", providerName)
-				interfaceType = GetProviderInterface(defaultProvider, configFile)
-			}
+		defaultProvider, err := config.UpdateGetDefaultProvider(configFile)
+		if err == nil && defaultProvider != "" {
+			providerName = defaultProvider
+			logging.Debug("Using default provider from config: %s", providerName)
+			interfaceType = GetProviderInterface(defaultProvider, configFile)
 		}
 	}
 	

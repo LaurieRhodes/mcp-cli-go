@@ -1,8 +1,6 @@
 package host
 
 import (
-	"os"
-
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
@@ -30,63 +28,58 @@ func GetAIOptions(configFile, cmdLineProvider, cmdLineModel string) (*AIOptions,
 		Model:    cmdLineModel,
 	}
 	
-	// Load config to get default provider and settings
-	cfg, err := config.LoadConfig(configFile)
-	if err != nil {
-		logging.Warn("Failed to load config: %v", err)
-		// Use fallbacks if config fails
-		if cmdLineProvider == "" {
-			options.Provider = "openai"
-		}
-		if cmdLineModel == "" {
-			options.Model = getEmergencyFallbackModel(options.Provider)
-		}
-		return options, nil
-	}
-	
 	// Try to get default provider if not specified on command line
 	if cmdLineProvider == "" {
-		defaultProvider := config.GetDefaultProviderFromConfig(cfg)
-		options.Provider = defaultProvider
-		logging.Debug("Using provider from config: %s", options.Provider)
+		defaultProvider, err := config.UpdateGetDefaultProvider(configFile)
+		if err != nil {
+			logging.Warn("Failed to get default provider: %v", err)
+		} else {
+			options.Provider = defaultProvider
+			logging.Debug("Using provider from config: %s", options.Provider)
+		}
 	}
 	
 	// Try to get default model if not specified on command line
 	if cmdLineModel == "" {
-		// Get the model for the current provider
-		defaultModel, err := config.GetDefaultModelFromConfig(cfg, options.Provider)
+		// Load all providers to find the model
+		providers, err := config.UpdateLoadAllProviders(configFile)
 		if err != nil {
-			logging.Warn("Failed to get default model for %s: %v", options.Provider, err)
-			options.Model = getEmergencyFallbackModel(options.Provider)
+			logging.Warn("Failed to load providers: %v", err)
 		} else {
-			options.Model = defaultModel
-			logging.Info("Using configured default model for %s: %s", options.Provider, options.Model)
+			// Get the model for the current provider
+			if providerConfig, ok := providers[options.Provider]; ok {
+				if providerConfig.DefaultModel != "" {
+					options.Model = providerConfig.DefaultModel
+					logging.Info("Using configured default model for %s: %s", options.Provider, options.Model)
+				} else {
+					logging.Warn("No default model configured for provider %s", options.Provider)
+				}
+			}
 		}
+	}
+	
+	// FIXED: Only use emergency fallbacks if no model is configured at all
+	if options.Model == "" {
+		logging.Warn("No model specified in config or command line for provider %s, using emergency fallback", options.Provider)
+		options.Model = getEmergencyFallbackModel(options.Provider)
 	}
 	
 	// Handle provider-specific options
 	if options.Provider == "ollama" {
-		// For Ollama, try to get the API endpoint from config
-		providerConfig, err := config.GetProviderConfigFromConfig(cfg, options.Provider)
-		if err == nil && providerConfig.APIEndpoint != "" {
-			options.APIEndpoint = providerConfig.APIEndpoint
-			logging.Debug("Using API endpoint from config for provider: %s", options.Provider)
-		} else {
+		// For Ollama, get the API endpoint
+		apiEndpoint, err := config.GetAPIEndpoint(options.Provider, configFile)
+		if err != nil {
+			logging.Warn("Failed to get API endpoint from config: %v", err)
 			options.APIEndpoint = "http://localhost:11434" // Default Ollama endpoint
-			logging.Debug("Using default Ollama endpoint")
+		} else {
+			options.APIEndpoint = apiEndpoint
+			logging.Debug("Using API endpoint from config for provider: %s", options.Provider)
 		}
 	} else {
 		// For other providers, get the API key
-		apiKey, err := config.GetAPIKeyFromConfig(cfg, options.Provider)
+		apiKey, err := config.UpdatedGetAPIKey(options.Provider, configFile)
 		if err != nil {
-			// Try environment variables as fallback
-			envKey := getAPIKeyFromEnv(options.Provider)
-			if envKey != "" {
-				options.APIKey = envKey
-				logging.Debug("Using API key from environment for provider: %s", options.Provider)
-			} else {
-				logging.Warn("Failed to get API key from config or environment: %v", err)
-			}
+			logging.Warn("Failed to get API key from config: %v", err)
 		} else {
 			options.APIKey = apiKey
 			logging.Debug("Using API key from config for provider: %s", options.Provider)
@@ -94,24 +87,6 @@ func GetAIOptions(configFile, cmdLineProvider, cmdLineModel string) (*AIOptions,
 	}
 	
 	return options, nil
-}
-
-// getAPIKeyFromEnv gets API key from environment variables
-func getAPIKeyFromEnv(provider string) string {
-	switch provider {
-	case "openai":
-		return os.Getenv("OPENAI_API_KEY")
-	case "anthropic":
-		return os.Getenv("ANTHROPIC_API_KEY")
-	case "gemini":
-		return os.Getenv("GEMINI_API_KEY")
-	case "deepseek":
-		return os.Getenv("DEEPSEEK_API_KEY")
-	case "openrouter":
-		return os.Getenv("OPENROUTER_API_KEY")
-	default:
-		return ""
-	}
 }
 
 // getEmergencyFallbackModel returns emergency fallback models ONLY when config is missing

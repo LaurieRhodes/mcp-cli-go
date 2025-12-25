@@ -12,12 +12,14 @@ import (
 	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
+	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 	workflowservice "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/template"
 )
 
 // generateExecutionID generates a unique execution ID
@@ -32,7 +34,7 @@ func executeTemplate() error {
 	logging.Info("Executing workflow template: %s", templateName)
 	
 	// 1. Load configuration using auto-generation if needed
-	configService := config.NewService()
+	configService := infraConfig.NewService()
 	appConfig, exampleCreated, err := configService.LoadConfigOrCreateExample(configFile)
 	if err != nil {
 		return handleTemplateError(fmt.Errorf("failed to load configuration: %w", err))
@@ -53,14 +55,28 @@ func executeTemplate() error {
 		return nil
 	}
 	
-	// 2. Validate template exists and get template configuration
-	template, exists := appConfig.GetWorkflowTemplate(templateName)
+	// 2. Check for template v2 first
+	if templateV2, exists := appConfig.TemplatesV2[templateName]; exists {
+		logging.Info("Executing template v2: %s", templateName)
+		return executeTemplateV2(appConfig, configService, templateV2)
+	}
+	
+	// 3. Fallback to old template system
+	// Validate template exists and get template configuration
+	workflowTemplate, exists := appConfig.GetWorkflowTemplate(templateName)
 	if !exists {
 		availableTemplates := appConfig.ListWorkflowTemplates()
-		if len(availableTemplates) == 0 {
+		availableV2 := make([]string, 0, len(appConfig.TemplatesV2))
+		for name := range appConfig.TemplatesV2 {
+			availableV2 = append(availableV2, name)
+		}
+		
+		if len(availableTemplates) == 0 && len(availableV2) == 0 {
 			return handleTemplateError(fmt.Errorf("no workflow templates are configured"))
 		}
-		return handleTemplateError(fmt.Errorf("workflow template '%s' not found. Available templates: %v", templateName, availableTemplates))
+		
+		allTemplates := append(availableTemplates, availableV2...)
+		return handleTemplateError(fmt.Errorf("workflow template '%s' not found. Available templates: %v", templateName, allTemplates))
 	}
 	
 	// 3. Determine servers to use from template configuration
@@ -69,22 +85,23 @@ func executeTemplate() error {
 	
 	// Use servers specified in the template steps, or command-line override
 	if serverName != "" {
-		// Command-line server override
-		serverNames, userSpecified = host.ProcessOptions(serverName, disableFilesystem, providerName, modelName)
+		// Command-line server override - pass configFile
+		serverNames, userSpecified = host.ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
 		logging.Debug("Using command-line server override: %v", serverNames)
 	} else {
 		// Extract servers from template steps
 		serverSet := make(map[string]bool)
-		for _, step := range template.Steps {
+		for _, step := range workflowTemplate.Steps {
 			for _, server := range step.Servers {
 				serverSet[server] = true
 			}
 		}
 		
 		if len(serverSet) == 0 {
-			// No servers specified in template, use all available
-			serverNames, userSpecified = host.ProcessOptions("", disableFilesystem, providerName, modelName)
-			logging.Debug("No servers specified in template, using all available: %v", serverNames)
+			// No servers specified in template, don't connect to any servers
+			serverNames = []string{}
+			userSpecified = make(map[string]bool)
+			logging.Info("No servers specified in template, workflow will run without MCP tools")
 		} else {
 			// Use servers from template
 			serverNames = make([]string, 0, len(serverSet))
@@ -97,17 +114,49 @@ func executeTemplate() error {
 		}
 	}
 	
-	if len(serverNames) == 0 {
-		return handleTemplateError(fmt.Errorf("no servers available for workflow execution"))
+	// Servers are optional for templates that only use LLM without tools
+	logging.Debug("Template will use %d servers", len(serverNames))
+	
+	// 4. Initialize provider using the provider factory
+	actualProviderName := providerName
+	var providerConfig *config.ProviderConfig
+	var interfaceType config.InterfaceType
+	
+	if actualProviderName == "" {
+		// Use default provider
+		var err error
+		actualProviderName, providerConfig, interfaceType, err = configService.GetDefaultProvider()
+		if err != nil {
+			return handleTemplateError(fmt.Errorf("failed to get default provider: %w", err))
+		}
+	} else {
+		// Use specified provider
+		var err error
+		providerConfig, interfaceType, err = configService.GetProviderConfig(actualProviderName)
+		if err != nil {
+			return handleTemplateError(fmt.Errorf("failed to get provider config: %w", err))
+		}
 	}
 	
-	// 4. Initialize AI provider service
-	aiService := ai.NewService()
-	provider, err := aiService.InitializeProvider(configFile, providerName, modelName)
-	if err != nil {
-		return handleTemplateError(fmt.Errorf("failed to initialize AI provider: %w", err))
+	// Override model if specified
+	if modelName != "" {
+		providerConfig.DefaultModel = modelName
 	}
-	defer provider.Close()
+	
+	// Map provider name to provider type
+	providerType, err := mapProviderNameToType(actualProviderName)
+	if err != nil {
+		return handleTemplateError(err)
+	}
+	
+	// Create provider using factory
+	providerFactory := ai.NewProviderFactory()
+	provider, err := providerFactory.CreateProvider(providerType, providerConfig)
+	if err != nil {
+		return handleTemplateError(fmt.Errorf("failed to create provider: %w", err))
+	}
+	
+	_ = interfaceType // Used for validation if needed
 	
 	// 5. Prepare input data
 	var processedInputData string
@@ -126,30 +175,47 @@ func executeTemplate() error {
 		}
 	}
 	
-	// 6. Execute workflow using the same pattern as query mode
+	// 6. Execute workflow
 	var workflowResponse *domain.WorkflowResponse
-	err = host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
-		// Create enhanced server manager that wraps the host connections
-		serverManager := NewHostServerManager(conns)
+	
+	if len(serverNames) == 0 {
+		// No servers needed - execute workflow directly without server connections
+		logging.Debug("Executing workflow without MCP servers")
 		
-		// Create workflow service
-		workflowService, err := workflowservice.NewService(appConfig, configService, provider, serverManager)
-		if err != nil {
-			return fmt.Errorf("failed to create workflow service: %w", err)
-		}
+		// Create empty server manager
+		serverManager := NewHostServerManager([]*host.ServerConnection{})
+		
+		// Create workflow service with domain.LLMProvider
+		workflowService := workflowservice.NewService(appConfig, configService, provider, serverManager)
 		
 		// Execute workflow
 		ctx := context.Background()
 		workflowResponse, err = workflowService.ExecuteWorkflow(ctx, templateName, processedInputData)
 		if err != nil {
-			return fmt.Errorf("workflow execution failed: %w", err)
+			return handleTemplateError(fmt.Errorf("workflow execution failed: %w", err))
 		}
+	} else {
+		// Servers needed - use RunCommandWithOptions to connect
+		err = host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
+			// Create server manager
+			serverManager := NewHostServerManager(conns)
+			
+			// Create workflow service with domain.LLMProvider
+			workflowService := workflowservice.NewService(appConfig, configService, provider, serverManager)
+			
+			// Execute workflow
+			ctx := context.Background()
+			workflowResponse, err = workflowService.ExecuteWorkflow(ctx, templateName, processedInputData)
+			if err != nil {
+				return fmt.Errorf("workflow execution failed: %w", err)
+			}
+			
+			return nil
+		}, configFile, serverNames, userSpecified, host.QuietCommandOptions())
 		
-		return nil
-	}, configFile, serverNames, userSpecified, host.QuietCommandOptions())
-	
-	if err != nil {
-		return handleTemplateError(err)
+		if err != nil {
+			return handleTemplateError(err)
+		}
 	}
 	
 	// 7. Output response
@@ -159,7 +225,7 @@ func executeTemplate() error {
 // executeListTemplates lists all available workflow templates
 func executeListTemplates() error {
 	// Load configuration using auto-generation if needed
-	configService := config.NewService()
+	configService := infraConfig.NewService()
 	appConfig, exampleCreated, err := configService.LoadConfigOrCreateExample(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
@@ -178,35 +244,58 @@ func executeListTemplates() error {
 		fmt.Println("📝 Example templates included:")
 	}
 	
-	// Get available templates
-	templates := appConfig.ListWorkflowTemplates()
+	// Get available templates (both v1 and v2)
+	templatesV1 := appConfig.ListWorkflowTemplates()
+	templatesV2 := make([]string, 0, len(appConfig.TemplatesV2))
+	for name := range appConfig.TemplatesV2 {
+		templatesV2 = append(templatesV2, name)
+	}
 	
-	if len(templates) == 0 {
+	totalCount := len(templatesV1) + len(templatesV2)
+	
+	if totalCount == 0 {
 		fmt.Println("No workflow templates are configured.")
-		fmt.Println("\nTo add templates, add a 'templates' section to your configuration file.")
+		fmt.Println("\nTo add templates, add YAML files to config/templates/ directory.")
 		return nil
 	}
 	
 	// Create template list response
 	templateList := map[string]interface{}{
-		"available_templates": templates,
-		"total_count":        len(templates),
+		"templates_v1":        templatesV1,
+		"templates_v2":        templatesV2,
+		"total_count":        totalCount,
 		"timestamp":          time.Now(),
 	}
 	
 	// Add template details if verbose mode is enabled
 	if verbose {
-		templateDetails := make(map[string]interface{})
-		for _, templateName := range templates {
+		templateDetailsV1 := make(map[string]interface{})
+		for _, templateName := range templatesV1 {
 			if workflowTemplate, exists := appConfig.GetWorkflowTemplate(templateName); exists {
-				templateDetails[templateName] = map[string]interface{}{
+				templateDetailsV1[templateName] = map[string]interface{}{
+					"version":     "1.0 (legacy)",
 					"description": workflowTemplate.Description,
 					"steps":       len(workflowTemplate.Steps),
 					"variables":   len(workflowTemplate.Variables),
 				}
 			}
 		}
-		templateList["template_details"] = templateDetails
+		
+		templateDetailsV2 := make(map[string]interface{})
+		for _, templateName := range templatesV2 {
+			if tmpl, exists := appConfig.TemplatesV2[templateName]; exists {
+				templateDetailsV2[templateName] = map[string]interface{}{
+					"version":     tmpl.Version,
+					"description": tmpl.Description,
+					"steps":       len(tmpl.Steps),
+					"category":    func() string { if tmpl.Metadata != nil { return tmpl.Metadata.Category }; return "" }(),
+					"tags":        func() []string { if tmpl.Metadata != nil { return tmpl.Metadata.Tags }; return nil }(),
+				}
+			}
+		}
+		
+		templateList["template_details_v1"] = templateDetailsV1
+		templateList["template_details_v2"] = templateDetailsV2
 	}
 	
 	// Output as JSON
@@ -221,9 +310,13 @@ func executeListTemplates() error {
 	if exampleCreated {
 		fmt.Println()
 		fmt.Println("🚀 Usage examples:")
-		fmt.Println("   mcp-cli --template analyze_file")
-		fmt.Println("   mcp-cli --template search_and_summarize")
-		fmt.Println("   echo 'some data' | mcp-cli --template simple_analyze")
+		if len(templatesV2) > 0 {
+			fmt.Printf("   mcp-cli --template %s\n", templatesV2[0])
+		}
+		if len(templatesV1) > 0 {
+			fmt.Printf("   mcp-cli --template %s\n", templatesV1[0])
+		}
+		fmt.Println("   echo 'some data' | mcp-cli --template simple_analysis")
 		fmt.Println()
 		fmt.Println("💡 Remember to configure your API keys and server paths first!")
 		fmt.Println("📦 Download Golang MCP servers from: https://github.com/LaurieRhodes/PUBLIC-Golang-MCP-Servers")
@@ -232,11 +325,8 @@ func executeListTemplates() error {
 	return nil
 }
 
-// outputTemplateResponse outputs the workflow response like query mode (clean by default)
+// outputTemplateResponse outputs the workflow response
 func outputTemplateResponse(response *domain.WorkflowResponse) error {
-	// Check if --json flag was used (if we need to support it later)
-	// For now, default to clean text output like query mode
-	
 	// If there's an error, output structured error for debugging
 	if response.Error != nil {
 		output, err := json.MarshalIndent(response, "", "  ")
@@ -247,17 +337,14 @@ func outputTemplateResponse(response *domain.WorkflowResponse) error {
 		return nil
 	}
 	
-	// For successful execution, output clean text like query mode
+	// For successful execution, output clean text
 	if response.FinalOutput != "" {
-		// Just output the final LLM response, clean and simple
 		fmt.Println(response.FinalOutput)
 	} else if len(response.StepResults) > 0 {
-		// Fallback to last step output if no final output
 		lastStep := response.StepResults[len(response.StepResults)-1]
 		if lastStep.Output != "" {
 			fmt.Println(lastStep.Output)
 		} else {
-			// If still no output, something went wrong - show minimal info
 			fmt.Printf("Template '%s' completed but produced no output\n", response.TemplateName)
 		}
 	} else {
@@ -267,9 +354,144 @@ func outputTemplateResponse(response *domain.WorkflowResponse) error {
 	return nil
 }
 
-// handleTemplateError handles template execution errors with structured output
+// executeTemplateV2 executes a template v2 workflow
+func executeTemplateV2(appConfig *config.ApplicationConfig, configService *infraConfig.Service, tmpl *config.TemplateV2) error {
+	logging.Info("Executing template v2: %s (version: %s)", tmpl.Name, tmpl.Version)
+	
+	// Initialize provider
+	actualProviderName := providerName
+	var providerConfig *config.ProviderConfig
+	var interfaceType config.InterfaceType
+	
+	if actualProviderName == "" {
+		// Use default from template or config
+		if tmpl.Config != nil && tmpl.Config.Defaults != nil && tmpl.Config.Defaults.Provider != "" {
+			actualProviderName = tmpl.Config.Defaults.Provider
+			var err error
+			providerConfig, interfaceType, err = configService.GetProviderConfig(actualProviderName)
+			if err != nil {
+				return handleTemplateError(fmt.Errorf("failed to get template provider config: %w", err))
+			}
+		} else {
+			// Use system default
+			var err error
+			actualProviderName, providerConfig, interfaceType, err = configService.GetDefaultProvider()
+			if err != nil {
+				return handleTemplateError(fmt.Errorf("failed to get default provider: %w", err))
+			}
+		}
+	} else {
+		// Use specified provider
+		var err error
+		providerConfig, interfaceType, err = configService.GetProviderConfig(actualProviderName)
+		if err != nil {
+			return handleTemplateError(fmt.Errorf("failed to get provider config: %w", err))
+		}
+	}
+	
+	// Override model if specified
+	if modelName != "" {
+		providerConfig.DefaultModel = modelName
+	} else if tmpl.Config != nil && tmpl.Config.Defaults != nil && tmpl.Config.Defaults.Model != "" {
+		providerConfig.DefaultModel = tmpl.Config.Defaults.Model
+	}
+	
+	// Create provider
+	providerType, err := mapProviderNameToType(actualProviderName)
+	if err != nil {
+		return handleTemplateError(err)
+	}
+	
+	providerFactory := ai.NewProviderFactory()
+	provider, err := providerFactory.CreateProvider(providerType, providerConfig)
+	if err != nil {
+		return handleTemplateError(fmt.Errorf("failed to create provider: %w", err))
+	}
+	
+	_ = interfaceType
+	
+	// Prepare input data
+	var processedInputData string
+	if inputData != "" {
+		processedInputData = inputData
+	} else {
+		// Check stdin
+		stat, _ := os.Stdin.Stat()
+		if (stat.Mode() & os.ModeCharDevice) == 0 {
+			stdinData, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				return handleTemplateError(fmt.Errorf("failed to read stdin: %w", err))
+			}
+			processedInputData = string(stdinData)
+		}
+	}
+	
+	// Collect all servers needed from all steps
+	serverSet := make(map[string]bool)
+	for _, step := range tmpl.Steps {
+		for _, server := range step.Servers {
+			serverSet[server] = true
+		}
+	}
+	
+	serverNames := make([]string, 0, len(serverSet))
+	for server := range serverSet {
+		serverNames = append(serverNames, server)
+	}
+	
+	// Execute template v2
+	var result *template.ExecutionResult
+	
+	if len(serverNames) == 0 {
+		// No servers - execute without connections
+		logging.Debug("Executing template v2 without MCP servers")
+		
+		serverManager := NewHostServerManager([]*host.ServerConnection{})
+		workflowServiceV2 := workflowservice.NewServiceV2(appConfig, provider, serverManager)
+		
+		ctx := context.Background()
+		result, err = workflowServiceV2.ExecuteTemplate(ctx, tmpl.Name, processedInputData)
+		if err != nil {
+			return handleTemplateError(fmt.Errorf("template v2 execution failed: %w", err))
+		}
+	} else {
+		// With servers
+		userSpecified := make(map[string]bool)
+		for _, s := range serverNames {
+			userSpecified[s] = true
+		}
+		
+		err = host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
+			serverManager := NewHostServerManager(conns)
+			workflowServiceV2 := workflowservice.NewServiceV2(appConfig, provider, serverManager)
+			
+			ctx := context.Background()
+			result, err = workflowServiceV2.ExecuteTemplate(ctx, tmpl.Name, processedInputData)
+			return err
+		}, configFile, serverNames, userSpecified, host.QuietCommandOptions())
+		
+		if err != nil {
+			return handleTemplateError(err)
+		}
+	}
+	
+	// Output result
+	if result.Error != nil {
+		fmt.Fprintf(os.Stderr, "Template v2 execution failed: %v\n", result.Error)
+		return result.Error
+	}
+	
+	if result.FinalOutput != "" {
+		fmt.Println(result.FinalOutput)
+	} else {
+		fmt.Printf("Template '%s' completed but produced no output\n", tmpl.Name)
+	}
+	
+	return nil
+}
+
+// handleTemplateError handles template execution errors
 func handleTemplateError(err error) error {
-	// Create structured error response for template mode
 	errorResponse := &domain.WorkflowResponse{
 		ExecutionID:  "error",
 		TemplateName: templateName,
@@ -285,9 +507,7 @@ func handleTemplateError(err error) error {
 		},
 	}
 	
-	// Output structured error
 	if outputErr := outputTemplateResponse(errorResponse); outputErr != nil {
-		// Fallback to plain text error if JSON marshaling fails
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		return err
 	}
@@ -300,16 +520,11 @@ type HostServerManager struct {
 	connections []*host.ServerConnection
 }
 
-// NewHostServerManager creates a new host server manager
 func NewHostServerManager(connections []*host.ServerConnection) *HostServerManager {
-	return &HostServerManager{
-		connections: connections,
-	}
+	return &HostServerManager{connections: connections}
 }
 
-// StartServer starts an MCP server (not applicable for host connections)
-func (hsm *HostServerManager) StartServer(ctx context.Context, serverName string, config *domain.ServerConfig) (domain.MCPServer, error) {
-	// Find existing connection
+func (hsm *HostServerManager) StartServer(ctx context.Context, serverName string, cfg *config.ServerConfig) (domain.MCPServer, error) {
 	for _, conn := range hsm.connections {
 		if conn.Name == serverName {
 			return &HostServerAdapter{connection: conn}, nil
@@ -318,13 +533,10 @@ func (hsm *HostServerManager) StartServer(ctx context.Context, serverName string
 	return nil, fmt.Errorf("server '%s' not found in host connections", serverName)
 }
 
-// StopServer stops an MCP server (not applicable for host connections)
 func (hsm *HostServerManager) StopServer(serverName string) error {
-	// Host connections are managed by the host package
 	return nil
 }
 
-// GetServer retrieves a running server
 func (hsm *HostServerManager) GetServer(serverName string) (domain.MCPServer, bool) {
 	for _, conn := range hsm.connections {
 		if conn.Name == serverName {
@@ -334,7 +546,6 @@ func (hsm *HostServerManager) GetServer(serverName string) (domain.MCPServer, bo
 	return nil, false
 }
 
-// ListServers returns all running servers
 func (hsm *HostServerManager) ListServers() map[string]domain.MCPServer {
 	servers := make(map[string]domain.MCPServer)
 	for _, conn := range hsm.connections {
@@ -343,9 +554,8 @@ func (hsm *HostServerManager) ListServers() map[string]domain.MCPServer {
 	return servers
 }
 
-// GetAvailableTools returns all available tools from all servers
 func (hsm *HostServerManager) GetAvailableTools() ([]domain.Tool, error) {
-	var tools []domain.Tool
+	var toolsList []domain.Tool
 	
 	for _, conn := range hsm.connections {
 		adapter := &HostServerAdapter{connection: conn}
@@ -354,23 +564,21 @@ func (hsm *HostServerManager) GetAvailableTools() ([]domain.Tool, error) {
 			logging.Warn("Failed to get tools from server %s: %v", conn.Name, err)
 			continue
 		}
-		tools = append(tools, serverTools...)
+		toolsList = append(toolsList, serverTools...)
 	}
 	
-	return tools, nil
+	return toolsList, nil
 }
 
-// ExecuteTool executes a tool on the appropriate server
 func (hsm *HostServerManager) ExecuteTool(ctx context.Context, toolName string, arguments map[string]interface{}) (string, error) {
-	// Find the server that has this tool
 	for _, conn := range hsm.connections {
 		adapter := &HostServerAdapter{connection: conn}
-		tools, err := adapter.GetTools()
+		toolsList, err := adapter.GetTools()
 		if err != nil {
 			continue
 		}
 		
-		for _, tool := range tools {
+		for _, tool := range toolsList {
 			if tool.Function.Name == toolName {
 				return adapter.ExecuteTool(ctx, toolName, arguments)
 			}
@@ -380,36 +588,29 @@ func (hsm *HostServerManager) ExecuteTool(ctx context.Context, toolName string, 
 	return "", fmt.Errorf("tool '%s' not found on any server", toolName)
 }
 
-// StopAll stops all running servers (not applicable for host connections)
 func (hsm *HostServerManager) StopAll() error {
-	// Host connections are managed by the host package
 	return nil
 }
 
 // HostServerAdapter adapts host.ServerConnection to domain.MCPServer interface
 type HostServerAdapter struct {
 	connection  *host.ServerConnection
-	toolsCache  []domain.Tool // Cache tools to avoid repeated calls
+	toolsCache  []domain.Tool
 	toolsCached bool
 }
 
-// Start starts the MCP server (already started by host)
 func (hsa *HostServerAdapter) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop stops the MCP server (managed by host)
 func (hsa *HostServerAdapter) Stop() error {
 	return nil
 }
 
-// IsRunning returns true if the server is running
 func (hsa *HostServerAdapter) IsRunning() bool {
 	return hsa.connection.Client != nil
 }
 
-// formatToolNameForOpenAI formats the tool name to be compatible with OpenAI's requirements
-// (copied from query mode for consistency)
 func formatToolNameForOpenAI(serverName, toolName string) string {
 	serverName = strings.ReplaceAll(serverName, ".", "_")
 	serverName = strings.ReplaceAll(serverName, " ", "_")
@@ -421,23 +622,18 @@ func formatToolNameForOpenAI(serverName, toolName string) string {
 	return fmt.Sprintf("%s_%s", serverName, toolName)
 }
 
-// GetTools returns available tools from this server using real MCP protocol
 func (hsa *HostServerAdapter) GetTools() ([]domain.Tool, error) {
-	// Use cache if available
 	if hsa.toolsCached {
 		return hsa.toolsCache, nil
 	}
 
-	// Get tools using the same method as query mode
 	result, err := tools.SendToolsList(hsa.connection.Client, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tools from MCP server %s: %w", hsa.connection.Name, err)
 	}
 
-	// Convert MCP tools to domain tools (same format as query mode)
 	var domainTools []domain.Tool
 	for _, tool := range result.Tools {
-		// Format tool name for consistency (same as query mode)
 		formattedName := formatToolNameForOpenAI(hsa.connection.Name, tool.Name)
 		
 		domainTool := domain.Tool{
@@ -451,7 +647,6 @@ func (hsa *HostServerAdapter) GetTools() ([]domain.Tool, error) {
 		domainTools = append(domainTools, domainTool)
 	}
 
-	// Cache the results
 	hsa.toolsCache = domainTools
 	hsa.toolsCached = true
 
@@ -459,9 +654,7 @@ func (hsa *HostServerAdapter) GetTools() ([]domain.Tool, error) {
 	return domainTools, nil
 }
 
-// ExecuteTool executes a tool on this server using real MCP protocol
 func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, arguments map[string]interface{}) (string, error) {
-	// Parse the tool name to remove server prefix (same logic as query mode)
 	actualToolName := toolName
 	serverPrefix := hsa.connection.Name + "_"
 	serverPrefixUnderscore := strings.ReplaceAll(hsa.connection.Name, "-", "_") + "_"
@@ -474,7 +667,6 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 
 	logging.Debug("Executing tool %s (actual: %s) on server %s", toolName, actualToolName, hsa.connection.Name)
 
-	// Execute the tool using real MCP protocol (same as query mode)
 	result, err := tools.SendToolsCall(hsa.connection.Client, actualToolName, arguments)
 	if err != nil {
 		return "", fmt.Errorf("MCP tool execution failed for %s: %w", actualToolName, err)
@@ -484,7 +676,6 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 		return "", fmt.Errorf("tool execution failed: %s", result.Error)
 	}
 
-	// Convert result to string (same logic as query mode)
 	var resultStr string
 	switch content := result.Content.(type) {
 	case string:
@@ -501,16 +692,34 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 	return resultStr, nil
 }
 
-// GetServerName returns the name of this server
 func (hsa *HostServerAdapter) GetServerName() string {
 	return hsa.connection.Name
 }
 
-// GetConfig returns the server configuration
-func (hsa *HostServerAdapter) GetConfig() *domain.ServerConfig {
-	// Return a basic config based on the connection
-	return &domain.ServerConfig{
+func (hsa *HostServerAdapter) GetConfig() *config.ServerConfig {
+	return &config.ServerConfig{
 		Command: "mock",
 		Args:    []string{},
 	}
 }
+
+// mapProviderNameToType maps a provider name string to domain.ProviderType
+func mapProviderNameToType(name string) (domain.ProviderType, error) {
+	switch strings.ToLower(name) {
+	case "openai":
+		return domain.ProviderOpenAI, nil
+	case "anthropic":
+		return domain.ProviderAnthropic, nil
+	case "ollama":
+		return domain.ProviderOllama, nil
+	case "deepseek":
+		return domain.ProviderDeepSeek, nil
+	case "gemini":
+		return domain.ProviderGemini, nil
+	case "openrouter":
+		return domain.ProviderOpenRouter, nil
+	default:
+		return "", fmt.Errorf("unsupported provider: %s", name)
+	}
+}
+

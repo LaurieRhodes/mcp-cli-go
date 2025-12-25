@@ -12,22 +12,23 @@ import (
 	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
 // OllamaClient implements the domain.LLMProvider interface for Ollama
 type OllamaClient struct {
 	client       *http.Client
-	config       *domain.ProviderConfig
+	config       *config.ProviderConfig
 	providerType domain.ProviderType
 }
 
 // Internal structures for Ollama API communication
 type ollamaChatMessage struct {
-	Role       string                 `json:"role"`
-	Content    string                 `json:"content"`
-	ToolCalls  []ollamaToolCall       `json:"tool_calls,omitempty"`
-	ToolCallID string                 `json:"tool_call_id,omitempty"`
+	Role       string           `json:"role"`
+	Content    string           `json:"content"`
+	ToolCalls  []ollamaToolCall `json:"tool_calls,omitempty"`
+	ToolCallID string           `json:"tool_call_id,omitempty"`
 }
 
 type ollamaToolCall struct {
@@ -51,10 +52,10 @@ type ollamaToolFunction struct {
 }
 
 type ollamaChatRequest struct {
-	Model    string              `json:"model"`
-	Messages []ollamaChatMessage `json:"messages"`
-	Stream   bool                `json:"stream"`
-	Tools    []ollamaTool        `json:"tools,omitempty"`
+	Model    string                 `json:"model"`
+	Messages []ollamaChatMessage    `json:"messages"`
+	Stream   bool                   `json:"stream"`
+	Tools    []ollamaTool           `json:"tools,omitempty"`
 	Options  map[string]interface{} `json:"options,omitempty"`
 }
 
@@ -91,13 +92,13 @@ const (
 )
 
 // NewOllamaClient creates a new Ollama client
-func NewOllamaClient(config *domain.ProviderConfig) (domain.LLMProvider, error) {
-	if config == nil {
+func NewOllamaClient(cfg *config.ProviderConfig) (domain.LLMProvider, error) {
+	if cfg == nil {
 		return nil, fmt.Errorf("provider configuration is required")
 	}
 
 	// Set default endpoint if not provided
-	endpoint := config.APIEndpoint
+	endpoint := cfg.APIEndpoint
 	if endpoint == "" {
 		endpoint = defaultOllamaEndpoint
 	}
@@ -109,7 +110,7 @@ func NewOllamaClient(config *domain.ProviderConfig) (domain.LLMProvider, error) 
 	endpoint = strings.TrimSuffix(endpoint, "/")
 
 	// Set timeout
-	timeout := time.Duration(config.TimeoutSeconds) * time.Second
+	timeout := time.Duration(cfg.TimeoutSeconds) * time.Second
 	if timeout == 0 {
 		timeout = 120 * time.Second // Default timeout for local models
 	}
@@ -120,14 +121,14 @@ func NewOllamaClient(config *domain.ProviderConfig) (domain.LLMProvider, error) 
 	}
 
 	// Fix the model name if needed
-	model := fixOllamaModel(config.DefaultModel)
-	config.DefaultModel = model
+	model := fixOllamaModel(cfg.DefaultModel)
+	cfg.DefaultModel = model
 
 	logging.Info("Creating Ollama client with model: %s, endpoint: %s", model, endpoint)
 
 	return &OllamaClient{
 		client:       httpClient,
-		config:       config,
+		config:       cfg,
 		providerType: domain.ProviderOllama,
 	}, nil
 }
@@ -248,14 +249,29 @@ func (c *OllamaClient) StreamCompletion(ctx context.Context, req *domain.Complet
 	}, nil
 }
 
+// CreateEmbeddings - Ollama doesn't have a standard embeddings API in the current implementation
+func (c *OllamaClient) CreateEmbeddings(ctx context.Context, req *domain.EmbeddingRequest) (*domain.EmbeddingResponse, error) {
+	return nil, fmt.Errorf("embeddings are not supported by Ollama provider - use OpenAI or compatible provider instead")
+}
+
+// GetSupportedEmbeddingModels returns empty list as Ollama doesn't support embeddings in this implementation
+func (c *OllamaClient) GetSupportedEmbeddingModels() []string {
+	return []string{} // Ollama doesn't support embeddings in this implementation
+}
+
+// GetMaxEmbeddingTokens returns 0 as Ollama doesn't support embeddings in this implementation
+func (c *OllamaClient) GetMaxEmbeddingTokens(model string) int {
+	return 0 // Ollama doesn't support embeddings in this implementation
+}
+
 // GetProviderType returns the type of this provider
 func (c *OllamaClient) GetProviderType() domain.ProviderType {
 	return c.providerType
 }
 
 // GetInterfaceType returns the interface type of this provider
-func (c *OllamaClient) GetInterfaceType() domain.InterfaceType {
-	return domain.OllamaNative
+func (c *OllamaClient) GetInterfaceType() config.InterfaceType {
+	return config.OllamaNative
 }
 
 // ValidateConfig validates the provider configuration
@@ -292,7 +308,7 @@ func (c *OllamaClient) getTemperature(requestTemp float64) float64 {
 // fixOllamaModel ensures model names are handled correctly for Ollama
 func fixOllamaModel(model string) string {
 	logging.Debug("Fixing Ollama model name: %s", model)
-	
+
 	if model == "" {
 		model = "ollama.com/ajindal/llama3.1-storm:8b"
 		logging.Warn("Empty model name, using default: %s", model)
@@ -303,7 +319,7 @@ func fixOllamaModel(model string) string {
 		model = model + ":8b"
 		logging.Warn("Adding version to model: %s", model)
 	}
-	
+
 	logging.Info("Using Ollama model: %s", model)
 	return model
 }
@@ -311,7 +327,7 @@ func fixOllamaModel(model string) string {
 // convertToOllamaMessages converts domain messages to Ollama format
 func (c *OllamaClient) convertToOllamaMessages(messages []domain.Message, systemPrompt string) []ollamaChatMessage {
 	ollamaMessages := make([]ollamaChatMessage, 0)
-	
+
 	// Add system prompt if provided
 	if systemPrompt != "" {
 		ollamaMessages = append(ollamaMessages, ollamaChatMessage{
@@ -319,7 +335,7 @@ func (c *OllamaClient) convertToOllamaMessages(messages []domain.Message, system
 			Content: systemPrompt,
 		})
 	}
-	
+
 	for _, msg := range messages {
 		switch msg.Role {
 		case "system":
@@ -345,14 +361,14 @@ func (c *OllamaClient) convertToOllamaMessages(messages []domain.Message, system
 			})
 		}
 	}
-	
+
 	return ollamaMessages
 }
 
 // convertToOllamaTools converts domain tools to Ollama format
 func (c *OllamaClient) convertToOllamaTools(tools []domain.Tool) []ollamaTool {
 	ollamaTools := make([]ollamaTool, 0, len(tools))
-	
+
 	for _, tool := range tools {
 		ollamaTool := ollamaTool{
 			Type: "function",
@@ -362,10 +378,10 @@ func (c *OllamaClient) convertToOllamaTools(tools []domain.Tool) []ollamaTool {
 				Parameters:  tool.Function.Parameters,
 			},
 		}
-		
+
 		ollamaTools = append(ollamaTools, ollamaTool)
 	}
-	
+
 	return ollamaTools
 }
 
@@ -374,20 +390,20 @@ func (c *OllamaClient) isToolResultFollowUp(messages []domain.Message) bool {
 	if len(messages) < 3 {
 		return false
 	}
-	
+
 	hasToolCall := false
 	hasToolResult := false
-	
+
 	for i := 1; i < len(messages); i++ {
 		if messages[i].Role == "assistant" && len(messages[i].ToolCalls) > 0 {
 			hasToolCall = true
 		}
-		
+
 		if messages[i].Role == "tool" {
 			hasToolResult = true
 		}
 	}
-	
+
 	return hasToolCall && hasToolResult
 }
 
@@ -395,11 +411,11 @@ func (c *OllamaClient) isToolResultFollowUp(messages []domain.Message) bool {
 func (c *OllamaClient) addToolFollowUpClarification(ollamaMessages []ollamaChatMessage, domainMessages []domain.Message) []ollamaChatMessage {
 	var latestToolResult string
 	var latestToolName string
-	
+
 	for i := len(domainMessages) - 1; i >= 0; i-- {
 		if domainMessages[i].Role == "tool" {
 			latestToolResult = domainMessages[i].Content
-			
+
 			// Search for the tool name in the previous assistant messages
 			for j := i - 1; j >= 0; j-- {
 				if domainMessages[j].Role == "assistant" && len(domainMessages[j].ToolCalls) > 0 {
@@ -410,23 +426,23 @@ func (c *OllamaClient) addToolFollowUpClarification(ollamaMessages []ollamaChatM
 			break
 		}
 	}
-	
+
 	if latestToolResult != "" {
 		clarificationContent := "I've executed the requested tool. "
 		if latestToolName != "" {
 			clarificationContent += fmt.Sprintf("Tool name: %s. ", latestToolName)
 		}
 		clarificationContent += "Please analyze this result and provide a complete response."
-		
+
 		clarificationMsg := ollamaChatMessage{
 			Role:    "user",
 			Content: clarificationContent,
 		}
-		
+
 		ollamaMessages = append(ollamaMessages, clarificationMsg)
 		logging.Debug("Added clarification message for tool follow-up")
 	}
-	
+
 	return ollamaMessages
 }
 
@@ -498,7 +514,7 @@ func (c *OllamaClient) sendStreamingRequest(ctx context.Context, url string, pay
 	var fullContent strings.Builder
 	var toolCalls []internalOllamaToolCall
 	decoder := json.NewDecoder(resp.Body)
-	
+
 	for {
 		var chunk ollamaChatChunk
 		err := decoder.Decode(&chunk)
@@ -508,29 +524,29 @@ func (c *OllamaClient) sendStreamingRequest(ctx context.Context, url string, pay
 			}
 			return fullContent.String(), toolCalls, fmt.Errorf("error decoding stream: %w", err)
 		}
-		
+
 		content := chunk.Message.Content
 		if content != "" {
 			fullContent.WriteString(content)
-			
+
 			if callback != nil {
 				if err := callback(content); err != nil {
 					return fullContent.String(), toolCalls, fmt.Errorf("callback error: %w", err)
 				}
 			}
 		}
-		
+
 		// Process standard tool calls if they exist in the final chunk
 		if len(chunk.Message.ToolCalls) > 0 && chunk.Done {
 			for i, ollamaToolCall := range chunk.Message.ToolCalls {
 				toolID := fmt.Sprintf("tc_%d", i)
-				
+
 				argsJSON, err := json.Marshal(ollamaToolCall.Function.Arguments)
 				if err != nil {
 					logging.Warn("Failed to marshal tool arguments to JSON: %v", err)
 					argsJSON = []byte("{}")
 				}
-				
+
 				toolCall := internalOllamaToolCall{
 					ID:   toolID,
 					Type: "function",
@@ -539,58 +555,58 @@ func (c *OllamaClient) sendStreamingRequest(ctx context.Context, url string, pay
 						Arguments: argsJSON,
 					},
 				}
-				
+
 				toolCalls = append(toolCalls, toolCall)
 			}
 		}
-		
+
 		if chunk.Done {
 			break
 		}
 	}
-	
+
 	// Check for alternative tool call format if no standard tool calls were detected
 	if len(toolCalls) == 0 && strings.Contains(fullContent.String(), "<tool_call>") {
 		logging.Info("No standard tool calls found in streaming response, checking for alternative format")
 		altToolCalls := c.parseAlternativeToolCalls(fullContent.String())
-		
+
 		if len(altToolCalls) > 0 {
 			logging.Info("Successfully parsed %d alternative format tool calls from streaming content", len(altToolCalls))
 			toolCalls = altToolCalls
-			
+
 			// Remove tool call text from content
 			cleanContent := regexp.MustCompile(`<tool_call>.*?</tool_call>`).ReplaceAllString(fullContent.String(), "")
 			cleanContent = strings.TrimSpace(cleanContent)
-			
+
 			if cleanContent != "" {
 				fullContent = *new(strings.Builder)
 				fullContent.WriteString(cleanContent)
 			}
 		}
 	}
-	
+
 	return fullContent.String(), toolCalls, nil
 }
 
 // extractContentAndToolCalls extracts content and tool calls from an Ollama response
 func (c *OllamaClient) extractContentAndToolCalls(response *ollamaChatResponse) (string, []internalOllamaToolCall) {
 	var toolCalls []internalOllamaToolCall
-	
+
 	content := response.Message.Content
-	
+
 	// Extract tool calls if any - standard format
 	if len(response.Message.ToolCalls) > 0 {
 		logging.Debug("Found %d standard tool calls in response", len(response.Message.ToolCalls))
-		
+
 		for i, toolCall := range response.Message.ToolCalls {
 			toolID := fmt.Sprintf("tc_%d", i)
-			
+
 			args, err := json.Marshal(toolCall.Function.Arguments)
 			if err != nil {
 				logging.Warn("Failed to marshal tool arguments to JSON: %v", err)
 				args = []byte("{}")
 			}
-			
+
 			newToolCall := internalOllamaToolCall{
 				ID:   toolID,
 				Type: "function",
@@ -599,35 +615,35 @@ func (c *OllamaClient) extractContentAndToolCalls(response *ollamaChatResponse) 
 					Arguments: args,
 				},
 			}
-			
+
 			toolCalls = append(toolCalls, newToolCall)
 		}
 	} else if strings.Contains(content, "<tool_call>") {
 		// Fallback for alternative tool call format
 		logging.Info("No standard tool calls found, checking for alternative format")
 		altToolCalls := c.parseAlternativeToolCalls(content)
-		
+
 		if len(altToolCalls) > 0 {
 			logging.Info("Successfully parsed %d alternative format tool calls", len(altToolCalls))
 			toolCalls = altToolCalls
-			
+
 			// Remove tool call text from content
 			content = regexp.MustCompile(`<tool_call>.*?</tool_call>`).ReplaceAllString(content, "")
 			content = strings.TrimSpace(content)
 		}
 	}
-	
+
 	return content, toolCalls
 }
 
 // parseAlternativeToolCalls parses tool calls from alternative XML-like format
 func (c *OllamaClient) parseAlternativeToolCalls(content string) []internalOllamaToolCall {
 	var toolCalls []internalOllamaToolCall
-	
+
 	// Use regex to find tool calls in the content
-	toolCallRegex := regexp.MustCompile(`<tool_call>\s*(\{[^}]*\})\s*</tool_call>`)
+	toolCallRegex := regexp.MustCompile(`<tool_call>\\s*(\\{[^}]*\\})\\s*</tool_call>`)
 	matches := toolCallRegex.FindAllStringSubmatch(content, -1)
-	
+
 	for i, match := range matches {
 		if len(match) > 1 {
 			// Try to parse the JSON content
@@ -636,13 +652,13 @@ func (c *OllamaClient) parseAlternativeToolCalls(content string) []internalOllam
 				logging.Warn("Failed to parse alternative tool call JSON: %v", err)
 				continue
 			}
-			
+
 			// Extract tool name and arguments
 			name, _ := toolData["name"].(string)
 			if name == "" {
 				continue
 			}
-			
+
 			// Convert arguments to JSON
 			var argsJSON []byte
 			if args, ok := toolData["arguments"].(map[string]interface{}); ok {
@@ -654,7 +670,7 @@ func (c *OllamaClient) parseAlternativeToolCalls(content string) []internalOllam
 			} else {
 				argsJSON = []byte("{}")
 			}
-			
+
 			toolCall := internalOllamaToolCall{
 				ID:   fmt.Sprintf("alt_tc_%d", i),
 				Type: "function",
@@ -663,11 +679,11 @@ func (c *OllamaClient) parseAlternativeToolCalls(content string) []internalOllam
 					Arguments: argsJSON,
 				},
 			}
-			
+
 			toolCalls = append(toolCalls, toolCall)
 		}
 	}
-	
+
 	return toolCalls
 }
 
