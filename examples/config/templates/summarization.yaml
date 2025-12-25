@@ -1,0 +1,36 @@
+name: summarization
+description: "Generates concise summary of text"
+version: 1.0.0
+
+metadata:
+  category: primitives
+  tags:
+    - summarization
+    - nlp
+    - reusable
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o-mini
+    temperature: 0.4
+
+steps:
+  - name: summarize
+    description: "Create comprehensive summary"
+    
+    system_prompt: "You are a professional summarization specialist. Be concise and accurate."
+    
+    prompt: |
+      Summarize this content:
+      {{stdin}}
+      
+      Provide:
+      - Executive summary (2-3 sentences)
+      - Key points (bullet list)
+      - Main takeaways
+      
+      Keep it clear and actionable.
+    
+    servers: []
+    output: summary

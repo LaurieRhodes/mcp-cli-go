@@ -1,0 +1,5 @@
+server_name: bash
+config:
+  command: ~/mcp-servers/bash/bash-mcp
+  args: []
+  env: {}

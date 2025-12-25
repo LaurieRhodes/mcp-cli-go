@@ -1,0 +1,7 @@
+interface_type: openai_compatible
+provider_name: lmstudio
+config:
+  api_endpoint: http://localhost:1234/v1
+  default_model: local-model
+  max_retries: 2
+  timeout_seconds: 300

@@ -1,0 +1,22 @@
+name: simple_analysis
+description: "Basic analysis template demonstrating template v2 features"
+version: 1.0.0
+
+metadata:
+  category: analysis
+  tags:
+    - simple
+    - example
+
+config:
+  defaults:
+    provider: openai
+    temperature: 0.7
+    timeout: 60s
+
+steps:
+  - name: analyze
+    description: "Analyze the input data"
+    prompt: "Analyze this data and provide insights: {{stdin}}"
+    servers: []
+    output: analysis_result

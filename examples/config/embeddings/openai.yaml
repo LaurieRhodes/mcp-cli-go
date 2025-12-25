@@ -1,0 +1,24 @@
+interface_type: openai_compatible
+provider_name: openai
+config:
+  api_endpoint: https://api.openai.com/v1
+  api_key: ${OPENAI_API_KEY}
+  default_embedding_model: text-embedding-3-small
+  default_model: text-embedding-3-small
+  embedding_models:
+      text-embedding-3-large:
+          cost_per_1k_tokens: 0.00013
+          description: Larger embedding model with higher performance
+          dimensions: 3072
+          max_tokens: 8191
+      text-embedding-3-small:
+          cost_per_1k_tokens: 2e-05
+          default: true
+          description: Most capable embedding model for both english and non-english tasks
+          dimensions: 1536
+          max_tokens: 8191
+      text-embedding-ada-002:
+          cost_per_1k_tokens: 0.0001
+          description: Previous generation embedding model
+          dimensions: 1536
+          max_tokens: 8191

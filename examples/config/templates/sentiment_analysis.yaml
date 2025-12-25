@@ -1,0 +1,37 @@
+name: sentiment_analysis
+description: "Analyzes sentiment of input text"
+version: 1.0.0
+
+metadata:
+  category: primitives
+  tags:
+    - sentiment
+    - nlp
+    - reusable
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o-mini
+    temperature: 0.3
+
+steps:
+  - name: analyze_sentiment
+    description: "Determine sentiment and emotional tone"
+    
+    system_prompt: "You are a sentiment analysis specialist. Provide concise, structured analysis."
+    
+    prompt: |
+      Analyze the sentiment of this text:
+      {{stdin}}
+      
+      Provide:
+      1. Overall sentiment (positive/negative/neutral)
+      2. Confidence score (0-100)
+      3. Key emotional indicators
+      4. Tone assessment
+      
+      Format as JSON.
+    
+    servers: []
+    output: sentiment_result

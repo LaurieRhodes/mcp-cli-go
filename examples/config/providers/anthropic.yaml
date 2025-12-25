@@ -1,0 +1,7 @@
+interface_type: anthropic_native
+provider_name: anthropic
+config:
+  api_key: ${ANTHROPIC_API_KEY}
+  default_model: claude-3-5-sonnet-20241022
+  max_retries: 5
+  timeout_seconds: 300

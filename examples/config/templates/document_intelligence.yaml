@@ -1,0 +1,125 @@
+name: document_intelligence
+description: "Complete document analysis using multiple composed templates"
+version: 1.0.0
+
+metadata:
+  category: composed
+  tags:
+    - document-processing
+    - composition-advanced
+    - multi-template
+  author: Template Composition System
+
+config:
+  variables:
+    document_type: "general"
+  
+  defaults:
+    provider: openai
+    model: gpt-4o-mini
+    temperature: 0.5
+
+steps:
+  # Step 1: Summarize the document
+  - name: create_summary
+    description: "Generate document summary using composition"
+    template: summarization
+    template_input: "{{stdin}}"
+    output: document_summary
+  
+  # Step 2: Extract entities from the document
+  - name: identify_entities
+    description: "Extract named entities from document"
+    template: entity_extraction
+    template_input: "{{stdin}}"
+    output: document_entities
+  
+  # Step 3: Analyze sentiment/tone
+  - name: assess_tone
+    description: "Analyze document sentiment and tone"
+    template: sentiment_analysis
+    template_input: "{{stdin}}"
+    output: document_sentiment
+  
+  # Step 4: Classify document
+  - name: classify_document
+    description: "Classify document based on analysis"
+    
+    system_prompt: "You are a document classification expert."
+    
+    prompt: |
+      Based on this analysis:
+      
+      Summary: {{document_summary}}
+      Entities: {{document_entities}}
+      Sentiment: {{document_sentiment}}
+      
+      Classify this document:
+      - Category (legal/technical/business/personal/other)
+      - Subcategory
+      - Sensitivity level (public/internal/confidential/restricted)
+      - Recommended actions
+      
+      Provide clear classification with reasoning.
+    
+    servers: []
+    output: classification
+  
+  # Step 5: Generate metadata
+  - name: create_metadata
+    description: "Generate structured metadata"
+    
+    prompt: |
+      Create structured metadata for document indexing:
+      
+      Summary: {{document_summary}}
+      Entities: {{document_entities}}
+      Sentiment: {{document_sentiment}}
+      Classification: {{classification}}
+      
+      Generate JSON metadata including:
+      - title (inferred from content)
+      - keywords (top 10)
+      - tags
+      - categories
+      - sensitivity_level
+      - key_entities
+      - summary_text
+      - recommended_retention_period
+    
+    servers: []
+    output: metadata
+  
+  # Step 6: Final intelligence report
+  - name: intelligence_report
+    description: "Compile comprehensive document intelligence"
+    
+    prompt: |
+      # Document Intelligence Report
+      
+      ## Executive Summary
+      {{document_summary}}
+      
+      ## Classification
+      {{classification}}
+      
+      ## Key Entities
+      {{document_entities}}
+      
+      ## Sentiment Analysis
+      {{document_sentiment}}
+      
+      ## Metadata
+      {{metadata}}
+      
+      ## Recommendations
+      Based on the above analysis, provide:
+      1. Recommended workflow routing
+      2. Suggested stakeholders to notify
+      3. Compliance or legal considerations
+      4. Next steps
+      
+      Format as a professional intelligence brief.
+    
+    servers: []
+    output: final_intelligence

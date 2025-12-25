@@ -1,0 +1,5 @@
+server_name: filesystem
+config:
+  command: ~/mcp-servers/filesystem/filesystem-mcp
+  args: []
+  env: {}

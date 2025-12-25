@@ -1,0 +1,107 @@
+name: customer_support_analysis
+description: "Comprehensive customer support ticket analysis using composed templates"
+version: 1.0.0
+
+metadata:
+  category: composed
+  tags:
+    - customer-support
+    - composition-demo
+    - multi-step
+  author: Template Composition System
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o-mini
+    temperature: 0.5
+
+steps:
+  # Step 1: Call sentiment analysis template
+  - name: analyze_sentiment
+    description: "Analyze customer sentiment using reusable template"
+    template: sentiment_analysis
+    template_input: "{{stdin}}"
+    output: sentiment_data
+  
+  # Step 2: Call entity extraction template
+  - name: extract_entities
+    description: "Extract entities using reusable template"
+    template: entity_extraction
+    template_input: "{{stdin}}"
+    output: entity_data
+  
+  # Step 3: Determine priority based on sentiment
+  - name: prioritize
+    description: "Determine ticket priority"
+    
+    system_prompt: "You are a support ticket prioritization system."
+    
+    prompt: |
+      Based on this sentiment analysis:
+      {{sentiment_data}}
+      
+      And these extracted entities:
+      {{entity_data}}
+      
+      Determine support ticket priority:
+      - URGENT: Negative sentiment + mentions products/money/legal
+      - HIGH: Negative sentiment or critical entities
+      - MEDIUM: Neutral sentiment
+      - LOW: Positive sentiment
+      
+      Provide priority with brief justification.
+    
+    servers: []
+    output: priority
+  
+  # Step 4: Generate response template
+  - name: response_template
+    description: "Create appropriate response template"
+    
+    system_prompt: "You are a customer support response specialist."
+    
+    prompt: |
+      Create a professional response template for this ticket:
+      
+      Original Message: {{stdin}}
+      
+      Sentiment Analysis: {{sentiment_data}}
+      
+      Entities Detected: {{entity_data}}
+      
+      Priority: {{priority}}
+      
+      Generate:
+      1. Appropriate greeting based on sentiment
+      2. Acknowledgment of specific issues/entities
+      3. Action steps or resolution path
+      4. Professional closing
+      
+      Make it empathetic and actionable.
+    
+    servers: []
+    output: response_draft
+  
+  # Step 5: Final summary
+  - name: final_summary
+    description: "Compile complete analysis"
+    
+    prompt: |
+      ## Customer Support Ticket Analysis
+      
+      ### Priority: {{priority}}
+      
+      ### Sentiment Analysis
+      {{sentiment_data}}
+      
+      ### Entities Identified
+      {{entity_data}}
+      
+      ### Recommended Response
+      {{response_draft}}
+      
+      Compile this into a clear, actionable summary for support agents.
+    
+    servers: []
+    output: final_report

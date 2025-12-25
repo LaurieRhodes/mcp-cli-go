@@ -1,0 +1,96 @@
+name: conditional_workflow
+description: "Demonstrates conditional execution based on data analysis"
+version: 1.0.0
+
+metadata:
+  category: example
+  tags:
+    - conditional
+    - demo
+  author: Dev Team
+
+config:
+  defaults:
+    provider: openai
+    temperature: 0.3
+
+steps:
+  # Step 1: Analyze the input to determine severity
+  - name: assess_severity
+    description: "Determine the severity level of the input"
+    
+    system_prompt: "You are an assessment specialist. Classify severity as: low, medium, high, or critical."
+    
+    prompt: |
+      Assess the severity of this situation:
+      {{stdin}}
+      
+      Respond with ONLY one word: low, medium, high, or critical
+    
+    servers: []
+    output: severity_level
+  
+  # Step 2a: Critical path - only runs if critical
+  - name: critical_alert
+    description: "Send critical alert (only if critical)"
+    condition: "severity_level == 'critical'"
+    
+    prompt: |
+      CRITICAL ALERT REQUIRED
+      
+      Situation: {{stdin}}
+      Severity: {{severity_level}}
+      
+      Generate an urgent alert message for immediate response.
+    
+    servers: []
+    output: alert_message
+  
+  # Step 2b: High severity path
+  - name: high_priority_action
+    description: "High priority actions (only if high)"
+    condition: "severity_level == 'high'"
+    
+    prompt: |
+      HIGH PRIORITY
+      
+      Situation: {{stdin}}
+      Severity: {{severity_level}}
+      
+      Provide escalation plan and timeline.
+    
+    servers: []
+    output: action_plan
+  
+  # Step 2c: Standard path - runs for low or medium
+  - name: standard_processing
+    description: "Standard processing (low or medium)"
+    condition: "severity_level == 'low' or severity_level == 'medium'"
+    
+    prompt: |
+      Standard Processing
+      
+      Situation: {{stdin}}
+      Severity: {{severity_level}}
+      
+      Provide standard response plan.
+    
+    servers: []
+    output: response_plan
+  
+  # Step 3: Summary (always runs)
+  - name: final_summary
+    description: "Generate final summary"
+    depends_on:
+      - assess_severity
+    
+    prompt: |
+      Final Summary:
+      
+      Input: {{stdin}}
+      Assessed Severity: {{severity_level}}
+      
+      Provide concise summary of actions taken based on severity.
+    
+    servers: []
+    output: summary

@@ -56,13 +56,31 @@ ehthumbs.db
 Thumbs.db
 
 # Configuration files with sensitive data
-# CRITICAL: These contain API keys, endpoints, and server configurations
-config/
-config/*
+# CRITICAL: Only ignore actual user config files with secrets
+# DO NOT ignore source code directories like internal/*/config/ or examples/
+#
+# Pattern: Only ignore /config/ at root, and only specific file types
+/config/*.yaml
+/config/*.yml
+/config/*.json
+/config/.env
+/config/providers/*.yaml
+/config/providers/*.yml
+/config/templates/*.yaml
+/config/templates/*.yml
+/config/runas/*.yaml
+/config/runas/*.yml
+
+# Legacy config files
 server_config.json
 server_config.json.txt
 server_config.json.private
 *.private
+
+# Explicitly ALLOW example files (negation pattern)
+!/config.example.yaml
+!/config/*.example.yaml
+!/examples/
 
 # Environment files
 .env

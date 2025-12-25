@@ -1,0 +1,93 @@
+# MCP Server Configuration: Document Intelligence Agent
+# Demonstrates template composition capabilities
+
+runas_type: mcp
+version: "1.0"
+
+server_info:
+  name: document_intelligence_agent
+  version: 1.0.0
+  description: "AI-powered document processing with composed workflow templates"
+
+tools:
+  # Primitive templates - building blocks
+  - template: sentiment_analysis
+    name: analyze_sentiment
+    description: "Analyze sentiment and emotional tone of text"
+    
+    input_schema:
+      type: object
+      properties:
+        text:
+          type: string
+          description: "Text to analyze"
+      required:
+        - text
+    
+    input_mapping:
+      text: "{{input_data}}"
+  
+  - template: entity_extraction
+    name: extract_entities
+    description: "Extract named entities (people, organizations, locations, etc.)"
+    
+    input_schema:
+      type: object
+      properties:
+        text:
+          type: string
+          description: "Text to extract entities from"
+      required:
+        - text
+    
+    input_mapping:
+      text: "{{input_data}}"
+  
+  - template: summarization
+    name: summarize
+    description: "Generate concise summary of text"
+    
+    input_schema:
+      type: object
+      properties:
+        text:
+          type: string
+          description: "Text to summarize"
+      required:
+        - text
+    
+    input_mapping:
+      text: "{{input_data}}"
+  
+  # Composed templates - complex workflows
+  - template: customer_support_analysis
+    name: analyze_support_ticket
+    description: "Comprehensive customer support ticket analysis (uses composed templates)"
+    
+    input_schema:
+      type: object
+      properties:
+        ticket_text:
+          type: string
+          description: "Customer support ticket content"
+      required:
+        - ticket_text
+    
+    input_mapping:
+      ticket_text: "{{input_data}}"
+  
+  - template: document_intelligence
+    name: analyze_document
+    description: "Complete document intelligence analysis (uses multiple composed templates)"
+    
+    input_schema:
+      type: object
+      properties:
+        document_text:
+          type: string
+          description: "Document content to analyze"
+      required:
+        - document_text
+    
+    input_mapping:
+      document_text: "{{input_data}}"

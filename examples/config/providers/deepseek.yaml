@@ -1,0 +1,10 @@
+interface_type: openai_compatible
+provider_name: deepseek
+config:
+  api_endpoint: https://api.deepseek.com/v1
+  api_key: ${DEEPSEEK_API_KEY}
+  context_window: 32000
+  default_model: deepseek-chat
+  max_retries: 2
+  reserve_tokens: 2000
+  timeout_seconds: 300

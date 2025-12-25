@@ -1,0 +1,39 @@
+name: entity_extraction
+description: "Extracts named entities from text"
+version: 1.0.0
+
+metadata:
+  category: primitives
+  tags:
+    - nlp
+    - entities
+    - reusable
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o-mini
+    temperature: 0.2
+
+steps:
+  - name: extract_entities
+    description: "Extract and categorize named entities"
+    
+    system_prompt: "You are an entity extraction specialist. Extract all relevant entities."
+    
+    prompt: |
+      Extract named entities from this text:
+      {{stdin}}
+      
+      Identify:
+      - People
+      - Organizations
+      - Locations
+      - Products
+      - Dates/Times
+      - Technologies
+      
+      Format as JSON with categories.
+    
+    servers: []
+    output: entities

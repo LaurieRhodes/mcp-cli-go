@@ -1,0 +1,17 @@
+interface_type: openai_compatible
+provider_name: openrouter
+config:
+  api_endpoint: https://openrouter.ai/api/v1
+  api_key: ${OPENROUTER_API_KEY}
+  default_embedding_model: text-embedding-3-small
+  default_model: text-embedding-3-small
+  embedding_models:
+      text-embedding-3-large:
+          description: Larger OpenAI embedding model via OpenRouter
+          dimensions: 3072
+          max_tokens: 8191
+      text-embedding-3-small:
+          default: true
+          description: OpenAI embedding model via OpenRouter
+          dimensions: 1536
+          max_tokens: 8191

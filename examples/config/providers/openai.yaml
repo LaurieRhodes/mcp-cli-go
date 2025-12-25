@@ -1,0 +1,10 @@
+interface_type: openai_compatible
+provider_name: openai
+config:
+  api_endpoint: https://api.openai.com/v1
+  api_key: ${OPENAI_API_KEY}
+  context_window: 128000
+  default_model: gpt-4o-mini
+  max_retries: 2
+  reserve_tokens: 4000
+  timeout_seconds: 300

@@ -1,0 +1,10 @@
+interface_type: openai_compatible
+provider_name: gemini
+config:
+  api_endpoint: https://generativelanguage.googleapis.com
+  api_key: ${GEMINI_API_KEY}
+  context_window: 1000000
+  default_model: gemini-2.0-flash-exp
+  max_retries: 2
+  reserve_tokens: 8000
+  timeout_seconds: 300
