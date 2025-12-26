@@ -122,3 +122,8 @@ coverage/
 # Local development
 /tmp/
 /temp/
+config/embeddings/ollama.yaml
+config/embeddings/openai.yaml
+config/embeddings/openrouter.yaml
+config/README.md
+config/servers/README.md
