@@ -96,9 +96,9 @@ server_config.json.private
 logs/
 
 # Output and data directories
-output/
-outputs/
-data/
+/output/
+/outputs/
+/data/
 *.output
 
 # Runtime data
