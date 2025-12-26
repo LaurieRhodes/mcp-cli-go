@@ -34,7 +34,7 @@ name: research_workflow
 steps:
   - name: research
     provider: anthropic
-    prompt: "Research: {{topic}}"
+    prompt: "Research:  {{input_data}}"
     output: findings
 
   - name: verify
@@ -257,7 +257,7 @@ steps:
   - name: verify
     provider: openai
     model: gpt-4o
-    prompt: "Fact-check: {{initial}}"
+    prompt: "Fact-check: {{input_data}}"
     output: verified
 ```
 
@@ -387,7 +387,7 @@ defaults:
 # Workflow steps
 steps:
   - name: step1
-    prompt: "Your prompt with {{variables}}"
+    prompt: "Your prompt with  {{input_data}}"
     output: result1
 
   - name: step2
@@ -472,7 +472,7 @@ Each step in a workflow can use a different provider:
 ```yaml
 steps:
   - provider: anthropic    # Use Claude for research
-    prompt: "Research {{topic}}"
+    prompt: "Research {{input_data}}"
 
   - provider: openai       # Use GPT-4 for analysis
     prompt: "Analyze {{research}}"

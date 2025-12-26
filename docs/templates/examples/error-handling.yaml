@@ -1,0 +1,102 @@
+# API Data Fetcher with Error Handling
+# Demonstrates: Error handling, retry logic, fallback values
+
+name: api_fetcher
+description: Fetch and process API data with robust error handling
+version: 1.0.0
+author: MCP-CLI Team
+tags: [error-handling, retry, reliability]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  # Step 1: Fetch API Data (with retry)
+  - name: fetch_data
+    servers: [web-api]  # Assumes you have a web-api MCP server
+    prompt: |
+      Fetch data from API endpoint: {{api_url}}
+      
+      Parameters:
+      {{api_params}}
+    output: raw_data
+    error_handling:
+      on_failure: retry
+      max_retries: 3
+      retry_backoff: exponential
+      initial_delay: 2  # Start with 2 second delay
+      default_output: "API_UNAVAILABLE"
+  
+  # Step 2: Validate Data (skip if fetch failed)
+  - name: validate_data
+    condition: "{{raw_data}} not contains 'API_UNAVAILABLE'"
+    prompt: |
+      Validate this API response:
+      {{raw_data}}
+      
+      Check:
+      - Is JSON valid?
+      - Are required fields present?
+      - Are values in expected ranges?
+      
+      Return "VALID" or "INVALID" with explanation.
+    output: validation_result
+    error_handling:
+      on_failure: continue
+      default_output: "VALIDATION_FAILED"
+  
+  # Step 3: Process Data (with fallback)
+  - name: process_data
+    condition: "{{validation_result}} contains 'VALID'"
+    prompt: |
+      Process this validated data:
+      {{raw_data}}
+      
+      Extract and format:
+      - Key metrics
+      - Trends
+      - Anomalies
+    output: processed_data
+    error_handling:
+      on_failure: continue
+      default_output: "PROCESSING_FAILED"
+  
+  # Step 4: Generate Report (always runs)
+  - name: create_report
+    prompt: |
+      Create status report:
+      
+      Raw Data Status: {{raw_data}}
+      Validation: {{validation_result | default: "SKIPPED"}}
+      Processing: {{processed_data | default: "SKIPPED"}}
+      
+      {% if processed_data contains "PROCESSING_FAILED" or raw_data contains "API_UNAVAILABLE" %}
+      ## Status: FAILED
+      
+      The data pipeline encountered errors. Please check:
+      - API availability
+      - Network connectivity
+      - Data format
+      
+      {% else %}
+      ## Status: SUCCESS
+      
+      Data processed successfully:
+      {{processed_data}}
+      {% endif %}
+    output: final_report
+
+# Usage:
+# mcp-cli --template api_fetcher --input-data '{
+#   "api_url": "https://api.example.com/data",
+#   "api_params": {"date": "2024-12-26"}
+# }'
+#
+# Error handling features demonstrated:
+# 1. Retry with exponential backoff (2s, 4s, 8s)
+# 2. Default output when all retries fail
+# 3. Continue execution despite failures
+# 4. Conditional step execution based on previous results
+# 5. Always-run final report regardless of failures

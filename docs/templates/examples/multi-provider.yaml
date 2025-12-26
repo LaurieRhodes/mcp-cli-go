@@ -1,0 +1,83 @@
+# Multi-Provider Workflow Template
+# Demonstrates: Using multiple AI providers, provider override, consensus building
+
+name: multi_provider
+description: Get consensus from multiple AI providers
+version: 1.0.0
+author: MCP-CLI Team
+tags: [multi-provider, consensus, comparison]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  # Step 1: Claude's Analysis
+  - name: claude_analysis
+    provider: anthropic
+    model: claude-sonnet-4
+    system_prompt: "You are an analytical AI assistant"
+    prompt: |
+      Analyze this question thoroughly:
+      
+      {{question}}
+      
+      Provide:
+      - Your interpretation
+      - Key considerations
+      - Recommended approach
+      - Potential risks
+    output: claude_view
+  
+  # Step 2: GPT-4's Analysis  
+  - name: gpt_analysis
+    provider: openai
+    model: gpt-4o
+    system_prompt: "You are an analytical AI assistant"
+    prompt: |
+      Analyze this question thoroughly:
+      
+      {{question}}
+      
+      Provide:
+      - Your interpretation
+      - Key considerations
+      - Recommended approach
+      - Potential risks
+    output: gpt_view
+  
+  # Step 3: Synthesize with Local Model (cost-effective!)
+  - name: synthesize_consensus
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Review these two AI analyses of the same question:
+      
+      Claude's Analysis:
+      {{claude_view}}
+      
+      GPT-4's Analysis:
+      {{gpt_view}}
+      
+      Provide a synthesis that:
+      1. Identifies where they agree (consensus points)
+      2. Identifies where they disagree (divergent views)
+      3. Explains possible reasons for differences
+      4. Provides a balanced recommendation
+      
+      Format as markdown with clear sections.
+    output: consensus_report
+
+# Usage:
+# mcp-cli --template multi_provider --input-data '{
+#   "question": "Should we migrate our monolith to microservices?"
+# }'
+#
+# Strategy:
+# - Claude (strong analysis) for initial review
+# - GPT-4 (alternative perspective) for comparison
+# - Ollama (local, free) for synthesis
+#
+# Cost optimization: Use expensive models for analysis,
+# cheap/free model for final synthesis

@@ -1,0 +1,131 @@
+# Daily Development Report Template
+# Demonstrates: Practical automation, real-world use case, structured output
+
+name: daily_report
+description: Generate daily development report from git/project data
+version: 1.0.0
+author: MCP-CLI Team
+tags: [automation, reporting, git, cicd]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+    temperature: 0.5
+
+steps:
+  # Step 1: Analyze Git Commits
+  - name: analyze_commits
+    prompt: |
+      Analyze today's git commits:
+      
+      {{commits}}
+      
+      Provide:
+      - Summary of work done
+      - Main features/fixes
+      - Notable changes
+      - Areas of focus
+      
+      Be concise but informative.
+    output: commit_summary
+  
+  # Step 2: Analyze Issues/PRs
+  - name: analyze_issues
+    prompt: |
+      Analyze current issues and pull requests:
+      
+      Issues:
+      {{issues}}
+      
+      Pull Requests:
+      {{pull_requests}}
+      
+      Provide:
+      - Status overview
+      - Critical items
+      - Blockers
+      - Progress indicators
+    output: issue_summary
+  
+  # Step 3: Generate Report
+  - name: create_daily_report
+    prompt: |
+      Create daily development report for {{date}}
+      
+      Commit Analysis:
+      {{commit_summary}}
+      
+      Issue/PR Analysis:
+      {{issue_summary}}
+      
+      Additional Context:
+      - Team: {{team}}
+      - Sprint: {{sprint}}
+      
+      Format as markdown:
+      
+      # Daily Development Report - {{date}}
+      
+      ## Summary
+      [One paragraph overview]
+      
+      ## Commits ({{commit_count}})
+      [Summary of commits]
+      
+      ## Issues & Pull Requests
+      ### Open Issues ({{open_issues}})
+      [Status and priorities]
+      
+      ### Pull Requests ({{open_prs}})
+      [Review status]
+      
+      ## Progress
+      [What was accomplished]
+      
+      ## Blockers
+      [Current obstacles, if any]
+      
+      ## Tomorrow's Focus
+      [Planned work for next day]
+      
+      ---
+      Generated: {{timestamp}}
+    output: daily_report
+
+# Usage in automation (cron job):
+#
+# #!/bin/bash
+# # daily-report.sh
+#
+# # Gather data
+# COMMITS=$(git log --since="24 hours ago" --oneline)
+# ISSUES=$(gh issue list --json number,title,state)
+# PRS=$(gh pr list --json number,title,state)
+#
+# # Create input
+# cat > /tmp/daily-input.json << EOF
+# {
+#   "date": "$(date +%Y-%m-%d)",
+#   "commits": "$COMMITS",
+#   "commit_count": "$(echo "$COMMITS" | wc -l)",
+#   "issues": "$ISSUES",
+#   "open_issues": "$(echo "$ISSUES" | jq '[.[] | select(.state=="OPEN")] | length')",
+#   "pull_requests": "$PRS",
+#   "open_prs": "$(echo "$PRS" | jq 'length')",
+#   "team": "Backend Team",
+#   "sprint": "Sprint 42",
+#   "timestamp": "$(date)"
+# }
+# EOF
+#
+# # Generate report
+# mcp-cli --template daily_report \
+#   --input-data "$(cat /tmp/daily-input.json)" \
+#   > reports/daily-$(date +%Y%m%d).md
+#
+# # Email to team
+# mail -s "Daily Report - $(date +%Y-%m-%d)" \
+#   team@example.com < reports/daily-$(date +%Y%m%d).md
+#
+# Cron: 0 17 * * * /path/to/daily-report.sh

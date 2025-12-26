@@ -1,0 +1,78 @@
+# Parallel Analysis Template
+# Demonstrates: Parallel execution, aggregate modes, concurrent processing
+
+name: parallel_analysis
+description: Run multiple analyses concurrently for faster results
+version: 1.0.0
+author: MCP-CLI Team
+tags: [parallel, performance, analysis]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+    temperature: 0.5
+
+steps:
+  # Parallel Step: Run multiple analyses at once
+  - name: comprehensive_review
+    parallel:
+      # Analysis 1: Security
+      - name: security
+        system_prompt: "You are a security expert"
+        prompt: |
+          Analyze security of:
+          {{code}}
+          
+          Focus on vulnerabilities and attack vectors.
+          Be concise.
+        output: security_review
+      
+      # Analysis 2: Performance
+      - name: performance
+        system_prompt: "You are a performance optimization expert"
+        prompt: |
+          Analyze performance of:
+          {{code}}
+          
+          Focus on bottlenecks and optimization opportunities.
+          Be concise.
+        output: performance_review
+      
+      # Analysis 3: Maintainability
+      - name: maintainability
+        system_prompt: "You are a software architecture expert"
+        prompt: |
+          Analyze maintainability of:
+          {{code}}
+          
+          Focus on code structure and long-term maintenance.
+          Be concise.
+        output: maintainability_review
+    
+    # Run max 2 analyses at a time
+    max_concurrent: 2
+    
+    # Merge all results into single object
+    aggregate: merge
+  
+  # Sequential Step: Synthesize results
+  - name: synthesize_findings
+    prompt: |
+      Create a comprehensive analysis from these parallel reviews:
+      
+      {{comprehensive_review}}
+      
+      Provide:
+      1. Key findings from each area
+      2. Interconnected issues
+      3. Priority recommendations
+      
+      Format as markdown.
+    output: final_analysis
+
+# Usage:
+# mcp-cli --template parallel_analysis --input-data '{"code": "..."}'
+#
+# Performance benefit: 3 analyses run concurrently (2 at a time)
+# instead of sequentially, reducing total time by ~50%
