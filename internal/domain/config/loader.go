@@ -25,11 +25,13 @@ type IncludeDirectives struct {
 	Servers    string `yaml:"servers,omitempty"`    // e.g., "config/servers/*.yaml"
 	Embeddings string `yaml:"embeddings,omitempty"` // e.g., "config/embeddings/*.yaml"
 	Templates  string `yaml:"templates,omitempty"`  // e.g., "config/templates/**/*.yaml"
+	Settings   string `yaml:"settings,omitempty"`   // e.g., "config/settings.yaml"
 }
 
 // MainConfigFile represents the main config file with optional includes
 type MainConfigFile struct {
 	Includes   *IncludeDirectives `yaml:"includes,omitempty"`
+	// Legacy fields for backward compatibility - prefer using settings.yaml
 	Servers    map[string]ServerConfig      `yaml:"servers,omitempty"`
 	AI         *AIConfig                    `yaml:"ai,omitempty"`
 	Embeddings *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
@@ -154,6 +156,13 @@ func (l *Loader) loadSingleFile(path string) (*ApplicationConfig, error) {
 
 // processIncludes processes all include directives and merges into result
 func (l *Loader) processIncludes(includes *IncludeDirectives, result *ApplicationConfig) error {
+	// Process settings first (if present)
+	if includes.Settings != "" {
+		if err := l.loadSettings(includes.Settings, result); err != nil {
+			return fmt.Errorf("failed to load settings: %w", err)
+		}
+	}
+
 	// Process provider includes
 	if includes.Providers != "" {
 		if err := l.loadProviders(includes.Providers, result); err != nil {
@@ -179,6 +188,72 @@ func (l *Loader) processIncludes(includes *IncludeDirectives, result *Applicatio
 	if includes.Templates != "" {
 		if err := l.loadTemplates(includes.Templates, result); err != nil {
 			return fmt.Errorf("failed to load templates: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// loadSettings loads global settings from settings.yaml
+func (l *Loader) loadSettings(path string, result *ApplicationConfig) error {
+	// Make path absolute relative to base directory
+	if !filepath.IsAbs(path) && l.baseDir != "" {
+		path = filepath.Join(l.baseDir, path)
+	}
+
+	// Read settings file
+	data, err := os.ReadFile(path)
+	if err != nil {
+		// Settings file is optional
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("failed to read settings file %s: %w", path, err)
+	}
+
+	// Parse settings file
+	var settings struct {
+		AI         *AIConfig         `yaml:"ai,omitempty"`
+		Embeddings *EmbeddingsConfig `yaml:"embeddings,omitempty"`
+	}
+
+	if err := yaml.Unmarshal(data, &settings); err != nil {
+		return fmt.Errorf("failed to parse settings file %s: %w", path, err)
+	}
+
+	// Merge AI settings (settings.yaml takes precedence over main config)
+	if settings.AI != nil {
+		if result.AI == nil {
+			result.AI = settings.AI
+		} else {
+			// Merge settings, preferring settings.yaml values
+			if settings.AI.DefaultProvider != "" {
+				result.AI.DefaultProvider = settings.AI.DefaultProvider
+			}
+			if settings.AI.DefaultSystemPrompt != "" {
+				result.AI.DefaultSystemPrompt = settings.AI.DefaultSystemPrompt
+			}
+		}
+	}
+
+	// Merge embeddings settings
+	if settings.Embeddings != nil {
+		if result.Embeddings == nil {
+			result.Embeddings = settings.Embeddings
+		} else {
+			// Merge settings, preferring settings.yaml values
+			if settings.Embeddings.DefaultChunkStrategy != "" {
+				result.Embeddings.DefaultChunkStrategy = settings.Embeddings.DefaultChunkStrategy
+			}
+			if settings.Embeddings.DefaultMaxChunkSize > 0 {
+				result.Embeddings.DefaultMaxChunkSize = settings.Embeddings.DefaultMaxChunkSize
+			}
+			if settings.Embeddings.DefaultOverlap > 0 {
+				result.Embeddings.DefaultOverlap = settings.Embeddings.DefaultOverlap
+			}
+			if settings.Embeddings.OutputPrecision > 0 {
+				result.Embeddings.OutputPrecision = settings.Embeddings.OutputPrecision
+			}
 		}
 	}
 

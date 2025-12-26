@@ -29,7 +29,7 @@ func (g *ModularConfigGenerator) Generate(config *GeneratorConfig) error {
 	}
 
 	// Create subdirectories
-	dirs := []string{"providers", "embeddings", "servers", "templates"}
+	dirs := []string{"providers", "embeddings", "servers", "templates", "runas"}
 	for _, dir := range dirs {
 		path := filepath.Join(g.baseDir, dir)
 		if err := os.MkdirAll(path, 0755); err != nil {
@@ -60,6 +60,11 @@ func (g *ModularConfigGenerator) Generate(config *GeneratorConfig) error {
 	// Create server files if requested
 	if err := g.createServerFiles(config); err != nil {
 		return fmt.Errorf("failed to create server files: %w", err)
+	}
+
+	// Create runas directory README
+	if err := g.createRunasReadme(); err != nil {
+		return fmt.Errorf("failed to create runas README: %w", err)
 	}
 
 	// Create README
@@ -96,18 +101,7 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 			Servers:    filepath.Join(configDirName, "servers/*.yaml"),
 			Embeddings: filepath.Join(configDirName, "embeddings/*.yaml"),
 			Templates:  filepath.Join(configDirName, "templates/*.yaml"),
-		},
-		AI: &AIConfig{
-			DefaultProvider:     config.DefaultProvider,
-			DefaultSystemPrompt: "You are a helpful assistant.",
-			// Don't include Interfaces - they will be loaded from provider files
-		},
-		Embeddings: &EmbeddingsConfig{
-			DefaultChunkStrategy: "sentence",
-			DefaultMaxChunkSize:  512,
-			DefaultOverlap:       0,
-			OutputPrecision:      6,
-			// Don't include Interfaces - they will be loaded from embedding files
+			Settings:   filepath.Join(configDirName, "settings.yaml"),
 		},
 	}
 
@@ -127,6 +121,16 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 // createSettings creates the settings.yaml file
 func (g *ModularConfigGenerator) createSettings(config *GeneratorConfig) error {
 	settings := map[string]interface{}{
+		"ai": map[string]interface{}{
+			"default_provider":      config.DefaultProvider,
+			"default_system_prompt": "You are a helpful assistant.",
+		},
+		"embeddings": map[string]interface{}{
+			"default_chunk_strategy": "sentence",
+			"default_max_chunk_size": 512,
+			"default_overlap":        0,
+			"output_precision":       6,
+		},
 		"logging": map[string]interface{}{
 			"level":  "info",
 			"format": "text",
@@ -584,6 +588,81 @@ func (g *ModularConfigGenerator) writeEmbeddingFile(dir, filename string, data i
 	return nil
 }
 
+// createRunasReadme creates a README for the runas directory
+func (g *ModularConfigGenerator) createRunasReadme() error {
+	runasDir := filepath.Join(g.baseDir, "runas")
+	readmePath := filepath.Join(runasDir, "README.md")
+	
+	readme := `# MCP Server Mode Configurations
+
+This directory contains configurations for running mcp-cli as an MCP server.
+
+When you run ` + "`mcp-cli serve config.yaml`" + `, it exposes workflows as tools
+that can be used by Claude Desktop, IDEs, or other MCP clients.
+
+## Example Server Configuration
+
+Create a file like ` + "`research_agent.yaml`" + `:
+
+` + "```yaml" + `
+server_info:
+  name: research-agent
+  version: 1.0.0
+  description: AI research assistant with web search
+
+tools:
+  - name: research_topic
+    description: Research a topic comprehensively
+    template: research_workflow
+    input_schema:
+      type: object
+      properties:
+        topic:
+          type: string
+          description: Topic to research
+      required: [topic]
+    input_mapping:
+      topic: "{{input_data}}"
+` + "```" + `
+
+## Running as MCP Server
+
+` + "```bash" + `
+# Start server
+mcp-cli serve config/runas/research_agent.yaml
+
+# With verbose logging
+mcp-cli serve --verbose config/runas/research_agent.yaml
+` + "```" + `
+
+## Configure Claude Desktop
+
+Add to ` + "`claude_desktop_config.json`" + `:
+
+` + "```json" + `
+{
+  "mcpServers": {
+    "research-agent": {
+      "command": "/usr/local/bin/mcp-cli",
+      "args": ["serve", "/absolute/path/to/config/runas/research_agent.yaml"]
+    }
+  }
+}
+` + "```" + `
+
+## Benefits
+
+- **Expose workflows as tools** for AI assistants
+- **Reuse templates** without rewriting code
+- **Multi-provider workflows** available to Claude
+- **Template composition** accessible via MCP protocol
+
+Each YAML file in this directory defines a separate MCP server configuration.
+`
+	
+	return os.WriteFile(readmePath, []byte(readme), 0644)
+}
+
 // createReadme creates a README.md file explaining the structure
 func (g *ModularConfigGenerator) createReadme() error {
 	readme := `# MCP CLI Modular Configuration
@@ -594,9 +673,11 @@ This directory contains your modular MCP CLI configuration files.
 
 ` + "```" + `
 mcp-cli                  # Executable
-config.yaml              # Main config at executable level
-config/                  # Config directory
+.env                     # API keys (gitignored)
+config.yaml              # Main config with includes
+config/                  # Modular config directory
 ├── README.md            # This file
+├── settings.yaml        # Global settings
 ├── providers/           # LLM provider configs
 │   ├── ollama.yaml
 │   ├── openai.yaml
@@ -606,14 +687,19 @@ config/                  # Config directory
 │   ├── openrouter.yaml
 │   └── ollama.yaml
 ├── servers/             # MCP server configs
+│   ├── README.md
 │   └── *.yaml
-└── templates/           # Workflow templates
+├── templates/           # Workflow templates
+│   ├── README.md
+│   └── *.yaml
+└── runas/               # MCP server mode configs
+    ├── README.md
     └── *.yaml
 ` + "```" + `
 
 ## Main Config (config.yaml)
 
-The main config file is at the executable level and uses includes to load modular configs:
+The main config file uses includes to load all modular configurations:
 
 ` + "```yaml" + `
 includes:
@@ -621,7 +707,16 @@ includes:
   embeddings: config/embeddings/*.yaml
   servers: config/servers/*.yaml
   templates: config/templates/*.yaml
+  settings: config/settings.yaml
+` + "```" + `
 
+All settings are in ` + "`config/settings.yaml`" + ` - the main config just declares includes.
+
+## Settings File (config/settings.yaml)
+
+Global settings are in ` + "`config/settings.yaml`" + `:
+
+` + "```yaml" + `
 ai:
   default_provider: ollama
   default_system_prompt: You are a helpful assistant.
@@ -629,6 +724,15 @@ ai:
 embeddings:
   default_chunk_strategy: sentence
   default_max_chunk_size: 512
+  output_precision: 6
+
+logging:
+  level: info
+  format: text
+
+chat:
+  default_temperature: 0.7
+  max_history_size: 50
 ` + "```" + `
 
 ## Provider Files (LLM)
@@ -684,14 +788,37 @@ Workflow templates go in ` + "`templates/`" + `:
 name: analyze
 description: Analyze input data
 steps:
-  - step: 1
-    name: analyze
-    base_prompt: Analyze this: {{input_data}}
+  - name: step1
+    prompt: "Analyze this: {{stdin}}"
+    output: analysis
+  - name: step2
+    prompt: "Summarize: {{analysis}}"
 ` + "```" + `
+
+## MCP Server Mode (runas/)
+
+Server mode configurations in ` + "`runas/`" + ` expose workflows as MCP tools:
+
+**runas/research_agent.yaml:**
+` + "```yaml" + `
+server_info:
+  name: research-agent
+  version: 1.0.0
+
+tools:
+  - name: research_topic
+    template: research_workflow
+    input_schema:
+      type: object
+      properties:
+        topic: {type: string}
+` + "```" + `
+
+Run with: ` + "`mcp-cli serve config/runas/research_agent.yaml`" + `
 
 ## Environment Variables
 
-API keys should be set in ` + "`.env`" + ` (next to executable):
+API keys should be in ` + "`.env`" + ` (next to executable):
 
 ` + "```bash" + `
 OPENAI_API_KEY=your-key-here
@@ -701,48 +828,18 @@ GEMINI_API_KEY=your-key-here
 OPENROUTER_API_KEY=your-key-here
 ` + "```" + `
 
-## Usage
+## Truly Modular Design
 
-The CLI will automatically find config.yaml next to the executable:
+**config.yaml**: Just includes, no settings
+**config/settings.yaml**: All global settings (AI, embeddings, logging, chat)
+**config/providers/**: Individual LLM provider configs
+**config/embeddings/**: Individual embedding provider configs
+**config/servers/**: Individual MCP server configs
+**config/templates/**: Reusable workflow templates
+**config/runas/**: MCP server mode configurations
 
-` + "```bash" + `
-# Automatic detection
-./mcp-cli query "hello"
-
-# Explicit config file
-./mcp-cli --config config.yaml query "hello"
-` + "```" + `
-
-## Separation of Concerns
-
-**LLM Providers** (` + "`providers/`" + `):
-- Chat completions
-- Text generation
-- Conversation models
-
-**Embedding Providers** (` + "`embeddings/`" + `):
-- Vector embeddings
-- Semantic search
-- RAG applications
-- May use same API but different models
-
-**Benefits**:
-- Clear separation between LLM and embedding configs
-- Easy to configure different embedding providers than LLM providers
-- Independent model selection for each purpose
-- Clean organization for version control
-
-## Why Separate Embeddings?
-
-While many providers support both LLM and embeddings through the same API,
-they serve different purposes:
-
-1. **Different Models**: Embedding models (text-embedding-3-small) vs LLM models (gpt-4o)
-2. **Different Use Cases**: Vector search vs text generation
-3. **Different Pricing**: Embedding tokens are much cheaper
-4. **Independent Selection**: You might use OpenAI for embeddings but Ollama for LLM
-
-This modular structure lets you mix and match providers for each purpose.
+Each file is self-contained and can be edited independently.
+Version control friendly - track changes to individual components.
 `
 
 	path := filepath.Join(g.baseDir, "README.md")
