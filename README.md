@@ -3,8 +3,28 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://go.dev/)
 [![Release](https://img.shields.io/github/v/release/LaurieRhodes/mcp-cli-go)](https://github.com/LaurieRhodes/mcp-cli-go/releases)
+[![Documentation](https://img.shields.io/badge/docs-comprehensive-blue)](docs/)
 
 A Go implementation of the Model Context Protocol (MCP) CLI that enables multi-step AI workflows across multiple providers from a single binary.
+
+> **📚 New to MCP-CLI?** Check out the [comprehensive documentation](docs/) for guides, examples, and technical details.
+
+---
+
+## Table of Contents
+
+- [What This Does](#what-this-does)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Real-World Examples](#real-world-examples)
+- [MCP Server Mode](#mcp-server-mode)
+- [Documentation](#documentation) 📚
+- [Usage Modes](#usage-modes)
+- [Configuration](#configuration)
+- [Command Reference](#command-reference)
+- [Architecture](#architecture)
+- [Resources](#resources)
 
 ---
 
@@ -125,6 +145,8 @@ go build -o mcp-cli
 sudo mv mcp-cli /usr/local/bin/
 ```
 
+**📚 Next Steps:** See the [Getting Started Guide](docs/getting-started/) for configuration and first-time setup.
+
 ---
 
 ## Quick Start
@@ -217,6 +239,8 @@ steps:
 echo "Impact of AI on healthcare" | mcp-cli --template deep_research
 ```
 
+**📚 Want to learn more?** See the [comprehensive guides](docs/guides/) and [template documentation](docs/templates/).
+
 ---
 
 ## Real-World Examples
@@ -260,6 +284,8 @@ steps:
     prompt: "Fact-check: {{input_data}}"
     output: verified
 ```
+
+**📚 More examples:** See [Template Examples](docs/templates/examples/) for production-ready patterns.
 
 ---
 
@@ -311,6 +337,8 @@ Add to `claude_desktop_config.json`:
 ```
 
 Now Claude can use your workflow as a tool!
+
+**📚 For complete MCP server documentation:** See [MCP Server Mode Guide](docs/mcp-server/)
 
 ---
 
@@ -396,6 +424,8 @@ steps:
     output: result2
 ```
 
+**📚 For complete configuration reference:** See [Templates Documentation](docs/templates/authoring-guide.md)
+
 ---
 
 ## Command Reference
@@ -440,6 +470,49 @@ mcp-cli <command> --help
 --verbose               # Verbose logging
 --quiet                 # Minimal output
 ```
+
+---
+
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory.
+
+### 📚 Quick Links
+
+| Documentation                                | Description                              |
+| -------------------------------------------- | ---------------------------------------- |
+| **[Documentation Index](docs/README.md)**    | Start here - complete navigation guide   |
+| **[Getting Started](docs/getting-started/)** | Installation, configuration, first steps |
+| **[Usage Guides](docs/guides/)**             | Mode-specific guides and best practices  |
+| **[Templates](docs/templates/)**             | Template authoring and examples          |
+| **[MCP Server Mode](docs/mcp-server/)**      | Expose workflows as MCP tools            |
+| **[Architecture](docs/architecture/)**       | Technical design and internals           |
+
+### 📖 By Topic
+
+**New Users:**
+
+- [Installation Guide](docs/getting-started/installation.md) - Install and configure MCP-CLI
+- [Core Concepts](docs/getting-started/concepts.md) - Understand modes, providers, templates
+- [FAQ](docs/getting-started/faq.md) - Common questions answered
+
+**Usage Guides:**
+
+- [Chat Mode](docs/guides/chat-mode.md) - Interactive conversations with AI
+- [Query Mode](docs/guides/query-mode.md) - Single-shot queries for automation
+- [Interactive Mode](docs/guides/interactive-mode.md) - Direct MCP tool testing
+- [Automation & Scripting](docs/guides/automation.md) - CI/CD integration patterns
+- [Debugging](docs/guides/debugging.md) - Troubleshooting and logging
+
+**Template Development:**
+
+- [Template Authoring Guide](docs/templates/authoring-guide.md) - Complete template reference
+- [Template Examples](docs/templates/examples/) - Real-world template patterns
+
+**Advanced Topics:**
+
+- [MCP Server Documentation](docs/mcp-server/) - Expose templates as discoverable tools
+- [Architecture Documentation](docs/architecture/) - System design for developers
 
 ---
 
@@ -529,10 +602,24 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Resources
 
+### Documentation
+
+- **[Complete Documentation](docs/README.md)** - Comprehensive guides and references
+- **[Getting Started](docs/getting-started/)** - Installation and configuration
+- **[Usage Guides](docs/guides/)** - Mode-specific tutorials
+- **[Template Authoring](docs/templates/)** - Creating workflows
+- **[MCP Server Mode](docs/mcp-server/)** - Expose workflows as tools
+- **[Architecture](docs/architecture/)** - Technical design documentation
+
+### Project Links
+
 - **Source Code**: [github.com/LaurieRhodes/mcp-cli-go](https://github.com/LaurieRhodes/mcp-cli-go)
 - **Releases**: [Releases Page](https://github.com/LaurieRhodes/mcp-cli-go/releases)
 - **Issues**: [Issue Tracker](https://github.com/LaurieRhodes/mcp-cli-go/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/LaurieRhodes/mcp-cli-go/discussions)
+
+### External Resources
+
 - **MCP Protocol**: [modelcontextprotocol.io](https://modelcontextprotocol.io)
 - **Author**: [laurierhodes.info](https://laurierhodes.info)
 

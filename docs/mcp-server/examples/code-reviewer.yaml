@@ -1,0 +1,710 @@
+# Code Reviewer Server Example
+
+This example creates an automated code review assistant for development workflows.
+
+**What this server provides:**
+- `analyze_code` - Comprehensive code quality analysis
+- `review_pr` - Pull request review with suggestions
+- `check_security` - Security vulnerability scanning
+- `suggest_improvements` - Code improvement recommendations
+- `generate_tests` - Unit test generation
+
+**Use in Claude Desktop:**
+"Analyze this Python function for bugs"
+"Review this pull request diff"
+"Check this code for security issues"
+"Suggest improvements for this class"
+
+---
+
+## Server Configuration
+
+**File:** `config/runas/code-reviewer.yaml`
+
+```yaml
+name: code_reviewer
+version: 1.0.0
+description: Automated code review and quality analysis tools
+
+# Tools exposed to MCP clients
+tools:
+  # Tool 1: General code analysis
+  - name: analyze_code
+    description: Analyze code for bugs, quality issues, and best practices
+    template: code_analyzer
+    parameters:
+      code:
+        type: string
+        description: Source code to analyze (any language)
+        required: true
+      
+      language:
+        type: string
+        description: Programming language (python, go, javascript, etc.)
+        required: false
+        default: "auto-detect"
+      
+      focus:
+        type: string
+        description: What to focus on - all, bugs, style, performance, or security
+        required: false
+        default: "all"
+        enum: ["all", "bugs", "style", "performance", "security"]
+
+  # Tool 2: Pull request review
+  - name: review_pr
+    description: Review pull request changes and provide constructive feedback
+    template: pr_reviewer
+    parameters:
+      diff:
+        type: string
+        description: Git diff output from the pull request
+        required: true
+      
+      context:
+        type: string
+        description: Additional context about the PR (purpose, related issues, etc.)
+        required: false
+      
+      severity_threshold:
+        type: string
+        description: Minimum severity to report - low, medium, or high
+        required: false
+        default: "medium"
+        enum: ["low", "medium", "high"]
+
+  # Tool 3: Security check
+  - name: check_security
+    description: Scan code for security vulnerabilities and unsafe patterns
+    template: security_scanner
+    parameters:
+      code:
+        type: string
+        description: Code to scan for security issues
+        required: true
+      
+      language:
+        type: string
+        description: Programming language
+        required: true
+      
+      check_dependencies:
+        type: boolean
+        description: Check for known vulnerable dependencies
+        required: false
+        default: false
+
+  # Tool 4: Suggest improvements
+  - name: suggest_improvements
+    description: Provide actionable suggestions to improve code quality
+    template: improvement_suggester
+    parameters:
+      code:
+        type: string
+        description: Code to improve
+        required: true
+      
+      style_guide:
+        type: string
+        description: Style guide to follow (pep8, google, airbnb, standard, etc.)
+        required: false
+      
+      show_examples:
+        type: boolean
+        description: Include code examples in suggestions
+        required: false
+        default: true
+
+  # Tool 5: Generate unit tests
+  - name: generate_tests
+    description: Generate unit tests for given code
+    template: test_generator
+    parameters:
+      code:
+        type: string
+        description: Code to generate tests for
+        required: true
+      
+      language:
+        type: string
+        description: Programming language
+        required: true
+      
+      framework:
+        type: string
+        description: Testing framework (pytest, jest, go test, etc.)
+        required: false
+      
+      coverage_target:
+        type: string
+        description: Test coverage target - basic, standard, or comprehensive
+        required: false
+        default: "standard"
+        enum: ["basic", "standard", "comprehensive"]
+```
+
+---
+
+## Required Templates
+
+### 1. code_analyzer.yaml
+
+```yaml
+name: code_analyzer
+description: Comprehensive code analysis
+version: 1.0.0
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o
+    temperature: 0.3
+
+steps:
+  - name: detect_language
+    condition: "{{input_data.language}} == 'auto-detect'"
+    prompt: |
+      Identify the programming language of this code:
+      {{input_data.code}}
+      
+      Return just the language name (e.g., "python", "go", "javascript")
+    output: detected_language
+
+  - name: analyze
+    prompt: |
+      Analyze this code for quality issues:
+      
+      Language: {{input_data.language}}{% if detected_language %} (detected: {{detected_language}}){% endif %}
+      Focus: {{input_data.focus}}
+      
+      Code:
+      ```
+      {{input_data.code}}
+      ```
+      
+      {% if input_data.focus == 'all' or input_data.focus == 'bugs' %}
+      Check for:
+      - Logic errors
+      - Edge cases
+      - Error handling
+      - Null/undefined checks
+      {% endif %}
+      
+      {% if input_data.focus == 'all' or input_data.focus == 'style' %}
+      - Code style issues
+      - Naming conventions
+      - Documentation
+      {% endif %}
+      
+      {% if input_data.focus == 'all' or input_data.focus == 'performance' %}
+      - Performance issues
+      - Algorithm efficiency
+      - Resource usage
+      {% endif %}
+      
+      {% if input_data.focus == 'all' or input_data.focus == 'security' %}
+      - Security vulnerabilities
+      - Input validation
+      - Safe practices
+      {% endif %}
+      
+      Rate each issue: CRITICAL, HIGH, MEDIUM, LOW
+    output: analysis
+
+  - name: format_report
+    prompt: |
+      Format this analysis as a structured code review:
+      {{analysis}}
+      
+      Use format:
+      ## Summary
+      [Overview of findings]
+      
+      ## Issues Found
+      ### Critical
+      [Critical issues]
+      
+      ### High
+      [High priority issues]
+      
+      ### Medium
+      [Medium priority issues]
+      
+      ### Low
+      [Low priority suggestions]
+      
+      ## Recommendations
+      [Top 3-5 recommendations]
+```
+
+### 2. pr_reviewer.yaml
+
+```yaml
+name: pr_reviewer
+description: Review pull request changes
+version: 1.0.0
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o
+    temperature: 0.3
+
+steps:
+  - name: parse_diff
+    prompt: |
+      Parse this git diff to identify changes:
+      {{input_data.diff}}
+      
+      Identify:
+      - Files changed
+      - Lines added/removed
+      - Type of changes (features, fixes, refactoring)
+    output: diff_summary
+
+  - name: review_changes
+    prompt: |
+      Review these code changes:
+      
+      Diff Summary:
+      {{diff_summary}}
+      
+      {% if input_data.context %}
+      Context:
+      {{input_data.context}}
+      {% endif %}
+      
+      Full Diff:
+      {{input_data.diff}}
+      
+      Review for:
+      - Correctness
+      - Code quality
+      - Potential bugs
+      - Breaking changes
+      - Test coverage
+      - Documentation
+      
+      Minimum severity: {{input_data.severity_threshold}}
+    output: review_findings
+
+  - name: format_review
+    prompt: |
+      Format these review findings as a PR comment:
+      {{review_findings}}
+      
+      Use format:
+      ## Pull Request Review
+      
+      ### Overview
+      [Summary of changes]
+      
+      ### Concerns
+      [Issues found, grouped by severity]
+      
+      ### Suggestions
+      [Improvement suggestions]
+      
+      ### Positives
+      [Good practices noted]
+      
+      ### Approval Status
+      ✅ Approved / ⚠️ Approved with comments / ❌ Changes requested
+```
+
+### 3. security_scanner.yaml
+
+```yaml
+name: security_scanner
+description: Scan code for security vulnerabilities
+version: 1.0.0
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o
+    temperature: 0.2  # Lower temperature for consistent security checks
+
+steps:
+  - name: identify_risks
+    prompt: |
+      Scan this {{input_data.language}} code for security vulnerabilities:
+      
+      ```{{input_data.language}}
+      {{input_data.code}}
+      ```
+      
+      Check for:
+      - SQL injection vulnerabilities
+      - XSS (Cross-Site Scripting)
+      - CSRF vulnerabilities
+      - Authentication/authorization issues
+      - Insecure data storage
+      - Hardcoded secrets/credentials
+      - Unsafe deserialization
+      - Path traversal
+      - Command injection
+      - Insecure cryptography
+      
+      For each issue found, provide:
+      - Severity (CRITICAL, HIGH, MEDIUM, LOW)
+      - Location (line numbers)
+      - Description
+      - Potential impact
+    output: vulnerabilities
+
+  - name: check_common_weaknesses
+    prompt: |
+      Check for OWASP Top 10 and CWE patterns:
+      {{vulnerabilities}}
+      
+      Add any additional security concerns not yet identified.
+    output: comprehensive_scan
+
+  - name: format_security_report
+    prompt: |
+      Create a security report from these findings:
+      {{comprehensive_scan}}
+      
+      Format:
+      ## Security Scan Report
+      
+      ### Critical Issues (Immediate Action Required)
+      [Critical vulnerabilities]
+      
+      ### High Priority Issues
+      [High severity issues]
+      
+      ### Medium Priority Issues
+      [Medium severity issues]
+      
+      ### Recommendations
+      - Immediate fixes needed
+      - Security best practices
+      - Additional testing recommended
+      
+      ### Summary
+      Risk Level: [CRITICAL/HIGH/MEDIUM/LOW]
+```
+
+### 4. improvement_suggester.yaml
+
+```yaml
+name: improvement_suggester
+description: Suggest code improvements
+version: 1.0.0
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o
+
+steps:
+  - name: analyze_for_improvements
+    prompt: |
+      Analyze this code for potential improvements:
+      
+      ```
+      {{input_data.code}}
+      ```
+      
+      {% if input_data.style_guide %}
+      Follow {{input_data.style_guide}} style guide
+      {% endif %}
+      
+      Suggest improvements for:
+      - Readability
+      - Maintainability
+      - Performance
+      - Error handling
+      - Code organization
+      - DRY (Don't Repeat Yourself)
+      - SOLID principles
+    output: improvement_ideas
+
+  - name: prioritize_suggestions
+    prompt: |
+      Prioritize these improvement suggestions:
+      {{improvement_ideas}}
+      
+      Organize by:
+      1. High impact, low effort (do these first)
+      2. High impact, high effort (plan for these)
+      3. Low impact, low effort (nice to have)
+      4. Low impact, high effort (skip for now)
+    output: prioritized_suggestions
+
+  - name: format_suggestions
+    prompt: |
+      Format these suggestions as actionable recommendations:
+      {{prioritized_suggestions}}
+      
+      {% if input_data.show_examples %}
+      For each suggestion, include:
+      - What to change
+      - Why to change it
+      - Before/after code example
+      {% else %}
+      For each suggestion, include:
+      - What to change
+      - Why to change it
+      {% endif %}
+```
+
+### 5. test_generator.yaml
+
+```yaml
+name: test_generator
+description: Generate unit tests
+version: 1.0.0
+
+config:
+  defaults:
+    provider: openai
+    model: gpt-4o
+
+steps:
+  - name: analyze_code
+    prompt: |
+      Analyze this {{input_data.language}} code to understand what to test:
+      
+      ```{{input_data.language}}
+      {{input_data.code}}
+      ```
+      
+      Identify:
+      - Functions/methods to test
+      - Edge cases
+      - Error conditions
+      - Input variations
+      - Expected outputs
+    output: test_plan
+
+  - name: generate_tests
+    prompt: |
+      Generate {{input_data.coverage_target}} test coverage for this code.
+      
+      Test Plan:
+      {{test_plan}}
+      
+      {% if input_data.framework %}
+      Use {{input_data.framework}} framework
+      {% endif %}
+      
+      Coverage levels:
+      {% if input_data.coverage_target == 'basic' %}
+      - Happy path tests
+      - Basic edge cases
+      {% elif input_data.coverage_target == 'standard' %}
+      - Happy path tests
+      - Edge cases
+      - Error conditions
+      {% else %}
+      - Happy path tests
+      - All edge cases
+      - Error conditions
+      - Boundary conditions
+      - Integration scenarios
+      {% endif %}
+      
+      Code to test:
+      ```{{input_data.language}}
+      {{input_data.code}}
+      ```
+      
+      Generate complete, runnable test code.
+    output: test_code
+
+  - name: add_documentation
+    prompt: |
+      Add documentation to these tests:
+      {{test_code}}
+      
+      Include:
+      - Test purpose comments
+      - Setup/teardown explanations
+      - Why specific values are used
+```
+
+---
+
+## Usage Examples
+
+### Example 1: Analyze Function
+
+**In Claude Desktop:**
+```
+You: Analyze this Python function:
+
+def calculate_total(items):
+    total = 0
+    for item in items:
+        total += item.price
+    return total
+
+Claude: I'll analyze this code for issues.
+
+[Calls analyze_code with:
+  code: "def calculate_total..."
+  language: "python"
+  focus: "all"
+]
+
+Analysis:
+## Issues Found
+
+### High
+- Missing null check for items parameter
+- No handling for items without price attribute
+...
+```
+
+### Example 2: Review Pull Request
+
+**In Claude Desktop:**
+```
+You: Review this pull request:
+[paste git diff]
+
+Claude: I'll review these changes.
+
+[Calls review_pr with:
+  diff: "[git diff content]"
+  severity_threshold: "medium"
+]
+
+## Pull Request Review
+
+### Overview
+This PR adds error handling to the user login flow...
+
+### Concerns
+⚠️ HIGH: Line 45 - Password comparison uses == instead of secure comparison
+...
+```
+
+### Example 3: Security Scan
+
+**In Claude Desktop:**
+```
+You: Check this code for security issues:
+
+def execute_query(user_input):
+    query = f"SELECT * FROM users WHERE name = '{user_input}'"
+    return db.execute(query)
+
+Claude: I'll scan this for security vulnerabilities.
+
+[Calls check_security with:
+  code: "def execute_query..."
+  language: "python"
+]
+
+## Security Scan Report
+
+### Critical Issues
+🚨 SQL Injection Vulnerability (Line 2)
+- User input directly interpolated into SQL query
+- Attacker could inject: ' OR '1'='1
+...
+```
+
+---
+
+## Setup Instructions
+
+**1. Create templates in `config/templates/`:**
+- code_analyzer.yaml
+- pr_reviewer.yaml
+- security_scanner.yaml
+- improvement_suggester.yaml
+- test_generator.yaml
+
+**2. Create server config:**
+```bash
+# Save to: config/runas/code-reviewer.yaml
+```
+
+**3. Test locally:**
+```bash
+mcp-cli serve config/runas/code-reviewer.yaml
+```
+
+**4. Add to Claude Desktop:**
+
+```json
+{
+  "mcpServers": {
+    "code_reviewer": {
+      "command": "mcp-cli",
+      "args": ["serve", "/full/path/to/config/runas/code-reviewer.yaml"]
+    }
+  }
+}
+```
+
+---
+
+## Cost Estimates
+
+**Using GPT-4o:**
+
+| Tool | Average Cost |
+|------|--------------|
+| analyze_code | ~$0.02-0.05 |
+| review_pr (small) | ~$0.05-0.10 |
+| review_pr (large) | ~$0.20-0.50 |
+| check_security | ~$0.03-0.08 |
+| suggest_improvements | ~$0.05-0.10 |
+| generate_tests (basic) | ~$0.05-0.10 |
+| generate_tests (comprehensive) | ~$0.15-0.30 |
+
+**Monthly estimates (active development):**
+- Light use (5-10 reviews/day): ~$10-20/month
+- Medium use (20-30 reviews/day): ~$50-80/month
+- Heavy use (50+ reviews/day): ~$150-250/month
+
+---
+
+## Integration with CI/CD
+
+**GitHub Actions example:**
+
+```yaml
+# .github/workflows/ai-review.yml
+name: AI Code Review
+
+on: [pull_request]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Get diff
+        run: |
+          git diff origin/main...HEAD > changes.diff
+      
+      - name: Review with MCP-CLI
+        run: |
+          mcp-cli --template pr_reviewer --input-data "{
+            \"diff\": \"$(cat changes.diff)\"
+          }" > review.md
+      
+      - name: Comment PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const review = require('fs').readFileSync('review.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: review
+            });
+```
+
+---
+
+**Automated code review at your fingertips!** 🔍💻

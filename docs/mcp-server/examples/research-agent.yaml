@@ -1,0 +1,540 @@
+# Research Agent Server Example
+
+This example creates a research assistant that can perform deep research, fact-checking, and synthesis.
+
+**What this server provides:**
+- `research_topic` - Comprehensive multi-source research
+- `fact_check` - Verify claims with evidence
+- `compare_sources` - Compare information from multiple sources
+- `generate_summary` - Create executive summaries
+
+**Use in Claude Desktop:**
+"Research the history of quantum computing"
+"Fact check this claim: ChatGPT was released in 2022"
+"Compare what different sources say about AI safety"
+
+---
+
+## Server Configuration
+
+**File:** `config/runas/research-agent.yaml`
+
+```yaml
+name: research_agent
+version: 1.0.0
+description: Deep research and fact-checking assistant
+
+# Tools exposed to MCP clients
+tools:
+  # Tool 1: Comprehensive research on any topic
+  - name: research_topic
+    description: Perform comprehensive research on a topic using multiple sources and perspectives
+    template: deep_research
+    parameters:
+      topic:
+        type: string
+        description: Topic to research (e.g., "quantum computing history", "climate change effects")
+        required: true
+      
+      depth:
+        type: string
+        description: Research depth - quick (2-3 sources), standard (4-6 sources), or deep (8+ sources)
+        required: false
+        default: "standard"
+        enum: ["quick", "standard", "deep"]
+      
+      include_sources:
+        type: boolean
+        description: Include source citations in the response
+        required: false
+        default: true
+
+  # Tool 2: Fact-check specific claims
+  - name: fact_check
+    description: Verify factual claims with evidence and sources
+    template: fact_checker
+    parameters:
+      claim:
+        type: string
+        description: Claim to fact-check (e.g., "The Eiffel Tower is 330 meters tall")
+        required: true
+      
+      require_sources:
+        type: boolean
+        description: Require verifiable sources for verification
+        required: false
+        default: true
+
+  # Tool 3: Compare multiple sources
+  - name: compare_sources
+    description: Compare what different sources say about a topic, identifying agreements and contradictions
+    template: source_comparison
+    parameters:
+      topic:
+        type: string
+        description: Topic to compare sources about
+        required: true
+      
+      num_sources:
+        type: number
+        description: Number of sources to compare (2-10)
+        required: false
+        default: 3
+
+  # Tool 4: Generate executive summary
+  - name: generate_summary
+    description: Create concise executive summary from research findings
+    template: research_summarizer
+    parameters:
+      content:
+        type: string
+        description: Content to summarize (research findings, articles, etc.)
+        required: true
+      
+      length:
+        type: string
+        description: Summary length - brief (2-3 sentences), standard (1 paragraph), or detailed (2-3 paragraphs)
+        required: false
+        default: "standard"
+        enum: ["brief", "standard", "detailed"]
+      
+      include_key_points:
+        type: boolean
+        description: Include bulleted key points
+        required: false
+        default: true
+```
+
+---
+
+## Required Templates
+
+These templates must exist in `config/templates/` for the server to work:
+
+### 1. deep_research.yaml
+
+```yaml
+name: deep_research
+description: Multi-source research workflow
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: research_planning
+    prompt: |
+      Create a research plan for this topic: {{input_data.topic}}
+      
+      Depth level: {{input_data.depth}}
+      
+      Generate:
+      1. Key questions to answer
+      2. Types of sources to consult
+      3. Potential perspectives to explore
+    output: research_plan
+
+  - name: conduct_research
+    prompt: |
+      Based on this research plan:
+      {{research_plan}}
+      
+      Conduct comprehensive research on: {{input_data.topic}}
+      
+      Provide:
+      - Key findings
+      - Multiple perspectives
+      - Important context
+      {% if input_data.include_sources %}
+      - Source citations
+      {% endif %}
+    output: findings
+
+  - name: synthesize
+    prompt: |
+      Synthesize these research findings:
+      {{findings}}
+      
+      Create a well-organized research report with:
+      - Executive summary
+      - Main findings
+      - Different viewpoints
+      - Conclusions
+```
+
+### 2. fact_checker.yaml
+
+```yaml
+name: fact_checker
+description: Verify factual claims
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: analyze_claim
+    prompt: |
+      Analyze this claim: {{input_data.claim}}
+      
+      Identify:
+      - Specific factual assertions
+      - What would be needed to verify
+      - Potential sources of verification
+    output: analysis
+
+  - name: verify
+    prompt: |
+      Based on this analysis:
+      {{analysis}}
+      
+      Fact-check the claim: {{input_data.claim}}
+      
+      {% if input_data.require_sources %}
+      Provide:
+      - Verdict (True/False/Partially True/Unverifiable)
+      - Evidence from reliable sources
+      - Source citations
+      {% else %}
+      Provide:
+      - Verdict
+      - Reasoning
+      {% endif %}
+    output: verification
+
+  - name: explain
+    prompt: |
+      Present this fact-check result clearly:
+      {{verification}}
+      
+      Format:
+      - Clear verdict
+      - Evidence
+      - Explanation
+      - Sources (if available)
+```
+
+### 3. source_comparison.yaml
+
+```yaml
+name: source_comparison
+description: Compare multiple sources
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: gather_sources
+    prompt: |
+      For the topic: {{input_data.topic}}
+      
+      Identify {{input_data.num_sources}} different types of sources to compare:
+      - Academic
+      - News
+      - Industry
+      - Government
+      - etc.
+      
+      For each, note key claims and perspectives.
+    output: source_findings
+
+  - name: compare
+    prompt: |
+      Compare these source findings:
+      {{source_findings}}
+      
+      Analyze:
+      - Points of agreement
+      - Contradictions
+      - Different emphasis
+      - Unique insights from each
+    output: comparison
+
+  - name: synthesize_comparison
+    prompt: |
+      Based on this comparison:
+      {{comparison}}
+      
+      Create a comprehensive overview showing:
+      - What all sources agree on
+      - Where sources disagree and why
+      - Overall picture from multiple perspectives
+```
+
+### 4. research_summarizer.yaml
+
+```yaml
+name: research_summarizer
+description: Summarize research findings
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: extract_key_points
+    prompt: |
+      Extract key points from this content:
+      {{input_data.content}}
+      
+      Identify:
+      - Main findings
+      - Critical insights
+      - Important conclusions
+    output: key_points
+
+  - name: create_summary
+    prompt: |
+      Create a {{input_data.length}} summary from these key points:
+      {{key_points}}
+      
+      {% if input_data.include_key_points %}
+      Format:
+      - Executive summary ({{input_data.length}})
+      - Bulleted key points
+      {% else %}
+      Format:
+      - Executive summary ({{input_data.length}})
+      {% endif %}
+```
+
+---
+
+## Usage Examples
+
+### Example 1: Basic Research
+
+**In Claude Desktop:**
+```
+You: Research the topic "quantum computing applications in cryptography"
+
+Claude: I'll use the research_topic tool to investigate this.
+
+[Calls research_topic with:
+  topic: "quantum computing applications in cryptography"
+  depth: "standard"
+  include_sources: true
+]
+
+Research Report:
+...comprehensive research results...
+```
+
+### Example 2: Quick Research
+
+**In Claude Desktop:**
+```
+You: Do a quick research on "latest developments in fusion energy"
+
+Claude: I'll perform a quick research on this topic.
+
+[Calls research_topic with:
+  topic: "latest developments in fusion energy"
+  depth: "quick"
+]
+
+Quick Research Summary:
+...concise findings...
+```
+
+### Example 3: Fact Checking
+
+**In Claude Desktop:**
+```
+You: Fact check this: "Mount Everest is the tallest mountain on Earth"
+
+Claude: I'll verify this claim.
+
+[Calls fact_check with:
+  claim: "Mount Everest is the tallest mountain on Earth"
+  require_sources: true
+]
+
+Fact Check Result:
+Verdict: Partially True
+
+Explanation: This depends on the definition of "tallest"...
+- Highest altitude above sea level: Yes (8,849m)
+- Tallest from base to peak: No (Mauna Kea is taller)
+
+Sources: [citations]
+```
+
+### Example 4: Source Comparison
+
+**In Claude Desktop:**
+```
+You: Compare what different sources say about AI alignment
+
+Claude: I'll compare multiple perspectives on AI alignment.
+
+[Calls compare_sources with:
+  topic: "AI alignment"
+  num_sources: 4
+]
+
+Source Comparison:
+...analysis of different perspectives...
+```
+
+---
+
+## Setup Instructions
+
+**1. Create templates:**
+```bash
+# Save the four template files above to:
+config/templates/deep_research.yaml
+config/templates/fact_checker.yaml
+config/templates/source_comparison.yaml
+config/templates/research_summarizer.yaml
+```
+
+**2. Create server config:**
+```bash
+# Save server config to:
+config/runas/research-agent.yaml
+```
+
+**3. Test server:**
+```bash
+# Start server manually
+mcp-cli serve config/runas/research-agent.yaml
+
+# Should show:
+# Exposing 4 tools:
+#   • research_topic
+#   • fact_check
+#   • compare_sources
+#   • generate_summary
+```
+
+**4. Add to Claude Desktop:**
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "research_agent": {
+      "command": "mcp-cli",
+      "args": ["serve", "/full/path/to/config/runas/research-agent.yaml"]
+    }
+  }
+}
+```
+
+**5. Restart Claude Desktop and test!**
+
+---
+
+## Customization
+
+### Adjust Research Depth
+
+**Modify template to use different providers by depth:**
+
+```yaml
+# In deep_research.yaml
+steps:
+  - name: conduct_research
+    provider: "{% if input_data.depth == 'deep' %}anthropic{% else %}ollama{% endif %}"
+    model: "{% if input_data.depth == 'deep' %}claude-sonnet-4{% else %}qwen2.5:32b{% endif %}"
+    prompt: ...
+```
+
+**Result:**
+- Quick/standard research: Free (Ollama)
+- Deep research: Paid but thorough (Claude)
+
+### Add Web Search
+
+**If you have brave-search configured:**
+
+```yaml
+steps:
+  - name: web_search
+    servers: [brave-search]
+    prompt: "Search for: {{input_data.topic}}"
+    output: search_results
+  
+  - name: analyze_results
+    prompt: |
+      Analyze these search results:
+      {{search_results}}
+```
+
+### Add More Tools
+
+```yaml
+tools:
+  - name: timeline_research
+    description: Research chronological timeline of events
+    template: timeline_builder
+    parameters:
+      topic:
+        type: string
+        required: true
+      
+      start_year:
+        type: number
+        required: false
+      
+      end_year:
+        type: number
+        required: false
+```
+
+---
+
+## Cost Estimates
+
+**Using Claude Sonnet 4:**
+
+| Tool | Depth | Estimated Cost |
+|------|-------|----------------|
+| research_topic | quick | ~$0.05 |
+| research_topic | standard | ~$0.15 |
+| research_topic | deep | ~$0.30 |
+| fact_check | - | ~$0.03 |
+| compare_sources | 3 sources | ~$0.10 |
+| compare_sources | 5 sources | ~$0.20 |
+| generate_summary | - | ~$0.02 |
+
+**Using Ollama (local):**
+- All operations: $0 (free)
+- Slightly less comprehensive results
+
+---
+
+## Tips
+
+**1. Be specific with topics:**
+- ✓ "quantum computing applications in cryptography"
+- ✗ "quantum stuff"
+
+**2. Use depth appropriately:**
+- Quick: Simple facts, overviews
+- Standard: Most topics
+- Deep: Complex, controversial, or important topics
+
+**3. Fact-check specific claims:**
+- ✓ "The speed of light is 300,000 km/s"
+- ✗ "Science is cool"
+
+**4. Compare distinct perspectives:**
+- ✓ "AI safety concerns from different viewpoints"
+- ✗ "What people think about AI"
+
+---
+
+**Ready to research!** This server turns Claude into a research assistant. 🔍

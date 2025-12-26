@@ -1,0 +1,702 @@
+# Data Analyst Server Example
+
+This example creates a data analysis assistant for extracting insights from data.
+
+**What this server provides:**
+- `analyze_dataset` - Statistical analysis of datasets
+- `generate_insights` - Extract key insights from data
+- `create_visualization_plan` - Plan data visualizations
+- `compare_datasets` - Compare two datasets
+- `detect_anomalies` - Find outliers and unusual patterns
+
+**Use in Claude Desktop:**
+"Analyze this CSV data"
+"Generate insights from these sales numbers"
+"Compare Q1 vs Q2 revenue data"
+"Find anomalies in this usage data"
+
+---
+
+## Server Configuration
+
+**File:** `config/runas/data-analyst.yaml`
+
+```yaml
+name: data_analyst
+version: 1.0.0
+description: Data analysis and insights generation tools
+
+# Tools exposed to MCP clients
+tools:
+  # Tool 1: Analyze dataset
+  - name: analyze_dataset
+    description: Perform statistical analysis on a dataset
+    template: dataset_analyzer
+    parameters:
+      data:
+        type: string
+        description: Dataset (CSV, JSON, or tabular text format)
+        required: true
+      
+      data_format:
+        type: string
+        description: Format of the data - csv, json, or text
+        required: false
+        default: "csv"
+        enum: ["csv", "json", "text"]
+      
+      analysis_type:
+        type: string
+        description: Type of analysis - descriptive, correlation, trend, or comprehensive
+        required: false
+        default: "comprehensive"
+        enum: ["descriptive", "correlation", "trend", "comprehensive"]
+      
+      include_visualizations:
+        type: boolean
+        description: Include visualization recommendations
+        required: false
+        default: true
+
+  # Tool 2: Generate insights
+  - name: generate_insights
+    description: Extract actionable insights from data analysis
+    template: insight_generator
+    parameters:
+      data:
+        type: string
+        description: Data or analysis results to extract insights from
+        required: true
+      
+      context:
+        type: string
+        description: Business context (e.g., "quarterly sales", "user engagement")
+        required: false
+      
+      insight_count:
+        type: number
+        description: Number of top insights to generate (3-10)
+        required: false
+        default: 5
+
+  # Tool 3: Visualization planning
+  - name: create_visualization_plan
+    description: Recommend appropriate visualizations for data
+    template: visualization_planner
+    parameters:
+      data_description:
+        type: string
+        description: Description of the data (columns, types, relationships)
+        required: true
+      
+      goal:
+        type: string
+        description: What you want to show (trends, comparisons, distributions, etc.)
+        required: true
+      
+      audience:
+        type: string
+        description: Audience level - technical, executive, or general
+        required: false
+        default: "general"
+        enum: ["technical", "executive", "general"]
+
+  # Tool 4: Compare datasets
+  - name: compare_datasets
+    description: Compare two datasets and identify differences, trends, or patterns
+    template: dataset_comparator
+    parameters:
+      dataset1:
+        type: string
+        description: First dataset to compare
+        required: true
+      
+      dataset2:
+        type: string
+        description: Second dataset to compare
+        required: true
+      
+      comparison_focus:
+        type: string
+        description: What to focus on - changes, trends, or differences
+        required: false
+        default: "differences"
+        enum: ["changes", "trends", "differences", "all"]
+      
+      dataset1_label:
+        type: string
+        description: Label for first dataset (e.g., "Q1 2024")
+        required: false
+        default: "Dataset 1"
+      
+      dataset2_label:
+        type: string
+        description: Label for second dataset (e.g., "Q2 2024")
+        required: false
+        default: "Dataset 2"
+
+  # Tool 5: Detect anomalies
+  - name: detect_anomalies
+    description: Find outliers, anomalies, and unusual patterns in data
+    template: anomaly_detector
+    parameters:
+      data:
+        type: string
+        description: Dataset to scan for anomalies
+        required: true
+      
+      sensitivity:
+        type: string
+        description: Detection sensitivity - low, medium, or high
+        required: false
+        default: "medium"
+        enum: ["low", "medium", "high"]
+      
+      explain_findings:
+        type: boolean
+        description: Include explanations for why something is anomalous
+        required: false
+        default: true
+```
+
+---
+
+## Required Templates
+
+### 1. dataset_analyzer.yaml
+
+```yaml
+name: dataset_analyzer
+description: Statistical data analysis
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: parse_data
+    prompt: |
+      Parse this {{input_data.data_format}} data:
+      
+      {{input_data.data}}
+      
+      Identify:
+      - Number of rows/records
+      - Column names and types
+      - Data quality issues (missing values, outliers)
+      - Basic statistics
+    output: data_structure
+
+  - name: analyze
+    prompt: |
+      Perform {{input_data.analysis_type}} analysis on this data:
+      
+      Data Structure:
+      {{data_structure}}
+      
+      Original Data:
+      {{input_data.data}}
+      
+      {% if input_data.analysis_type == 'descriptive' or input_data.analysis_type == 'comprehensive' %}
+      Provide:
+      - Mean, median, mode
+      - Standard deviation
+      - Min, max, range
+      - Distribution characteristics
+      {% endif %}
+      
+      {% if input_data.analysis_type == 'correlation' or input_data.analysis_type == 'comprehensive' %}
+      - Correlations between variables
+      - Relationships identified
+      {% endif %}
+      
+      {% if input_data.analysis_type == 'trend' or input_data.analysis_type == 'comprehensive' %}
+      - Trends over time
+      - Patterns identified
+      - Seasonality (if applicable)
+      {% endif %}
+    output: analysis_results
+
+  - name: format_results
+    prompt: |
+      Format these analysis results professionally:
+      {{analysis_results}}
+      
+      {% if input_data.include_visualizations %}
+      Include:
+      - Analysis summary
+      - Key statistics
+      - Recommended visualizations
+      {% else %}
+      Include:
+      - Analysis summary
+      - Key statistics
+      {% endif %}
+      
+      Use clear headings and bullet points.
+```
+
+### 2. insight_generator.yaml
+
+```yaml
+name: insight_generator
+description: Extract actionable insights
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: identify_patterns
+    prompt: |
+      Identify patterns and notable findings in this data:
+      
+      {{input_data.data}}
+      
+      {% if input_data.context %}
+      Context: {{input_data.context}}
+      {% endif %}
+      
+      Look for:
+      - Significant trends
+      - Unexpected patterns
+      - Correlations
+      - Outliers
+      - Opportunities
+      - Risks
+    output: patterns
+
+  - name: generate_insights
+    prompt: |
+      From these patterns:
+      {{patterns}}
+      
+      Generate {{input_data.insight_count}} actionable insights.
+      
+      Each insight should include:
+      - The finding (what the data shows)
+      - The implication (what it means)
+      - Recommended action (what to do about it)
+      
+      Prioritize by:
+      1. Impact (high impact first)
+      2. Confidence (backed by data)
+      3. Actionability (can act on it)
+    output: insights
+
+  - name: format_insights
+    prompt: |
+      Format these insights for presentation:
+      {{insights}}
+      
+      Use format:
+      ## Top {{input_data.insight_count}} Insights
+      
+      ### 1. [Insight Title]
+      **Finding:** [What the data shows]
+      **Implication:** [What it means for business]
+      **Action:** [What to do]
+      **Confidence:** [High/Medium/Low]
+```
+
+### 3. visualization_planner.yaml
+
+```yaml
+name: visualization_planner
+description: Recommend data visualizations
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: understand_data
+    prompt: |
+      Understand this data description:
+      {{input_data.data_description}}
+      
+      Goal: {{input_data.goal}}
+      Audience: {{input_data.audience}}
+      
+      Identify:
+      - Data types (categorical, numerical, temporal)
+      - Number of variables
+      - Relationships to show
+      - Story to tell
+    output: data_understanding
+
+  - name: recommend_visualizations
+    prompt: |
+      Based on this understanding:
+      {{data_understanding}}
+      
+      Recommend appropriate visualizations for {{input_data.audience}} audience.
+      
+      For each recommendation include:
+      - Visualization type (bar chart, line graph, scatter plot, etc.)
+      - Why it's appropriate
+      - What insights it will reveal
+      - How to structure it (x-axis, y-axis, grouping, etc.)
+      
+      Consider {{input_data.audience}} preferences:
+      {% if input_data.audience == 'executive' %}
+      - Simple, high-level
+      - Focus on key metrics
+      - Easy to understand at a glance
+      {% elif input_data.audience == 'technical' %}
+      - Can be detailed
+      - Show statistical nuances
+      - Multiple dimensions OK
+      {% else %}
+      - Balance of clarity and detail
+      - Self-explanatory
+      - Avoid jargon
+      {% endif %}
+    output: recommendations
+
+  - name: create_plan
+    prompt: |
+      Create a visualization plan from these recommendations:
+      {{recommendations}}
+      
+      Format:
+      ## Visualization Plan
+      
+      ### Primary Visualization
+      [Most important chart]
+      
+      ### Supporting Visualizations
+      [Additional charts for context]
+      
+      ### Implementation Notes
+      - Tools to use
+      - Key considerations
+      - Common pitfalls to avoid
+```
+
+### 4. dataset_comparator.yaml
+
+```yaml
+name: dataset_comparator
+description: Compare two datasets
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: parse_datasets
+    prompt: |
+      Parse and summarize these two datasets:
+      
+      {{input_data.dataset1_label}}:
+      {{input_data.dataset1}}
+      
+      {{input_data.dataset2_label}}:
+      {{input_data.dataset2}}
+      
+      For each dataset, identify:
+      - Structure
+      - Key metrics
+      - Statistical summary
+    output: dataset_summaries
+
+  - name: compare
+    prompt: |
+      Compare these datasets:
+      {{dataset_summaries}}
+      
+      Focus on: {{input_data.comparison_focus}}
+      
+      {% if input_data.comparison_focus == 'changes' or input_data.comparison_focus == 'all' %}
+      Identify:
+      - What increased
+      - What decreased
+      - What stayed the same
+      - Percentage changes
+      {% endif %}
+      
+      {% if input_data.comparison_focus == 'trends' or input_data.comparison_focus == 'all' %}
+      - Directional trends
+      - Momentum shifts
+      - Pattern changes
+      {% endif %}
+      
+      {% if input_data.comparison_focus == 'differences' or input_data.comparison_focus == 'all' %}
+      - Significant differences
+      - New items
+      - Missing items
+      - Distribution changes
+      {% endif %}
+    output: comparison
+
+  - name: format_comparison
+    prompt: |
+      Format this comparison report:
+      {{comparison}}
+      
+      Use format:
+      ## Dataset Comparison
+      {{input_data.dataset1_label}} vs {{input_data.dataset2_label}}
+      
+      ### Executive Summary
+      [High-level comparison]
+      
+      ### Key Differences
+      [Most significant changes]
+      
+      ### Detailed Analysis
+      [In-depth comparison]
+      
+      ### Recommendations
+      [What to investigate further]
+```
+
+### 5. anomaly_detector.yaml
+
+```yaml
+name: anomaly_detector
+description: Detect outliers and anomalies
+version: 1.0.0
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-sonnet-4
+
+steps:
+  - name: establish_baseline
+    prompt: |
+      Analyze this data to establish normal patterns:
+      {{input_data.data}}
+      
+      Identify:
+      - Normal ranges for each metric
+      - Expected patterns
+      - Typical variations
+      - Statistical baseline
+    output: baseline
+
+  - name: detect_anomalies
+    prompt: |
+      Compare data against this baseline:
+      {{baseline}}
+      
+      Original data:
+      {{input_data.data}}
+      
+      Sensitivity: {{input_data.sensitivity}}
+      
+      {% if input_data.sensitivity == 'high' %}
+      Flag values outside 1.5 standard deviations
+      {% elif input_data.sensitivity == 'medium' %}
+      Flag values outside 2 standard deviations
+      {% else %}
+      Flag values outside 3 standard deviations
+      {% endif %}
+      
+      Detect:
+      - Statistical outliers
+      - Unexpected patterns
+      - Suspicious sequences
+      - Sudden changes
+    output: anomalies
+
+  - name: explain_anomalies
+    prompt: |
+      {% if input_data.explain_findings %}
+      For each anomaly found:
+      {{anomalies}}
+      
+      Explain:
+      - What makes it anomalous
+      - Severity (critical, high, medium, low)
+      - Possible causes
+      - Recommended action
+      {% else %}
+      List the anomalies found:
+      {{anomalies}}
+      {% endif %}
+```
+
+---
+
+## Usage Examples
+
+### Example 1: Analyze CSV Data
+
+**In Claude Desktop:**
+```
+You: Analyze this sales data:
+
+Date,Revenue,Units
+2024-01-01,5000,100
+2024-01-02,5500,110
+2024-01-03,4800,95
+
+Claude: I'll analyze this dataset.
+
+[Calls analyze_dataset with:
+  data: "Date,Revenue,Units..."
+  data_format: "csv"
+  analysis_type: "comprehensive"
+]
+
+Analysis Results:
+## Dataset Analysis
+
+### Overview
+- 3 records
+- Columns: Date, Revenue, Units
+- Date range: Jan 1-3, 2024
+
+### Statistics
+Revenue:
+- Mean: $5,100
+- Median: $5,000
+- Range: $4,800 - $5,500
+...
+```
+
+### Example 2: Generate Insights
+
+**In Claude Desktop:**
+```
+You: Generate insights from this user engagement data:
+[paste data]
+
+Claude: I'll extract key insights.
+
+[Calls generate_insights with:
+  data: "[engagement data]"
+  context: "user engagement"
+  insight_count: 5
+]
+
+## Top 5 Insights
+
+### 1. Weekend Usage Surge
+**Finding:** 40% increase in weekend activity
+**Implication:** Users prefer weekend interaction
+**Action:** Optimize weekend campaigns
+**Confidence:** High
+...
+```
+
+### Example 3: Compare Datasets
+
+**In Claude Desktop:**
+```
+You: Compare Q1 vs Q2 revenue:
+
+Q1: [data]
+Q2: [data]
+
+Claude: I'll compare these quarters.
+
+[Calls compare_datasets with:
+  dataset1: "[Q1 data]"
+  dataset2: "[Q2 data]"
+  dataset1_label: "Q1 2024"
+  dataset2_label: "Q2 2024"
+  comparison_focus: "changes"
+]
+
+## Dataset Comparison
+Q1 2024 vs Q2 2024
+
+### Executive Summary
+Revenue increased 15% from Q1 to Q2...
+```
+
+---
+
+## Setup Instructions
+
+**1. Create templates in `config/templates/`:**
+- dataset_analyzer.yaml
+- insight_generator.yaml
+- visualization_planner.yaml
+- dataset_comparator.yaml
+- anomaly_detector.yaml
+
+**2. Create server config:**
+```bash
+# Save to: config/runas/data-analyst.yaml
+```
+
+**3. Test:**
+```bash
+mcp-cli serve config/runas/data-analyst.yaml
+```
+
+**4. Add to Claude Desktop:**
+
+```json
+{
+  "mcpServers": {
+    "data_analyst": {
+      "command": "mcp-cli",
+      "args": ["serve", "/full/path/to/config/runas/data-analyst.yaml"]
+    }
+  }
+}
+```
+
+---
+
+## Cost Estimates
+
+**Using Claude Sonnet 4:**
+
+| Tool | Dataset Size | Estimated Cost |
+|------|--------------|----------------|
+| analyze_dataset | Small (<100 rows) | ~$0.02-0.05 |
+| analyze_dataset | Medium (100-1000 rows) | ~$0.10-0.20 |
+| analyze_dataset | Large (1000+ rows) | ~$0.30-0.50 |
+| generate_insights | - | ~$0.03-0.08 |
+| create_visualization_plan | - | ~$0.02-0.05 |
+| compare_datasets | Small | ~$0.05-0.10 |
+| compare_datasets | Large | ~$0.20-0.40 |
+| detect_anomalies | - | ~$0.05-0.15 |
+
+---
+
+## Tips
+
+**1. Prepare data well:**
+```
+✓ Clean CSV with headers
+✓ Consistent formatting
+✗ Mixed formats in same column
+✗ Missing headers
+```
+
+**2. Provide context:**
+```
+✓ "quarterly sales data"
+✓ "daily active users, Q1 2024"
+✗ "some numbers"
+```
+
+**3. Choose right analysis type:**
+- Descriptive: Basic statistics, distributions
+- Correlation: Relationships between variables
+- Trend: Time-series patterns
+- Comprehensive: All of the above
+
+**4. Right-size datasets:**
+- For best results: <1000 rows
+- For large datasets: sample or aggregate first
+
+---
+
+**Turn data into insights!** Your AI data analyst is ready. 📊
