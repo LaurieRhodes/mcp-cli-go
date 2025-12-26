@@ -11,43 +11,23 @@ import (
 
 // ProviderFactory implements the domain.ProviderFactory interface
 type ProviderFactory struct {
-	// supportedProviders maps provider types to their interface types
-	supportedProviders map[domain.ProviderType]config.InterfaceType
+	// No hardcoded provider mapping - fully configuration-driven
 }
 
 // NewProviderFactory creates a new provider factory
 func NewProviderFactory() domain.ProviderFactory {
-	factory := &ProviderFactory{
-		supportedProviders: make(map[domain.ProviderType]config.InterfaceType),
-	}
-
-	// Initialize supported providers
-	factory.supportedProviders[domain.ProviderOpenAI] = config.OpenAICompatible
-	factory.supportedProviders[domain.ProviderAnthropic] = config.AnthropicNative
-	factory.supportedProviders[domain.ProviderOllama] = config.OllamaNative
-	factory.supportedProviders[domain.ProviderDeepSeek] = config.OpenAICompatible
-	factory.supportedProviders[domain.ProviderGemini] = config.GeminiNative
-	factory.supportedProviders[domain.ProviderOpenRouter] = config.OpenAICompatible
-	factory.supportedProviders[domain.ProviderLMStudio] = config.OpenAICompatible
-
-	return factory
+	return &ProviderFactory{}
 }
 
-// CreateProvider creates a new provider instance
-func (f *ProviderFactory) CreateProvider(providerType domain.ProviderType, cfg *config.ProviderConfig) (domain.LLMProvider, error) {
+// CreateProvider creates a new provider instance based on interface type in config
+func (f *ProviderFactory) CreateProvider(providerType domain.ProviderType, cfg *config.ProviderConfig, interfaceType config.InterfaceType) (domain.LLMProvider, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("provider configuration is required")
 	}
 
-	logging.Info("Creating provider for type: %s", providerType)
+	logging.Info("Creating provider '%s' with interface type '%s'", providerType, interfaceType)
 
-	// Validate the provider type is supported
-	interfaceType, exists := f.supportedProviders[providerType]
-	if !exists {
-		return nil, fmt.Errorf("unsupported provider type: %s", providerType)
-	}
-
-	// Create the appropriate client based on the interface type
+	// Create the appropriate client based on the interface type from configuration
 	switch interfaceType {
 	case config.OpenAICompatible:
 		return clients.NewOpenAICompatibleClient(providerType, cfg)
@@ -62,20 +42,14 @@ func (f *ProviderFactory) CreateProvider(providerType domain.ProviderType, cfg *
 	}
 }
 
-// GetSupportedProviders returns a list of supported provider types
+// GetSupportedProviders returns supported interface types (not hardcoded providers)
 func (f *ProviderFactory) GetSupportedProviders() []domain.ProviderType {
-	providers := make([]domain.ProviderType, 0, len(f.supportedProviders))
-	for providerType := range f.supportedProviders {
-		providers = append(providers, providerType)
-	}
-	return providers
+	// This method is deprecated in favor of configuration-driven approach
+	return []domain.ProviderType{}
 }
 
-// GetProviderInterface returns the interface type for a provider
+// GetProviderInterface is deprecated - interface type comes from configuration
 func (f *ProviderFactory) GetProviderInterface(providerType domain.ProviderType) config.InterfaceType {
-	if interfaceType, exists := f.supportedProviders[providerType]; exists {
-		return interfaceType
-	}
-	// Default to OpenAI compatible for unknown providers
+	// Return default - actual interface type should come from config
 	return config.OpenAICompatible
 }

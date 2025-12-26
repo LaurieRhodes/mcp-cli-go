@@ -85,6 +85,8 @@ func ConvertToEnhancedConfig(config *Config) *EnhancedConfig {
 		"anthropic":  AnthropicNative,
 		"ollama":     OllamaNative,
 		"gemini":     OpenAICompatible, // For now, we'll treat Gemini as OpenAI-compatible
+		"kimik2":     OpenAICompatible, // Kimi K2 (Moonshot AI)
+		"lmstudio":   OpenAICompatible, // LM Studio
 	}
 	
 	// Create the interfaces configuration
@@ -135,7 +137,7 @@ func GenerateNewConfig(config *Config) *EnhancedConfig {
 	// Map providers to their interfaces
 	for providerName, providerConfig := range config.AI.Providers {
 		switch providerName {
-		case "openai", "deepseek", "openrouter":
+		case "openai", "deepseek", "openrouter", "kimik2", "lmstudio":
 			openaiCompatible.Providers[providerName] = providerConfig
 		case "anthropic":
 			anthropicNative.Providers[providerName] = providerConfig

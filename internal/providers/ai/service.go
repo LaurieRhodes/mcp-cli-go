@@ -89,7 +89,7 @@ func (s *Service) InitializeProvider(configFile, providerOverride, modelOverride
 	}
 
 	// Create the provider using the factory
-	provider, err := s.factory.CreateProvider(providerType, providerConfig)
+	provider, err := s.factory.CreateProvider(providerType, providerConfig, interfaceType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create provider %s: %w", providerName, err)
 	}
@@ -126,8 +126,10 @@ func (s *Service) getProviderConfiguration(appConfig *config.ApplicationConfig, 
 	return nil, "", domain.ErrProviderNotFound.WithDetails(fmt.Sprintf("provider '%s' not found in configuration", providerName))
 }
 
-// inferInterfaceType determines interface type from provider name
+// inferInterfaceType determines interface type from provider name (fallback for legacy configs)
 func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
+	// This is a fallback for old configs that don't specify interface_type
+	// New configs should always specify interface_type in the provider file
 	switch strings.ToLower(providerName) {
 	case "anthropic":
 		return config.AnthropicNative
@@ -135,33 +137,18 @@ func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 		return config.OllamaNative
 	case "gemini":
 		return config.GeminiNative
-	case "openai", "deepseek", "openrouter", "lmstudio":
-		return config.OpenAICompatible
 	default:
-		return config.OpenAICompatible // Safe default
+		// Safe default for OpenAI-compatible providers
+		// This includes: openai, deepseek, openrouter, lmstudio, and any custom providers
+		return config.OpenAICompatible
 	}
 }
 
 // mapProviderNameToType converts config provider name to domain provider type
+// For truly configuration-driven behavior, we use the provider name directly as the type
 func (s *Service) mapProviderNameToType(providerName string) (domain.ProviderType, error) {
-	switch strings.ToLower(providerName) {
-	case "openai":
-		return domain.ProviderOpenAI, nil
-	case "anthropic":
-		return domain.ProviderAnthropic, nil
-	case "ollama":
-		return domain.ProviderOllama, nil
-	case "deepseek":
-		return domain.ProviderDeepSeek, nil
-	case "gemini":
-		return domain.ProviderGemini, nil
-	case "openrouter":
-		return domain.ProviderOpenRouter, nil
-	case "lmstudio":
-		return domain.ProviderLMStudio, nil
-	default:
-		return "", fmt.Errorf("unsupported provider: %s", providerName)
-	}
+	// Simply use the provider name as-is - the factory will determine interface type from config
+	return domain.ProviderType(providerName), nil
 }
 
 // getAPIKeyFromEnv retrieves API key from environment variables

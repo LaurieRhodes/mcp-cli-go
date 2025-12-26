@@ -556,16 +556,20 @@ func (l *Loader) Save(config *ApplicationConfig, path string) error {
 	return nil
 }
 
-// inferInterfaceType determines interface type from provider name
+// inferInterfaceType determines interface type from provider name (fallback for configs without interface_type)
 func inferInterfaceType(providerName string) InterfaceType {
-	switch providerName {
+	// This is a fallback for old configs that don't specify interface_type
+	// New configs should always specify interface_type in the provider file
+	switch strings.ToLower(providerName) {
 	case "anthropic":
 		return AnthropicNative
 	case "ollama":
 		return OllamaNative
-	case "openai", "deepseek", "openrouter", "lmstudio", "gemini":
-		return OpenAICompatible
+	case "gemini":
+		return GeminiNative
 	default:
-		return OpenAICompatible // Safe default
+		// Safe default for OpenAI-compatible providers
+		// This includes: openai, deepseek, openrouter, lmstudio, and any custom providers
+		return OpenAICompatible
 	}
 }

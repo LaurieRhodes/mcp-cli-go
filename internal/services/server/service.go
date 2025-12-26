@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"strings"
 	
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
@@ -243,30 +242,20 @@ func (s *Service) executeTemplateV2(tmpl *config.TemplateV2, inputData string, t
 
 // executeTemplateV2WithProvider executes a template with the actual provider
 func (s *Service) executeTemplateV2WithProvider(tmpl *config.TemplateV2, inputData string, providerName string, providerConfig *config.ProviderConfig) (string, error) {
-	// Map provider name to provider type
-	var providerType domain.ProviderType
-	switch strings.ToLower(providerName) {
-	case "openai":
-		providerType = domain.ProviderOpenAI
-	case "anthropic":
-		providerType = domain.ProviderAnthropic
-	case "ollama":
-		providerType = domain.ProviderOllama
-	case "deepseek":
-		providerType = domain.ProviderDeepSeek
-	case "gemini":
-		providerType = domain.ProviderGemini
-	case "openrouter":
-		providerType = domain.ProviderOpenRouter
-	default:
-		return "", fmt.Errorf("unsupported provider: %s", providerName)
-	}
+	// Convert provider name to ProviderType (configuration-driven)
+	providerType := domain.ProviderType(providerName)
 	
 	logging.Debug("Creating provider: %s", providerType)
 	
+	// Get interface type from configuration
+	_, interfaceType, err := s.configService.GetProviderConfig(providerName)
+	if err != nil {
+		return "", fmt.Errorf("failed to get provider interface type: %w", err)
+	}
+	
 	// Create provider using factory
 	providerFactory := ai.NewProviderFactory()
-	provider, err := providerFactory.CreateProvider(providerType, providerConfig)
+	provider, err := providerFactory.CreateProvider(providerType, providerConfig, interfaceType)
 	if err != nil {
 		return "", fmt.Errorf("failed to create provider: %w", err)
 	}

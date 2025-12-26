@@ -362,12 +362,13 @@ type ChatConfig struct {
 // ProviderFactory defines the interface for creating LLM providers
 type ProviderFactory interface {
 	// CreateProvider creates a new provider instance
-	CreateProvider(providerType ProviderType, cfg *config.ProviderConfig) (LLMProvider, error)
+	// interfaceType determines which client implementation to use
+	CreateProvider(providerType ProviderType, cfg *config.ProviderConfig, interfaceType config.InterfaceType) (LLMProvider, error)
 
-	// GetSupportedProviders returns a list of supported provider types
+	// GetSupportedProviders returns a list of supported provider types (deprecated - use config)
 	GetSupportedProviders() []ProviderType
 
-	// GetProviderInterface returns the interface type for a provider
+	// GetProviderInterface returns the interface type for a provider (deprecated - use config)
 	GetProviderInterface(providerType ProviderType) config.InterfaceType
 }
 

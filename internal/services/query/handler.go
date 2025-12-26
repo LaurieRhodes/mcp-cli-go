@@ -80,9 +80,20 @@ func NewQueryHandler(connections []*host.ServerConnection, aiOptions *host.AIOpt
 	// Determine provider type
 	providerType := domain.ProviderType(aiOptions.Provider)
 	
+	// Determine interface type (default to OpenAI-compatible)
+	interfaceType := config.OpenAICompatible
+	switch strings.ToLower(aiOptions.Provider) {
+	case "anthropic":
+		interfaceType = config.AnthropicNative
+	case "ollama":
+		interfaceType = config.OllamaNative
+	case "gemini":
+		interfaceType = config.GeminiNative
+	}
+	
 	// Create LLM provider using factory
 	factory := ai.NewProviderFactory()
-	client, err := factory.CreateProvider(providerType, providerConfig)
+	client, err := factory.CreateProvider(providerType, providerConfig, interfaceType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create LLM provider: %w", err)
 	}
@@ -144,7 +155,7 @@ func NewQueryHandlerWithInterface(connections []*host.ServerConnection, aiOption
 	
 	// Create LLM provider using factory
 	factory := ai.NewProviderFactory()
-	client, err := factory.CreateProvider(providerType, providerConfig)
+	client, err := factory.CreateProvider(providerType, providerConfig, interfaceType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create LLM provider: %w", err)
 	}

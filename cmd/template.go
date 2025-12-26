@@ -144,19 +144,14 @@ func executeTemplate() error {
 	}
 	
 	// Map provider name to provider type
-	providerType, err := mapProviderNameToType(actualProviderName)
-	if err != nil {
-		return handleTemplateError(err)
-	}
+	providerType := domain.ProviderType(actualProviderName)
 	
 	// Create provider using factory
 	providerFactory := ai.NewProviderFactory()
-	provider, err := providerFactory.CreateProvider(providerType, providerConfig)
+	provider, err := providerFactory.CreateProvider(providerType, providerConfig, interfaceType)
 	if err != nil {
 		return handleTemplateError(fmt.Errorf("failed to create provider: %w", err))
 	}
-	
-	_ = interfaceType // Used for validation if needed
 	
 	// 5. Prepare input data
 	var processedInputData string
@@ -397,18 +392,13 @@ func executeTemplateV2(appConfig *config.ApplicationConfig, configService *infra
 	}
 	
 	// Create provider
-	providerType, err := mapProviderNameToType(actualProviderName)
-	if err != nil {
-		return handleTemplateError(err)
-	}
+	providerType := domain.ProviderType(actualProviderName)
 	
 	providerFactory := ai.NewProviderFactory()
-	provider, err := providerFactory.CreateProvider(providerType, providerConfig)
+	provider, err := providerFactory.CreateProvider(providerType, providerConfig, interfaceType)
 	if err != nil {
 		return handleTemplateError(fmt.Errorf("failed to create provider: %w", err))
 	}
-	
-	_ = interfaceType
 	
 	// Prepare input data
 	var processedInputData string
@@ -703,23 +693,4 @@ func (hsa *HostServerAdapter) GetConfig() *config.ServerConfig {
 	}
 }
 
-// mapProviderNameToType maps a provider name string to domain.ProviderType
-func mapProviderNameToType(name string) (domain.ProviderType, error) {
-	switch strings.ToLower(name) {
-	case "openai":
-		return domain.ProviderOpenAI, nil
-	case "anthropic":
-		return domain.ProviderAnthropic, nil
-	case "ollama":
-		return domain.ProviderOllama, nil
-	case "deepseek":
-		return domain.ProviderDeepSeek, nil
-	case "gemini":
-		return domain.ProviderGemini, nil
-	case "openrouter":
-		return domain.ProviderOpenRouter, nil
-	default:
-		return "", fmt.Errorf("unsupported provider: %s", name)
-	}
-}
 

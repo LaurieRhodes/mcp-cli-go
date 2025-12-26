@@ -10,6 +10,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/core/chunking"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/core/tokens"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
@@ -41,42 +42,53 @@ func (s *Service) GenerateEmbeddings(ctx context.Context, req *domain.EmbeddingJ
 	// Apply defaults
 	req = s.applyDefaults(req)
 
-	// Get provider configuration
+	// Get provider configuration - Use embeddings config first, fall back to AI config
 	providerName := req.Provider
 	if providerName == "" {
-		// Use default provider
-		defaultProviderName, _, _, err := s.configService.GetDefaultProvider()
+		// Use default embedding provider
+		defaultProviderName, _, _, err := s.configService.GetDefaultEmbeddingProvider()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get default provider: %w", err)
+			// Fallback to default AI provider if no embedding provider configured
+			defaultProviderName, _, _, err = s.configService.GetDefaultProvider()
+			if err != nil {
+				return nil, fmt.Errorf("failed to get default provider: %w", err)
+			}
 		}
 		providerName = defaultProviderName
 	}
 
-	providerConfig, interfaceType, err := s.configService.GetProviderConfig(providerName)
+	// Try to get embedding-specific configuration first
+	embeddingConfig, interfaceType, err := s.configService.GetEmbeddingProviderConfig(providerName)
+	var providerConfig *config.ProviderConfig
+	
 	if err != nil {
-		return nil, fmt.Errorf("failed to get provider config for %s: %w", providerName, err)
+		// Fallback to AI provider configuration
+		logging.Debug("Embedding config not found for %s, falling back to AI provider config", providerName)
+		providerConfig, interfaceType, err = s.configService.GetProviderConfig(providerName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get provider config for %s: %w", providerName, err)
+		}
+	} else {
+		// Convert EmbeddingProviderConfig to ProviderConfig
+		providerConfig = &config.ProviderConfig{
+			APIKey:                embeddingConfig.APIKey,
+			APIEndpoint:           embeddingConfig.APIEndpoint,
+			DefaultModel:          embeddingConfig.DefaultModel,
+			DefaultEmbeddingModel: embeddingConfig.DefaultModel, // For embeddings, these are the same
+			TimeoutSeconds:        embeddingConfig.TimeoutSeconds,
+			MaxRetries:            embeddingConfig.MaxRetries,
+			EmbeddingModels:       embeddingConfig.Models,
+		}
+		
+		logging.Debug("Using embedding-specific configuration for %s", providerName)
 	}
 
-	// Create provider instance - FIXED: Added missing gemini case
-	var providerType domain.ProviderType
-	switch providerName {
-	case "openai":
-		providerType = domain.ProviderOpenAI
-	case "deepseek":
-		providerType = domain.ProviderDeepSeek
-	case "openrouter":
-		providerType = domain.ProviderOpenRouter
-	case "gemini":
-		providerType = domain.ProviderGemini
-	case "lmstudio":
-		providerType = domain.ProviderLMStudio
-	default:
-		providerType = domain.ProviderOpenAI // Default fallback
-	}
+	// Create provider instance - Configuration-driven
+	providerType := domain.ProviderType(providerName)
 
 	logging.Info("Creating provider %s (type: %s, interface: %s)", providerName, providerType, interfaceType)
 
-	provider, err := s.providerFactory.CreateProvider(providerType, providerConfig)
+	provider, err := s.providerFactory.CreateProvider(providerType, providerConfig, interfaceType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create provider %s: %w", providerName, err)
 	}

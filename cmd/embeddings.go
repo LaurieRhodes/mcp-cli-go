@@ -200,26 +200,16 @@ func showAvailableModels(configService domain.ConfigurationService, providerFact
 	fmt.Println("==========================")
 	
 	// Get default provider
-	defaultProviderName, defaultConfig, _, err := configService.GetDefaultProvider()
+	defaultProviderName, defaultConfig, interfaceType, err := configService.GetDefaultProvider()
 	if err != nil {
 		logging.Warn("Could not get default provider: %v", err)
 		return nil
 	}
 	
 	// Create provider instance to get supported models
-	var providerType domain.ProviderType
-	switch defaultProviderName {
-	case "openai":
-		providerType = domain.ProviderOpenAI
-	case "deepseek":
-		providerType = domain.ProviderDeepSeek
-	case "openrouter":
-		providerType = domain.ProviderOpenRouter
-	default:
-		providerType = domain.ProviderOpenAI
-	}
+	providerType := domain.ProviderType(defaultProviderName)
 	
-	provider, err := providerFactory.CreateProvider(providerType, defaultConfig)
+	provider, err := providerFactory.CreateProvider(providerType, defaultConfig, interfaceType)
 	if err != nil {
 		return fmt.Errorf("failed to create provider: %w", err)
 	}
@@ -228,7 +218,7 @@ func showAvailableModels(configService domain.ConfigurationService, providerFact
 	models := provider.GetSupportedEmbeddingModels()
 	for _, model := range models {
 		maxTokens := provider.GetMaxEmbeddingTokens(model)
-		fmt.Printf("  %-30s (max tokens: %d)", model, maxTokens)
+		fmt.Printf("  %-30s (max tokens: %d)\n", model, maxTokens)
 	}
 	
 	return nil
