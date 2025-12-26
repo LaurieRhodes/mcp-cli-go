@@ -10,6 +10,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/query"
 	"github.com/spf13/cobra"
 )
@@ -325,8 +326,10 @@ Examples:
 						return fmt.Errorf("failed to write output file: %w", err)
 					}
 				} else {
-					// Output plain text to stdout
-					fmt.Println(result.Response)
+					// Use platform-aware output writer
+					writer := output.NewWriter()
+					defer writer.Close()
+					writer.Println(result.Response)
 				}
 			}
 		}
