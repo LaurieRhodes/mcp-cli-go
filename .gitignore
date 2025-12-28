@@ -127,3 +127,8 @@ config/embeddings/openai.yaml
 config/embeddings/openrouter.yaml
 config/README.md
 config/servers/README.md
+config/embeddings/aws-bedrock.yaml
+config/embeddings/azure-foundry.yaml
+config/servers/bash.yaml
+config/servers/filesystem.yaml
+config/servers/search.yaml

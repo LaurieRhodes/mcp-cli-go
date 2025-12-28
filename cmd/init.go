@@ -98,6 +98,9 @@ type InitConfig struct {
 	IncludeGemini     bool
 	IncludeOpenRouter bool
 	IncludeLMStudio   bool
+	IncludeBedrock    bool
+	IncludeAzureFoundry bool
+	IncludeVertexAI   bool
 	DefaultProvider   string
 }
 
@@ -134,6 +137,9 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 	fmt.Println("  • Ollama        - Local AI (no API key needed)")
 	fmt.Println("  • OpenAI        - GPT-4, GPT-4o (requires API key)")
 	fmt.Println("  • Anthropic     - Claude 3.5 (requires API key)")
+	fmt.Println("  • AWS Bedrock   - Claude, Titan models (requires AWS credentials)")
+	fmt.Println("  • Azure Foundry - GPT, embeddings on Azure (requires Azure credentials)")
+	fmt.Println("  • GCP Vertex AI - Gemini on GCP (requires GCP credentials)")
 	fmt.Println("  • DeepSeek      - DeepSeek Chat (requires API key)")
 	fmt.Println("  • Gemini        - Google Gemini (requires API key)")
 	fmt.Println("  • OpenRouter    - Access many models (requires API key)")
@@ -166,6 +172,33 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 		config.Providers = append(config.Providers, "anthropic")
 		if config.DefaultProvider == "" {
 			config.DefaultProvider = "anthropic"
+		}
+	}
+	
+	// AWS Bedrock
+	if askYesNo(reader, "Use AWS Bedrock (requires AWS credentials)", false) {
+		config.IncludeBedrock = true
+		config.Providers = append(config.Providers, "bedrock")
+		if config.DefaultProvider == "" {
+			config.DefaultProvider = "bedrock"
+		}
+	}
+	
+	// Azure Foundry
+	if askYesNo(reader, "Use Azure AI Foundry (requires Azure credentials)", false) {
+		config.IncludeAzureFoundry = true
+		config.Providers = append(config.Providers, "azure-foundry")
+		if config.DefaultProvider == "" {
+			config.DefaultProvider = "azure-foundry"
+		}
+	}
+	
+	// GCP Vertex AI
+	if askYesNo(reader, "Use GCP Vertex AI (requires GCP credentials)", false) {
+		config.IncludeVertexAI = true
+		config.Providers = append(config.Providers, "vertex-ai")
+		if config.DefaultProvider == "" {
+			config.DefaultProvider = "vertex-ai"
 		}
 	}
 	
@@ -307,9 +340,38 @@ func createEnvFile(path string, config *InitConfig) error {
 		content.WriteString("OPENROUTER_API_KEY=\n\n")
 	}
 	
+	if config.IncludeBedrock {
+		content.WriteString("# AWS Bedrock Credentials\n")
+		content.WriteString("# Get from: AWS IAM Console\n")
+		content.WriteString("AWS_ACCESS_KEY_ID=\n")
+		content.WriteString("AWS_SECRET_ACCESS_KEY=\n")
+		content.WriteString("AWS_REGION=us-east-1\n")
+		content.WriteString("# AWS_SESSION_TOKEN=  # Optional, for temporary credentials\n\n")
+	}
+	
+	if config.IncludeAzureFoundry {
+		content.WriteString("# Azure AI Foundry Credentials\n")
+		content.WriteString("# Get from: Azure Portal > AI Foundry Resource > Keys and Endpoint\n")
+		content.WriteString("AZURE_FOUNDRY_API_KEY=\n")
+		content.WriteString("# AZURE_FOUNDRY_ENDPOINT=https://your-resource.openai.azure.com/openai/v1/\n\n")
+	}
+	
+	if config.IncludeVertexAI {
+		content.WriteString("# GCP Vertex AI Credentials\n")
+		content.WriteString("# Setup:\n")
+		content.WriteString("#   1. Create GCP project: https://console.cloud.google.com/\n")
+		content.WriteString("#   2. Enable Vertex AI API: https://console.cloud.google.com/apis/library/aiplatform.googleapis.com\n")
+		content.WriteString("#   3. Create service account with 'Vertex AI User' role\n")
+		content.WriteString("#   4. Download service account JSON key\n")
+		content.WriteString("GCP_PROJECT_ID=\n")
+		content.WriteString("GCP_LOCATION=us-central1\n")
+		content.WriteString("GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json\n\n")
+	}
+	
 	// Only create .env if there are API keys to configure
 	if config.IncludeOpenAI || config.IncludeAnthropic || config.IncludeDeepSeek || 
-	   config.IncludeGemini || config.IncludeOpenRouter {
+	   config.IncludeGemini || config.IncludeOpenRouter || config.IncludeBedrock ||
+	   config.IncludeAzureFoundry || config.IncludeVertexAI {
 		return os.WriteFile(path, []byte(content.String()), 0644)
 	}
 	
@@ -366,16 +428,19 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 	
 	// Create generator config
 	genConfig := &config.GeneratorConfig{
-		Providers:         initCfg.Providers,
-		Servers:           initCfg.Servers,
-		DefaultProvider:   initCfg.DefaultProvider,
-		IncludeOllama:     initCfg.IncludeOllama,
-		IncludeOpenAI:     initCfg.IncludeOpenAI,
-		IncludeAnthropic:  initCfg.IncludeAnthropic,
-		IncludeDeepSeek:   initCfg.IncludeDeepSeek,
-		IncludeGemini:     initCfg.IncludeGemini,
-		IncludeOpenRouter: initCfg.IncludeOpenRouter,
-		IncludeLMStudio:   initCfg.IncludeLMStudio,
+		Providers:          initCfg.Providers,
+		Servers:            initCfg.Servers,
+		DefaultProvider:    initCfg.DefaultProvider,
+		IncludeOllama:      initCfg.IncludeOllama,
+		IncludeOpenAI:      initCfg.IncludeOpenAI,
+		IncludeAnthropic:   initCfg.IncludeAnthropic,
+		IncludeDeepSeek:    initCfg.IncludeDeepSeek,
+		IncludeGemini:      initCfg.IncludeGemini,
+		IncludeOpenRouter:  initCfg.IncludeOpenRouter,
+		IncludeLMStudio:    initCfg.IncludeLMStudio,
+		IncludeBedrock:     initCfg.IncludeBedrock,
+		IncludeAzureFoundry: initCfg.IncludeAzureFoundry,
+		IncludeVertexAI:    initCfg.IncludeVertexAI,
 	}
 	
 	// Generate modular config
@@ -387,7 +452,8 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 	// Create .env file at executable level (parent directory)
 	parentDir := filepath.Dir(configDir)
 	if initCfg.IncludeOpenAI || initCfg.IncludeAnthropic || initCfg.IncludeDeepSeek ||
-		initCfg.IncludeGemini || initCfg.IncludeOpenRouter {
+		initCfg.IncludeGemini || initCfg.IncludeOpenRouter || initCfg.IncludeBedrock ||
+		initCfg.IncludeAzureFoundry || initCfg.IncludeVertexAI {
 		envPath := filepath.Join(parentDir, ".env")
 		if err := createEnvFile(envPath, initCfg); err != nil {
 			return fmt.Errorf("failed to create .env file: %w", err)
@@ -434,7 +500,8 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 	fmt.Println()
 	
 	if cfg.IncludeOpenAI || cfg.IncludeAnthropic || cfg.IncludeDeepSeek ||
-		cfg.IncludeGemini || cfg.IncludeOpenRouter {
+		cfg.IncludeGemini || cfg.IncludeOpenRouter || cfg.IncludeBedrock ||
+		cfg.IncludeAzureFoundry || cfg.IncludeVertexAI {
 		color.New(color.FgYellow).Println("⚠️  Important: Add your API keys")
 		fmt.Printf("   Edit: %s/.env\n", parentDir)
 		fmt.Println()
@@ -443,7 +510,8 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 	info.Println("🎯 Next steps:")
 	fmt.Printf("   1. Review: %s/README.md\n", configDir)
 	if cfg.IncludeOpenAI || cfg.IncludeAnthropic || cfg.IncludeDeepSeek ||
-		cfg.IncludeGemini || cfg.IncludeOpenRouter {
+		cfg.IncludeGemini || cfg.IncludeOpenRouter || cfg.IncludeBedrock ||
+		cfg.IncludeAzureFoundry || cfg.IncludeVertexAI {
 		fmt.Printf("   2. Edit .env: %s/.env\n", parentDir)
 		fmt.Printf("   3. Run: ./mcp-cli query \"hello\"\n")
 	} else {

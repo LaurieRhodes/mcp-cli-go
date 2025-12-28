@@ -11,6 +11,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/output"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/query"
 	"github.com/spf13/cobra"
 )
@@ -97,10 +98,11 @@ Examples:
 
 		// Convert enhanced options to standard options for backward compatibility
 		aiOptions := &host.AIOptions{
-			Provider:    enhancedAIOptions.Provider,
-			Model:      enhancedAIOptions.Model,
-			APIKey:     enhancedAIOptions.APIKey,
-			APIEndpoint: enhancedAIOptions.APIEndpoint,
+			Provider:      enhancedAIOptions.Provider,
+			Model:         enhancedAIOptions.Model,
+			APIKey:        enhancedAIOptions.APIKey,
+			APIEndpoint:   enhancedAIOptions.APIEndpoint,
+			InterfaceType: enhancedAIOptions.Interface,
 		}
 
 		// Override from command-line flags if specified
@@ -114,7 +116,13 @@ Examples:
 		}
 
 		// If API key is not in config, try environment variables (for providers that need it)
-		if aiOptions.Provider != "ollama" && aiOptions.APIKey == "" {
+		// Skip this check for providers that use alternative authentication (AWS Bedrock, GCP Vertex AI)
+		providersWithoutAPIKey := map[string]bool{
+			"bedrock":   true, // Uses AWS credentials
+			"vertex-ai": true, // Uses GCP service account
+		}
+		
+		if !providersWithoutAPIKey[aiOptions.Provider] && aiOptions.Provider != "ollama" && aiOptions.APIKey == "" {
 			// Try provider-specific environment variables
 			var envKey string
 			switch aiOptions.Provider {
@@ -128,6 +136,8 @@ Examples:
 				envKey = os.Getenv("DEEPSEEK_API_KEY")
 			case "openrouter":
 				envKey = os.Getenv("OPENROUTER_API_KEY")
+			case "azure-openai":
+				envKey = os.Getenv("AZURE_OPENAI_API_KEY")
 			}
 			
 			// If we found an environment variable API key, use it
@@ -228,8 +238,18 @@ Examples:
 		// Run the query command with the given options
 		var result *query.QueryResult
 		err = host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
-			// Create query handler
-			handler, err := query.NewQueryHandler(conns, aiOptions, systemPrompt)
+			// Use AI service to create provider with full config
+			aiService := ai.NewService()
+			llmProvider, err := aiService.InitializeProvider(configFile, providerName, modelName)
+			if err != nil {
+				if errorCodeOnly {
+					os.Exit(query.ErrInitializationCode)
+				}
+				return fmt.Errorf("failed to initialize AI provider: %w", err)
+			}
+
+			// Create query handler with pre-created provider
+			handler, err := query.NewQueryHandlerWithProvider(conns, llmProvider, aiOptions, systemPrompt)
 			if err != nil {
 				if errorCodeOnly {
 					os.Exit(query.ErrInitializationCode)

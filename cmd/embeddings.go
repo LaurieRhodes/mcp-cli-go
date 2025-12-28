@@ -99,8 +99,8 @@ func executeEmbeddings(cmd *cobra.Command, args []string) error {
 	providerFactory := ai.NewProviderFactory()
 	embeddingService := embeddings.NewService(configService, providerFactory)
 	
-	// Load configuration - appConfig is used for initialization
-	_, err := configService.LoadConfig("server_config.json")
+	// Load configuration using configFile from root command
+	_, err := configService.LoadConfig(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}

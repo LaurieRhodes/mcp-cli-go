@@ -560,13 +560,21 @@ func (l *Loader) Save(config *ApplicationConfig, path string) error {
 func inferInterfaceType(providerName string) InterfaceType {
 	// This is a fallback for old configs that don't specify interface_type
 	// New configs should always specify interface_type in the provider file
-	switch strings.ToLower(providerName) {
-	case "anthropic":
+	providerLower := strings.ToLower(providerName)
+	
+	switch {
+	case providerLower == "anthropic":
 		return AnthropicNative
-	case "ollama":
+	case providerLower == "ollama":
 		return OllamaNative
-	case "gemini":
+	case providerLower == "gemini":
 		return GeminiNative
+	case strings.Contains(providerLower, "azure"):
+		return AzureOpenAI
+	case strings.Contains(providerLower, "bedrock"):
+		return AWSBedrock
+	case strings.Contains(providerLower, "vertex"):
+		return GCPVertexAI
 	default:
 		// Safe default for OpenAI-compatible providers
 		// This includes: openai, deepseek, openrouter, lmstudio, and any custom providers

@@ -1,7 +1,7 @@
 package host
 
 import (
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 

@@ -89,6 +89,15 @@ func (s *Service) expandEnvVarsInConfig(config *domainConfig.ApplicationConfig) 
 			for providerName, providerConfig := range interfaceConfig.Providers {
 				providerConfig.APIKey = expandEnvVars(providerConfig.APIKey)
 				providerConfig.APIEndpoint = expandEnvVars(providerConfig.APIEndpoint)
+				// AWS Bedrock specific fields
+				providerConfig.AWSRegion = expandEnvVars(providerConfig.AWSRegion)
+				providerConfig.AWSAccessKeyID = expandEnvVars(providerConfig.AWSAccessKeyID)
+				providerConfig.AWSSecretAccessKey = expandEnvVars(providerConfig.AWSSecretAccessKey)
+				providerConfig.AWSSessionToken = expandEnvVars(providerConfig.AWSSessionToken)
+				// GCP Vertex AI specific fields
+				providerConfig.ProjectID = expandEnvVars(providerConfig.ProjectID)
+				providerConfig.Location = expandEnvVars(providerConfig.Location)
+				providerConfig.CredentialsPath = expandEnvVars(providerConfig.CredentialsPath)
 				interfaceConfig.Providers[providerName] = providerConfig
 			}
 			config.AI.Interfaces[interfaceType] = interfaceConfig
@@ -100,6 +109,15 @@ func (s *Service) expandEnvVarsInConfig(config *domainConfig.ApplicationConfig) 
 		for providerName, providerConfig := range config.AI.Providers {
 			providerConfig.APIKey = expandEnvVars(providerConfig.APIKey)
 			providerConfig.APIEndpoint = expandEnvVars(providerConfig.APIEndpoint)
+			// AWS Bedrock specific fields
+			providerConfig.AWSRegion = expandEnvVars(providerConfig.AWSRegion)
+			providerConfig.AWSAccessKeyID = expandEnvVars(providerConfig.AWSAccessKeyID)
+			providerConfig.AWSSecretAccessKey = expandEnvVars(providerConfig.AWSSecretAccessKey)
+			providerConfig.AWSSessionToken = expandEnvVars(providerConfig.AWSSessionToken)
+			// GCP Vertex AI specific fields
+			providerConfig.ProjectID = expandEnvVars(providerConfig.ProjectID)
+			providerConfig.Location = expandEnvVars(providerConfig.Location)
+			providerConfig.CredentialsPath = expandEnvVars(providerConfig.CredentialsPath)
 			config.AI.Providers[providerName] = providerConfig
 		}
 	}

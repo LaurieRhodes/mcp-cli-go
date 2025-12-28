@@ -69,18 +69,28 @@ func (s *Service) GenerateEmbeddings(ctx context.Context, req *domain.EmbeddingJ
 			return nil, fmt.Errorf("failed to get provider config for %s: %w", providerName, err)
 		}
 	} else {
-		// Convert EmbeddingProviderConfig to ProviderConfig
-		providerConfig = &config.ProviderConfig{
-			APIKey:                embeddingConfig.APIKey,
-			APIEndpoint:           embeddingConfig.APIEndpoint,
-			DefaultModel:          embeddingConfig.DefaultModel,
-			DefaultEmbeddingModel: embeddingConfig.DefaultModel, // For embeddings, these are the same
-			TimeoutSeconds:        embeddingConfig.TimeoutSeconds,
-			MaxRetries:            embeddingConfig.MaxRetries,
-			EmbeddingModels:       embeddingConfig.Models,
+		// For cloud providers (AWS Bedrock, GCP Vertex AI, Azure), get the full provider config instead
+		// because EmbeddingProviderConfig doesn't have cloud-specific auth fields
+		if interfaceType == config.AWSBedrock || interfaceType == config.GCPVertexAI || interfaceType == config.AzureOpenAI {
+			logging.Debug("Cloud provider %s detected, getting full provider config", providerName)
+			providerConfig, interfaceType, err = s.configService.GetProviderConfig(providerName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get provider config for %s: %w", providerName, err)
+			}
+		} else {
+			// Convert EmbeddingProviderConfig to ProviderConfig
+			providerConfig = &config.ProviderConfig{
+				APIKey:                embeddingConfig.APIKey,
+				APIEndpoint:           embeddingConfig.APIEndpoint,
+				DefaultModel:          embeddingConfig.DefaultModel,
+				DefaultEmbeddingModel: embeddingConfig.DefaultModel, // For embeddings, these are the same
+				TimeoutSeconds:        embeddingConfig.TimeoutSeconds,
+				MaxRetries:            embeddingConfig.MaxRetries,
+				EmbeddingModels:       embeddingConfig.Models,
+			}
+			
+			logging.Debug("Using embedding-specific configuration for %s", providerName)
 		}
-		
-		logging.Debug("Using embedding-specific configuration for %s", providerName)
 	}
 
 	// Create provider instance - Configuration-driven

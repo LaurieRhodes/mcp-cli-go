@@ -77,16 +77,19 @@ func (g *ModularConfigGenerator) Generate(config *GeneratorConfig) error {
 
 // GeneratorConfig holds configuration for the generator
 type GeneratorConfig struct {
-	Providers         []string
-	Servers           []string
-	DefaultProvider   string
-	IncludeOllama     bool
-	IncludeOpenAI     bool
-	IncludeAnthropic  bool
-	IncludeDeepSeek   bool
-	IncludeGemini     bool
-	IncludeOpenRouter bool
-	IncludeLMStudio   bool
+	Providers          []string
+	Servers            []string
+	DefaultProvider    string
+	IncludeOllama      bool
+	IncludeOpenAI      bool
+	IncludeAnthropic   bool
+	IncludeDeepSeek    bool
+	IncludeGemini      bool
+	IncludeOpenRouter  bool
+	IncludeLMStudio    bool
+	IncludeBedrock     bool
+	IncludeAzureFoundry bool
+	IncludeVertexAI    bool
 }
 
 // createMainConfig creates the main config.yaml file at parent level
@@ -196,6 +199,24 @@ func (g *ModularConfigGenerator) createProviderFiles(config *GeneratorConfig) er
 
 	if config.IncludeLMStudio {
 		if err := g.createLMStudioProvider(providersDir); err != nil {
+			return err
+		}
+	}
+
+	if config.IncludeBedrock {
+		if err := g.createBedrockProvider(providersDir); err != nil {
+			return err
+		}
+	}
+
+	if config.IncludeAzureFoundry {
+		if err := g.createAzureFoundryProvider(providersDir); err != nil {
+			return err
+		}
+	}
+
+	if config.IncludeVertexAI {
+		if err := g.createVertexAIProvider(providersDir); err != nil {
 			return err
 		}
 	}
@@ -327,6 +348,78 @@ func (g *ModularConfigGenerator) createLMStudioProvider(dir string) error {
 	return g.writeProviderFile(dir, "lmstudio.yaml", provider)
 }
 
+// createBedrockProvider creates aws-bedrock.yaml
+func (g *ModularConfigGenerator) createBedrockProvider(dir string) error {
+	provider := map[string]interface{}{
+		"interface_type": "aws_bedrock",
+		"provider_name":  "bedrock",
+		"config": map[string]interface{}{
+			"aws_region":           "${AWS_REGION}",
+			"aws_access_key_id":    "${AWS_ACCESS_KEY_ID}",
+			"aws_secret_access_key": "${AWS_SECRET_ACCESS_KEY}",
+			"default_model":        "anthropic.claude-3-5-sonnet-20241022-v2:0",
+			"timeout_seconds":      300,
+			"max_retries":          3,
+		},
+	}
+
+	return g.writeProviderFile(dir, "aws-bedrock.yaml", provider)
+}
+
+// createAzureFoundryProvider creates azure-foundry.yaml
+func (g *ModularConfigGenerator) createAzureFoundryProvider(dir string) error {
+	provider := map[string]interface{}{
+		"interface_type": "openai_compatible",
+		"provider_name":  "azure-foundry",
+		"config": map[string]interface{}{
+			"api_key":         "${AZURE_FOUNDRY_API_KEY}",
+			"api_endpoint":    "https://your-resource.openai.azure.com/openai/v1/",
+			"default_model":   "gpt-4o",
+			"timeout_seconds": 60,
+			"max_retries":     3,
+			"context_window":  128000,
+			"reserve_tokens":  4000,
+		},
+	}
+
+	return g.writeProviderFile(dir, "azure-foundry.yaml", provider)
+}
+
+// createVertexAIProvider creates gcp-vertex-ai.yaml
+func (g *ModularConfigGenerator) createVertexAIProvider(dir string) error {
+	provider := map[string]interface{}{
+		"interface_type": "gcp_vertex_ai",
+		"provider_name":  "vertex-ai",
+		"config": map[string]interface{}{
+			"project_id":        "${GCP_PROJECT_ID}",
+			"location":          "${GCP_LOCATION:-us-central1}",
+			"credentials_path":  "${GOOGLE_APPLICATION_CREDENTIALS}",
+			"default_model":     "gemini-2.5-flash",
+			"timeout_seconds":   60,
+			"max_retries":       3,
+			"context_window":    1000000,
+			"reserve_tokens":    4000,
+			"embedding_models": map[string]interface{}{
+				"text-embedding-004": map[string]interface{}{
+					"max_tokens":  3072,
+					"dimensions":  768,
+					"default":     true,
+				},
+				"text-multilingual-embedding-002": map[string]interface{}{
+					"max_tokens":  3072,
+					"dimensions":  768,
+				},
+				"textembedding-gecko@003": map[string]interface{}{
+					"max_tokens":  3072,
+					"dimensions":  768,
+				},
+			},
+		},
+	}
+
+	return g.writeProviderFile(dir, "gcp-vertex-ai.yaml", provider)
+}
+
 // writeProviderFile writes a provider YAML file with proper field ordering
 func (g *ModularConfigGenerator) writeProviderFile(dir, filename string, data interface{}) error {
 	// Convert to ordered YAML manually to ensure interface_type and provider_name come first
@@ -422,8 +515,30 @@ func (g *ModularConfigGenerator) createEmbeddingFiles(config *GeneratorConfig) e
 		}
 	}
 
+	// Create Bedrock embeddings if Bedrock is enabled
+	if config.IncludeBedrock {
+		if err := g.createBedrockEmbedding(embeddingsDir); err != nil {
+			return err
+		}
+	}
+
+	// Create Azure Foundry embeddings if Azure Foundry is enabled
+	if config.IncludeAzureFoundry {
+		if err := g.createAzureFoundryEmbedding(embeddingsDir); err != nil {
+			return err
+		}
+	}
+
+	// Create Vertex AI embeddings if Vertex AI is enabled
+	if config.IncludeVertexAI {
+		if err := g.createVertexAIEmbedding(embeddingsDir); err != nil {
+			return err
+		}
+	}
+
 	// Create README if no embeddings providers
-	if !config.IncludeOpenAI && !config.IncludeOpenRouter && !config.IncludeOllama {
+	if !config.IncludeOpenAI && !config.IncludeOpenRouter && !config.IncludeOllama && 
+	   !config.IncludeBedrock && !config.IncludeAzureFoundry && !config.IncludeVertexAI {
 		readmePath := filepath.Join(embeddingsDir, "README.md")
 		readme := `# Embeddings Configuration
 
@@ -446,7 +561,6 @@ config:
     text-embedding-3-small:
       max_tokens: 8191
       dimensions: 1536
-      default: true
 ` + "```" + `
 `
 		return os.WriteFile(readmePath, []byte(readme), 0644)
@@ -461,29 +575,24 @@ func (g *ModularConfigGenerator) createOpenAIEmbedding(dir string) error {
 		"interface_type": "openai_compatible",
 		"provider_name":  "openai",
 		"config": map[string]interface{}{
-			"api_key":                 "${OPENAI_API_KEY}",
-			"api_endpoint":            "https://api.openai.com/v1",
-			"default_model":           "text-embedding-3-small",
-			"default_embedding_model": "text-embedding-3-small",
+			"api_key":         "${OPENAI_API_KEY}",
+			"api_endpoint":    "https://api.openai.com/v1",
+			"default_model":   "text-embedding-3-small",
 			"embedding_models": map[string]interface{}{
 				"text-embedding-3-small": map[string]interface{}{
-					"max_tokens":        8191,
-					"dimensions":        1536,
-					"cost_per_1k_tokens": 0.00002,
-					"default":           true,
-					"description":       "Most capable embedding model for both english and non-english tasks",
+					"description": "Most capable embedding model for both english and non-english tasks",
+					"dimensions":  1536,
+					"max_tokens":  8191,
 				},
 				"text-embedding-3-large": map[string]interface{}{
-					"max_tokens":         8191,
-					"dimensions":         3072,
-					"cost_per_1k_tokens": 0.00013,
-					"description":        "Larger embedding model with higher performance",
+					"description": "Larger embedding model with higher performance",
+					"dimensions":  3072,
+					"max_tokens":  8191,
 				},
 				"text-embedding-ada-002": map[string]interface{}{
-					"max_tokens":         8191,
-					"dimensions":         1536,
-					"cost_per_1k_tokens": 0.0001,
-					"description":        "Previous generation embedding model",
+					"description": "Previous generation embedding model",
+					"dimensions":  1536,
+					"max_tokens":  8191,
 				},
 			},
 		},
@@ -498,21 +607,19 @@ func (g *ModularConfigGenerator) createOpenRouterEmbedding(dir string) error {
 		"interface_type": "openai_compatible",
 		"provider_name":  "openrouter",
 		"config": map[string]interface{}{
-			"api_key":                 "${OPENROUTER_API_KEY}",
-			"api_endpoint":            "https://openrouter.ai/api/v1",
-			"default_model":           "text-embedding-3-small",
-			"default_embedding_model": "text-embedding-3-small",
+			"api_key":         "${OPENROUTER_API_KEY}",
+			"api_endpoint":    "https://openrouter.ai/api/v1",
+			"default_model":   "text-embedding-3-small",
 			"embedding_models": map[string]interface{}{
 				"text-embedding-3-small": map[string]interface{}{
-					"max_tokens":  8191,
-					"dimensions":  1536,
-					"default":     true,
 					"description": "OpenAI embedding model via OpenRouter",
+					"dimensions":  1536,
+					"max_tokens":  8191,
 				},
 				"text-embedding-3-large": map[string]interface{}{
-					"max_tokens":  8191,
-					"dimensions":  3072,
 					"description": "Larger OpenAI embedding model via OpenRouter",
+					"dimensions":  3072,
+					"max_tokens":  8191,
 				},
 			},
 		},
@@ -527,26 +634,133 @@ func (g *ModularConfigGenerator) createOllamaEmbedding(dir string) error {
 		"interface_type": "openai_compatible",
 		"provider_name":  "ollama",
 		"config": map[string]interface{}{
-			"api_endpoint":            "http://localhost:11434",
-			"default_model":           "nomic-embed-text",
-			"default_embedding_model": "nomic-embed-text",
+			"api_endpoint":    "http://localhost:11434",
+			"default_model":   "nomic-embed-text",
 			"embedding_models": map[string]interface{}{
 				"nomic-embed-text": map[string]interface{}{
-					"max_tokens":  8192,
-					"dimensions":  768,
-					"default":     true,
 					"description": "High-performance open embedding model",
+					"dimensions":  768,
+					"max_tokens":  8192,
 				},
 				"mxbai-embed-large": map[string]interface{}{
-					"max_tokens":  512,
-					"dimensions":  1024,
 					"description": "Large multilingual embedding model",
+					"dimensions":  1024,
+					"max_tokens":  512,
 				},
 			},
 		},
 	}
 
 	return g.writeEmbeddingFile(dir, "ollama.yaml", embedding)
+}
+
+// createBedrockEmbedding creates AWS Bedrock embedding configuration
+func (g *ModularConfigGenerator) createBedrockEmbedding(dir string) error {
+	embedding := map[string]interface{}{
+		"interface_type": "aws_bedrock",
+		"provider_name":  "bedrock",
+		"config": map[string]interface{}{
+			"aws_region":            "${AWS_REGION}",
+			"aws_access_key_id":     "${AWS_ACCESS_KEY_ID}",
+			"aws_secret_access_key": "${AWS_SECRET_ACCESS_KEY}",
+			"default_model":         "cohere.embed-english-v3",
+			"timeout_seconds":       30,
+			"max_retries":           3,
+			"embedding_models": map[string]interface{}{
+				"cohere.embed-english-v3": map[string]interface{}{
+					"description": "Cohere English text embeddings optimized for semantic search (serverless)",
+					"dimensions":  1024,
+					"max_tokens":  512,
+				},
+				"cohere.embed-multilingual-v3": map[string]interface{}{
+					"description": "Cohere multilingual embeddings supporting 100+ languages (serverless)",
+					"dimensions":  1024,
+					"max_tokens":  512,
+				},
+				"amazon.titan-embed-text-v2:0": map[string]interface{}{
+					"description": "Amazon Titan Text Embeddings V2 with improved performance",
+					"dimensions":  1024,
+					"max_tokens":  8192,
+				},
+				"amazon.titan-embed-g1-text-02": map[string]interface{}{
+					"description": "Amazon Titan Text Embeddings G1 - Text",
+					"dimensions":  1536,
+					"max_tokens":  8192,
+				},
+			},
+		},
+	}
+
+	return g.writeEmbeddingFile(dir, "aws-bedrock.yaml", embedding)
+}
+
+// createAzureFoundryEmbedding creates Azure Foundry embedding configuration
+func (g *ModularConfigGenerator) createAzureFoundryEmbedding(dir string) error {
+	embedding := map[string]interface{}{
+		"interface_type": "openai_compatible",
+		"provider_name":  "azure-foundry",
+		"config": map[string]interface{}{
+			"api_key":         "${AZURE_FOUNDRY_API_KEY}",
+			"api_endpoint":    "https://your-resource.openai.azure.com/openai/v1/",
+			"default_model":   "text-embedding-3-small",
+			"timeout_seconds": 30,
+			"max_retries":     3,
+			"embedding_models": map[string]interface{}{
+				"text-embedding-3-small": map[string]interface{}{
+					"description": "Most capable embedding model for both english and non-english tasks",
+					"dimensions":  1536,
+					"max_tokens":  8191,
+				},
+				"text-embedding-3-large": map[string]interface{}{
+					"description": "Larger embedding model with higher performance",
+					"dimensions":  3072,
+					"max_tokens":  8191,
+				},
+				"text-embedding-ada-002": map[string]interface{}{
+					"description": "Previous generation embedding model",
+					"dimensions":  1536,
+					"max_tokens":  8191,
+				},
+			},
+		},
+	}
+
+	return g.writeEmbeddingFile(dir, "azure-foundry.yaml", embedding)
+}
+
+// createVertexAIEmbedding creates Vertex AI embedding configuration
+func (g *ModularConfigGenerator) createVertexAIEmbedding(dir string) error {
+	embedding := map[string]interface{}{
+		"interface_type": "gcp_vertex_ai",
+		"provider_name":  "vertex-ai",
+		"config": map[string]interface{}{
+			"project_id":        "${GCP_PROJECT_ID}",
+			"location":          "${GCP_LOCATION:-us-central1}",
+			"credentials_path":  "${GOOGLE_APPLICATION_CREDENTIALS}",
+			"default_model":     "text-embedding-004",
+			"timeout_seconds":   30,
+			"max_retries":       3,
+			"embedding_models": map[string]interface{}{
+				"text-embedding-004": map[string]interface{}{
+					"description": "Latest Google embedding model",
+					"dimensions":  768,
+					"max_tokens":  3072,
+				},
+				"text-multilingual-embedding-002": map[string]interface{}{
+					"description": "Multilingual embedding model",
+					"dimensions":  768,
+					"max_tokens":  3072,
+				},
+				"textembedding-gecko@003": map[string]interface{}{
+					"description": "Gecko embedding model v3",
+					"dimensions":  768,
+					"max_tokens":  3072,
+				},
+			},
+		},
+	}
+
+	return g.writeEmbeddingFile(dir, "gcp-vertex-ai.yaml", embedding)
 }
 
 // writeEmbeddingFile writes an embedding provider YAML file with proper field ordering

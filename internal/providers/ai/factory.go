@@ -37,6 +37,12 @@ func (f *ProviderFactory) CreateProvider(providerType domain.ProviderType, cfg *
 		return clients.NewOllamaClient(cfg)
 	case config.GeminiNative:
 		return clients.NewGeminiClient(providerType, cfg)
+	case config.AzureOpenAI:
+		return clients.NewAzureOpenAIClient(providerType, cfg)
+	case config.AWSBedrock:
+		return clients.NewAWSBedrockClient(providerType, cfg)
+	case config.GCPVertexAI:
+		return clients.NewGCPVertexAIOpenAIClient(providerType, cfg)
 	default:
 		return nil, fmt.Errorf("unsupported interface type: %s", interfaceType)
 	}

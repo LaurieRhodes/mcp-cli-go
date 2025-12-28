@@ -108,8 +108,11 @@ func (s *Service) getProviderConfiguration(appConfig *config.ApplicationConfig, 
 
 	// Search through interface hierarchy
 	if appConfig.AI.Interfaces != nil {
+		logging.Debug("Searching for provider '%s' in %d interfaces", providerName, len(appConfig.AI.Interfaces))
 		for interfaceType, interfaceConfig := range appConfig.AI.Interfaces {
+			logging.Debug("  Checking interface '%s' with %d providers", interfaceType, len(interfaceConfig.Providers))
 			if providerConfig, exists := interfaceConfig.Providers[providerName]; exists {
+				logging.Info("Found provider '%s' in interface '%s'", providerName, interfaceType)
 				return &providerConfig, interfaceType, nil
 			}
 		}
@@ -119,6 +122,7 @@ func (s *Service) getProviderConfiguration(appConfig *config.ApplicationConfig, 
 	if appConfig.AI.Providers != nil {
 		if providerConfig, exists := appConfig.AI.Providers[providerName]; exists {
 			interfaceType := s.inferInterfaceType(providerName)
+			logging.Info("Found provider '%s' in legacy providers, inferred interface: '%s'", providerName, interfaceType)
 			return &providerConfig, interfaceType, nil
 		}
 	}
@@ -130,13 +134,21 @@ func (s *Service) getProviderConfiguration(appConfig *config.ApplicationConfig, 
 func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 	// This is a fallback for old configs that don't specify interface_type
 	// New configs should always specify interface_type in the provider file
-	switch strings.ToLower(providerName) {
-	case "anthropic":
+	providerLower := strings.ToLower(providerName)
+	
+	switch {
+	case providerLower == "anthropic":
 		return config.AnthropicNative
-	case "ollama":
+	case providerLower == "ollama":
 		return config.OllamaNative
-	case "gemini":
+	case providerLower == "gemini":
 		return config.GeminiNative
+	case strings.Contains(providerLower, "azure"):
+		return config.AzureOpenAI
+	case strings.Contains(providerLower, "bedrock"):
+		return config.AWSBedrock
+	case strings.Contains(providerLower, "vertex"):
+		return config.GCPVertexAI
 	default:
 		// Safe default for OpenAI-compatible providers
 		// This includes: openai, deepseek, openrouter, lmstudio, and any custom providers
@@ -175,9 +187,16 @@ func (s *Service) validateProviderConfig(providerName string, cfg *config.Provid
 		return domain.ErrConfigInvalid.WithDetails(fmt.Sprintf("provider '%s' missing default model", providerName))
 	}
 
-	// API key required for cloud providers (excluding Ollama and LMStudio)
+	// Providers that use alternative authentication (not APIKey)
+	providersWithAlternativeAuth := map[config.InterfaceType]bool{
+		config.AWSBedrock:   true, // Uses AWS credentials
+		config.GCPVertexAI:  true, // Uses GCP service account
+		config.OllamaNative: true, // No auth needed
+	}
+
+	// API key required for cloud providers (excluding those with alternative auth)
 	providerLower := strings.ToLower(providerName)
-	if interfaceType != config.OllamaNative && providerLower != "lmstudio" && cfg.APIKey == "" {
+	if !providersWithAlternativeAuth[interfaceType] && providerLower != "lmstudio" && cfg.APIKey == "" {
 		return domain.ErrProviderAuth.WithDetails(fmt.Sprintf("provider '%s' missing API key", providerName))
 	}
 

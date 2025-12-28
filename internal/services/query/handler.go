@@ -80,16 +80,28 @@ func NewQueryHandler(connections []*host.ServerConnection, aiOptions *host.AIOpt
 	// Determine provider type
 	providerType := domain.ProviderType(aiOptions.Provider)
 	
-	// Determine interface type (default to OpenAI-compatible)
-	interfaceType := config.OpenAICompatible
-	switch strings.ToLower(aiOptions.Provider) {
-	case "anthropic":
-		interfaceType = config.AnthropicNative
-	case "ollama":
-		interfaceType = config.OllamaNative
-	case "gemini":
-		interfaceType = config.GeminiNative
+	// Use interface type from AIOptions if set, otherwise infer
+	interfaceType := aiOptions.InterfaceType
+	if interfaceType == "" {
+		switch strings.ToLower(aiOptions.Provider) {
+		case "anthropic":
+			interfaceType = config.AnthropicNative
+		case "ollama":
+			interfaceType = config.OllamaNative
+		case "gemini":
+			interfaceType = config.GeminiNative
+		case "bedrock":
+			interfaceType = config.AWSBedrock
+		case "azure-openai":
+			interfaceType = config.AzureOpenAI
+		case "vertex-ai":
+			interfaceType = config.GCPVertexAI
+		default:
+			interfaceType = config.OpenAICompatible
+		}
 	}
+	
+	logging.Debug("Using interface type %s for provider %s", interfaceType, aiOptions.Provider)
 	
 	// Create LLM provider using factory
 	factory := ai.NewProviderFactory()
@@ -105,9 +117,40 @@ func NewQueryHandler(connections []*host.ServerConnection, aiOptions *host.AIOpt
 		ContextMessages:     []domain.Message{},
 		toolsCache:          make(map[string][]tools.Tool),
 		AIOptions:           aiOptions,
+		InterfaceType:       interfaceType,
 		toolCalls:           []ToolCallInfo{},
 		ServerName:          serverName,
 		MaxFollowUpAttempts: defaultMaxFollowUpAttempts, // Use default value
+	}, nil
+}
+
+// NewQueryHandlerWithProvider creates a new query handler with a pre-created LLM provider
+func NewQueryHandlerWithProvider(connections []*host.ServerConnection, llmProvider domain.LLMProvider, aiOptions *host.AIOptions, systemPrompt string) (*QueryHandler, error) {
+	// Determine the server name
+	var serverName string
+	if len(connections) == 1 {
+		serverName = connections[0].Name
+	}
+	
+	// Use default system prompt if not provided
+	if systemPrompt == "" {
+		systemPrompt = "You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question."
+	}
+	
+	// DEBUGGING: Log the exact system prompt being used
+	logging.Info("SYSTEM_PROMPT_DEBUG: Using system prompt: %s", systemPrompt)
+	
+	return &QueryHandler{
+		Connections:         connections,
+		LLMClient:           llmProvider,
+		SystemPrompt:        systemPrompt,
+		ContextMessages:     []domain.Message{},
+		toolsCache:          make(map[string][]tools.Tool),
+		AIOptions:           aiOptions,
+		InterfaceType:       aiOptions.InterfaceType,
+		toolCalls:           []ToolCallInfo{},
+		ServerName:          serverName,
+		MaxFollowUpAttempts: defaultMaxFollowUpAttempts,
 	}, nil
 }
 

@@ -177,10 +177,10 @@ func NewOpenAICompatibleClient(providerType domain.ProviderType, cfg *config.Pro
 // CreateCompletion implements domain.LLMProvider
 func (c *OpenAICompatibleClient) CreateCompletion(ctx context.Context, req *domain.CompletionRequest) (*domain.CompletionResponse, error) {
 	// Convert domain messages to OpenAI format
-	messages := c.convertToOpenAIMessages(req.Messages, req.SystemPrompt)
+	messages := convertToOpenAIMessages(req.Messages, req.SystemPrompt)
 	
 	// Convert domain tools to OpenAI format
-	tools := c.convertToOpenAITools(req.Tools)
+	tools := convertToOpenAITools(req.Tools)
 
 	// Create request payload
 	payload := openaiChatRequest{
@@ -226,7 +226,7 @@ func (c *OpenAICompatibleClient) CreateCompletion(ctx context.Context, req *doma
 		}
 
 		choice := chatResp.Choices[0].Message
-		toolCalls := c.convertFromOpenAIToolCalls(choice.ToolCalls)
+		toolCalls := convertFromOpenAIToolCalls(choice.ToolCalls)
 
 		logging.Info("Successfully received response from %s API", c.providerType)
 
@@ -241,8 +241,8 @@ func (c *OpenAICompatibleClient) CreateCompletion(ctx context.Context, req *doma
 
 // StreamCompletion implements domain.LLMProvider
 func (c *OpenAICompatibleClient) StreamCompletion(ctx context.Context, req *domain.CompletionRequest, writer io.Writer) (*domain.CompletionResponse, error) {
-	messages := c.convertToOpenAIMessages(req.Messages, req.SystemPrompt)
-	tools := c.convertToOpenAITools(req.Tools)
+	messages := convertToOpenAIMessages(req.Messages, req.SystemPrompt)
+	tools := convertToOpenAITools(req.Tools)
 
 	payload := openaiChatRequest{
 		Model:    c.model,
@@ -461,7 +461,13 @@ func (c *OpenAICompatibleClient) sendRequest(ctx context.Context, endpoint strin
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	
+	// Azure endpoints use "api-key" header, others use "Authorization: Bearer"
+	if c.isAzureEndpoint() {
+		req.Header.Set("api-key", c.apiKey)
+	} else {
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -499,7 +505,14 @@ func (c *OpenAICompatibleClient) sendStreamingRequest(ctx context.Context, endpo
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	
+	// Azure endpoints use "api-key" header, others use "Authorization: Bearer"
+	if c.isAzureEndpoint() {
+		req.Header.Set("api-key", c.apiKey)
+	} else {
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	}
+	
 	req.Header.Set("Accept", "text/event-stream")
 
 	resp, err := c.httpClient.Do(req)
@@ -514,6 +527,12 @@ func (c *OpenAICompatibleClient) sendStreamingRequest(ctx context.Context, endpo
 	}
 
 	return resp, nil
+}
+
+// isAzureEndpoint checks if the endpoint is an Azure endpoint
+func (c *OpenAICompatibleClient) isAzureEndpoint() bool {
+	return strings.Contains(c.apiEndpoint, ".openai.azure.com") ||
+		strings.Contains(c.apiEndpoint, ".services.ai.azure.com")
 }
 
 func (c *OpenAICompatibleClient) processStreamingResponse(resp *http.Response, writer io.Writer) (string, []domain.ToolCall, error) {
@@ -602,15 +621,15 @@ func (c *OpenAICompatibleClient) processStreamingResponse(resp *http.Response, w
 				openaiToolCalls = append(openaiToolCalls, *tc)
 			}
 		}
-		toolCalls = c.convertFromOpenAIToolCalls(openaiToolCalls)
+		toolCalls = convertFromOpenAIToolCalls(openaiToolCalls)
 	}
 
 	return fullContent, toolCalls, nil
 }
 
-// Conversion helper methods
+// Conversion helper methods (package-level, shared with Azure client)
 
-func (c *OpenAICompatibleClient) convertToOpenAIMessages(messages []domain.Message, systemPrompt string) []openaiMessage {
+func convertToOpenAIMessages(messages []domain.Message, systemPrompt string) []openaiMessage {
 	openaiMessages := make([]openaiMessage, 0, len(messages)+1)
 
 	if systemPrompt != "" {
@@ -652,7 +671,7 @@ func (c *OpenAICompatibleClient) convertToOpenAIMessages(messages []domain.Messa
 	return openaiMessages
 }
 
-func (c *OpenAICompatibleClient) convertToOpenAITools(tools []domain.Tool) []openaiTool {
+func convertToOpenAITools(tools []domain.Tool) []openaiTool {
 	if len(tools) == 0 {
 		return nil
 	}
@@ -672,7 +691,7 @@ func (c *OpenAICompatibleClient) convertToOpenAITools(tools []domain.Tool) []ope
 	return openaiTools
 }
 
-func (c *OpenAICompatibleClient) convertFromOpenAIToolCalls(openaiToolCalls []openaiToolCall) []domain.ToolCall {
+func convertFromOpenAIToolCalls(openaiToolCalls []openaiToolCall) []domain.ToolCall {
 	if len(openaiToolCalls) == 0 {
 		return nil
 	}
