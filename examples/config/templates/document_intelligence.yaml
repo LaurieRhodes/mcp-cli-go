@@ -24,21 +24,21 @@ steps:
   - name: create_summary
     description: "Generate document summary using composition"
     template: summarization
-    template_input: "{{stdin}}"
+    template_input: "{{input_data}}"
     output: document_summary
   
   # Step 2: Extract entities from the document
   - name: identify_entities
     description: "Extract named entities from document"
     template: entity_extraction
-    template_input: "{{stdin}}"
+    template_input: "{{input_data}}"
     output: document_entities
   
   # Step 3: Analyze sentiment/tone
   - name: assess_tone
     description: "Analyze document sentiment and tone"
     template: sentiment_analysis
-    template_input: "{{stdin}}"
+    template_input: "{{input_data}}"
     output: document_sentiment
   
   # Step 4: Classify document

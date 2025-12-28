@@ -75,7 +75,7 @@ This workflow uses **three different AI providers** in sequence, each doing what
 
 ### ✅ Currently Available
 
-- **Multiple AI Providers**: OpenAI, Anthropic, Ollama, DeepSeek, Gemini, OpenRouter, LM Studio
+- **Multiple AI Providers**: OpenAI, Anthropic, Ollama, DeepSeek, Gemini, Kimi K2, OpenRouter, LM Studio, AWS Bedrock, Azure Foundry. Google Vertex
 - **YAML Workflow Templates**: Define multi-step workflows without code
 - **Template Composition**: Call templates from within templates
 - **MCP Server Mode**: Expose workflows as tools for Claude Desktop
@@ -245,6 +245,33 @@ echo "Impact of AI on healthcare" | mcp-cli --template deep_research
 
 ## Real-World Examples
 
+### 🎯 Industry Showcases
+
+**NEW:** Comprehensive industry-specific showcase examples
+
+| Industry                                                                     | Templates | What It Demonstrates                       | ROI                |
+| ---------------------------------------------------------------------------- | --------- | ------------------------------------------ | ------------------ |
+| **[DevOps](docs/templates/showcases/devops/)**                               | 3 YAML    | Consensus validation, failover resilience  | 99.9% uptime       |
+| **[Security](docs/templates/showcases/security/)**                           | 5 YAML    | SOAR automation, threat intelligence       | 500× faster triage |
+| **[Data Engineering](docs/templates/showcases/data-engineering/)**           | 3 YAML    | RAG pipelines, ML data quality             | 99.9% time savings |
+| **[Development](docs/templates/showcases/development/)**                     | 4 YAML    | API docs, query optimization               | 99% time savings   |
+| **[Business Intelligence](docs/templates/showcases/business-intelligence/)** | 3 YAML    | Template composition, recurring automation | 97% savings        |
+| **[Market Analysis](docs/templates/showcases/market-analysis/)**             | 4 YAML    | Multi-factor analysis with real APIs       | 71× ROI            |
+
+**Key Features:**
+
+- ✅ Production-ready YAML templates
+- ✅ Real MCP server integration (FRED, Unusual Whales, Estimize, SEC EDGAR)
+- ✅ Measured ROI (not speculative claims)
+- ✅ Expert-informed methodology
+- ✅ Honest about limitations
+
+👉 **[Browse all showcases →](docs/templates/showcases/)**
+
+---
+
+### Quick Template Examples
+
 ### Document Analysis Pipeline
 
 ```yaml
@@ -285,7 +312,7 @@ steps:
     output: verified
 ```
 
-**📚 More examples:** See [Template Examples](docs/templates/examples/) for production-ready patterns.
+**📚 More examples:** See [Template Examples](docs/templates/examples/) and [Industry Showcases](docs/templates/showcases/) for production-ready patterns.
 
 ---
 
@@ -479,14 +506,15 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory.
 
 ### 📚 Quick Links
 
-| Documentation                                | Description                              |
-| -------------------------------------------- | ---------------------------------------- |
-| **[Documentation Index](docs/README.md)**    | Start here - complete navigation guide   |
-| **[Getting Started](docs/getting-started/)** | Installation, configuration, first steps |
-| **[Usage Guides](docs/guides/)**             | Mode-specific guides and best practices  |
-| **[Templates](docs/templates/)**             | Template authoring and examples          |
-| **[MCP Server Mode](docs/mcp-server/)**      | Expose workflows as MCP tools            |
-| **[Architecture](docs/architecture/)**       | Technical design and internals           |
+| Documentation                                       | Description                                |
+| --------------------------------------------------- | ------------------------------------------ |
+| **[Documentation Index](docs/README.md)**           | Start here - complete navigation guide     |
+| **[Industry Showcases](docs/templates/showcases/)** | ⭐ 22 working templates across 6 industries |
+| **[Getting Started](docs/getting-started/)**        | Installation, configuration, first steps   |
+| **[Usage Guides](docs/guides/)**                    | Mode-specific guides and best practices    |
+| **[Templates](docs/templates/)**                    | Template authoring and examples            |
+| **[MCP Server Mode](docs/mcp-server/)**             | Expose workflows as MCP tools              |
+| **[Architecture](docs/architecture/)**              | Technical design and internals             |
 
 ### 📖 By Topic
 
@@ -506,6 +534,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory.
 
 **Template Development:**
 
+- **[Industry Showcases](docs/templates/showcases/)** - ⭐ 22 production-ready templates (DevOps, Security, Data Engineering, Development, BI, Market Analysis)
 - [Template Authoring Guide](docs/templates/authoring-guide.md) - Complete template reference
 - [Template Examples](docs/templates/examples/) - Real-world template patterns
 
@@ -605,6 +634,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ### Documentation
 
 - **[Complete Documentation](docs/README.md)** - Comprehensive guides and references
+- **[Industry Showcases](docs/templates/showcases/)** - ⭐ 22 working templates with real tool integration
 - **[Getting Started](docs/getting-started/)** - Installation and configuration
 - **[Usage Guides](docs/guides/)** - Mode-specific tutorials
 - **[Template Authoring](docs/templates/)** - Creating workflows

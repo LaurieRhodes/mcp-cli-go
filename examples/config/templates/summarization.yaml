@@ -23,7 +23,7 @@ steps:
     
     prompt: |
       Summarize this content:
-      {{stdin}}
+      {{input_data}}
       
       Provide:
       - Executive summary (2-3 sentences)

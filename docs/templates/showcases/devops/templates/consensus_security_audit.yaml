@@ -1,0 +1,467 @@
+name: consensus_security_audit
+description: Multi-provider security audit with cross-validation for high-confidence findings
+version: 1.0.0
+author: Security Templates
+tags: [security, audit, consensus, validation, multi-provider]
+
+config:
+  defaults:
+    temperature: 0.2  # Lower for security analysis (factual, not creative)
+    max_tokens: 6000
+
+steps:
+  # Step 1: Parallel analysis across 3 providers
+  - name: multi_provider_security_scan
+    parallel:
+      # Provider 1: Anthropic Claude (strong reasoning, security focus)
+      - name: claude_audit
+        provider: anthropic
+        model: claude-3-5-sonnet
+        prompt: |
+          Perform comprehensive security audit of this configuration:
+          
+          ```
+          {{input_data.config}}
+          ```
+          
+          **Configuration Type:** {{input_data.type}}
+          **Environment:** {{input_data.environment}}
+          
+          Check for security vulnerabilities in these categories:
+          
+          **1. Authentication & Authorization:**
+          - Weak authentication mechanisms
+          - Missing authorization checks
+          - Privilege escalation vectors
+          - Token/session management issues
+          
+          **2. Secrets Management:**
+          - Hardcoded credentials
+          - Exposed API keys
+          - Unencrypted sensitive data
+          - Secrets in environment variables
+          
+          **3. Network Security:**
+          - Overly permissive network policies
+          - Unnecessary port exposure
+          - Missing TLS/encryption
+          - Insecure protocols (HTTP, FTP)
+          
+          **4. Access Control:**
+          - Excessive permissions
+          - Running as root/admin
+          - Missing principle of least privilege
+          - Service account misuse
+          
+          **5. Input Validation:**
+          - Command injection risks
+          - SQL injection vectors
+          - Path traversal vulnerabilities
+          - Unsafe deserialization
+          
+          **6. Resource Management:**
+          - Missing resource limits
+          - DoS vulnerabilities
+          - Unbounded operations
+          - Memory/CPU exhaustion risks
+          
+          **7. Known Vulnerabilities:**
+          - OWASP Top 10 issues
+          - CWE Common Weakness patterns
+          - CVEs in dependencies
+          - Outdated versions
+          
+          For EACH finding, provide:
+          ```
+          Severity: [CRITICAL|HIGH|MEDIUM|LOW]
+          Category: [category from above]
+          Title: [Brief title]
+          Description: [What is the security issue?]
+          Location: [Where in the config? Line numbers if possible]
+          Impact: [What could an attacker do? What's at risk?]
+          Remediation: [Specific fix with example code]
+          References: [OWASP, CWE, CVE references if applicable]
+          ```
+          
+          Return findings as a structured list, ordered by severity.
+        output: claude_findings
+      
+      # Provider 2: OpenAI GPT-4o (broad knowledge base, pattern recognition)
+      - name: gpt_audit
+        provider: openai
+        model: gpt-4o
+        prompt: |
+          Perform comprehensive security audit of this configuration:
+          
+          ```
+          {{input_data.config}}
+          ```
+          
+          **Configuration Type:** {{input_data.type}}
+          **Environment:** {{input_data.environment}}
+          
+          Check for security vulnerabilities in these categories:
+          
+          **1. Authentication & Authorization:**
+          - Weak authentication mechanisms
+          - Missing authorization checks
+          - Privilege escalation vectors
+          - Token/session management issues
+          
+          **2. Secrets Management:**
+          - Hardcoded credentials
+          - Exposed API keys
+          - Unencrypted sensitive data
+          - Secrets in environment variables
+          
+          **3. Network Security:**
+          - Overly permissive network policies
+          - Unnecessary port exposure
+          - Missing TLS/encryption
+          - Insecure protocols (HTTP, FTP)
+          
+          **4. Access Control:**
+          - Excessive permissions
+          - Running as root/admin
+          - Missing principle of least privilege
+          - Service account misuse
+          
+          **5. Input Validation:**
+          - Command injection risks
+          - SQL injection vectors
+          - Path traversal vulnerabilities
+          - Unsafe deserialization
+          
+          **6. Resource Management:**
+          - Missing resource limits
+          - DoS vulnerabilities
+          - Unbounded operations
+          - Memory/CPU exhaustion risks
+          
+          **7. Known Vulnerabilities:**
+          - OWASP Top 10 issues
+          - CWE Common Weakness patterns
+          - CVEs in dependencies
+          - Outdated versions
+          
+          For EACH finding, provide:
+          ```
+          Severity: [CRITICAL|HIGH|MEDIUM|LOW]
+          Category: [category from above]
+          Title: [Brief title]
+          Description: [What is the security issue?]
+          Location: [Where in the config? Line numbers if possible]
+          Impact: [What could an attacker do? What's at risk?]
+          Remediation: [Specific fix with example code]
+          References: [OWASP, CWE, CVE references if applicable]
+          ```
+          
+          Return findings as a structured list, ordered by severity.
+        output: gpt_findings
+      
+      # Provider 3: Google Gemini (alternative perspective, different training)
+      - name: gemini_audit
+        provider: gemini
+        model: gemini-1.5-pro
+        prompt: |
+          Perform comprehensive security audit of this configuration:
+          
+          ```
+          {{input_data.config}}
+          ```
+          
+          **Configuration Type:** {{input_data.type}}
+          **Environment:** {{input_data.environment}}
+          
+          Check for security vulnerabilities in these categories:
+          
+          **1. Authentication & Authorization:**
+          - Weak authentication mechanisms
+          - Missing authorization checks
+          - Privilege escalation vectors
+          - Token/session management issues
+          
+          **2. Secrets Management:**
+          - Hardcoded credentials
+          - Exposed API keys
+          - Unencrypted sensitive data
+          - Secrets in environment variables
+          
+          **3. Network Security:**
+          - Overly permissive network policies
+          - Unnecessary port exposure
+          - Missing TLS/encryption
+          - Insecure protocols (HTTP, FTP)
+          
+          **4. Access Control:**
+          - Excessive permissions
+          - Running as root/admin
+          - Missing principle of least privilege
+          - Service account misuse
+          
+          **5. Input Validation:**
+          - Command injection risks
+          - SQL injection vectors
+          - Path traversal vulnerabilities
+          - Unsafe deserialization
+          
+          **6. Resource Management:**
+          - Missing resource limits
+          - DoS vulnerabilities
+          - Unbounded operations
+          - Memory/CPU exhaustion risks
+          
+          **7. Known Vulnerabilities:**
+          - OWASP Top 10 issues
+          - CWE Common Weakness patterns
+          - CVEs in dependencies
+          - Outdated versions
+          
+          For EACH finding, provide:
+          ```
+          Severity: [CRITICAL|HIGH|MEDIUM|LOW]
+          Category: [category from above]
+          Title: [Brief title]
+          Description: [What is the security issue?]
+          Location: [Where in the config? Line numbers if possible]
+          Impact: [What could an attacker do? What's at risk?]
+          Remediation: [Specific fix with example code]
+          References: [OWASP, CWE, CVE references if applicable]
+          ```
+          
+          Return findings as a structured list, ordered by severity.
+        output: gemini_findings
+    
+    max_concurrent: 3  # Run all 3 simultaneously
+    aggregate: array   # Store as array for individual access
+    output: all_findings
+
+  # Step 2: Cross-validate findings across providers
+  - name: cross_validate
+    provider: ollama  # Use local model for meta-analysis (cost optimization)
+    model: qwen2.5:32b
+    prompt: |
+      Cross-validate these security audit findings from 3 different AI models.
+      
+      ---
+      
+      **Claude (Anthropic) findings:**
+      {{all_findings[0]}}
+      
+      ---
+      
+      **GPT-4o (OpenAI) findings:**
+      {{all_findings[1]}}
+      
+      ---
+      
+      **Gemini (Google) findings:**
+      {{all_findings[2]}}
+      
+      ---
+      
+      Perform consensus analysis:
+      
+      ## HIGH CONFIDENCE FINDINGS (All 3 models found)
+      
+      For each finding that ALL THREE models identified:
+      - Finding title and severity
+      - Note: "All 3 models agree"
+      - Consensus severity (if models differ, explain)
+      - Location in config
+      - Why this is high confidence
+      
+      ## MEDIUM CONFIDENCE FINDINGS (2 of 3 models found)
+      
+      For each finding that TWO models identified:
+      - Finding title and severity
+      - Note which 2 models found it
+      - Note which model missed it
+      - Possible reasons for disagreement
+      - Location in config
+      - Recommendation: Review manually (likely real, but verify)
+      
+      ## MINORITY FINDINGS (Only 1 model found)
+      
+      For each finding that ONLY ONE model identified:
+      - Finding title and severity
+      - Note which model found it (Claude/GPT/Gemini)
+      - Why might others have missed it? Options:
+        a) This model caught something unique (good catch!)
+        b) This might be a false positive
+        c) Others focused on higher-severity issues first
+      - Location in config
+      - Recommendation: Requires manual investigation
+      
+      ## SEVERITY CONFLICTS (Models disagree on severity)
+      
+      For findings where models agree it exists but disagree on severity:
+      - Finding title
+      - Claude says: [severity]
+      - GPT-4o says: [severity]
+      - Gemini says: [severity]
+      - Recommended severity based on consensus
+      - Rationale for recommendation
+      
+      ## SUMMARY STATISTICS
+      
+      - Total unique findings: [count]
+      - High confidence: [count] ([percentage]%)
+      - Medium confidence: [count] ([percentage]%)
+      - Low confidence: [count] ([percentage]%)
+      - Severity conflicts: [count]
+      
+      ## RECOMMENDATIONS
+      
+      **Immediate action (HIGH confidence + CRITICAL/HIGH severity):**
+      [List findings requiring immediate fix]
+      
+      **Review and validate (MEDIUM confidence OR minority findings):**
+      [List findings requiring manual investigation]
+      
+      **Consider addressing (LOW severity but validated):**
+      [List lower-priority validated findings]
+    output: consensus_analysis
+
+  # Step 3: Generate comprehensive audit report
+  - name: create_audit_report
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Create comprehensive security audit report in markdown format:
+      
+      # Security Audit Report - Multi-Provider Consensus Analysis
+      
+      **Configuration:** {{input_data.name}}  
+      **Type:** {{input_data.type}}  
+      **Environment:** {{input_data.environment}}  
+      **Date:** {{execution.timestamp}}  
+      **Template:** {{template.name}} v{{template.version}}  
+      
+      ---
+      
+      ## Executive Summary
+      
+      This security audit was performed using consensus validation across three independent AI providers (Anthropic Claude, OpenAI GPT-4o, Google Gemini). This multi-provider approach:
+      
+      - **Increases confidence:** Findings all models agree on are highly likely to be real issues
+      - **Reduces false negatives:** Different models catch different patterns
+      - **Identifies unique insights:** Minority findings may represent catches others missed
+      - **Quantifies uncertainty:** Confidence levels help prioritize investigation
+      
+      [Add 2-3 paragraph summary of overall security posture and key findings]
+      
+      ---
+      
+      ## Consensus Analysis
+      
+      {{consensus_analysis}}
+      
+      ---
+      
+      ## Prioritized Action Plan
+      
+      ### IMMEDIATE ACTIONS (Before Production Deployment)
+      
+      Address all HIGH CONFIDENCE findings with CRITICAL or HIGH severity:
+      
+      [Extract from consensus_analysis - high confidence critical/high items]
+      
+      **Estimated effort:** [estimate based on number and complexity]  
+      **Risk if not addressed:** [explain risks]
+      
+      ### SHORT-TERM ACTIONS (This Sprint)
+      
+      Address HIGH CONFIDENCE findings with MEDIUM severity:
+      
+      [Extract from consensus_analysis - high confidence medium items]
+      
+      **Estimated effort:** [estimate]
+      
+      ### INVESTIGATION REQUIRED
+      
+      Manual review needed for:
+      
+      1. **MEDIUM CONFIDENCE findings** - Likely real, but validate:
+         [List items]
+      
+      2. **MINORITY FINDINGS** - Could be unique catches OR false positives:
+         [List items with which model found each]
+      
+      ### CONSIDER FOR BACKLOG
+      
+      Lower priority validated findings:
+      
+      [Extract from consensus_analysis - low severity but validated items]
+      
+      ---
+      
+      ## Individual Model Findings
+      
+      <details>
+      <summary>Claude (Anthropic) Complete Findings</summary>
+      
+      {{all_findings[0]}}
+      
+      </details>
+      
+      <details>
+      <summary>GPT-4o (OpenAI) Complete Findings</summary>
+      
+      {{all_findings[1]}}
+      
+      </details>
+      
+      <details>
+      <summary>Gemini (Google) Complete Findings</summary>
+      
+      {{all_findings[2]}}
+      
+      </details>
+      
+      ---
+      
+      ## Confidence Assessment
+      
+      **Methodology:** Multi-provider consensus validation
+      
+      - **High confidence (3/3 agree):** Findings validated by all three independent AI systems
+      - **Medium confidence (2/3 agree):** Findings validated by two systems, worth investigating
+      - **Low confidence (1/3 only):** Unique findings requiring manual validation
+      
+      **Model Agreement Analysis:**
+      [Analyze patterns: Which models agree most? Which find unique issues?]
+      
+      **Quality of findings:**
+      - Severity distribution
+      - Category coverage
+      - Specificity and actionability of recommendations
+      
+      ---
+      
+      ## Next Steps
+      
+      1. **Immediate:** Address high-confidence critical/high severity findings
+      2. **This week:** Investigate medium-confidence and minority findings
+      3. **This sprint:** Address validated medium-severity findings
+      4. **Manual review:** Validate minority findings (could be valuable unique catches)
+      5. **Re-audit:** After fixes, run this template again to verify resolution
+      
+      ---
+      
+      ## Appendix: Configuration Audited
+      
+      <details>
+      <summary>Full configuration (click to expand)</summary>
+      
+      ```
+      {{input_data.config}}
+      ```
+      
+      </details>
+      
+      ---
+      
+      **End of Security Audit Report**
+      
+      **Note:** This report uses consensus validation to increase confidence, but all findings should be reviewed by qualified security professionals before making decisions. Consensus doesn't guarantee correctness - it quantifies agreement across multiple AI systems.

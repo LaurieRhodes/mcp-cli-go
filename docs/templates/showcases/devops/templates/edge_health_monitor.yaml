@@ -1,0 +1,270 @@
+name: edge_health_monitor
+description: Lightweight health monitoring for edge deployments with offline capability
+version: 1.0.0
+author: Edge Operations Templates
+tags: [edge, monitoring, health-check, lightweight, offline]
+
+config:
+  defaults:
+    provider: ollama  # Local model - no internet required
+    model: qwen2.5:7b  # Smaller model for resource-constrained edge devices
+    temperature: 0.3
+
+steps:
+  # Step 1: Collect current system metrics
+  - name: collect_metrics
+    # This step would integrate with your metrics system
+    # For demonstration, assuming input_data contains current metrics
+    provider: ollama
+    model: qwen2.5:7b
+    prompt: |
+      Parse and structure these system metrics:
+      
+      {{input_data.raw_metrics}}
+      
+      Extract and format:
+      - CPU usage (current, average, peak)
+      - Memory usage (used, available, percentage)
+      - Disk usage (used, available, percentage per mount)
+      - Network (throughput, errors, dropped packets)
+      - Process health (running, stopped, crashed)
+      - Load average (1m, 5m, 15m)
+      
+      Return as structured JSON format for downstream analysis.
+    output: current_metrics
+
+  # Step 2: Analyze health status
+  - name: analyze_health
+    provider: ollama
+    model: qwen2.5:7b
+    prompt: |
+      Analyze system health based on these metrics:
+      
+      {{current_metrics}}
+      
+      Use these thresholds:
+      
+      **CPU:**
+      - < 70%: Healthy
+      - 70-85%: Warning (elevated usage)
+      - 85-95%: Degraded (high usage, monitor closely)
+      - > 95%: Critical (near saturation)
+      
+      **Memory:**
+      - < 75%: Healthy
+      - 75-85%: Warning
+      - 85-95%: Degraded
+      - > 95%: Critical (risk of OOM)
+      
+      **Disk:**
+      - < 80%: Healthy
+      - 80-90%: Warning
+      - 90-95%: Degraded
+      - > 95%: Critical (near full)
+      
+      **Load Average:**
+      - < CPU_count: Healthy
+      - CPU_count to 1.5x: Warning
+      - 1.5x to 2x: Degraded
+      - > 2x CPU_count: Critical
+      
+      Provide:
+      
+      **Overall Status:** [HEALTHY|WARNING|DEGRADED|CRITICAL]
+      
+      **Resource Breakdown:**
+      - CPU: [status] - [current usage]
+      - Memory: [status] - [current usage]
+      - Disk: [status] - [usage by mount]
+      - Load: [status] - [current vs threshold]
+      
+      **Issues Detected:**
+      [List any threshold violations with severity]
+      
+      **Trending:**
+      - Improving / Stable / Degrading
+      - [Explain based on available metrics]
+      
+      **Pressure Points:**
+      [Which resources are under most stress]
+    output: health_analysis
+
+  # Step 3: Detect anomalies
+  - name: anomaly_detection
+    provider: ollama
+    model: qwen2.5:7b
+    prompt: |
+      Compare current metrics to baseline to detect anomalies:
+      
+      **Current metrics:**
+      {{current_metrics}}
+      
+      **Baseline (historical normal):**
+      {{input_data.baseline_metrics}}
+      
+      **Device location:** {{input_data.device_location}}
+      **Time of day:** {{execution.timestamp}}
+      
+      Detect anomalies:
+      
+      **Sudden Changes (>50% deviation from baseline):**
+      - CPU spike: [yes/no] - [current vs baseline]
+      - Memory spike: [yes/no] - [current vs baseline]
+      - Disk growth: [yes/no] - [current vs baseline]
+      - Network anomaly: [yes/no] - [current vs baseline]
+      
+      **Gradual Trends (persistent drift):**
+      - CPU trend: [increasing/stable/decreasing]
+      - Memory trend: [increasing/stable/decreasing]
+      - Disk trend: [increasing/stable/decreasing]
+      
+      **Pattern Changes:**
+      - Load pattern: [matches normal daily pattern?]
+      - Process count: [within normal range?]
+      - Error rates: [elevated vs baseline?]
+      
+      **Anomaly Severity:**
+      - None: All metrics within expected ranges
+      - Low: Minor deviation, monitoring suggested
+      - Medium: Significant deviation, investigation recommended
+      - High: Major deviation, action required
+      - Critical: Severe anomaly, immediate attention needed
+      
+      **Anomaly Details:**
+      [For each detected anomaly, explain what changed and potential causes]
+    output: anomaly_report
+
+  # Step 4: Generate recommendations
+  - name: generate_recommendations
+    provider: ollama
+    model: qwen2.5:7b
+    prompt: |
+      Based on health analysis and anomaly detection, provide actionable recommendations:
+      
+      **Health Status:** {{health_analysis}}
+      **Anomalies:** {{anomaly_report}}
+      
+      Generate recommendations:
+      
+      **IMMEDIATE ACTIONS (if Critical/High):**
+      [Actions needed within minutes/hours]
+      - Example: "Free disk space - /var partition >95%"
+      - Example: "Investigate process causing CPU spike"
+      
+      **SHORT-TERM ACTIONS (if Degraded/Medium):**
+      [Actions needed within days]
+      - Example: "Schedule disk cleanup"
+      - Example: "Review memory usage trend"
+      
+      **MONITORING (if Warning/Low):**
+      [Things to watch]
+      - Example: "Monitor CPU trend over next 24h"
+      - Example: "Track disk growth rate"
+      
+      **PREVENTIVE (if Healthy but trending):**
+      [Proactive measures]
+      - Example: "Disk growing 10%/week, plan expansion"
+      - Example: "Memory creep detected, investigate memory leak"
+      
+      **INVESTIGATION NEEDED:**
+      [Unclear situations requiring human review]
+      - Example: "Unusual traffic pattern - normal or attack?"
+      - Example: "New process consuming resources - authorized?"
+    output: recommendations
+
+  # Step 5: Local logging (always happens, even offline)
+  - name: log_locally
+    provider: ollama
+    model: qwen2.5:7b
+    prompt: |
+      Format log entry for local storage:
+      
+      ```
+      TIMESTAMP: {{execution.timestamp}}
+      LOCATION: {{input_data.device_location}}
+      STATUS: {{health_analysis.overall_status}}
+      ANOMALY_LEVEL: {{anomaly_report.severity}}
+      
+      HEALTH:
+      {{health_analysis}}
+      
+      ANOMALIES:
+      {{anomaly_report}}
+      
+      RECOMMENDATIONS:
+      {{recommendations}}
+      ---
+      ```
+      
+      Return only the formatted log entry above.
+    output: log_entry
+
+  # Step 6: Escalate if critical (only if critical AND internet available)
+  - name: escalate_if_critical
+    condition: "{{health_analysis.overall_status}} == 'CRITICAL' OR {{anomaly_report.severity}} == 'CRITICAL'"
+    # This step would integrate with your alerting system (PagerDuty, Slack, etc.)
+    # If internet unavailable, this step silently skips (condition may not trigger server access)
+    provider: ollama  # Can use cloud provider if internet available
+    model: qwen2.5:7b
+    prompt: |
+      Format critical alert for escalation:
+      
+      **ALERT: Critical Health Issue Detected**
+      
+      **Location:** {{input_data.device_location}}
+      **Time:** {{execution.timestamp}}
+      **Severity:** CRITICAL
+      
+      **Issue:**
+      {{health_analysis.issues_detected}}
+      
+      **Metrics:**
+      {{current_metrics}}
+      
+      **Immediate Actions Required:**
+      {{recommendations.immediate_actions}}
+      
+      **Anomalies:**
+      {{anomaly_report.anomaly_details}}
+      
+      This alert should be sent to:
+      - PagerDuty incident
+      - Slack #ops-alerts channel
+      - On-call engineer (SMS/email)
+    output: alert_payload
+
+  # Step 7: Generate summary report
+  - name: summary_report
+    provider: ollama
+    model: qwen2.5:7b
+    prompt: |
+      Create concise monitoring summary:
+      
+      # Edge Device Health Report
+      
+      **Device:** {{input_data.device_location}}  
+      **Timestamp:** {{execution.timestamp}}  
+      **Overall Status:** {{health_analysis.overall_status}}
+      
+      ## Quick Status
+      
+      {{health_analysis.resource_breakdown}}
+      
+      ## Anomalies
+      
+      {{anomaly_report.severity}}: {{anomaly_report.anomaly_details}}
+      
+      ## Actions Needed
+      
+      {{recommendations.immediate_actions}}
+      
+      {{recommendations.short_term_actions}}
+      
+      ## Trends
+      
+      {{health_analysis.trending}}
+      
+      ---
+      
+      **Logged to:** /var/log/edge-monitor.log  
+      {% if escalate_if_critical %}**Alert sent:** {{alert_payload}}{% endif %}

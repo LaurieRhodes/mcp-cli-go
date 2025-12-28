@@ -29,7 +29,7 @@ steps:
         - name: technical_analysis
           prompt: |
             Provide a TECHNICAL perspective on:
-            {{stdin}}
+            {{input_data}}
             
             Focus on: implementation, architecture, technical feasibility.
           
@@ -39,7 +39,7 @@ steps:
         - name: business_analysis
           prompt: |
             Provide a BUSINESS perspective on:
-            {{stdin}}
+            {{input_data}}
             
             Focus on: ROI, market impact, business value.
           
@@ -49,7 +49,7 @@ steps:
         - name: user_analysis
           prompt: |
             Provide a USER perspective on:
-            {{stdin}}
+            {{input_data}}
             
             Focus on: user experience, accessibility, usability.
           

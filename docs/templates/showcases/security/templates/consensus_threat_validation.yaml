@@ -1,0 +1,371 @@
+name: consensus_threat_validation
+description: Multi-provider threat validation for high-stakes security decisions
+version: 1.0.0
+author: Security Templates
+tags: [security, consensus, validation, multi-provider, critical-decisions]
+
+config:
+  defaults:
+    temperature: 0.2
+    max_tokens: 6000
+
+steps:
+  # Step 1: Parallel analysis from 3 providers
+  - name: multi_provider_analysis
+    parallel:
+      # Provider 1: Anthropic Claude
+      - name: claude_analysis
+        provider: anthropic
+        model: claude-3-5-sonnet
+        prompt: |
+          Analyze this security event and determine if it's a threat:
+          
+          **Event:**
+          {{input_data.event}}
+          
+          **Context:**
+          {{input_data.context}}
+          
+          Assess:
+          
+          **Is this malicious activity?**
+          YES / NO / UNCERTAIN
+          
+          **Threat Level:**
+          CRITICAL / HIGH / MEDIUM / LOW / NONE
+          
+          **Evidence:**
+          List specific indicators that support your assessment
+          
+          **Recommended Action:**
+          - Isolate system
+          - Block IP/domain
+          - Monitor only
+          - No action (false positive)
+          
+          **Confidence:**
+          HIGH / MEDIUM / LOW
+          
+          **Reasoning:**
+          Detailed explanation of your analysis
+        output: claude_verdict
+      
+      # Provider 2: OpenAI GPT-4
+      - name: gpt_analysis
+        provider: openai
+        model: gpt-4o
+        prompt: |
+          Analyze this security event and determine if it's a threat:
+          
+          **Event:**
+          {{input_data.event}}
+          
+          **Context:**
+          {{input_data.context}}
+          
+          Assess:
+          
+          **Is this malicious activity?**
+          YES / NO / UNCERTAIN
+          
+          **Threat Level:**
+          CRITICAL / HIGH / MEDIUM / LOW / NONE
+          
+          **Evidence:**
+          List specific indicators that support your assessment
+          
+          **Recommended Action:**
+          - Isolate system
+          - Block IP/domain
+          - Monitor only
+          - No action (false positive)
+          
+          **Confidence:**
+          HIGH / MEDIUM / LOW
+          
+          **Reasoning:**
+          Detailed explanation of your analysis
+        output: gpt_verdict
+      
+      # Provider 3: Google Gemini
+      - name: gemini_analysis
+        provider: gemini
+        model: gemini-1.5-pro
+        prompt: |
+          Analyze this security event and determine if it's a threat:
+          
+          **Event:**
+          {{input_data.event}}
+          
+          **Context:**
+          {{input_data.context}}
+          
+          Assess:
+          
+          **Is this malicious activity?**
+          YES / NO / UNCERTAIN
+          
+          **Threat Level:**
+          CRITICAL / HIGH / MEDIUM / LOW / NONE
+          
+          **Evidence:**
+          List specific indicators that support your assessment
+          
+          **Recommended Action:**
+          - Isolate system
+          - Block IP/domain
+          - Monitor only
+          - No action (false positive)
+          
+          **Confidence:**
+          HIGH / MEDIUM / LOW
+          
+          **Reasoning:**
+          Detailed explanation of your analysis
+        output: gemini_verdict
+    
+    max_concurrent: 3
+    aggregate: array
+    output: all_verdicts
+
+  # Step 2: Cross-validate findings
+  - name: consensus_validation
+    provider: ollama  # Use local model for meta-analysis (cost optimization)
+    model: qwen2.5:32b
+    prompt: |
+      Cross-validate threat assessments from 3 AI providers:
+      
+      ---
+      
+      **Claude Analysis:**
+      {{all_verdicts[0]}}
+      
+      ---
+      
+      **GPT-4 Analysis:**
+      {{all_verdicts[1]}}
+      
+      ---
+      
+      **Gemini Analysis:**
+      {{all_verdicts[2]}}
+      
+      ---
+      
+      ## Consensus Analysis
+      
+      ### Agreement on Malicious Activity
+      
+      - Claude says: {{all_verdicts[0].malicious}}
+      - GPT-4 says: {{all_verdicts[1].malicious}}
+      - Gemini says: {{all_verdicts[2].malicious}}
+      
+      **Consensus:** [All agree / 2 of 3 agree / All disagree]
+      
+      ### Threat Level Comparison
+      
+      - Claude: {{all_verdicts[0].threat_level}}
+      - GPT-4: {{all_verdicts[1].threat_level}}
+      - Gemini: {{all_verdicts[2].threat_level}}
+      
+      **Consensus Threat Level:** [Highest / Average / Requires review]
+      
+      ### Recommended Actions Comparison
+      
+      - Claude: {{all_verdicts[0].recommended_action}}
+      - GPT-4: {{all_verdicts[1].recommended_action}}
+      - Gemini: {{all_verdicts[2].recommended_action}}
+      
+      **Consensus Action:** [Action if all agree / Escalate if disagree]
+      
+      ### Evidence Synthesis
+      
+      **Common Evidence** (all 3 found):
+      [List evidence all models identified]
+      
+      **Partial Evidence** (2 of 3 found):
+      [List evidence 2 models identified]
+      
+      **Unique Findings** (only 1 model found):
+      - From Claude: [unique items]
+      - From GPT-4: [unique items]
+      - From Gemini: [unique items]
+      
+      ### Confidence Assessment
+      
+      **Overall Confidence:**
+      - HIGH: All 3 agree on malicious + high threat
+      - MEDIUM: 2 of 3 agree, or mixed threat levels
+      - LOW: All 3 disagree, or all uncertain
+      
+      **Recommended Decision:**
+      
+      {% if consensus == 'all_agree_malicious' and threat_high %}
+      **AUTO-EXECUTE RESPONSE**
+      - All providers agree this is a serious threat
+      - High confidence in recommended actions
+      - Safe to proceed with automated response
+      {% elif consensus == '2_of_3_agree' %}
+      **SENIOR ANALYST REVIEW**
+      - Majority agree but not unanimous
+      - Human review recommended before action
+      - Escalate to senior analyst with findings
+      {% else %}
+      **SECURITY TEAM REVIEW**
+      - No consensus or all uncertain
+      - Do not take automated action
+      - Full team review required
+      {% endif %}
+      
+      ### Summary for Decision Maker
+      
+      [2-3 paragraph summary of consensus findings, areas of agreement/disagreement, 
+      and final recommendation]
+    output: consensus
+
+  # Step 3: Generate decision report
+  - name: decision_report
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      # Consensus Threat Validation Report
+      
+      **Event Analyzed:** {{input_data.event_id}}
+      **Timestamp:** {{execution.timestamp}}
+      **Validation Method:** Multi-Provider Consensus (3 AI systems)
+      
+      ---
+      
+      ## Executive Summary
+      
+      {{consensus.summary}}
+      
+      ---
+      
+      ## Consensus Findings
+      
+      **Malicious Activity:** {{consensus.malicious_consensus}}
+      **Threat Level:** {{consensus.threat_level_consensus}}
+      **Confidence:** {{consensus.overall_confidence}}
+      
+      **Recommended Decision:** {{consensus.recommended_decision}}
+      
+      ---
+      
+      ## Individual Provider Assessments
+      
+      ### Claude (Anthropic)
+      
+      **Verdict:** {{all_verdicts[0].malicious}}
+      **Threat Level:** {{all_verdicts[0].threat_level}}
+      **Confidence:** {{all_verdicts[0].confidence}}
+      
+      **Evidence:**
+      {{all_verdicts[0].evidence}}
+      
+      **Recommendation:** {{all_verdicts[0].recommended_action}}
+      
+      **Reasoning:**
+      {{all_verdicts[0].reasoning}}
+      
+      ---
+      
+      ### GPT-4 (OpenAI)
+      
+      **Verdict:** {{all_verdicts[1].malicious}}
+      **Threat Level:** {{all_verdicts[1].threat_level}}
+      **Confidence:** {{all_verdicts[1].confidence}}
+      
+      **Evidence:**
+      {{all_verdicts[1].evidence}}
+      
+      **Recommendation:** {{all_verdicts[1].recommended_action}}
+      
+      **Reasoning:**
+      {{all_verdicts[1].reasoning}}
+      
+      ---
+      
+      ### Gemini (Google)
+      
+      **Verdict:** {{all_verdicts[2].malicious}}
+      **Threat Level:** {{all_verdicts[2].threat_level}}
+      **Confidence:** {{all_verdicts[2].confidence}}
+      
+      **Evidence:**
+      {{all_verdicts[2].evidence}}
+      
+      **Recommendation:** {{all_verdicts[2].recommended_action}}
+      
+      **Reasoning:**
+      {{all_verdicts[2].reasoning}}
+      
+      ---
+      
+      ## Evidence Analysis
+      
+      ### High-Confidence Evidence (All 3 Agree)
+      
+      {{consensus.common_evidence}}
+      
+      ### Medium-Confidence Evidence (2 of 3 Agree)
+      
+      {{consensus.partial_evidence}}
+      
+      ### Unique Findings (Requires Investigation)
+      
+      {{consensus.unique_findings}}
+      
+      ---
+      
+      ## Decision Framework
+      
+      {% if consensus.overall_confidence == 'HIGH' %}
+      ### ✅ High Confidence - Proceed with Automated Response
+      
+      All three providers agree on threat assessment. Safe to execute
+      recommended actions automatically.
+      
+      **Actions:**
+      {{consensus.recommended_actions}}
+      
+      {% elif consensus.overall_confidence == 'MEDIUM' %}
+      ### ⚠️ Medium Confidence - Senior Analyst Review Required
+      
+      Providers partially agree. Human review recommended before taking
+      disruptive actions.
+      
+      **Review Points:**
+      {{consensus.review_points}}
+      
+      {% else %}
+      ### ❌ Low Confidence - Security Team Review Required
+      
+      Providers disagree or uncertain. Do NOT take automated action.
+      Escalate to full security team for analysis.
+      
+      **Escalation Reasons:**
+      {{consensus.escalation_reasons}}
+      
+      {% endif %}
+      
+      ---
+      
+      ## Cost Analysis
+      
+      **Validation Cost:**
+      - Claude analysis: ~$0.045
+      - GPT-4 analysis: ~$0.032
+      - Gemini analysis: ~$0.041
+      - Consensus synthesis: ~$0.003 (local model)
+      - **Total: ~$0.121**
+      
+      **Value:**
+      This validation provides high-confidence decision-making for
+      potentially disruptive actions (system isolation, IP blocking, etc.)
+      
+      ---
+      
+      **Validation Method:** Multi-Provider Consensus
+      **Template:** {{template.name}} v{{template.version}}
+      **Providers:** Anthropic Claude, OpenAI GPT-4, Google Gemini

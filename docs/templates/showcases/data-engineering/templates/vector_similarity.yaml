@@ -1,0 +1,491 @@
+name: vector_similarity
+description: Semantic similarity search, clustering, and duplicate detection using vector embeddings
+version: 1.0.0
+author: Data Engineering Templates
+tags: [data-engineering, vectors, similarity, embeddings, clustering, recommendations]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-3-5-sonnet
+    temperature: 0.3
+    max_tokens: 6000
+
+steps:
+  # Step 1: Prepare dataset for embedding
+  - name: prepare_dataset
+    prompt: |
+      Prepare dataset for similarity analysis:
+      
+      **Dataset:**
+      {{input_data.dataset}}
+      
+      **Text Field:** {{input_data.text_field}}
+      **ID Field:** {{input_data.id_field}}
+      
+      For each item, extract:
+      - Unique ID
+      - Text content for embedding
+      - Metadata (for filtering/display)
+      
+      Return structured dataset:
+      ```json
+      {
+        "items": [
+          {
+            "id": "item_001",
+            "text": "content to embed",
+            "metadata": {
+              "title": "...",
+              "category": "...",
+              "date": "..."
+            }
+          }
+        ],
+        "total_items": 1000
+      }
+      ```
+    output: prepared_data
+
+  # Step 2: Generate embeddings for all items
+  - name: generate_embeddings
+    provider: ollama
+    model: nomic-embed-text
+    prompt: |
+      Generate embeddings for similarity analysis:
+      
+      **Items to Embed:**
+      {{prepared_data.items}}
+      
+      **Embedding Model:** {{input_data.embedding_model | default: 'nomic-embed-text'}}
+      **Use Case:** {{input_data.use_case | default: 'similarity_search'}}
+      
+      For each item, generate embedding vector:
+      - Model: nomic-embed-text (768 dimensions)
+      - Normalize vectors for cosine similarity
+      
+      Note: In production, this would batch process via embedding API.
+      
+      Return:
+      ```json
+      {
+        "embeddings": [
+          {
+            "id": "item_001",
+            "vector": [0.123, -0.456, ...],  // 768 dimensions
+            "text": "original text"
+          }
+        ],
+        "model": "nomic-embed-text",
+        "dimensions": 768,
+        "total_embedded": 1000
+      }
+      ```
+    output: embeddings
+
+  # Step 3: Compute pairwise similarities
+  - name: compute_similarities
+    prompt: |
+      Compute pairwise similarities between all items:
+      
+      **Embeddings:**
+      {{embeddings}}
+      
+      **Similarity Metric:** {{input_data.similarity_metric | default: 'cosine'}}
+      **Threshold:** {{input_data.similarity_threshold | default: 0.80}}
+      
+      For each item, find most similar items:
+      
+      1. Compute similarity with all other items
+      2. Rank by similarity score (1.0 = identical, 0.0 = unrelated)
+      3. Filter to items above threshold
+      4. Return top N most similar
+      
+      Return similarity matrix:
+      ```json
+      {
+        "similarities": [
+          {
+            "item_id": "item_001",
+            "similar_items": [
+              {
+                "id": "item_042",
+                "similarity": 0.95,
+                "text": "similar content"
+              },
+              {
+                "id": "item_123",
+                "similarity": 0.87,
+                "text": "also similar"
+              }
+            ]
+          }
+        ],
+        "avg_similarity": 0.45,
+        "high_similarity_pairs": 250  // > 0.80
+      }
+      ```
+    output: similarities
+
+  # Step 4: Detect duplicates
+  - name: detect_duplicates
+    prompt: |
+      Detect duplicate and near-duplicate items:
+      
+      **Similarities:**
+      {{similarities}}
+      
+      **Duplicate Threshold:** {{input_data.duplicate_threshold | default: 0.95}}
+      
+      Identify duplicates:
+      - Similarity > 0.95: Very likely duplicates
+      - Similarity 0.90-0.95: Possible duplicates (review)
+      - Similarity 0.80-0.90: Similar but probably not duplicates
+      
+      For each duplicate pair:
+      ```json
+      {
+        "duplicates": [
+          {
+            "item_1": {
+              "id": "item_001",
+              "text": "..."
+            },
+            "item_2": {
+              "id": "item_042",
+              "text": "..."
+            },
+            "similarity": 0.98,
+            "confidence": "very_high",
+            "recommendation": "Keep item_001, remove item_042"
+          }
+        ],
+        "summary": {
+          "total_duplicates": 45,
+          "very_high_confidence": 30,
+          "high_confidence": 12,
+          "medium_confidence": 3
+        }
+      }
+      ```
+    output: duplicates
+
+  # Step 5: Cluster similar items
+  - name: cluster_items
+    prompt: |
+      Identify clusters of similar items:
+      
+      **Similarities:**
+      {{similarities}}
+      
+      **Clustering Method:** {{input_data.clustering_method | default: 'hierarchical'}}
+      **Min Cluster Size:** {{input_data.min_cluster_size | default: 3}}
+      
+      Group items into semantic clusters:
+      
+      1. Items with high mutual similarity form clusters
+      2. Each cluster represents a topic/theme
+      3. Identify cluster centroids (most representative item)
+      4. Name clusters based on common themes
+      
+      Return clusters:
+      ```json
+      {
+        "clusters": [
+          {
+            "cluster_id": "cluster_001",
+            "name": "Authentication & Security",
+            "size": 25,
+            "avg_internal_similarity": 0.82,
+            "centroid_item": "item_123",
+            "items": ["item_123", "item_124", "item_125", ...]
+          }
+        ],
+        "summary": {
+          "total_clusters": 15,
+          "clustered_items": 850,
+          "outliers": 150  // items not in any cluster
+        }
+      }
+      ```
+    output: clusters
+
+  # Step 6: Generate recommendations
+  - name: generate_recommendations
+    prompt: |
+      Generate item-to-item recommendations:
+      
+      **Similarities:**
+      {{similarities}}
+      
+      **Top N:** {{input_data.top_n_recommendations | default: 10}}
+      
+      For each item, recommend most similar items:
+      
+      **Use Cases:**
+      - E-commerce: "Customers who viewed this also viewed..."
+      - Content: "Related articles"
+      - Customer support: "Similar past tickets"
+      
+      Return recommendations:
+      ```json
+      {
+        "recommendations": [
+          {
+            "item_id": "item_001",
+            "item_title": "Product A",
+            "recommended_items": [
+              {
+                "id": "item_042",
+                "title": "Product B",
+                "similarity": 0.89,
+                "reason": "Similar features and category"
+              }
+            ]
+          }
+        ]
+      }
+      ```
+    output: recommendations
+
+  # Step 7: Generate comprehensive analysis report
+  - name: generate_report
+    prompt: |
+      # Vector Similarity Analysis Report
+      
+      **Dataset:** {{input_data.dataset_name}}
+      **Date:** {{execution.timestamp}}
+      **Template:** {{template.name}} v{{template.version}}
+      
+      ---
+      
+      ## Executive Summary
+      
+      Semantic similarity analysis performed on {{prepared_data.total_items}} items
+      using vector embeddings. This analysis enables similarity search, duplicate
+      detection, clustering, and recommendations.
+      
+      **Key Results:**
+      - Items analyzed: {{prepared_data.total_items}}
+      - Duplicates found: {{duplicates.summary.total_duplicates}}
+      - Clusters identified: {{clusters.summary.total_clusters}}
+      - High-similarity pairs: {{similarities.high_similarity_pairs}}
+      
+      ---
+      
+      ## Dataset Overview
+      
+      **Total Items:** {{prepared_data.total_items}}
+      **Text Field:** {{input_data.text_field}}
+      **Metadata:** {{prepared_data.metadata_fields}}
+      
+      ---
+      
+      ## Embedding Generation
+      
+      **Model:** {{embeddings.model}}
+      **Dimensions:** {{embeddings.dimensions}}
+      **Items Embedded:** {{embeddings.total_embedded}}
+      
+      **Processing:**
+      - Embedding model: {{embeddings.model}}
+      - Vector dimensions: {{embeddings.dimensions}}
+      - Normalization: Applied for cosine similarity
+      
+      ---
+      
+      ## Similarity Analysis
+      
+      **Similarity Metric:** {{input_data.similarity_metric | default: 'cosine'}}
+      **Threshold:** {{input_data.similarity_threshold | default: 0.80}}
+      
+      **Distribution:**
+      - Average similarity across all pairs: {{similarities.avg_similarity}}
+      - High similarity pairs (>0.80): {{similarities.high_similarity_pairs}}
+      - Very high similarity (>0.95): {{similarities.very_high_pairs}}
+      
+      **Interpretation:**
+      - Similarity 0.90-1.00: Nearly identical
+      - Similarity 0.80-0.90: Very similar
+      - Similarity 0.70-0.80: Similar
+      - Similarity <0.70: Different
+      
+      ---
+      
+      ## Duplicate Detection
+      
+      **Threshold:** {{input_data.duplicate_threshold | default: 0.95}}
+      
+      **Results:**
+      - Total duplicate pairs: {{duplicates.summary.total_duplicates}}
+      - Very high confidence: {{duplicates.summary.very_high_confidence}}
+      - High confidence: {{duplicates.summary.high_confidence}}
+      - Medium confidence: {{duplicates.summary.medium_confidence}}
+      
+      **Top Duplicate Pairs:**
+      {% for dup in duplicates.duplicates[:5] %}
+      {{loop.index}}. {{dup.item_1.id}} ↔ {{dup.item_2.id}} ({{dup.similarity}})
+         Recommendation: {{dup.recommendation}}
+      {% endfor %}
+      
+      **Action Required:**
+      Review and remove {{duplicates.summary.total_duplicates}} duplicate items
+      to improve data quality.
+      
+      ---
+      
+      ## Cluster Analysis
+      
+      **Clustering Method:** {{input_data.clustering_method | default: 'hierarchical'}}
+      **Min Cluster Size:** {{input_data.min_cluster_size | default: 3}}
+      
+      **Results:**
+      - Total clusters: {{clusters.summary.total_clusters}}
+      - Clustered items: {{clusters.summary.clustered_items}}
+      - Outliers: {{clusters.summary.outliers}}
+      
+      **Top Clusters:**
+      {% for cluster in clusters.clusters[:10] %}
+      {{loop.index}}. {{cluster.name}} ({{cluster.size}} items)
+         Average internal similarity: {{cluster.avg_internal_similarity}}
+         Centroid: {{cluster.centroid_item}}
+      {% endfor %}
+      
+      **Use Cases:**
+      - Topic modeling: Understand main themes in dataset
+      - Content organization: Group similar items
+      - Anomaly detection: Outliers may be unique/interesting
+      
+      ---
+      
+      ## Recommendations Generated
+      
+      **Top N per Item:** {{input_data.top_n_recommendations | default: 10}}
+      **Total Recommendations:** {{recommendations.total_recommendations}}
+      
+      **Sample Recommendations:**
+      {% for rec in recommendations.recommendations[:3] %}
+      
+      **{{rec.item_title}}** ({{rec.item_id}}):
+      {% for suggested in rec.recommended_items[:5] %}
+      - {{suggested.title}} (similarity: {{suggested.similarity}})
+        {{suggested.reason}}
+      {% endfor %}
+      {% endfor %}
+      
+      **Applications:**
+      - E-commerce: Product recommendations
+      - Content platforms: Related articles/videos
+      - Customer support: Similar past tickets
+      - Research: Find related papers
+      
+      ---
+      
+      ## Use Case Examples
+      
+      ### 1. Semantic Search
+      
+      **Query:** "How to configure authentication?"
+      **Process:**
+      1. Embed query using same model
+      2. Find items with highest similarity to query
+      3. Return ranked results
+      
+      **Implementation:**
+      - Store embeddings in vector database (Pinecone, Weaviate, etc.)
+      - Query: <100ms latency
+      - Results: Semantically relevant, not just keyword matching
+      
+      ### 2. Duplicate Detection
+      
+      **Duplicates Found:** {{duplicates.summary.total_duplicates}}
+      **Savings:**
+      - Storage: ~{{duplicates.summary.total_duplicates}} × avg_item_size
+      - Processing: Reduced dataset size improves training speed
+      - Quality: Removes redundancy, improves diversity
+      
+      ### 3. Content Recommendations
+      
+      **Recommendations per Item:** {{input_data.top_n_recommendations}}
+      **Coverage:** {{recommendations.coverage}}%
+      **Quality:** Based on semantic similarity, not just metadata
+      
+      ### 4. Clustering & Organization
+      
+      **Clusters:** {{clusters.summary.total_clusters}} topic areas
+      **Use:** Organize content, understand dataset structure
+      **Benefit:** Discover hidden themes and relationships
+      
+      ---
+      
+      ## Performance Metrics
+      
+      **Processing Time:**
+      - Dataset preparation: {{prepare_time | default: 'N/A'}}
+      - Embedding generation: {{embed_time | default: 'N/A'}}
+      - Similarity computation: {{similarity_time | default: 'N/A'}}
+      - Clustering: {{cluster_time | default: 'N/A'}}
+      - **Total:** {{execution.duration | default: 'N/A'}}
+      
+      **Resource Usage:**
+      - Embeddings storage: ~{{embeddings.storage_size | default: 'N/A'}}MB
+      - Vector database: {{vector_db_size | default: 'N/A'}}MB
+      
+      ---
+      
+      ## Recommendations
+      
+      ### Data Quality
+      {% if duplicates.summary.total_duplicates > 0 %}
+      ⚠️ Remove {{duplicates.summary.total_duplicates}} duplicate items
+      {% else %}
+      ✓ No duplicates found
+      {% endif %}
+      
+      ### Clustering
+      {% if clusters.summary.outliers > 100 %}
+      ⚠️ {{clusters.summary.outliers}} outliers - review for quality issues
+      {% else %}
+      ✓ Most items successfully clustered
+      {% endif %}
+      
+      ### Similarity Threshold
+      {% if similarities.avg_similarity < 0.30 %}
+      ⚠️ Low average similarity - dataset may be too diverse
+      Consider: Separate analysis by category
+      {% elif similarities.avg_similarity > 0.70 %}
+      ⚠️ High average similarity - dataset may be too homogeneous
+      Consider: More diverse content
+      {% else %}
+      ✓ Similarity distribution is healthy
+      {% endif %}
+      
+      ---
+      
+      ## Next Steps
+      
+      1. **Deploy Recommendations:**
+         - Store similarity matrix
+         - Implement recommendation API
+         - A/B test against existing system
+      
+      2. **Remove Duplicates:**
+         - Review high-confidence duplicates
+         - Remove or merge duplicate items
+         - Re-run analysis on cleaned dataset
+      
+      3. **Leverage Clusters:**
+         - Use for content organization
+         - Improve search with cluster filtering
+         - Identify content gaps (small clusters)
+      
+      4. **Monitor Performance:**
+         - Track recommendation click-through rate
+         - Measure search relevance
+         - Update embeddings as data changes
+      
+      ---
+      
+      **Analysis Type:** Vector Similarity
+      **Template:** {{template.name}} v{{template.version}}
+      **Timestamp:** {{execution.timestamp}}

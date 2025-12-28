@@ -21,14 +21,14 @@ steps:
   - name: analyze_sentiment
     description: "Analyze customer sentiment using reusable template"
     template: sentiment_analysis
-    template_input: "{{stdin}}"
+    template_input: "{{input_data}}"
     output: sentiment_data
   
   # Step 2: Call entity extraction template
   - name: extract_entities
     description: "Extract entities using reusable template"
     template: entity_extraction
-    template_input: "{{stdin}}"
+    template_input: "{{input_data}}"
     output: entity_data
   
   # Step 3: Determine priority based on sentiment
@@ -64,7 +64,7 @@ steps:
     prompt: |
       Create a professional response template for this ticket:
       
-      Original Message: {{stdin}}
+      Original Message: {{input_data}}
       
       Sentiment Analysis: {{sentiment_data}}
       

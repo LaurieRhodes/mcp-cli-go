@@ -23,7 +23,7 @@ steps:
     
     prompt: |
       Assess the severity of this situation:
-      {{stdin}}
+      {{input_data}}
       
       Respond with ONLY one word: low, medium, high, or critical
     
@@ -38,7 +38,7 @@ steps:
     prompt: |
       CRITICAL ALERT REQUIRED
       
-      Situation: {{stdin}}
+      Situation: {{input_data}}
       Severity: {{severity_level}}
       
       Generate an urgent alert message for immediate response.
@@ -54,7 +54,7 @@ steps:
     prompt: |
       HIGH PRIORITY
       
-      Situation: {{stdin}}
+      Situation: {{input_data}}
       Severity: {{severity_level}}
       
       Provide escalation plan and timeline.
@@ -70,7 +70,7 @@ steps:
     prompt: |
       Standard Processing
       
-      Situation: {{stdin}}
+      Situation: {{input_data}}
       Severity: {{severity_level}}
       
       Provide standard response plan.
@@ -87,7 +87,7 @@ steps:
     prompt: |
       Final Summary:
       
-      Input: {{stdin}}
+      Input: {{input_data}}
       Assessed Severity: {{severity_level}}
       
       Provide concise summary of actions taken based on severity.

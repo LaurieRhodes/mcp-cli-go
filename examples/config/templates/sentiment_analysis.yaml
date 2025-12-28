@@ -23,7 +23,7 @@ steps:
     
     prompt: |
       Analyze the sentiment of this text:
-      {{stdin}}
+      {{input_data}}
       
       Provide:
       1. Overall sentiment (positive/negative/neutral)

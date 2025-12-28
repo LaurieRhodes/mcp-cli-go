@@ -17,6 +17,6 @@ config:
 steps:
   - name: analyze
     description: "Analyze the input data"
-    prompt: "Analyze this data and provide insights: {{stdin}}"
+    prompt: "Analyze this data and provide insights: {{input_data}}"
     servers: []
     output: analysis_result

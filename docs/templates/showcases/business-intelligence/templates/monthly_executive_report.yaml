@@ -1,0 +1,446 @@
+name: monthly_executive_report
+description: Automated monthly KPI deck with scheduled execution
+version: 1.0.0
+author: Business Intelligence Templates
+tags: [business-intelligence, executive-reporting, recurring, scheduled, kpis]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-3-5-sonnet
+    temperature: 0.2
+    max_tokens: 6000
+
+# Scheduled execution (runs automatically)
+schedule:
+  frequency: monthly
+  day: 1  # First day of month
+  time: "06:00"  # 6 AM
+
+steps:
+  # Step 1: Collect metrics from multiple platforms in parallel
+  - name: collect_all_metrics
+    prompt: |
+      Collect metrics from multiple business platforms:
+      
+      Note: In production, this would use MCP servers to query:
+      - Google Analytics (web metrics)
+      - Mixpanel (product metrics)
+      - Salesforce (sales metrics)
+      - Zendesk (support metrics)
+      - Financial systems (revenue, costs)
+      
+      For demonstration, return structured metrics:
+      ```json
+      {
+        "web_analytics": {
+          "users": 150000,
+          "sessions": 425000,
+          "conversion_rate": 0.032,
+          "bounce_rate": 0.42
+        },
+        "product_analytics": {
+          "dau": 12500,
+          "mau": 45000,
+          "wau_over_mau": 0.65,
+          "feature_adoption": {
+            "feature_a": 0.78,
+            "feature_b": 0.45
+          }
+        },
+        "sales_metrics": {
+          "arr": 12500000,
+          "new_arr": 850000,
+          "churn_arr": 125000,
+          "net_new_arr": 725000,
+          "pipeline": 5600000,
+          "win_rate": 0.28
+        },
+        "support_metrics": {
+          "tickets_created": 2847,
+          "tickets_resolved": 2912,
+          "csat_score": 4.2,
+          "avg_response_time_hours": 3.5
+        },
+        "financial": {
+          "revenue": 1125000,
+          "costs": 875000,
+          "gross_margin": 0.45,
+          "burn_rate": 250000
+        },
+        "period": {
+          "month": "{{current_month}}",
+          "year": 2024
+        }
+      }
+      ```
+    output: current_metrics
+  
+  # Step 2: Calculate MoM and YoY changes
+  - name: calculate_trends
+    prompt: |
+      Calculate month-over-month and year-over-year trends:
+      
+      **Current Metrics:**
+      {{current_metrics}}
+      
+      **Previous Month Metrics:**
+      {{load_from_database('metrics', 'previous_month')}}
+      
+      **Same Month Last Year:**
+      {{load_from_database('metrics', 'same_month_last_year')}}
+      
+      For each KPI, calculate:
+      
+      ## Trends
+      - Current value
+      - Previous month value
+      - MoM change (absolute)
+      - MoM change (percentage)
+      - YoY change (absolute)
+      - YoY change (percentage)
+      - Trend direction (up/down/flat)
+      
+      ## Status vs Goal
+      - Monthly goal
+      - Current vs goal (on_track/at_risk/off_track)
+      - Projected month-end value
+      
+      Return KPI analysis:
+      ```json
+      {
+        "kpis": [
+          {
+            "name": "ARR",
+            "category": "sales",
+            "current": 12500000,
+            "previous_month": 11775000,
+            "mom_change": 725000,
+            "mom_change_pct": 0.0616,
+            "yoy_change": 3500000,
+            "yoy_change_pct": 0.389,
+            "trend": "up",
+            "goal_monthly": 12000000,
+            "status": "on_track",
+            "goal_vs_actual_pct": 0.042
+          },
+          {
+            "name": "Monthly Active Users",
+            "category": "product",
+            "current": 45000,
+            "previous_month": 43500,
+            "mom_change": 1500,
+            "mom_change_pct": 0.0345,
+            "yoy_change": 12000,
+            "yoy_change_pct": 0.364,
+            "trend": "up",
+            "goal_monthly": 50000,
+            "status": "at_risk",
+            "goal_vs_actual_pct": -0.10
+          }
+        ]
+      }
+      ```
+    output: kpi_trends
+  
+  # Step 3: Generate insights
+  - name: generate_insights
+    prompt: |
+      Analyze KPIs and generate executive insights:
+      
+      **KPI Trends:**
+      {{kpi_trends}}
+      
+      **Current Metrics:**
+      {{current_metrics}}
+      
+      Generate insights:
+      
+      ## Top 3 Wins (Biggest Positive Changes)
+      Identify metrics with:
+      - Strong positive MoM growth
+      - Exceeding goals
+      - Positive trend acceleration
+      
+      For each, explain:
+      - What improved
+      - How much (specific numbers)
+      - What's driving the improvement
+      
+      ## Top 3 Concerns (Negative Trends or At-Risk Goals)
+      Identify metrics with:
+      - Negative MoM change
+      - Below goal
+      - Concerning trends
+      
+      For each, explain:
+      - What's declining
+      - How much below target
+      - Potential causes
+      - Recommended actions
+      
+      ## Key Drivers Analysis
+      What's causing the changes?
+      - Product launches
+      - Marketing campaigns
+      - Seasonal effects
+      - Market conditions
+      - Operational changes
+      
+      ## Recommended Actions
+      Based on trends, what should leadership do?
+      - Immediate actions (this week)
+      - Strategic adjustments (this quarter)
+      - Areas needing investigation
+      
+      Return insights:
+      ```json
+      {
+        "summary": "Strong growth in ARR (+6.2% MoM) driven by enterprise sales, but MAU growth slowing (at risk of missing Q4 target)",
+        "top_wins": [
+          {
+            "metric": "ARR",
+            "achievement": "+$725K MoM (+6.2%)",
+            "driver": "3 new enterprise deals closed",
+            "impact": "On track for $15M ARR by EOY"
+          },
+          {
+            "metric": "CSAT Score",
+            "achievement": "4.2 (up from 3.9)",
+            "driver": "New support workflow implemented",
+            "impact": "Lower churn risk, better retention"
+          }
+        ],
+        "top_concerns": [
+          {
+            "metric": "MAU Growth",
+            "issue": "Only +3.4% MoM (target: +8%)",
+            "cause": "Slower new user activation",
+            "action": "Investigate onboarding funnel, A/B test improvements"
+          },
+          {
+            "metric": "Gross Margin",
+            "issue": "45% (target: 50%)",
+            "cause": "Increased infrastructure costs",
+            "action": "Review cloud spend optimization opportunities"
+          }
+        ],
+        "key_drivers": [
+          "Enterprise sales momentum continuing from Q3",
+          "Support team improvements showing results",
+          "User growth slowing - need activation focus"
+        ],
+        "recommended_actions": [
+          "Immediate: Analyze onboarding drop-off points",
+          "This month: Launch onboarding A/B tests",
+          "This quarter: Optimize infrastructure costs"
+        ]
+      }
+      ```
+    output: insights
+  
+  # Step 4: Create PowerPoint deck
+  - name: create_presentation
+    prompt: |
+      Generate monthly executive report presentation:
+      
+      **KPIs:** {{kpi_trends}}
+      **Insights:** {{insights}}
+      **Period:** {{current_metrics.period.month}} {{current_metrics.period.year}}
+      
+      Note: In production, this would call a PowerPoint generation template
+      or use MCP server to create actual .pptx file.
+      
+      Create presentation outline:
+      
+      # Monthly Business Review
+      ## {{current_metrics.period.month}} {{current_metrics.period.year}}
+      
+      ---
+      
+      ## Slide 1: Executive Summary
+      
+      **Performance Snapshot:**
+      - ARR: {{kpi_trends.kpis | find: 'name=ARR' | format_currency}}
+      - MAU: {{kpi_trends.kpis | find: 'name=Monthly Active Users' | format_number}}
+      - Revenue: {{current_metrics.financial.revenue | format_currency}}
+      - Burn Rate: {{current_metrics.financial.burn_rate | format_currency}}
+      
+      **Key Insight:**
+      {{insights.summary}}
+      
+      ---
+      
+      ## Slide 2: Top Wins 🎉
+      
+      {{#each insights.top_wins}}
+      ### {{@index + 1}}. {{this.metric}}
+      
+      **Achievement:** {{this.achievement}}
+      
+      **What Drove This:**
+      {{this.driver}}
+      
+      **Impact:**
+      {{this.impact}}
+      
+      ---
+      {{/each}}
+      
+      ---
+      
+      ## Slide 3: Areas of Concern ⚠️
+      
+      {{#each insights.top_concerns}}
+      ### {{@index + 1}}. {{this.metric}}
+      
+      **Issue:** {{this.issue}}
+      
+      **Likely Cause:**
+      {{this.cause}}
+      
+      **Recommended Action:**
+      {{this.action}}
+      
+      ---
+      {{/each}}
+      
+      ---
+      
+      ## Slide 4: Sales & Revenue Metrics
+      
+      [Chart: ARR Growth Over Time]
+      
+      **ARR:** {{current_metrics.sales_metrics.arr | format_currency}}
+      - MoM: {{kpi_trends.kpis | find: 'name=ARR' | attr: 'mom_change' | format_currency}} ({{kpi_trends.kpis | find: 'name=ARR' | attr: 'mom_change_pct' | format_percent}})
+      - YoY: {{kpi_trends.kpis | find: 'name=ARR' | attr: 'yoy_change' | format_currency}} ({{kpi_trends.kpis | find: 'name=ARR' | attr: 'yoy_change_pct' | format_percent}})
+      
+      **New ARR:** {{current_metrics.sales_metrics.new_arr | format_currency}}
+      **Churn ARR:** {{current_metrics.sales_metrics.churn_arr | format_currency}}
+      **Net New ARR:** {{current_metrics.sales_metrics.net_new_arr | format_currency}}
+      
+      **Pipeline:** {{current_metrics.sales_metrics.pipeline | format_currency}}
+      **Win Rate:** {{current_metrics.sales_metrics.win_rate | format_percent}}
+      
+      ---
+      
+      ## Slide 5: Product & Growth Metrics
+      
+      [Chart: MAU Growth Over Time]
+      
+      **MAU:** {{current_metrics.product_analytics.mau | format_number}}
+      - MoM: {{kpi_trends.kpis | find: 'name=Monthly Active Users' | attr: 'mom_change' | format_number}} ({{kpi_trends.kpis | find: 'name=Monthly Active Users' | attr: 'mom_change_pct' | format_percent}})
+      
+      **DAU:** {{current_metrics.product_analytics.dau | format_number}}
+      **DAU/MAU:** {{current_metrics.product_analytics.dau / current_metrics.product_analytics.mau | format_percent}}
+      
+      **Feature Adoption:**
+      - Feature A: {{current_metrics.product_analytics.feature_adoption.feature_a | format_percent}}
+      - Feature B: {{current_metrics.product_analytics.feature_adoption.feature_b | format_percent}}
+      
+      ---
+      
+      ## Slide 6: Customer Success Metrics
+      
+      **Support Tickets:**
+      - Created: {{current_metrics.support_metrics.tickets_created}}
+      - Resolved: {{current_metrics.support_metrics.tickets_resolved}}
+      - Net: {{current_metrics.support_metrics.tickets_resolved - current_metrics.support_metrics.tickets_created}}
+      
+      **CSAT Score:** {{current_metrics.support_metrics.csat_score}}/5.0
+      
+      **Avg Response Time:** {{current_metrics.support_metrics.avg_response_time_hours}} hours
+      
+      ---
+      
+      ## Slide 7: Financial Metrics
+      
+      **Revenue:** {{current_metrics.financial.revenue | format_currency}}
+      **Costs:** {{current_metrics.financial.costs | format_currency}}
+      **Gross Margin:** {{current_metrics.financial.gross_margin | format_percent}}
+      **Burn Rate:** {{current_metrics.financial.burn_rate | format_currency}}
+      
+      [Chart: Runway projection]
+      
+      ---
+      
+      ## Slide 8: Key Drivers This Month
+      
+      {{#each insights.key_drivers}}
+      - {{this}}
+      {{/each}}
+      
+      ---
+      
+      ## Slide 9: Recommended Actions
+      
+      {{#each insights.recommended_actions}}
+      - {{this}}
+      {{/each}}
+      
+      ---
+      
+      ## Slide 10: Goals & Targets
+      
+      [Dashboard showing all KPIs vs goals]
+      
+      **On Track:** {{kpi_trends.kpis | filter: 'status=on_track' | length}} metrics
+      **At Risk:** {{kpi_trends.kpis | filter: 'status=at_risk' | length}} metrics
+      **Off Track:** {{kpi_trends.kpis | filter: 'status=off_track' | length}} metrics
+      
+      ---
+      
+      **Report Generated:** {{execution.timestamp}}
+      **Next Report:** {{next_execution_date}}
+      **Automated:** Yes
+    output: presentation_deck
+  
+  # Step 5: Distribute report
+  - name: distribute_report
+    prompt: |
+      Distribute monthly report to stakeholders:
+      
+      Note: In production, this would use MCP servers for Slack and Email
+      
+      ## Slack Notification
+      
+      **Channel:** #executive-team
+      
+      **Message:**
+      📊 **Monthly Business Review - {{current_metrics.period.month}} {{current_metrics.period.year}}**
+      
+      **Key Highlights:**
+      {{insights.summary}}
+      
+      **Top Win:** {{insights.top_wins[0].metric}} - {{insights.top_wins[0].achievement}}
+      
+      **Top Concern:** {{insights.top_concerns[0].metric}} - {{insights.top_concerns[0].issue}}
+      
+      **Full Report:** [Link to presentation deck]
+      
+      ---
+      
+      ## Email Distribution
+      
+      **To:** executives@company.com
+      **Subject:** Monthly Business Review - {{current_metrics.period.month}} {{current_metrics.period.year}}
+      
+      **Body:**
+      Hi Team,
+      
+      The automated monthly business review for {{current_metrics.period.month}} is ready.
+      
+      **Executive Summary:**
+      {{insights.summary}}
+      
+      **Recommended Actions:**
+      {{#each insights.recommended_actions}}
+      - {{this}}
+      {{/each}}
+      
+      Please review the attached presentation deck before our monthly review meeting.
+      
+      Best regards,
+      Automated Reporting System
+      
+      **Attachment:** monthly-report-{{current_metrics.period.month}}-{{current_metrics.period.year}}.pptx

@@ -1,0 +1,547 @@
+name: data_quality_validation
+description: Multi-provider consensus validation for ML training data quality
+version: 1.0.0
+author: Data Engineering Templates
+tags: [data-engineering, ml, data-quality, consensus, validation]
+
+config:
+  defaults:
+    temperature: 0.2
+    max_tokens: 6000
+
+steps:
+  # Step 1: Parallel data quality analysis from 3 providers
+  - name: multi_provider_validation
+    parallel:
+      # Provider 1: Anthropic Claude
+      - name: claude_validation
+        provider: anthropic
+        model: claude-3-5-sonnet
+        prompt: |
+          Validate this ML training dataset for quality issues:
+          
+          **Dataset:**
+          {{input_data.dataset}}
+          
+          **Target Variable:** {{input_data.target_column}}
+          **Task Type:** {{input_data.task_type | default: 'classification'}}
+          
+          Perform comprehensive data quality analysis:
+          
+          ## 1. Completeness
+          - Missing values per column (count and percentage)
+          - Completely empty rows
+          - Columns with >50% missing data
+          
+          ## 2. Data Types & Format
+          - Incorrect data types (numbers as strings, etc.)
+          - Inconsistent formatting
+          - Invalid values (negative where shouldn't be, etc.)
+          
+          ## 3. Target Variable Quality
+          - Missing labels (unlabeled samples)
+          - Label distribution (class imbalance)
+          - Invalid labels (out of expected range/categories)
+          - Label noise (contradictory labels for similar samples)
+          
+          ## 4. Outliers & Anomalies
+          - Statistical outliers (>3 std dev)
+          - Logical impossibilities (age > 150, negative prices, etc.)
+          - Unexpected value ranges
+          
+          ## 5. Duplicates
+          - Exact duplicates (same values across all columns)
+          - Near-duplicates (similar but not identical)
+          - Duplicate IDs if applicable
+          
+          ## 6. Feature Quality
+          - Zero-variance features (same value everywhere)
+          - High-cardinality categorical features (too many categories)
+          - Leakage risks (features that shouldn't be in training data)
+          
+          ## 7. Bias & Fairness
+          - Representation across protected attributes
+          - Target distribution across demographic groups
+          - Potential discrimination patterns
+          
+          ## 8. Statistical Distribution
+          - Feature distributions (skewness, outliers)
+          - Correlation with target
+          - Multicollinearity between features
+          
+          Return structured validation report:
+          ```json
+          {
+            "overall_quality": "PASS|FAIL|WARNING",
+            "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+            "issues_found": [
+              {
+                "category": "completeness|types|target|outliers|duplicates|features|bias|distribution",
+                "severity": "critical|high|medium|low",
+                "description": "Missing values in 'age' column",
+                "impact": "Will cause training to fail",
+                "count": 150,
+                "percentage": "15%",
+                "recommendation": "Impute with median or drop rows"
+              }
+            ],
+            "summary": {
+              "total_issues": 5,
+              "critical": 1,
+              "high": 2,
+              "medium": 1,
+              "low": 1
+            }
+          }
+          ```
+        output: claude_validation
+      
+      # Provider 2: OpenAI GPT-4
+      - name: gpt_validation
+        provider: openai
+        model: gpt-4o
+        prompt: |
+          Validate this ML training dataset for quality issues:
+          
+          **Dataset:**
+          {{input_data.dataset}}
+          
+          **Target Variable:** {{input_data.target_column}}
+          **Task Type:** {{input_data.task_type | default: 'classification'}}
+          
+          Perform comprehensive data quality analysis:
+          
+          ## 1. Completeness
+          - Missing values per column (count and percentage)
+          - Completely empty rows
+          - Columns with >50% missing data
+          
+          ## 2. Data Types & Format
+          - Incorrect data types (numbers as strings, etc.)
+          - Inconsistent formatting
+          - Invalid values (negative where shouldn't be, etc.)
+          
+          ## 3. Target Variable Quality
+          - Missing labels (unlabeled samples)
+          - Label distribution (class imbalance)
+          - Invalid labels (out of expected range/categories)
+          - Label noise (contradictory labels for similar samples)
+          
+          ## 4. Outliers & Anomalies
+          - Statistical outliers (>3 std dev)
+          - Logical impossibilities (age > 150, negative prices, etc.)
+          - Unexpected value ranges
+          
+          ## 5. Duplicates
+          - Exact duplicates (same values across all columns)
+          - Near-duplicates (similar but not identical)
+          - Duplicate IDs if applicable
+          
+          ## 6. Feature Quality
+          - Zero-variance features (same value everywhere)
+          - High-cardinality categorical features (too many categories)
+          - Leakage risks (features that shouldn't be in training data)
+          
+          ## 7. Bias & Fairness
+          - Representation across protected attributes
+          - Target distribution across demographic groups
+          - Potential discrimination patterns
+          
+          ## 8. Statistical Distribution
+          - Feature distributions (skewness, outliers)
+          - Correlation with target
+          - Multicollinearity between features
+          
+          Return structured validation report:
+          ```json
+          {
+            "overall_quality": "PASS|FAIL|WARNING",
+            "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+            "issues_found": [...],
+            "summary": {
+              "total_issues": 5,
+              "critical": 1,
+              "high": 2,
+              "medium": 1,
+              "low": 1
+            }
+          }
+          ```
+        output: gpt_validation
+      
+      # Provider 3: Google Gemini
+      - name: gemini_validation
+        provider: gemini
+        model: gemini-1.5-pro
+        prompt: |
+          Validate this ML training dataset for quality issues:
+          
+          **Dataset:**
+          {{input_data.dataset}}
+          
+          **Target Variable:** {{input_data.target_column}}
+          **Task Type:** {{input_data.task_type | default: 'classification'}}
+          
+          Perform comprehensive data quality analysis:
+          
+          ## 1. Completeness
+          - Missing values per column (count and percentage)
+          - Completely empty rows
+          - Columns with >50% missing data
+          
+          ## 2. Data Types & Format
+          - Incorrect data types (numbers as strings, etc.)
+          - Inconsistent formatting
+          - Invalid values (negative where shouldn't be, etc.)
+          
+          ## 3. Target Variable Quality
+          - Missing labels (unlabeled samples)
+          - Label distribution (class imbalance)
+          - Invalid labels (out of expected range/categories)
+          - Label noise (contradictory labels for similar samples)
+          
+          ## 4. Outliers & Anomalies
+          - Statistical outliers (>3 std dev)
+          - Logical impossibilities (age > 150, negative prices, etc.)
+          - Unexpected value ranges
+          
+          ## 5. Duplicates
+          - Exact duplicates (same values across all columns)
+          - Near-duplicates (similar but not identical)
+          - Duplicate IDs if applicable
+          
+          ## 6. Feature Quality
+          - Zero-variance features (same value everywhere)
+          - High-cardinality categorical features (too many categories)
+          - Leakage risks (features that shouldn't be in training data)
+          
+          ## 7. Bias & Fairness
+          - Representation across protected attributes
+          - Target distribution across demographic groups
+          - Potential discrimination patterns
+          
+          ## 8. Statistical Distribution
+          - Feature distributions (skewness, outliers)
+          - Correlation with target
+          - Multicollinearity between features
+          
+          Return structured validation report:
+          ```json
+          {
+            "overall_quality": "PASS|FAIL|WARNING",
+            "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+            "issues_found": [...],
+            "summary": {
+              "total_issues": 5,
+              "critical": 1,
+              "high": 2,
+              "medium": 1,
+              "low": 1
+            }
+          }
+          ```
+        output: gemini_validation
+    
+    max_concurrent: 3
+    aggregate: array
+    output: all_validations
+
+  # Step 2: Cross-validate findings across providers
+  - name: consensus_analysis
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Cross-validate data quality findings from 3 AI providers:
+      
+      ---
+      
+      **Claude Validation:**
+      {{all_validations[0]}}
+      
+      ---
+      
+      **GPT-4 Validation:**
+      {{all_validations[1]}}
+      
+      ---
+      
+      **Gemini Validation:**
+      {{all_validations[2]}}
+      
+      ---
+      
+      ## Consensus Analysis
+      
+      ### Issues All 3 Found (HIGH CONFIDENCE)
+      
+      Identify issues that ALL THREE providers detected:
+      - List the issue
+      - Severity level (use highest from any provider)
+      - All 3 agree this is a real problem
+      - Safe to address automatically
+      
+      ### Issues 2 of 3 Found (MEDIUM CONFIDENCE)
+      
+      Identify issues TWO providers detected:
+      - List the issue
+      - Which 2 found it
+      - Why might the 3rd have missed it?
+      - Recommend: Manual review before addressing
+      
+      ### Issues Only 1 Found (LOW CONFIDENCE - Investigate)
+      
+      Unique findings from each provider:
+      - From Claude only: [issues]
+      - From GPT-4 only: [issues]
+      - From Gemini only: [issues]
+      
+      These might be:
+      - Valid catches that others missed (good!)
+      - False positives
+      - Different interpretation of data
+      
+      Recommend: Investigate each unique finding
+      
+      ### Consensus Severity
+      
+      Overall dataset quality based on consensus:
+      
+      - **CRITICAL:** All 3 found critical issues → DO NOT TRAIN
+      - **HIGH:** All 3 found high-severity issues → Fix before training
+      - **MEDIUM:** 2 of 3 found issues → Review and fix
+      - **LOW:** Only minor issues or disagreement → Safe to train with monitoring
+      - **PASS:** No significant issues found → Safe to train
+      
+      ### Decision Recommendation
+      
+      {% if all_agree_critical %}
+      **HALT TRAINING PIPELINE**
+      - All providers agree data has critical issues
+      - Training on this data will produce poor/biased model
+      - Fix issues before proceeding
+      {% elif all_agree_high %}
+      **FIX BEFORE TRAINING**
+      - All providers found significant issues
+      - Address high-severity issues first
+      - Re-validate after fixes
+      {% elif majority_agree_medium %}
+      **REVIEW THEN TRAIN**
+      - Majority found issues worth addressing
+      - Human review recommended
+      - Can proceed with caution if time-critical
+      {% else %}
+      **SAFE TO TRAIN**
+      - Data quality acceptable
+      - Minor issues can be monitored
+      - Proceed with training
+      {% endif %}
+      
+      Return comprehensive consensus report.
+    output: consensus
+
+  # Step 3: Generate validation report
+  - name: generate_report
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      # ML Data Quality Validation Report
+      
+      **Dataset:** {{input_data.dataset_name}}
+      **Target:** {{input_data.target_column}}
+      **Task:** {{input_data.task_type | default: 'classification'}}
+      **Date:** {{execution.timestamp}}
+      **Validation Method:** Multi-Provider Consensus (3 AI systems)
+      
+      ---
+      
+      ## Executive Summary
+      
+      This dataset was validated using consensus analysis across three independent
+      AI systems (Anthropic Claude, OpenAI GPT-4, Google Gemini) to ensure high-
+      confidence data quality assessment before ML training.
+      
+      **Consensus Decision:** {{consensus.decision}}
+      
+      **Overall Quality:** {{consensus.quality_level}}
+      **Confidence:** {{consensus.confidence_level}}
+      
+      ---
+      
+      ## Consensus Findings
+      
+      ### HIGH CONFIDENCE Issues (All 3 Providers Agree)
+      
+      {{consensus.high_confidence_issues}}
+      
+      These issues were detected by all three independent validation systems.
+      High confidence that these are real problems requiring immediate attention.
+      
+      **Count:** {{consensus.high_confidence_count}}
+      **Action Required:** Fix before training
+      
+      ---
+      
+      ### MEDIUM CONFIDENCE Issues (2 of 3 Providers Agree)
+      
+      {{consensus.medium_confidence_issues}}
+      
+      These issues were detected by two providers. Likely real but worth manual review.
+      
+      **Count:** {{consensus.medium_confidence_count}}
+      **Action Required:** Review and address as appropriate
+      
+      ---
+      
+      ### Unique Findings (Investigation Required)
+      
+      #### From Claude Only:
+      {{consensus.claude_unique}}
+      
+      #### From GPT-4 Only:
+      {{consensus.gpt_unique}}
+      
+      #### From Gemini Only:
+      {{consensus.gemini_unique}}
+      
+      **Count:** {{consensus.unique_findings_count}}
+      **Action Required:** Investigate to determine if valid
+      
+      ---
+      
+      ## Individual Provider Reports
+      
+      ### Claude (Anthropic) Assessment
+      
+      **Overall Quality:** {{all_validations[0].overall_quality}}
+      **Severity:** {{all_validations[0].severity}}
+      **Issues Found:** {{all_validations[0].summary.total_issues}}
+      
+      **Key Findings:**
+      {{all_validations[0].issues_found}}
+      
+      ---
+      
+      ### GPT-4 (OpenAI) Assessment
+      
+      **Overall Quality:** {{all_validations[1].overall_quality}}
+      **Severity:** {{all_validations[1].severity}}
+      **Issues Found:** {{all_validations[1].summary.total_issues}}
+      
+      **Key Findings:**
+      {{all_validations[1].issues_found}}
+      
+      ---
+      
+      ### Gemini (Google) Assessment
+      
+      **Overall Quality:** {{all_validations[2].overall_quality}}
+      **Severity:** {{all_validations[2].severity}}
+      **Issues Found:** {{all_validations[2].summary.total_issues}}
+      
+      **Key Findings:**
+      {{all_validations[2].issues_found}}
+      
+      ---
+      
+      ## Recommended Actions
+      
+      ### Immediate Actions (Critical - Before Training)
+      
+      {{consensus.immediate_actions}}
+      
+      ### Short-Term Actions (High Priority)
+      
+      {{consensus.short_term_actions}}
+      
+      ### Long-Term Improvements (Medium Priority)
+      
+      {{consensus.long_term_actions}}
+      
+      ---
+      
+      ## Training Pipeline Decision
+      
+      {% if consensus.decision == 'HALT' %}
+      ### ❌ DO NOT PROCEED WITH TRAINING
+      
+      **Reason:** {{consensus.halt_reason}}
+      
+      **Required Actions Before Training:**
+      1. {{consensus.required_fixes}}
+      
+      **Re-validation Required:** Yes
+      
+      {% elif consensus.decision == 'FIX_FIRST' %}
+      ### ⚠️ FIX ISSUES BEFORE TRAINING
+      
+      **Reason:** {{consensus.fix_reason}}
+      
+      **Recommended Fixes:**
+      1. {{consensus.recommended_fixes}}
+      
+      **Can Proceed After:** Issues addressed and re-validated
+      
+      {% elif consensus.decision == 'REVIEW' %}
+      ### ⚠️ MANUAL REVIEW RECOMMENDED
+      
+      **Reason:** {{consensus.review_reason}}
+      
+      **Review Points:**
+      1. {{consensus.review_points}}
+      
+      **Can Proceed:** With human approval after review
+      
+      {% else %}
+      ### ✓ SAFE TO PROCEED WITH TRAINING
+      
+      **Reason:** {{consensus.safe_reason}}
+      
+      **Minor Issues to Monitor:**
+      {{consensus.monitor_items}}
+      
+      **Proceed:** Yes, data quality is acceptable
+      
+      {% endif %}
+      
+      ---
+      
+      ## Cost-Benefit Analysis
+      
+      **Validation Cost:**
+      - Claude validation: ~$0.015
+      - GPT-4 validation: ~$0.010
+      - Gemini validation: ~$0.012
+      - Consensus analysis: ~$0.003 (local model)
+      - **Total: ~$0.040**
+      
+      **Training Cost if Data Bad:**
+      - GPU hours wasted: 4-8 hours @ $3/hr = $12-24
+      - Developer time debugging: 4 hours @ $100/hr = $400
+      - Re-training after fixes: $12-24
+      - **Total cost of bad data: $424-448**
+      
+      **ROI of Validation:** 10,000×+ return on investment
+      
+      ---
+      
+      ## Confidence Assessment
+      
+      **Validation Approach:** Multi-provider consensus
+      **Providers:** 3 independent AI systems
+      **Agreement Level:** {{consensus.agreement_percentage}}%
+      
+      **Confidence Factors:**
+      - High confidence: All 3 agree ({{consensus.high_confidence_count}} issues)
+      - Medium confidence: 2 of 3 agree ({{consensus.medium_confidence_count}} issues)
+      - Low confidence: Only 1 found ({{consensus.unique_findings_count}} issues)
+      
+      **Overall Confidence:** {{consensus.confidence_level}}
+      
+      This validation provides {{consensus.confidence_level}} confidence in data quality
+      assessment through independent cross-validation.
+      
+      ---
+      
+      **Validation Method:** Multi-Provider Consensus
+      **Template:** {{template.name}} v{{template.version}}
+      **Timestamp:** {{execution.timestamp}}

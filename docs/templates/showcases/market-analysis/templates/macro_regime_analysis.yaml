@@ -1,0 +1,411 @@
+name: macro_regime_analysis
+description: Analyze Federal Reserve policy and macro environment for tech stock risk assessment
+version: 1.0.0
+author: Market Analysis Templates
+tags: [macro, federal-reserve, risk-environment, vix, yields]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-3-5-sonnet
+    temperature: 0.2
+    max_tokens: 6000
+
+# Required data sources (all FREE)
+servers:
+  - fred-api        # Federal Reserve Economic Data
+  - treasury-api    # US Treasury yields
+  - vix-api         # CBOE Volatility Index
+  - cme-fedwatch    # Fed Funds futures (rate probabilities)
+
+steps:
+  # Step 1: Get Federal Reserve policy data
+  - name: get_fed_policy_data
+    servers: [fred-api, cme-fedwatch]
+    prompt: |
+      Retrieve current Federal Reserve policy indicators:
+      
+      **From FRED API:**
+      
+      1. Current Fed Funds Rate:
+         Series: FEDFUNDS
+         Query: Latest value
+      
+      2. Recent rate changes:
+         Series: FEDFUNDS
+         Query: Past 12 months to see trend
+         
+      3. Inflation data:
+         CPI (Consumer Price Index): CPIAUCSL
+         Core PCE (Fed's preferred): PCEPILFE
+         Query: Latest + MoM/YoY changes
+      
+      4. Fed Balance Sheet:
+         Series: WALCL
+         Query: Latest + trend (expanding or contracting)
+         Note: QE = expanding (bullish), QT = contracting (bearish)
+      
+      5. Economic indicators:
+         - Unemployment: UNRATE
+         - GDP growth: GDP
+         - PMI: ISM Manufacturing (NAPM)
+      
+      **From CME FedWatch:**
+      
+      Fed Funds Futures implied probabilities:
+      - Next FOMC meeting: Probability of rate hike/hold/cut
+      - 6 months out: Expected rate level
+      - 12 months out: Terminal rate estimate
+      
+      Return structured data:
+      ```json
+      {
+        "fed_funds_rate": {
+          "current": 5.50,
+          "previous": 5.50,
+          "change_last_meeting": 0,
+          "trend": "PAUSED"
+        },
+        "rate_expectations": {
+          "next_meeting": {
+            "hike_prob": 0.05,
+            "hold_prob": 0.85,
+            "cut_prob": 0.10
+          },
+          "6_month": {
+            "expected_rate": 5.25,
+            "direction": "LIKELY_CUT"
+          }
+        },
+        "inflation": {
+          "cpi_latest": 3.1,
+          "cpi_yoy": 3.1,
+          "cpi_trend": "COOLING",
+          "core_pce": 2.9,
+          "core_pce_yoy": 2.9
+        },
+        "fed_balance_sheet": {
+          "size_trillions": 7.8,
+          "change_3mo": -0.2,
+          "direction": "QUANTITATIVE_TIGHTENING"
+        },
+        "economy": {
+          "unemployment": 3.7,
+          "gdp_growth": 4.9,
+          "pmi": 47.6
+        }
+      }
+      ```
+    output: fed_data
+  
+  # Step 2: Get market risk indicators
+  - name: get_risk_indicators
+    servers: [vix-api, treasury-api]
+    prompt: |
+      Retrieve market risk and volatility indicators:
+      
+      **VIX (CBOE Volatility Index):**
+      - Current level
+      - 20-day average
+      - Trend (rising or falling)
+      
+      Interpretation:
+      - VIX < 15: Low fear, complacency (RISK_ON)
+      - VIX 15-20: Normal market
+      - VIX 20-30: Elevated fear
+      - VIX > 30: High fear (RISK_OFF)
+      
+      **Treasury Yields:**
+      - 10-year yield (current)
+      - 2-year yield (current)
+      - Yield curve spread (10Y - 2Y)
+      
+      Curve interpretation:
+      - Positive (normal): 10Y > 2Y = healthy
+      - Flat: 10Y ≈ 2Y = caution
+      - Inverted: 10Y < 2Y = recession signal
+      
+      **Credit Spreads (from FRED):**
+      - Investment Grade spread: BAMLC0A0CM
+      - High Yield spread: BAMLH0A0HYM
+      
+      Spread interpretation:
+      - Tightening: Risk-on, investors confident
+      - Widening: Risk-off, investors fleeing to safety
+      
+      Return risk indicators:
+      ```json
+      {
+        "vix": {
+          "current": 16.5,
+          "avg_20d": 18.2,
+          "trend": "FALLING",
+          "regime": "LOW_FEAR"
+        },
+        "yields": {
+          "ten_year": 3.85,
+          "two_year": 4.25,
+          "curve_spread": -0.40,
+          "curve_shape": "INVERTED"
+        },
+        "credit_spreads": {
+          "investment_grade": 1.15,
+          "high_yield": 3.25,
+          "ig_trend": "TIGHTENING",
+          "hy_trend": "STABLE"
+        }
+      }
+      ```
+    output: risk_indicators
+  
+  # Step 3: Assess macro regime for tech stocks
+  - name: assess_macro_regime
+    prompt: |
+      Assess overall macro regime for Nasdaq/tech stocks:
+      
+      **Fed Policy Data:**
+      {{fed_data}}
+      
+      **Risk Indicators:**
+      {{risk_indicators}}
+      
+      ## Analysis Framework
+      
+      ### Factor 1: Federal Reserve Policy (Most Important)
+      
+      **Rate Direction:**
+      - Cutting rates: VERY BULLISH for tech
+        → Lower discount rate = higher PV of future earnings
+        → Tech = "long duration assets" (most value in distant future)
+      
+      - Paused/stable: BULLISH
+        → Certainty is good, no more tightening
+      
+      - Hiking rates: BEARISH
+        → Higher discount rate crushes growth stock valuations
+        → Example: 2022 (0% → 5%) = Nasdaq -33%
+      
+      Current: {{fed_data.fed_funds_rate.trend}}
+      Expected: {{fed_data.rate_expectations.6_month.direction}}
+      
+      **Balance Sheet (QE/QT):**
+      - Expanding (QE): Bullish (liquidity injections)
+      - Contracting (QT): Bearish (liquidity withdrawal)
+      
+      Current: {{fed_data.fed_balance_sheet.direction}}
+      
+      **Inflation Trend:**
+      - Cooling inflation: Bullish (Fed can pause/cut)
+      - Rising inflation: Bearish (Fed must stay restrictive)
+      
+      Current: {{fed_data.inflation.cpi_trend}}
+      CPI: {{fed_data.inflation.cpi_latest}}%
+      
+      ### Factor 2: Market Fear Gauge (VIX)
+      
+      VIX Level: {{risk_indicators.vix.current}}
+      
+      - VIX < 15: Low fear, RISK_ON environment
+      - VIX 15-25: Normal, neutral
+      - VIX > 25: Elevated fear, RISK_OFF
+      
+      Trend: {{risk_indicators.vix.trend}}
+      
+      ### Factor 3: Yield Curve
+      
+      Spread: {{risk_indicators.yields.curve_spread}}
+      Shape: {{risk_indicators.yields.curve_shape}}
+      
+      - Normal curve (positive): Healthy growth expectations
+      - Inverted curve (negative): Recession signal
+        → But tech often rallies BEFORE recession (rate cut expectations)
+      
+      ### Factor 4: Credit Market Health
+      
+      IG Spread: {{risk_indicators.credit_spreads.investment_grade}}
+      HY Spread: {{risk_indicators.credit_spreads.high_yield}}
+      
+      - Tightening: Investors confident, risk-on
+      - Widening: Investors fleeing risk, risk-off
+      
+      ## Overall Regime Assessment
+      
+      Weight the factors:
+      - Fed policy direction: 60% (most important)
+      - VIX level: 20%
+      - Credit spreads: 15%
+      - Yield curve: 5% (less predictive short-term)
+      
+      Calculate regime score:
+      
+      **RISK_ON signals (positive for tech):**
+      - Fed pausing or cutting: +3 points
+      - VIX < 20: +2 points
+      - Credit spreads tightening: +1.5 points
+      - Normal yield curve: +0.5 points
+      
+      **NEUTRAL signals:**
+      - Fed uncertain: 0 points
+      - VIX 20-25: 0 points
+      - Spreads stable: 0 points
+      
+      **RISK_OFF signals (negative for tech):**
+      - Fed hiking: -3 points
+      - VIX > 25: -2 points
+      - Credit spreads widening: -1.5 points
+      - Severe curve inversion: -0.5 points
+      
+      **Score interpretation:**
+      - Score > 4: RISK_ON (highly favorable)
+      - Score 2-4: RISK_ON (favorable)
+      - Score -2 to 2: NEUTRAL
+      - Score -4 to -2: RISK_OFF (unfavorable)
+      - Score < -4: SEVERE_RISK_OFF (very unfavorable)
+      
+      Generate macro regime assessment:
+      ```json
+      {
+        "signal": "RISK_ON",
+        "score": 5.5,
+        "confidence": 85,
+        "rationale": "Fed paused rate hikes (bullish), inflation cooling to 3.1% (supports pause), VIX at 16.5 shows low fear. Credit spreads tightening indicates risk appetite. Only concern is inverted yield curve, but often tech rallies into recession on rate cut expectations.",
+        "regime_factors": {
+          "fed_policy": {
+            "assessment": "FAVORABLE",
+            "score": 3,
+            "reason": "Paused at 5.5%, market pricing 70% chance of cut within 6 months"
+          },
+          "vix_fear": {
+            "assessment": "FAVORABLE",
+            "score": 2,
+            "reason": "VIX 16.5 = low fear, risk-on environment"
+          },
+          "credit_markets": {
+            "assessment": "FAVORABLE",
+            "score": 1.5,
+            "reason": "Spreads tightening, investors confident"
+          },
+          "yield_curve": {
+            "assessment": "NEUTRAL",
+            "score": 0,
+            "reason": "Inverted but tech often rallies on cut expectations"
+          }
+        },
+        "implications_for_tech": {
+          "valuation_impact": "Positive - lower discount rate supports high growth valuations",
+          "risk_appetite": "Strong - low VIX and tight spreads support risk assets",
+          "liquidity": "Neutral - QT continues but at slower pace"
+        },
+        "risks": [
+          "Fed could surprise hawkish if inflation re-accelerates",
+          "Yield curve inversion signals recession risk (though timing uncertain)",
+          "Geopolitical events could spike VIX"
+        ],
+        "regime_change_triggers": [
+          "CPI rises above 4% (Fed would stay restrictive)",
+          "VIX spikes above 30 (flight to safety)",
+          "Credit spreads widen >50bps (stress signal)"
+        ],
+        "recommendation": "Favorable environment for tech stock trading. Fed tailwind supports growth valuations. Monitor inflation data closely."
+      }
+      ```
+    output: macro_assessment
+  
+  # Step 4: Generate executive summary
+  - name: generate_summary
+    prompt: |
+      # Macro Regime Analysis
+      
+      **Date:** {{execution.timestamp}}
+      **Analysis:** Federal Reserve Policy & Market Risk Environment
+      
+      ---
+      
+      ## Overall Assessment: {{macro_assessment.signal}}
+      
+      **Confidence:** {{macro_assessment.confidence}}%
+      **Regime Score:** {{macro_assessment.score}} / 7
+      
+      ### Summary
+      
+      {{macro_assessment.rationale}}
+      
+      ---
+      
+      ## Key Factors
+      
+      ### Federal Reserve Policy (60% weight)
+      **Assessment:** {{macro_assessment.regime_factors.fed_policy.assessment}}
+      
+      - Current rate: {{fed_data.fed_funds_rate.current}}%
+      - Direction: {{fed_data.fed_funds_rate.trend}}
+      - Next 6 months: {{fed_data.rate_expectations.6_month.direction}}
+      
+      {{macro_assessment.regime_factors.fed_policy.reason}}
+      
+      ### Market Fear (20% weight)
+      **Assessment:** {{macro_assessment.regime_factors.vix_fear.assessment}}
+      
+      - VIX level: {{risk_indicators.vix.current}}
+      - Trend: {{risk_indicators.vix.trend}}
+      - Regime: {{risk_indicators.vix.regime}}
+      
+      {{macro_assessment.regime_factors.vix_fear.reason}}
+      
+      ### Credit Markets (15% weight)
+      **Assessment:** {{macro_assessment.regime_factors.credit_markets.assessment}}
+      
+      - IG spread: {{risk_indicators.credit_spreads.investment_grade}}%
+      - HY spread: {{risk_indicators.credit_spreads.high_yield}}%
+      - Trend: {{risk_indicators.credit_spreads.ig_trend}}
+      
+      {{macro_assessment.regime_factors.credit_markets.reason}}
+      
+      ### Yield Curve (5% weight)
+      **Assessment:** {{macro_assessment.regime_factors.yield_curve.assessment}}
+      
+      - 10Y yield: {{risk_indicators.yields.ten_year}}%
+      - 2Y yield: {{risk_indicators.yields.two_year}}%
+      - Spread: {{risk_indicators.yields.curve_spread}}% ({{risk_indicators.yields.curve_shape}})
+      
+      {{macro_assessment.regime_factors.yield_curve.reason}}
+      
+      ---
+      
+      ## Implications for Tech Stocks
+      
+      **Valuation Impact:**
+      {{macro_assessment.implications_for_tech.valuation_impact}}
+      
+      **Risk Appetite:**
+      {{macro_assessment.implications_for_tech.risk_appetite}}
+      
+      **Liquidity Conditions:**
+      {{macro_assessment.implications_for_tech.liquidity}}
+      
+      ---
+      
+      ## Risk Factors
+      
+      {{#each macro_assessment.risks}}
+      ⚠ {{this}}
+      {{/each}}
+      
+      ---
+      
+      ## Watch For Regime Change
+      
+      {{#each macro_assessment.regime_change_triggers}}
+      📊 {{this}}
+      {{/each}}
+      
+      ---
+      
+      ## Recommendation
+      
+      {{macro_assessment.recommendation}}
+      
+      ---
+      
+      **Data Sources:** FRED, CME FedWatch, CBOE (VIX), US Treasury  
+      **Template:** {{template.name}} v{{template.version}}

@@ -1,0 +1,356 @@
+name: incident_documentation
+description: Automated post-incident report generation with failover resilience
+version: 1.0.0
+author: Security Templates
+tags: [security, incident-response, documentation, compliance, failover]
+
+config:
+  defaults:
+    temperature: 0.3
+    max_tokens: 8000
+
+steps:
+  # Step 1: Try primary provider for incident analysis
+  - name: primary_analysis
+    provider: anthropic
+    model: claude-3-5-sonnet
+    prompt: |
+      Analyze this security incident and generate comprehensive documentation:
+      
+      **Incident Data:**
+      {{input_data.incident}}
+      
+      **Timeline:**
+      {{input_data.timeline}}
+      
+      **Actions Taken:**
+      {{input_data.actions}}
+      
+      Analyze and document:
+      
+      1. **Incident Summary:** What happened?
+      2. **Root Cause:** Why did it happen?
+      3. **Impact Assessment:** What was affected?
+      4. **Response Actions:** What did we do?
+      5. **Lessons Learned:** What should we improve?
+      
+      Provide comprehensive incident analysis.
+    timeout_seconds: 60
+    max_retries: 2
+    error_handling:
+      on_failure: continue
+      default_output: "PRIMARY_PROVIDER_UNAVAILABLE"
+    output: primary_result
+
+  # Step 2: Failover to secondary provider
+  - name: secondary_analysis
+    condition: "{{primary_result}} contains 'UNAVAILABLE'"
+    provider: openai
+    model: gpt-4o
+    prompt: |
+      Analyze this security incident and generate comprehensive documentation:
+      
+      **Incident Data:**
+      {{input_data.incident}}
+      
+      **Timeline:**
+      {{input_data.timeline}}
+      
+      **Actions Taken:**
+      {{input_data.actions}}
+      
+      Analyze and document:
+      
+      1. **Incident Summary:** What happened?
+      2. **Root Cause:** Why did it happen?
+      3. **Impact Assessment:** What was affected?
+      4. **Response Actions:** What did we do?
+      5. **Lessons Learned:** What should we improve?
+      
+      Provide comprehensive incident analysis.
+    timeout_seconds: 60
+    max_retries: 2
+    error_handling:
+      on_failure: continue
+      default_output: "SECONDARY_PROVIDER_UNAVAILABLE"
+    output: secondary_result
+
+  # Step 3: Final fallback to local model
+  - name: local_analysis
+    condition: "{{secondary_result}} contains 'UNAVAILABLE'"
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Analyze this security incident and generate comprehensive documentation:
+      
+      **Incident Data:**
+      {{input_data.incident}}
+      
+      **Timeline:**
+      {{input_data.timeline}}
+      
+      **Actions Taken:**
+      {{input_data.actions}}
+      
+      Analyze and document:
+      
+      1. **Incident Summary:** What happened?
+      2. **Root Cause:** Why did it happen?
+      3. **Impact Assessment:** What was affected?
+      4. **Response Actions:** What did we do?
+      5. **Lessons Learned:** What should we improve?
+      
+      Provide comprehensive incident analysis.
+    output: local_result
+
+  # Step 4: Select successful analysis
+  - name: select_analysis
+    provider: ollama
+    model: qwen2.5:7b
+    prompt: |
+      Select the successful incident analysis:
+      
+      Primary (Anthropic): {{primary_result}}
+      Secondary (OpenAI): {{secondary_result}}
+      Local (Ollama): {{local_result}}
+      
+      Return only the successful analysis with a note of which provider was used.
+    output: incident_analysis
+
+  # Step 5: Generate comprehensive post-incident report
+  - name: generate_report
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      # Post-Incident Report
+      
+      **Incident ID:** {{input_data.incident_id}}
+      **Date:** {{execution.timestamp}}
+      **Template:** {{template.name}} v{{template.version}}
+      **Analysis Provider:** [Extract from incident_analysis]
+      
+      ---
+      
+      ## Executive Summary
+      
+      [2-3 paragraph high-level summary for management]
+      
+      {{incident_analysis.summary}}
+      
+      ---
+      
+      ## Incident Overview
+      
+      **Severity:** {{input_data.incident.severity}}
+      **Category:** {{input_data.incident.category}}
+      **First Detected:** {{input_data.incident.detected}}
+      **Contained:** {{input_data.incident.contained}}
+      **Resolved:** {{input_data.incident.resolved}}
+      **Duration:** {{input_data.incident.duration}}
+      
+      ---
+      
+      ## Incident Details
+      
+      ### What Happened
+      
+      {{incident_analysis.what_happened}}
+      
+      ### How It Was Detected
+      
+      {{input_data.detection}}
+      
+      ### Systems/Data Affected
+      
+      {{incident_analysis.impact}}
+      
+      ---
+      
+      ## Timeline of Events
+      
+      {{input_data.timeline}}
+      
+      **Key Milestones:**
+      - Incident occurred: {{input_data.incident.occurred}}
+      - First detected: {{input_data.incident.detected}}
+      - Investigation started: {{input_data.incident.investigation_start}}
+      - Containment achieved: {{input_data.incident.contained}}
+      - Threat eradicated: {{input_data.incident.eradicated}}
+      - Systems recovered: {{input_data.incident.recovered}}
+      - Incident closed: {{input_data.incident.closed}}
+      
+      ---
+      
+      ## Root Cause Analysis
+      
+      {{incident_analysis.root_cause}}
+      
+      ### Contributing Factors
+      
+      {{incident_analysis.contributing_factors}}
+      
+      ### Why It Wasn't Prevented
+      
+      {{incident_analysis.prevention_gaps}}
+      
+      ### Why It Wasn't Detected Earlier
+      
+      {{incident_analysis.detection_gaps}}
+      
+      ---
+      
+      ## Response Actions Taken
+      
+      ### Immediate Containment
+      
+      {{input_data.actions.containment}}
+      
+      ### Eradication
+      
+      {{input_data.actions.eradication}}
+      
+      ### Recovery
+      
+      {{input_data.actions.recovery}}
+      
+      ---
+      
+      ## Impact Assessment
+      
+      ### Business Impact
+      
+      - **Affected Systems:** {{incident_analysis.impact.systems}}
+      - **Affected Users:** {{incident_analysis.impact.users}}
+      - **Service Disruption:** {{incident_analysis.impact.disruption}}
+      - **Data Impact:** {{incident_analysis.impact.data}}
+      
+      ### Financial Impact
+      
+      - **Direct Costs:** {{input_data.impact.costs.direct}}
+      - **Indirect Costs:** {{input_data.impact.costs.indirect}}
+      - **Estimated Total:** {{input_data.impact.costs.total}}
+      
+      ---
+      
+      ## Lessons Learned
+      
+      ### What Went Well
+      
+      {{incident_analysis.lessons.successes}}
+      
+      ### What Could Be Improved
+      
+      {{incident_analysis.lessons.improvements}}
+      
+      ---
+      
+      ## Remediation Actions
+      
+      ### Immediate Actions (0-7 days)
+      
+      {{incident_analysis.remediation.immediate}}
+      
+      **Status:** [To be assigned]
+      
+      ### Short-Term Actions (1-4 weeks)
+      
+      {{incident_analysis.remediation.short_term}}
+      
+      **Status:** [To be assigned]
+      
+      ### Long-Term Actions (1-3 months)
+      
+      {{incident_analysis.remediation.long_term}}
+      
+      **Status:** [To be assigned]
+      
+      ---
+      
+      ## Prevention Measures
+      
+      ### Detection Improvements
+      
+      {{incident_analysis.prevention.detection}}
+      
+      ### Prevention Controls
+      
+      {{incident_analysis.prevention.controls}}
+      
+      ### Mitigation Strategies
+      
+      {{incident_analysis.prevention.mitigation}}
+      
+      ---
+      
+      ## Compliance Considerations
+      
+      ### Regulatory Requirements
+      
+      {{input_data.compliance.requirements}}
+      
+      ### Reporting Obligations
+      
+      {{input_data.compliance.reporting}}
+      
+      ### Data Breach Notification
+      
+      {{input_data.compliance.notification}}
+      
+      ---
+      
+      ## Recommendations
+      
+      ### Technical Recommendations
+      
+      1. {{incident_analysis.recommendations.technical}}
+      
+      ### Process Recommendations
+      
+      1. {{incident_analysis.recommendations.process}}
+      
+      ### Training Recommendations
+      
+      1. {{incident_analysis.recommendations.training}}
+      
+      ---
+      
+      ## Appendices
+      
+      ### Appendix A: IOCs (Indicators of Compromise)
+      
+      ```
+      {{input_data.iocs}}
+      ```
+      
+      ### Appendix B: Logs and Evidence
+      
+      <details>
+      <summary>Click to expand</summary>
+      
+      ```
+      {{input_data.evidence}}
+      ```
+      
+      </details>
+      
+      ### Appendix C: Response Team
+      
+      {{input_data.team}}
+      
+      ---
+      
+      ## Report Metadata
+      
+      **Prepared By:** Automated Incident Documentation System
+      **Template:** {{template.name}} v{{template.version}}
+      **Provider Used:** {{selected_provider}}
+      **Generated:** {{execution.timestamp}}
+      **Review Status:** Pending Management Review
+      
+      ---
+      
+      **End of Post-Incident Report**
+      
+      **Note:** This report was generated automatically to ensure timely and 
+      consistent incident documentation even during provider outages. Human 
+      review and validation recommended before final distribution.

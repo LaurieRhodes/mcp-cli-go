@@ -1,0 +1,95 @@
+name: pr_review
+description: Consensus code quality review (NOT security scanning)
+version: 1.0.0
+author: Development Templates
+tags: [development, code-review, quality, consensus]
+
+config:
+  defaults:
+    temperature: 0.2
+    max_tokens: 6000
+
+steps:
+  # Step 1: Multi-provider code quality review
+  - name: consensus_review
+    parallel:
+      - provider: anthropic
+        model: claude-3-5-sonnet
+        prompt: |
+          Review code quality (NOT security):
+          
+          {{input_data.pr_diff}}
+          
+          Check:
+          - Readability and clarity
+          - Naming conventions
+          - Code complexity
+          - Documentation
+          - Architectural patterns
+          
+          Return issues found.
+      
+      - provider: openai
+        model: gpt-4o
+        prompt: |
+          Review code quality (NOT security):
+          
+          {{input_data.pr_diff}}
+          
+          Check:
+          - Readability and clarity
+          - Naming conventions
+          - Code complexity
+          - Documentation
+          - Architectural patterns
+          
+          Return issues found.
+      
+      - provider: gemini
+        model: gemini-1.5-pro
+        prompt: |
+          Review code quality (NOT security):
+          
+          {{input_data.pr_diff}}
+          
+          Check:
+          - Readability and clarity
+          - Naming conventions
+          - Code complexity
+          - Documentation
+          - Architectural patterns
+          
+          Return issues found.
+    
+    output: all_reviews
+
+  # Step 2: Cross-validate findings
+  - name: consensus_analysis
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Analyze review consensus:
+      
+      {{all_reviews}}
+      
+      Identify:
+      - All 3 agree: Definitely fix
+      - 2 of 3 agree: Suggest to developer
+      - Only 1 found: Flag for human review
+      
+      Return consensus report.
+    output: consensus
+
+  # Step 3: Generate review comment
+  - name: generate_comment
+    prompt: |
+      # Code Quality Review
+      
+      **Consensus Findings:**
+      {{consensus.all_agree}}
+      
+      **Suggestions:**
+      {{consensus.two_agree}}
+      
+      **For Discussion:**
+      {{consensus.one_found}}

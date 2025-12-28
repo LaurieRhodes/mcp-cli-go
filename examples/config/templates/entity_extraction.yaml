@@ -23,7 +23,7 @@ steps:
     
     prompt: |
       Extract named entities from this text:
-      {{stdin}}
+      {{input_data}}
       
       Identify:
       - People

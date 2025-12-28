@@ -1,0 +1,89 @@
+name: code_migration
+description: Automate framework/language migrations with validation
+version: 1.0.0
+author: Development Templates
+tags: [development, migration, refactoring, automation]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-3-5-sonnet
+    temperature: 0.3
+    max_tokens: 6000
+
+steps:
+  # Step 1: Identify files needing migration
+  - name: find_targets
+    prompt: |
+      Find all files requiring migration:
+      
+      **Source Path:** {{input_data.source_path}}
+      **Migration Type:** {{input_data.migration_type}}
+      
+      Common migrations:
+      - class_to_hooks: React class components → function components with hooks
+      - python2_to_3: Python 2 → Python 3
+      - js_to_ts: JavaScript → TypeScript
+      - enzyme_to_rtl: Enzyme tests → React Testing Library
+      - sequelize_to_prisma: Sequelize ORM → Prisma
+      
+      Return files to migrate:
+      ```json
+      {
+        "files": [
+          {
+            "path": "src/components/UserProfile.jsx",
+            "type": "class_component",
+            "complexity": "medium",
+            "has_tests": true
+          }
+        ],
+        "total": 500
+      }
+      ```
+    output: targets
+
+  # Step 2: Transform each file
+  - name: transform
+    for_each: "{{targets.files}}"
+    item_name: file
+    prompt: |
+      Transform file: {{file.path}}
+      
+      **Migration:** {{input_data.migration_type}}
+      **Original Code:** {{file.content}}
+      
+      Apply transformation according to migration type.
+      Preserve functionality exactly.
+      Maintain code style and formatting.
+      
+      Return transformed code.
+    output: transformed
+
+  # Step 3: Validate transformations
+  - name: validate
+    prompt: |
+      Validate transformed code:
+      
+      **Original:** {{targets}}
+      **Transformed:** {{transformed}}
+      
+      Check:
+      - Syntax valid
+      - Imports correct
+      - Functionality preserved
+      - Tests still pass
+      
+      Return validation results.
+    output: validation
+
+  # Step 4: Generate migration report
+  - name: generate_report
+    prompt: |
+      # Code Migration Report
+      
+      **Migration:** {{input_data.migration_type}}
+      **Files Migrated:** {{targets.total}}
+      **Success Rate:** {{validation.success_rate}}
+      
+      {{validation.summary}}

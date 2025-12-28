@@ -1,0 +1,487 @@
+name: query_optimizer
+description: Detect N+1 queries, missing indexes, and database performance issues
+version: 1.0.0
+author: Development Templates
+tags: [development, database, performance, optimization, n+1]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-3-5-sonnet
+    temperature: 0.2
+    max_tokens: 6000
+
+steps:
+  # Step 1: Extract all database queries from code
+  - name: extract_queries
+    prompt: |
+      Analyze codebase for database queries:
+      
+      **Codebase:**
+      {{input_data.codebase}}
+      
+      **ORM/Database:** {{input_data.orm | default: 'sqlalchemy|django|sequelize|prisma|gorm'}}
+      
+      Extract ALL database operations:
+      
+      ## ORM Queries
+      - Model.objects.all() (Django)
+      - session.query(Model) (SQLAlchemy)
+      - Model.findAll() (Sequelize)
+      - prisma.model.findMany() (Prisma)
+      - db.Find(&models) (GORM)
+      
+      ## Raw SQL
+      - execute("SELECT ...") statements
+      - cursor.execute() calls
+      - db.query() calls
+      
+      ## Relationships
+      - Foreign key access (user.posts)
+      - Many-to-many access (post.tags)
+      - Lazy loading patterns
+      
+      For each query, capture:
+      - File and line number
+      - Query code
+      - Model/table accessed
+      - Relationships accessed
+      - Inside loop? (critical for N+1)
+      - Joins used
+      - Prefetch/select_related used
+      
+      Return structured data:
+      ```json
+      {
+        "queries": [
+          {
+            "id": "query_001",
+            "file": "api/users.py",
+            "line": 42,
+            "code": "User.objects.all()",
+            "model": "User",
+            "inside_loop": false,
+            "has_joins": false
+          },
+          {
+            "id": "query_002",
+            "file": "api/users.py",
+            "line": 44,
+            "code": "user.posts.all()",
+            "model": "Post",
+            "inside_loop": true,  // POTENTIAL N+1!
+            "parent_query": "query_001"
+          }
+        ],
+        "total_queries": 42
+      }
+      ```
+    output: queries
+
+  # Step 2: Detect N+1 query patterns
+  - name: detect_n_plus_1
+    prompt: |
+      Detect N+1 query anti-patterns:
+      
+      **Queries:**
+      {{queries}}
+      
+      ## N+1 Pattern Detection
+      
+      Look for this pattern:
+      ```python
+      # PATTERN: N+1 query
+      items = Model.objects.all()  # 1 query
+      for item in items:  # Loop
+          related = item.related_model.all()  # N queries (1 per item)
+      ```
+      
+      Identify:
+      1. Query that fetches collection
+      2. Loop over that collection
+      3. Query inside loop accessing relationships
+      4. No prefetch/select_related used
+      
+      For each N+1 found:
+      
+      **Calculate Impact:**
+      - How many iterations? (estimate from typical data)
+      - Current queries: 1 + N
+      - Optimized queries: 2 (with proper join)
+      - Performance gain: (1 + N) / 2
+      
+      **Generate Fix:**
+      - Django: .select_related() for ForeignKey, .prefetch_related() for ManyToMany
+      - SQLAlchemy: .joinedload() or .subqueryload()
+      - Sequelize: include: [...] in findAll()
+      - Prisma: include: {...} in findMany()
+      - GORM: Preload()
+      
+      Return N+1 issues:
+      ```json
+      {
+        "n_plus_1_issues": [
+          {
+            "severity": "HIGH",
+            "file": "api/users.py",
+            "lines": "42-45",
+            "description": "N+1 query: Posts fetched individually for each user",
+            "current_queries": 1001,  // 1 + 1000 users
+            "optimized_queries": 2,
+            "performance_gain": "500×",
+            "current_code": "users = User.objects.all()\\nfor user in users:\\n    posts = user.posts.all()",
+            "fixed_code": "users = User.objects.all().prefetch_related('posts')\\nfor user in users:\\n    posts = user.posts.all()  # No extra queries",
+            "explanation": "Currently queries database once per user to fetch posts. Use prefetch_related to fetch all posts in single query."
+          }
+        ],
+        "total_n_plus_1": 5
+      }
+      ```
+    output: n_plus_1_issues
+
+  # Step 3: Find missing database indexes
+  - name: find_missing_indexes
+    prompt: |
+      Identify missing database indexes:
+      
+      **Queries:**
+      {{queries}}
+      
+      **Database Schema:**
+      {{input_data.schema | default: 'Analyze from queries'}}
+      
+      ## Index Opportunities
+      
+      Look for:
+      
+      **WHERE clauses without indexes:**
+      ```sql
+      SELECT * FROM users WHERE email = 'john@example.com'
+      # Needs: CREATE INDEX idx_users_email ON users(email)
+      ```
+      
+      **JOIN columns not indexed:**
+      ```sql
+      SELECT * FROM posts JOIN users ON posts.user_id = users.id
+      # Needs: INDEX on posts.user_id
+      ```
+      
+      **ORDER BY without index:**
+      ```sql
+      SELECT * FROM posts ORDER BY created_at DESC
+      # Needs: INDEX on created_at
+      ```
+      
+      **Composite indexes:**
+      ```sql
+      SELECT * FROM posts WHERE status = 'published' AND created_at > '2024-01-01'
+      # Needs: COMPOSITE INDEX on (status, created_at)
+      ```
+      
+      For each missing index:
+      
+      **Calculate Impact:**
+      - Current: Full table scan
+      - With index: Index seek
+      - Table size: (estimate or from schema)
+      - Speedup: 100× - 10,000× typical
+      
+      Return recommendations:
+      ```json
+      {
+        "missing_indexes": [
+          {
+            "severity": "CRITICAL",
+            "table": "users",
+            "column": "email",
+            "reason": "WHERE clause filters on email",
+            "query_file": "api/auth.py",
+            "query_line": 23,
+            "current_performance": "Full table scan (1M rows)",
+            "expected_speedup": "10,000×",
+            "sql": "CREATE INDEX idx_users_email ON users(email);",
+            "note": "Consider UNIQUE index if email must be unique"
+          },
+          {
+            "severity": "HIGH",
+            "table": "posts",
+            "columns": ["user_id", "created_at"],
+            "reason": "JOIN on user_id + ORDER BY created_at",
+            "query_file": "api/posts.py",
+            "query_line": 56,
+            "current_performance": "Full table scan + sort",
+            "expected_speedup": "500×",
+            "sql": "CREATE INDEX idx_posts_user_created ON posts(user_id, created_at DESC);",
+            "note": "Composite index covers both JOIN and ORDER BY"
+          }
+        ],
+        "total_recommendations": 8
+      }
+      ```
+    output: missing_indexes
+
+  # Step 4: Detect other query anti-patterns
+  - name: detect_antipatterns
+    prompt: |
+      Detect other database anti-patterns:
+      
+      **Queries:**
+      {{queries}}
+      
+      ## Anti-patterns to Detect
+      
+      ### SELECT * (Select All Columns)
+      ```sql
+      SELECT * FROM users  # Bad: Fetches all columns
+      SELECT id, name, email FROM users  # Good: Only needed columns
+      ```
+      
+      ### Missing LIMIT on large tables
+      ```sql
+      SELECT * FROM posts  # Bad: Could return millions of rows
+      SELECT * FROM posts LIMIT 100  # Good: Bounded result
+      ```
+      
+      ### Sequential Queries (Could be parallelized)
+      ```python
+      user = User.get(id=1)  # Query 1
+      posts = Post.filter(user_id=1)  # Query 2 (could run parallel)
+      comments = Comment.filter(user_id=1)  # Query 3
+      ```
+      
+      ### Cartesian Products (Dangerous JOINs)
+      ```sql
+      SELECT * FROM users, posts  # Missing JOIN condition!
+      ```
+      
+      ### Inefficient Counting
+      ```python
+      len(Model.objects.all())  # Bad: Loads all into memory
+      Model.objects.count()  # Good: COUNT query
+      ```
+      
+      Return anti-patterns found:
+      ```json
+      {
+        "antipatterns": [
+          {
+            "type": "select_star",
+            "severity": "MEDIUM",
+            "file": "api/users.py",
+            "line": 42,
+            "code": "SELECT * FROM users WHERE id = 1",
+            "issue": "Fetches all columns when only 3 are needed",
+            "fix": "SELECT id, name, email FROM users WHERE id = 1",
+            "impact": "Network bandwidth wasted, slower response"
+          }
+        ]
+      }
+      ```
+    output: antipatterns
+
+  # Step 5: Generate optimization report
+  - name: generate_report
+    prompt: |
+      # Database Query Optimization Report
+      
+      **Codebase:** {{input_data.codebase_name | default: 'Application'}}
+      **ORM:** {{input_data.orm | default: 'Detected'}}
+      **Analyzed:** {{execution.timestamp}}
+      **Template:** {{template.name}} v{{template.version}}
+      
+      ---
+      
+      ## Executive Summary
+      
+      **Total Queries Analyzed:** {{queries.total_queries}}
+      **Issues Found:** {{n_plus_1_issues.total_n_plus_1 + missing_indexes.total_recommendations + antipatterns.total}}
+      
+      **Performance Impact:**
+      - N+1 queries detected: {{n_plus_1_issues.total_n_plus_1}}
+      - Missing indexes: {{missing_indexes.total_recommendations}}
+      - Other anti-patterns: {{antipatterns.total}}
+      
+      **Estimated Speedup:** Up to 500× faster with all fixes applied
+      
+      ---
+      
+      ## Critical Issues (Fix Immediately)
+      
+      {% for issue in n_plus_1_issues.n_plus_1_issues %}
+      {% if issue.severity == 'HIGH' or issue.severity == 'CRITICAL' %}
+      ### ❌ N+1 Query: {{issue.file}}:{{issue.lines}}
+      
+      **Problem:**
+      {{issue.description}}
+      
+      **Current Performance:**
+      - Queries executed: {{issue.current_queries}}
+      - Estimated time: {{issue.current_time | default: '2000ms'}}
+      
+      **After Fix:**
+      - Queries executed: {{issue.optimized_queries}}
+      - Estimated time: {{issue.optimized_time | default: '4ms'}}
+      - **Performance gain: {{issue.performance_gain}}**
+      
+      **Current Code:**
+      ```python
+      {{issue.current_code}}
+      ```
+      
+      **Fixed Code:**
+      ```python
+      {{issue.fixed_code}}
+      ```
+      
+      **Explanation:**
+      {{issue.explanation}}
+      
+      ---
+      {% endif %}
+      {% endfor %}
+      
+      {% for index in missing_indexes.missing_indexes %}
+      {% if index.severity == 'CRITICAL' %}
+      ### ❌ Missing Index: {{index.table}}.{{index.column | default: index.columns}}
+      
+      **Problem:**
+      {{index.reason}}
+      
+      **Query Location:** {{index.query_file}}:{{index.query_line}}
+      
+      **Current Performance:**
+      {{index.current_performance}}
+      
+      **With Index:**
+      Expected speedup: {{index.expected_speedup}}
+      
+      **SQL to Fix:**
+      ```sql
+      {{index.sql}}
+      ```
+      
+      **Note:** {{index.note}}
+      
+      ---
+      {% endif %}
+      {% endfor %}
+      
+      ---
+      
+      ## High Priority Issues
+      
+      {% for issue in n_plus_1_issues.n_plus_1_issues %}
+      {% if issue.severity == 'MEDIUM' %}
+      ### ⚠️ N+1 Query: {{issue.file}}:{{issue.lines}}
+      
+      {{issue.description}}
+      
+      Performance gain: {{issue.performance_gain}}
+      
+      **Fix:** {{issue.fixed_code}}
+      
+      ---
+      {% endif %}
+      {% endfor %}
+      
+      {% for index in missing_indexes.missing_indexes %}
+      {% if index.severity == 'HIGH' %}
+      ### ⚠️ Missing Index: {{index.table}}.{{index.column | default: index.columns}}
+      
+      {{index.reason}}
+      
+      **SQL:** `{{index.sql}}`
+      
+      ---
+      {% endif %}
+      {% endfor %}
+      
+      ---
+      
+      ## Medium Priority Issues
+      
+      {% for pattern in antipatterns.antipatterns %}
+      ### 💡 {{pattern.type}}: {{pattern.file}}:{{pattern.line}}
+      
+      **Issue:** {{pattern.issue}}
+      
+      **Current:**
+      ```sql
+      {{pattern.code}}
+      ```
+      
+      **Fix:**
+      ```sql
+      {{pattern.fix}}
+      ```
+      
+      **Impact:** {{pattern.impact}}
+      
+      ---
+      {% endfor %}
+      
+      ---
+      
+      ## Summary by Severity
+      
+      **Critical (Fix Now):**
+      - N+1 queries: {{n_plus_1_issues.critical_count | default: 0}}
+      - Missing indexes: {{missing_indexes.critical_count | default: 0}}
+      
+      **High (Fix This Sprint):**
+      - N+1 queries: {{n_plus_1_issues.high_count | default: 0}}
+      - Missing indexes: {{missing_indexes.high_count | default: 0}}
+      
+      **Medium (Fix Soon):**
+      - Anti-patterns: {{antipatterns.total}}
+      
+      ---
+      
+      ## Estimated Impact
+      
+      **Current Performance:**
+      - API p95 latency: ~2000ms (estimated)
+      - Database CPU: ~80%
+      - Queries per request: ~50 average
+      
+      **After All Fixes:**
+      - API p95 latency: ~20ms (100× faster)
+      - Database CPU: ~20%
+      - Queries per request: ~5 average
+      
+      **Cost Savings:**
+      - Database scaling: $500/month → $150/month
+      - Reduced need for read replicas
+      - Better user experience
+      
+      ---
+      
+      ## Next Steps
+      
+      1. **Fix Critical N+1 Queries** (Day 1)
+         - Highest performance impact
+         - Easiest to fix (add .prefetch_related)
+         - Test with production traffic volume
+      
+      2. **Add Missing Indexes** (Day 2-3)
+         - Create indexes in staging first
+         - Monitor index size and query plans
+         - Deploy to production during low traffic
+      
+      3. **Address Anti-patterns** (Week 2)
+         - Refactor SELECT * queries
+         - Add LIMIT to large queries
+         - Optimize sequential queries
+      
+      4. **Monitor Performance** (Ongoing)
+         - Set up query performance monitoring
+         - Alert on slow queries (>100ms)
+         - Track database metrics
+      
+      ---
+      
+      **Performance Status:** ⚠️ NEEDS OPTIMIZATION
+      **Priority:** HIGH ({{n_plus_1_issues.total_n_plus_1}} critical issues)
+      **Estimated Effort:** 2-3 days to fix critical issues
+      
+      **Generated by:** {{template.name}} v{{template.version}}

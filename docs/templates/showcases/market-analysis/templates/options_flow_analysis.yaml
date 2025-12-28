@@ -1,0 +1,447 @@
+name: options_flow_analysis
+description: Track unusual options activity and smart money positioning
+version: 1.0.0
+author: Market Analysis Templates
+tags: [options-flow, smart-money, unusual-activity, dark-pools]
+
+config:
+  defaults:
+    provider: anthropic
+    model: claude-3-5-sonnet
+    temperature: 0.2
+    max_tokens: 6000
+
+# Required data sources
+servers:
+  - unusual-whales    # PAID $50/month - unusual options activity
+  - cboe-api          # FREE - put/call ratios, open interest
+  - yahoo-finance     # FREE - backup options data
+
+steps:
+  # Step 1: Get unusual options activity
+  - name: get_unusual_activity
+    servers: [unusual-whales]
+    prompt: |
+      Query Unusual Whales API for unusual options activity:
+      
+      **Stock:** {{input_data.ticker}}
+      **Lookback:** {{input_data.lookback_days | default: 5}} trading days
+      **Minimum Premium:** ${{input_data.min_premium | default: 100000}}
+      
+      **Query Parameters:**
+      ```
+      GET /api/v1/flow/{ticker}
+      params:
+        start_date: {{today - lookback_days}}
+        end_date: {{today}}
+        min_premium: {{min_premium}}
+        min_volume: 100  # At least 100 contracts
+      ```
+      
+      **What to look for:**
+      
+      1. **Sweep Orders (Most Important)**
+         - Buying across multiple exchanges simultaneously
+         - Paying ASK price (aggressive buying)
+         - Indicates high conviction, time-sensitive
+         
+         Types:
+         - CALL sweep = Bullish (expecting upside)
+         - PUT sweep = Bearish (expecting downside or hedging)
+      
+      2. **Block Trades**
+         - Large single orders (>500 contracts)
+         - Often institutional
+         - Look at ask/bid side:
+           - At ASK = Bullish (aggressive buying)
+           - At BID = Bearish (aggressive selling)
+      
+      3. **Dark Pool Prints**
+         - Large block trades off-exchange
+         - Premium to current price = Bullish (accumulation)
+         - Discount to current price = Bearish (distribution)
+      
+      4. **Unusual Volume**
+         - Volume > 5× normal open interest
+         - New positions being opened
+      
+      **Expected Response:**
+      ```json
+      {
+        "flow_events": [
+          {
+            "timestamp": "2024-12-28 10:15:23",
+            "type": "CALL_SWEEP",
+            "strike": 200,
+            "expiry": "2025-01-17",
+            "contracts": 500,
+            "premium": 375000,
+            "spot_price": 195.50,
+            "iv": 0.25,
+            "sentiment": "BULLISH",
+            "details": "Aggressive call buying 30 days out, strike $4.50 OTM"
+          },
+          {
+            "timestamp": "2024-12-27 14:45:10",
+            "type": "CALL_SWEEP",
+            "strike": 195,
+            "expiry": "2025-01-10",
+            "contracts": 1000,
+            "premium": 650000,
+            "spot_price": 194.00,
+            "iv": 0.28,
+            "sentiment": "BULLISH",
+            "details": "Large call sweep near-the-money, 2 weeks out"
+          },
+          {
+            "timestamp": "2024-12-26 11:30:00",
+            "type": "DARK_POOL",
+            "shares": 500000,
+            "price": 195.00,
+            "spot_price": 193.50,
+            "premium_pct": 0.78,
+            "sentiment": "BULLISH",
+            "details": "Dark pool print 500K shares at +0.78% premium"
+          }
+        ],
+        "summary": {
+          "total_events": 3,
+          "bullish_count": 3,
+          "bearish_count": 0,
+          "total_premium": 1025000,
+          "net_sentiment": "STRONGLY_BULLISH"
+        }
+      }
+      ```
+      
+      Note: If Unusual Whales not available, return empty flow_events array.
+    output: unusual_activity
+  
+  # Step 2: Get put/call ratio data
+  - name: get_putcall_ratios
+    servers: [cboe-api]
+    prompt: |
+      Get put/call ratio data for {{input_data.ticker}}:
+      
+      **From CBOE API:**
+      
+      1. Stock-specific P/C ratio:
+         - Total put volume / Total call volume (today)
+         - 5-day average P/C
+         - 20-day average P/C
+      
+      2. Market-wide P/C ratio (context):
+         - Overall market P/C (SPX)
+         - Trend (rising or falling)
+      
+      **Interpretation:**
+      
+      Stock P/C Ratio:
+      - < 0.7: Bullish extreme (too much call buying)
+        → Contrarian: Could be top (retail euphoria)
+        → Or: Smart money positioning for rally
+      
+      - 0.7 - 1.3: Normal range
+      
+      - > 1.5: Bearish extreme (too much put buying)
+        → Contrarian: Could be bottom (max fear)
+        → Or: Smart money hedging for drop
+      
+      **How to use:**
+      - P/C alone not predictive
+      - BUT combined with flow: If unusual call buying + LOW P/C = very bullish
+      - Confirms or contradicts flow data
+      
+      Return P/C analysis:
+      ```json
+      {
+        "stock_pc": {
+          "current": 0.62,
+          "avg_5d": 0.75,
+          "avg_20d": 0.85,
+          "interpretation": "BULLISH_EXTREME",
+          "note": "Heavy call buying past 5 days, P/C dropped from 0.85 to 0.62"
+        },
+        "market_pc": {
+          "current": 1.15,
+          "interpretation": "NORMAL"
+        }
+      }
+      ```
+    output: putcall_data
+  
+  # Step 3: Analyze options positioning
+  - name: analyze_options_positioning
+    servers: [cboe-api]
+    prompt: |
+      Analyze options open interest and positioning:
+      
+      **For {{input_data.ticker}}:**
+      
+      1. **Open Interest Analysis**
+         - Get open interest at key strikes
+         - Where is the "max pain" (most options expire worthless)?
+         - Where are large OI clusters?
+      
+      2. **Gamma Exposure**
+         - Calculate dealer gamma position
+         - Positive gamma: Dealers stabilize price (sell rallies, buy dips)
+         - Negative gamma: Dealers amplify moves (buy rallies, sell dips)
+      
+      3. **Implied Volatility**
+         - Current IV rank (percentile vs 1-year history)
+         - IV skew (OTM puts vs OTM calls)
+         - Rising IV = Market pricing in event
+      
+      Return positioning analysis:
+      ```json
+      {
+        "open_interest": {
+          "max_pain": 190,
+          "large_call_walls": [200, 210],
+          "large_put_walls": [185, 180],
+          "interpretation": "Price gravitates toward $190 into expiration"
+        },
+        "gamma_exposure": {
+          "dealers_net_gamma": -15000000,
+          "regime": "NEGATIVE_GAMMA",
+          "implication": "Dealers will amplify moves (buy rallies, sell dips)"
+        },
+        "implied_volatility": {
+          "iv_current": 0.28,
+          "iv_rank": 45,
+          "iv_percentile": "MODERATE",
+          "skew": "SLIGHT_PUT_BIAS",
+          "interpretation": "Moderate IV, not pricing in major event"
+        }
+      }
+      ```
+    output: options_positioning
+  
+  # Step 4: Synthesize flow signals
+  - name: synthesize_flow_signals
+    prompt: |
+      Synthesize all options flow data into actionable signal:
+      
+      **Unusual Activity:**
+      {{unusual_activity}}
+      
+      **Put/Call Ratios:**
+      {{putcall_data}}
+      
+      **Options Positioning:**
+      {{options_positioning}}
+      
+      ## Analysis Framework
+      
+      ### Signal Strength Hierarchy (Strongest to Weakest)
+      
+      1. **CALL/PUT SWEEPS + DARK POOL PRINTS** (Strongest)
+         - If multiple sweeps same direction + dark pool confirms
+         - Example: 3 call sweeps + dark pool at premium = VERY BULLISH
+         - Confidence: 90%+
+      
+      2. **CALL/PUT SWEEPS ONLY**
+         - Multiple sweeps same direction
+         - High premium ($100K+ per sweep)
+         - Confidence: 75-85%
+      
+      3. **DARK POOL PRINTS ONLY**
+         - Large blocks (500K+ shares)
+         - At premium (bullish) or discount (bearish)
+         - Confidence: 60-70%
+      
+      4. **PUT/CALL RATIO EXTREMES**
+         - Confirming signal only (not standalone)
+         - P/C < 0.7 + call flow = more bullish
+         - P/C > 1.5 + put flow = more bearish
+      
+      5. **OPEN INTEREST ALONE**
+         - Weakest signal
+         - Shows positioning but not direction
+         - Use for context only
+      
+      ### Conviction Levels
+      
+      **HIGH CONVICTION (90%+):**
+      - 3+ sweeps same direction past 3 days
+      - Total premium > $500K
+      - Dark pool confirms direction
+      - P/C confirms (calls: P/C low, puts: P/C high)
+      
+      **MEDIUM CONVICTION (70-85%):**
+      - 1-2 sweeps same direction
+      - Premium $100K-500K
+      - P/C confirms OR dark pool confirms
+      
+      **LOW CONVICTION (50-65%):**
+      - Single sweep or small premium
+      - P/C only or dark pool only
+      - Mixed signals
+      
+      **NO SIGNAL (<50%):**
+      - No unusual activity
+      - Or conflicting signals (call sweeps + put sweeps)
+      
+      ## Generate Signal
+      
+      Based on the data:
+      
+      **Count bullish vs bearish signals:**
+      - Call sweeps: {{unusual_activity.summary.bullish_count | filter: 'type=CALL_SWEEP'}}
+      - Put sweeps: {{unusual_activity.summary.bearish_count | filter: 'type=PUT_SWEEP'}}
+      - Dark pool premium: {{count dark pools at premium}}
+      - Dark pool discount: {{count dark pools at discount}}
+      - P/C ratio: {{putcall_data.stock_pc.interpretation}}
+      
+      **Determine signal:**
+      - If heavily one-sided (3+ same direction): STRONG signal
+      - If moderately one-sided (2 same direction): MODERATE signal
+      - If balanced or no data: NEUTRAL
+      
+      Generate options flow signal:
+      ```json
+      {
+        "signal": "BULLISH",
+        "strength": "STRONG",
+        "confidence": 85,
+        "conviction": "HIGH",
+        
+        "evidence": [
+          "3 large call sweeps totaling $1.025M premium past 3 days",
+          "Dark pool print 500K shares at +0.78% premium (accumulation)",
+          "Put/call ratio dropped from 0.85 to 0.62 (heavy call buying)",
+          "No bearish flow detected"
+        ],
+        
+        "key_observations": {
+          "dominant_flow": "CALL_SWEEPS",
+          "total_premium": 1025000,
+          "net_direction": "STRONGLY_BULLISH",
+          "smart_money_activity": "Aggressive call buying, time-sensitive positioning"
+        },
+        
+        "technical_details": {
+          "largest_trade": {
+            "type": "CALL_SWEEP",
+            "strike": 195,
+            "contracts": 1000,
+            "premium": 650000,
+            "days_to_expiry": 14
+          },
+          "gamma_regime": "{{options_positioning.gamma_exposure.regime}}",
+          "gamma_implication": "{{options_positioning.gamma_exposure.implication}}"
+        },
+        
+        "interpretation": "Strong smart money accumulation via options. Multiple large call sweeps indicate high-conviction bullish positioning. Dark pool print at premium confirms institutions buying stock. Low put/call ratio shows retail also bullish (confirms trend). Negative gamma means dealers will buy into rallies, amplifying upside.",
+        
+        "risks": [
+          "IF this is retail euphoria (everyone bullish), could be contrarian top",
+          "Large OI at $200 could act as resistance (dealers hedge by selling stock)"
+        ],
+        
+        "catalyst_timing": "Flow suggests 1-4 week time horizon (most sweeps 2-4 weeks out)",
+        
+        "data_quality": "{{#if unusual_activity.flow_events.length > 0}}EXCELLENT (paid data){{else}}LIMITED (free data only){{/if}}"
+      }
+      ```
+      
+      Note: If no unusual activity data (free tier), return NEUTRAL with lower confidence.
+    output: flow_signal
+  
+  # Step 5: Generate summary report
+  - name: generate_summary
+    prompt: |
+      # Options Flow Analysis: {{input_data.ticker}}
+      
+      **Analysis Date:** {{execution.timestamp}}
+      **Lookback Period:** {{input_data.lookback_days | default: 5}} days
+      
+      ---
+      
+      ## Signal: {{flow_signal.signal}} ({{flow_signal.strength}})
+      
+      **Confidence:** {{flow_signal.confidence}}%
+      **Conviction:** {{flow_signal.conviction}}
+      
+      ### Interpretation
+      
+      {{flow_signal.interpretation}}
+      
+      ---
+      
+      ## Evidence
+      
+      {{#each flow_signal.evidence}}
+      ✓ {{this}}
+      {{/each}}
+      
+      ---
+      
+      ## Key Observations
+      
+      **Dominant Flow Type:** {{flow_signal.key_observations.dominant_flow}}
+      **Total Premium:** ${{flow_signal.key_observations.total_premium | format_number}}
+      **Net Direction:** {{flow_signal.key_observations.net_direction}}
+      
+      **Smart Money Activity:**
+      {{flow_signal.key_observations.smart_money_activity}}
+      
+      ---
+      
+      ## Largest Trade
+      
+      {% if flow_signal.technical_details.largest_trade %}
+      - Type: {{flow_signal.technical_details.largest_trade.type}}
+      - Strike: ${{flow_signal.technical_details.largest_trade.strike}}
+      - Contracts: {{flow_signal.technical_details.largest_trade.contracts}}
+      - Premium: ${{flow_signal.technical_details.largest_trade.premium | format_number}}
+      - Days to Expiry: {{flow_signal.technical_details.largest_trade.days_to_expiry}}
+      {% else %}
+      No significant trades detected
+      {% endif %}
+      
+      ---
+      
+      ## Options Positioning Context
+      
+      **Dealer Gamma:** {{flow_signal.technical_details.gamma_regime}}
+      - {{flow_signal.technical_details.gamma_implication}}
+      
+      **Put/Call Ratio:** {{putcall_data.stock_pc.current}}
+      - {{putcall_data.stock_pc.interpretation}}
+      - {{putcall_data.stock_pc.note}}
+      
+      **Implied Volatility:** {{options_positioning.implied_volatility.iv_percentile}}
+      - Current IV: {{options_positioning.implied_volatility.iv_current}}
+      - IV Rank: {{options_positioning.implied_volatility.iv_rank}} percentile
+      
+      ---
+      
+      ## Risk Factors
+      
+      {{#each flow_signal.risks}}
+      ⚠ {{this}}
+      {{/each}}
+      
+      ---
+      
+      ## Catalyst Timing
+      
+      {{flow_signal.catalyst_timing}}
+      
+      ---
+      
+      ## Data Quality
+      
+      {{flow_signal.data_quality}}
+      
+      {% if unusual_activity.flow_events.length == 0 %}
+      **Note:** No paid options flow data available. Signal based on free put/call ratios only. 
+      Consider subscribing to Unusual Whales ($50/month) for better signal quality.
+      {% endif %}
+      
+      ---
+      
+      **Data Sources:** {{#if unusual_activity.flow_events.length > 0}}Unusual Whales, {{/if}}CBOE, Yahoo Finance
+      **Template:** {{template.name}} v{{template.version}}

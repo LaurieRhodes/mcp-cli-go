@@ -28,7 +28,7 @@ steps:
     description: "Fetch data with retry logic"
     
     prompt: |
-      Fetch and analyze data for: {{stdin}}
+      Fetch and analyze data for: {{input_data}}
       
       Provide comprehensive analysis.
     
@@ -89,7 +89,7 @@ steps:
     prompt: |
       Create final report:
       
-      Original Query: {{stdin}}
+      Original Query: {{input_data}}
       Primary Data: {{primary_data}}
       Processed Data: {{processed_data}}
       Validation: {{validation_result}}

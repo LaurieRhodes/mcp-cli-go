@@ -1,0 +1,340 @@
+name: resilient_incident_response
+description: Incident analysis with automatic provider failover for guaranteed availability
+version: 1.0.0
+author: DevOps Templates
+tags: [devops, incident-response, resilience, failover]
+
+config:
+  defaults:
+    temperature: 0.3  # Lower for factual analysis
+    max_tokens: 4000
+
+steps:
+  # Step 1: Try primary provider (best quality)
+  - name: primary_analysis
+    provider: anthropic
+    model: claude-3-5-sonnet
+    prompt: |
+      Analyze this production incident:
+      
+      {{input_data.logs}}
+      
+      Provide comprehensive incident analysis:
+      
+      **Timeline of Events:**
+      - Reconstruct what happened chronologically
+      - Identify when symptoms first appeared
+      - Track progression to full outage
+      
+      **Failure Points Identified:**
+      - What component(s) failed?
+      - What was the immediate trigger?
+      - Were there cascading failures?
+      
+      **System Components Involved:**
+      - Which services/systems affected?
+      - Dependencies and interactions
+      - Data flow disruptions
+      
+      **Impact Assessment:**
+      - User-facing impact
+      - Data integrity concerns
+      - Business operations affected
+      - Duration and scope
+      
+      **Evidence and Indicators:**
+      - Error messages and stack traces
+      - Metrics anomalies
+      - Alert patterns
+      - Correlation across systems
+    timeout_seconds: 60
+    max_retries: 2
+    error_handling:
+      on_failure: continue      # Don't stop workflow
+      default_output: "PRIMARY_PROVIDER_UNAVAILABLE"
+    output: primary_result
+
+  # Step 2: Failover to secondary provider (different vendor)
+  - name: secondary_analysis
+    condition: "{{primary_result}} contains 'UNAVAILABLE'"
+    provider: openai
+    model: gpt-4o
+    prompt: |
+      Analyze this production incident:
+      
+      {{input_data.logs}}
+      
+      Provide comprehensive incident analysis:
+      
+      **Timeline of Events:**
+      - Reconstruct what happened chronologically
+      - Identify when symptoms first appeared
+      - Track progression to full outage
+      
+      **Failure Points Identified:**
+      - What component(s) failed?
+      - What was the immediate trigger?
+      - Were there cascading failures?
+      
+      **System Components Involved:**
+      - Which services/systems affected?
+      - Dependencies and interactions
+      - Data flow disruptions
+      
+      **Impact Assessment:**
+      - User-facing impact
+      - Data integrity concerns
+      - Business operations affected
+      - Duration and scope
+      
+      **Evidence and Indicators:**
+      - Error messages and stack traces
+      - Metrics anomalies
+      - Alert patterns
+      - Correlation across systems
+    timeout_seconds: 60
+    max_retries: 2
+    error_handling:
+      on_failure: continue
+      default_output: "SECONDARY_PROVIDER_UNAVAILABLE"
+    output: secondary_result
+
+  # Step 3: Tertiary failover (different infrastructure)
+  - name: tertiary_analysis
+    condition: "{{secondary_result}} contains 'UNAVAILABLE'"
+    provider: gemini
+    model: gemini-1.5-pro
+    prompt: |
+      Analyze this production incident:
+      
+      {{input_data.logs}}
+      
+      Provide comprehensive incident analysis:
+      
+      **Timeline of Events:**
+      - Reconstruct what happened chronologically
+      - Identify when symptoms first appeared
+      - Track progression to full outage
+      
+      **Failure Points Identified:**
+      - What component(s) failed?
+      - What was the immediate trigger?
+      - Were there cascading failures?
+      
+      **System Components Involved:**
+      - Which services/systems affected?
+      - Dependencies and interactions
+      - Data flow disruptions
+      
+      **Impact Assessment:**
+      - User-facing impact
+      - Data integrity concerns
+      - Business operations affected
+      - Duration and scope
+      
+      **Evidence and Indicators:**
+      - Error messages and stack traces
+      - Metrics anomalies
+      - Alert patterns
+      - Correlation across systems
+    timeout_seconds: 60
+    max_retries: 2
+    error_handling:
+      on_failure: continue
+      default_output: "TERTIARY_PROVIDER_UNAVAILABLE"
+    output: tertiary_result
+
+  # Step 4: Final fallback to local model (guaranteed availability)
+  - name: local_analysis
+    condition: "{{tertiary_result}} contains 'UNAVAILABLE'"
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Analyze this production incident:
+      
+      {{input_data.logs}}
+      
+      Provide comprehensive incident analysis:
+      
+      **Timeline of Events:**
+      - Reconstruct what happened chronologically
+      - Identify when symptoms first appeared
+      - Track progression to full outage
+      
+      **Failure Points Identified:**
+      - What component(s) failed?
+      - What was the immediate trigger?
+      - Were there cascading failures?
+      
+      **System Components Involved:**
+      - Which services/systems affected?
+      - Dependencies and interactions
+      - Data flow disruptions
+      
+      **Impact Assessment:**
+      - User-facing impact
+      - Data integrity concerns
+      - Business operations affected
+      - Duration and scope
+      
+      **Evidence and Indicators:**
+      - Error messages and stack traces
+      - Metrics anomalies
+      - Alert patterns
+      - Correlation across systems
+    output: local_result
+
+  # Step 5: Select successful result
+  - name: select_analysis
+    provider: ollama  # Use local for meta-operation
+    model: qwen2.5:7b
+    prompt: |
+      Identify which incident analysis succeeded and return only that analysis:
+      
+      Primary (Anthropic Claude): {{primary_result}}
+      Secondary (OpenAI GPT-4o): {{secondary_result}}
+      Tertiary (Google Gemini): {{tertiary_result}}
+      Local (Ollama Qwen): {{local_result}}
+      
+      Instructions:
+      1. Find the first result that doesn't contain "UNAVAILABLE"
+      2. Return ONLY that successful analysis
+      3. Add one line at the top: "Provider used: [provider name]"
+      4. Do NOT summarize or modify the analysis
+    output: initial_analysis
+
+  # Step 6: Root cause analysis using 5 Whys methodology
+  - name: root_cause
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Perform root cause analysis using the 5 Whys methodology:
+      
+      Initial incident analysis:
+      {{initial_analysis}}
+      
+      Apply 5 Whys:
+      
+      **1. What failed?**
+      [Direct failure - what stopped working]
+      
+      **2. Why did it fail?**
+      [Immediate cause - what condition caused the failure]
+      
+      **3. Why did that condition exist?**
+      [Deeper cause - what allowed that condition to develop]
+      
+      **4. Why wasn't it prevented?**
+      [System/process gap - what safeguards were missing]
+      
+      **5. Why wasn't it detected earlier?**
+      [Monitoring/alerting gap - what visibility was lacking]
+      
+      **Root Cause:**
+      [Ultimate systemic issue that needs addressing]
+      
+      **Contributing Factors:**
+      [Other factors that made this possible or worse]
+    output: root_cause_analysis
+
+  # Step 7: Generate comprehensive post-mortem report
+  - name: create_report
+    provider: ollama
+    model: qwen2.5:32b
+    prompt: |
+      Create comprehensive incident post-mortem report in markdown format:
+      
+      # Incident Post-Mortem
+      
+      **Date:** {{execution.timestamp}}
+      **Template:** {{template.name}} v{{template.version}}
+      **Analysis Provider:** [Extract from initial_analysis]
+      
+      ---
+      
+      ## Executive Summary
+      
+      [2-3 paragraph high-level summary of incident, impact, and resolution]
+      
+      ---
+      
+      ## Incident Analysis
+      
+      {{initial_analysis}}
+      
+      ---
+      
+      ## Root Cause Analysis
+      
+      {{root_cause_analysis}}
+      
+      ---
+      
+      ## Action Items
+      
+      ### Immediate Actions (0-24 hours)
+      1. [Actions to prevent recurrence immediately]
+      2. [Emergency fixes or workarounds]
+      3. [Critical monitoring gaps to address]
+      
+      ### Short-term Actions (1-7 days)
+      1. [Process improvements]
+      2. [Code/config changes]
+      3. [Documentation updates]
+      
+      ### Long-term Actions (1-4 weeks)
+      1. [Architectural improvements]
+      2. [Systemic changes]
+      3. [Team training/process changes]
+      
+      ---
+      
+      ## Prevention Measures
+      
+      **Detection:**
+      - [How to detect this earlier in future]
+      - [Monitoring/alerting improvements needed]
+      
+      **Prevention:**
+      - [How to prevent this from happening]
+      - [Guardrails, validations, tests to add]
+      
+      **Mitigation:**
+      - [How to reduce blast radius if it happens again]
+      - [Circuit breakers, fallbacks, etc.]
+      
+      ---
+      
+      ## Lessons Learned
+      
+      **What went well:**
+      - [Positive aspects of response]
+      - [Effective procedures that worked]
+      
+      **What could be improved:**
+      - [Process gaps identified]
+      - [Communication issues]
+      - [Tool/visibility limitations]
+      
+      ---
+      
+      ## Timeline
+      
+      [Detailed timeline from initial_analysis, formatted as table or list]
+      
+      ---
+      
+      ## Appendix: Logs and Evidence
+      
+      <details>
+      <summary>Raw logs (click to expand)</summary>
+      
+      ```
+      {{input_data.logs}}
+      ```
+      
+      </details>
+      
+      ---
+      
+      **End of Post-Mortem Report**
