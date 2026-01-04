@@ -23,6 +23,7 @@ func NewLoader() *Loader {
 type IncludeDirectives struct {
 	Providers  string `yaml:"providers,omitempty"`  // e.g., "config/providers/*.yaml"
 	Servers    string `yaml:"servers,omitempty"`    // e.g., "config/servers/*.yaml"
+	RunAs      string `yaml:"runas,omitempty"`      // e.g., "config/runas/*.yaml"
 	Embeddings string `yaml:"embeddings,omitempty"` // e.g., "config/embeddings/*.yaml"
 	Templates  string `yaml:"templates,omitempty"`  // e.g., "config/templates/**/*.yaml"
 	Settings   string `yaml:"settings,omitempty"`   // e.g., "config/settings.yaml"
@@ -174,6 +175,14 @@ func (l *Loader) processIncludes(includes *IncludeDirectives, result *Applicatio
 	if includes.Servers != "" {
 		if err := l.loadServers(includes.Servers, result); err != nil {
 			return fmt.Errorf("failed to load servers: %w", err)
+		}
+	}
+
+	// Process runas includes (runas configs define MCP servers)
+	// Skip if MCP_CLI_SERVE_MODE is set to prevent recursive loading
+	if includes.RunAs != "" && os.Getenv("MCP_CLI_SERVE_MODE") != "true" {
+		if err := l.loadRunAsServers(includes.RunAs, result); err != nil {
+			return fmt.Errorf("failed to load runas servers: %w", err)
 		}
 	}
 
@@ -347,6 +356,44 @@ func (l *Loader) loadServers(pattern string, result *ApplicationConfig) error {
 
 		// Add to servers map
 		result.Servers[serverFile.ServerName] = serverFile.Config
+	}
+
+	return nil
+}
+
+// loadRunAsServers loads runas configurations and converts them to server configs
+func (l *Loader) loadRunAsServers(pattern string, result *ApplicationConfig) error {
+	files, err := l.glob(pattern)
+	if err != nil {
+		return err
+	}
+
+	// Get the executable path for mcp-cli
+	// We'll use the same binary that's currently running
+	exePath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to get executable path: %w", err)
+	}
+
+	for _, file := range files {
+		// Get absolute path for the runas config
+		absPath, err := filepath.Abs(file)
+		if err != nil {
+			return fmt.Errorf("failed to get absolute path for %s: %w", file, err)
+		}
+
+		// Derive server name from filename (without extension)
+		serverName := strings.TrimSuffix(filepath.Base(file), filepath.Ext(file))
+
+		// Create ServerConfig that runs "mcp-cli serve <runas-config>"
+		serverConfig := ServerConfig{
+			Command: exePath,
+			Args:    []string{"serve", absPath},
+			// Optional: could add description from runas config
+		}
+
+		// Add to servers map
+		result.Servers[serverName] = serverConfig
 	}
 
 	return nil

@@ -2,11 +2,15 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"strings"
+	"time"
 	
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/runas"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
@@ -14,19 +18,32 @@ import (
 )
 
 // Service implements the MCP server message handler
+// ProgressNotifier interface for sending progress notifications
+type ProgressNotifier interface {
+	SendProgressNotification(progressToken string, progress float64, total int, message string)
+}
+
 type Service struct {
-	runasConfig   *runas.RunAsConfig
-	appConfig     *config.ApplicationConfig
-	configService *infraConfig.Service
+	runasConfig        *runas.RunAsConfig
+	appConfig          *config.ApplicationConfig
+	configService      *infraConfig.Service
+	skillService       skills.SkillService
+	progressNotifier   ProgressNotifier
 }
 
 // NewService creates a new MCP server service
-func NewService(runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, configService *infraConfig.Service) *Service {
+func NewService(runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, configService *infraConfig.Service, skillService skills.SkillService) *Service {
 	return &Service{
 		runasConfig:   runasConfig,
 		appConfig:     appConfig,
 		configService: configService,
+		skillService:  skillService,
 	}
+}
+
+// SetProgressNotifier sets the progress notifier for sending progress updates
+func (s *Service) SetProgressNotifier(notifier ProgressNotifier) {
+	s.progressNotifier = notifier
 }
 
 // HandleInitialize handles the initialize request
@@ -100,14 +117,40 @@ func (s *Service) HandleToolsCall(params map[string]interface{}) (map[string]int
 	
 	logging.Debug("Tool arguments: %+v", arguments)
 	
+	// Log params for debugging
+	logging.Debug("Raw params received: %+v", params)
+	
+	// Extract progress token if present (MCP protocol support)
+	var progressToken string
+	if meta, ok := params["_meta"].(map[string]interface{}); ok {
+		if token, ok := meta["progressToken"].(string); ok {
+			progressToken = token
+			logging.Info("Progress token extracted: %s", progressToken)
+		} else {
+			logging.Warn("_meta exists but progressToken not found or not string")
+		}
+	} else {
+		logging.Warn("No _meta field in params (progress notifications disabled)")
+	}
+	
 	// Find the tool exposure
 	toolExposure, found := s.runasConfig.GetToolByName(toolName)
 	if !found {
 		return nil, fmt.Errorf("tool not found: %s", toolName)
 	}
 	
-	// Execute the template
-	result, err := s.executeTemplate(toolExposure, arguments)
+	// CHECK: Is this the execute_skill_code tool? (identified by template)
+	if toolExposure.Template == "execute_skill_code" {
+		return s.handleExecuteSkillCode(arguments)
+	}
+	
+	// CHECK: Is this a skill tool (uses load_skill template)?
+	if toolExposure.Template == "load_skill" {
+		return s.handleSkillToolCall(toolExposure, arguments)
+	}
+	
+	// Execute the template with progress token
+	result, err := s.executeTemplateWithProgress(toolExposure, arguments, progressToken)
 	if err != nil {
 		logging.Error("Template execution failed: %v", err)
 		
@@ -132,6 +175,71 @@ func (s *Service) HandleToolsCall(params map[string]interface{}) (map[string]int
 			},
 		},
 	}, nil
+}
+
+// executeTemplateWithProgress executes a template and sends progress notifications
+func (s *Service) executeTemplateWithProgress(toolExposure *runas.ToolExposure, arguments map[string]interface{}, progressToken string) (string, error) {
+	logging.Info("Executing template with progress support: token=%s, hasNotifier=%v", 
+		progressToken, s.progressNotifier != nil)
+	
+	// Send initial progress (0%)
+	if progressToken != "" && s.progressNotifier != nil {
+		logging.Info("Sending initial progress notification (0%%)")
+		s.progressNotifier.SendProgressNotification(progressToken, 0.0, 0, fmt.Sprintf("Starting %s", toolExposure.Name))
+	} else {
+		if progressToken == "" {
+			logging.Warn("No progress token provided - progress notifications disabled")
+		}
+		if s.progressNotifier == nil {
+			logging.Warn("No progress notifier available - progress notifications disabled")
+		}
+	}
+	
+	// Start heartbeat goroutine to send periodic progress updates
+	// This keeps the client alive during long-running template execution
+	done := make(chan bool)
+	if progressToken != "" && s.progressNotifier != nil {
+		go func() {
+			ticker := time.NewTicker(20 * time.Second)  // Send heartbeat every 20 seconds
+			defer ticker.Stop()
+			
+			for {
+				select {
+				case <-ticker.C:
+					// Send a "still working" notification with same progress value
+					// This resets the client's timeout without implying actual progress
+					s.progressNotifier.SendProgressNotification(
+						progressToken, 
+						0.5,  // Mid-point to indicate "in progress"
+						0, 
+						fmt.Sprintf("Executing %s...", toolExposure.Name),
+					)
+					logging.Debug("Sent heartbeat progress notification")
+				case <-done:
+					return
+				}
+			}
+		}()
+	}
+	
+	// Execute the template (this blocks)
+	result, err := s.executeTemplate(toolExposure, arguments)
+	
+	// Stop heartbeat
+	close(done)
+	
+	// Send completion progress (100%)
+	if progressToken != "" && s.progressNotifier != nil {
+		if err != nil {
+			logging.Info("Sending failure progress notification (100%%)")
+			s.progressNotifier.SendProgressNotification(progressToken, 1.0, 0, fmt.Sprintf("Failed: %v", err))
+		} else {
+			logging.Info("Sending completion progress notification (100%%)")
+			s.progressNotifier.SendProgressNotification(progressToken, 1.0, 0, fmt.Sprintf("Completed %s", toolExposure.Name))
+		}
+	}
+	
+	return result, err
 }
 
 // executeTemplate executes a template with the given arguments
@@ -286,6 +394,175 @@ func (s *Service) executeTemplateV2WithProvider(tmpl *config.TemplateV2, inputDa
 	}
 	
 	return fmt.Sprintf("Template '%s' completed but produced no output", tmpl.Name), nil
+}
+
+// handleSkillToolCall handles calls to skill tools (tools using load_skill template)
+func (s *Service) handleSkillToolCall(toolExposure *runas.ToolExposure, arguments map[string]interface{}) (map[string]interface{}, error) {
+	logging.Info("Handling skill tool call: %s", toolExposure.Name)
+	
+	// Extract skill name from input mapping
+	skillName := ""
+	if mapping, ok := toolExposure.InputMapping["skill_name"]; ok {
+		skillName = mapping
+	} else {
+		// Fallback: convert tool name (python_best_practices -> python-best-practices)
+		skillName = strings.ReplaceAll(toolExposure.Name, "_", "-")
+	}
+	
+	// Build skill load request
+	request := &skills.SkillLoadRequest{
+		SkillName: skillName,
+		Mode:      skills.SkillLoadModePassive, // Default
+	}
+	
+	// Extract parameters from arguments
+	if mode, ok := arguments["mode"].(string); ok {
+		request.Mode = skills.SkillLoadMode(mode)
+	}
+	
+	if includeRefs, ok := arguments["include_references"].(bool); ok {
+		request.IncludeReferences = includeRefs
+	}
+	
+	if refFiles, ok := arguments["reference_files"].([]interface{}); ok {
+		for _, ref := range refFiles {
+			if refStr, ok := ref.(string); ok {
+				request.ReferenceFiles = append(request.ReferenceFiles, refStr)
+			}
+		}
+	}
+	
+	if inputData, ok := arguments["input_data"].(string); ok {
+		request.InputData = inputData
+	}
+	
+	// Load the skill
+	result, err := s.skillService.LoadSkillByRequest(request)
+	if err != nil {
+		logging.Error("Failed to load skill: %v", err)
+		return map[string]interface{}{
+			"content": []interface{}{
+				map[string]interface{}{
+					"type": "text",
+					"text": fmt.Sprintf("Failed to load skill %s: %v", skillName, err),
+				},
+			},
+			"isError": true,
+		}, nil
+	}
+	
+	// Return skill content
+	content := result.Content
+	if result.Mode == skills.SkillLoadModeActive {
+		content = result.Result
+	}
+	
+	logging.Info("Successfully loaded skill: %s (%d chars)", skillName, len(content))
+	
+	return map[string]interface{}{
+		"content": []interface{}{
+			map[string]interface{}{
+				"type": "text",
+				"text": content,
+			},
+		},
+	}, nil
+}
+
+// handleExecuteSkillCode handles the execute_skill_code tool
+func (s *Service) handleExecuteSkillCode(arguments map[string]interface{}) (map[string]interface{}, error) {
+	logging.Info("Handling execute_skill_code request")
+	
+	// Extract skill_name
+	skillName, ok := arguments["skill_name"].(string)
+	if !ok || skillName == "" {
+		return s.errorResponse("skill_name parameter is required"), nil
+	}
+	
+	// Extract language (default to python)
+	language := "python"
+	if lang, ok := arguments["language"].(string); ok && lang != "" {
+		language = lang
+	}
+	
+	// Extract code
+	code, ok := arguments["code"].(string)
+	if !ok || code == "" {
+		return s.errorResponse("code parameter is required"), nil
+	}
+	
+	logging.Info("Executing code for skill: %s (language: %s, code length: %d)", skillName, language, len(code))
+	
+	// Extract files (optional)
+	files := make(map[string][]byte)
+	if filesArg, ok := arguments["files"].(map[string]interface{}); ok {
+		for filename, content := range filesArg {
+			// Content should be base64 encoded
+			if contentStr, ok := content.(string); ok {
+				// Try to decode as base64
+				decoded, err := base64.StdEncoding.DecodeString(contentStr)
+				if err != nil {
+					// If not base64, treat as plain text
+					decoded = []byte(contentStr)
+				}
+				files[filename] = decoded
+				logging.Debug("Added file: %s (%d bytes)", filename, len(decoded))
+			}
+		}
+	}
+	
+	// Create execution request
+	request := &skills.CodeExecutionRequest{
+		SkillName: skillName,
+		Language:  language,
+		Code:      code,
+		Files:     files,
+		Timeout:   60, // 60 second timeout
+	}
+	
+	// Execute code
+	result, err := s.skillService.ExecuteCode(request)
+	if err != nil {
+		logging.Error("Code execution failed: %v", err)
+		return s.errorResponse(fmt.Sprintf("Code execution failed: %v", err)), nil
+	}
+	
+	// Check if execution had an error
+	if result.Error != nil {
+		logging.Warn("Code execution completed with error: %v", result.Error)
+		return s.errorResponse(fmt.Sprintf("Code execution error: %v\n\nOutput:\n%s", result.Error, result.Output)), nil
+	}
+	
+	// Success!
+	logging.Info("Code executed successfully (exit code: %d, duration: %dms)", result.ExitCode, result.Duration)
+	
+	// Format response with output
+	responseText := result.Output
+	if result.Duration > 0 {
+		responseText = fmt.Sprintf("%s\n\n[Executed in %dms]", result.Output, result.Duration)
+	}
+	
+	return map[string]interface{}{
+		"content": []interface{}{
+			map[string]interface{}{
+				"type": "text",
+				"text": responseText,
+			},
+		},
+	}, nil
+}
+
+// errorResponse creates an error response in MCP format
+func (s *Service) errorResponse(message string) map[string]interface{} {
+	return map[string]interface{}{
+		"content": []interface{}{
+			map[string]interface{}{
+				"type": "text",
+				"text": message,
+			},
+		},
+		"isError": true,
+	}
 }
 
 // EmptyServerManager implements a minimal MCPServerManager for templates that don't need servers

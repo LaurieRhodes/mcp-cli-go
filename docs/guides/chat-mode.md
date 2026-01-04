@@ -2,6 +2,10 @@
 
 Have conversations with AI - like ChatGPT but in your terminal, with access to tools.
 
+![](./img/Chat%20Mode.jpeg)
+
+
+
 **What is Chat Mode?** Interactive back-and-forth conversation with AI that remembers what you said.
 
 **Think of it like:** Texting with AI. You say something, AI responds, you continue the conversation.
@@ -18,13 +22,6 @@ Have conversations with AI - like ChatGPT but in your terminal, with access to t
 - ✅ Testing templates before automation
 - ✅ Need AI to use tools (file access, web search)
 - ✅ Interactive development
-
-**Don't use when:**
-
-- ❌ Scripting/automation (use query mode)
-- ❌ Batch processing (use templates)
-- ❌ CI/CD pipelines (use query mode)
-- ❌ One simple question (use query mode)
 
 ---
 
@@ -96,8 +93,8 @@ mcp-cli chat
 **What happens:**
 
 1. Loads config.yaml to find default provider
-2. Connects to AI provider (e.g., Anthropic, OpenAI)
-3. Starts conversation (no MCP tools unless configured)
+2. Connects to AI provider (e.g., Anthropic, OpenAI etc)
+3. Starts conversation (all exposed MCP tools unless configured)
 4. Waits for your input
 
 **Cost:** Free until you type something! Then ~$0.001 per message.
@@ -143,13 +140,11 @@ mcp-cli chat --provider openai --model gpt-4o-mini
 mcp-cli chat --provider ollama --model llama3.2
 ```
 
-
-
 ---
 
 ### Start with Tools (MCP Servers)
 
-**What are tools?** Give AI ability to DO things (read files, search web, etc.)
+**What are tools?** Give AI ability to DO things (read files, search web, etc.).  All configured tools will be loaded by default or specific singular tools may be enabled from the commandline.
 
 ```bash
 # AI can access files
@@ -193,8 +188,6 @@ You> Search the web for "MCP protocol" and save results to a file
 
 I found information about MCP protocol and saved it to mcp-info.txt.
 ```
-
-**Cost impact:** Tool use adds ~$0.0005 per tool call (AI has to "think" about using tools)
 
 ---
 

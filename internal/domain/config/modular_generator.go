@@ -102,6 +102,7 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 		Includes: &IncludeDirectives{
 			Providers:  filepath.Join(configDirName, "providers/*.yaml"),
 			Servers:    filepath.Join(configDirName, "servers/*.yaml"),
+			RunAs:      filepath.Join(configDirName, "runas/*.yaml"),
 			Embeddings: filepath.Join(configDirName, "embeddings/*.yaml"),
 			Templates:  filepath.Join(configDirName, "templates/*.yaml"),
 			Settings:   filepath.Join(configDirName, "settings.yaml"),
@@ -920,6 +921,7 @@ includes:
   providers: config/providers/*.yaml
   embeddings: config/embeddings/*.yaml
   servers: config/servers/*.yaml
+  runas: config/runas/*.yaml
   templates: config/templates/*.yaml
   settings: config/settings.yaml
 ` + "```" + `

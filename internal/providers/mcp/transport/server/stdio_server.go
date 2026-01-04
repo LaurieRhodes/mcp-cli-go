@@ -212,6 +212,14 @@ func (s *StdioServer) handleToolsCall(msg *messages.JSONRPCMessage) {
 		}
 	}
 	
+	// Debug: Log received params
+	logging.Debug("Received tools/call params: %+v", params)
+	if meta, ok := params["_meta"]; ok {
+		logging.Debug("Found _meta in params: %+v", meta)
+	} else {
+		logging.Warn("No _meta found in tools/call params")
+	}
+	
 	// Call handler
 	result, err := s.handler.HandleToolsCall(params)
 	if err != nil {
@@ -300,6 +308,49 @@ func (s *StdioServer) writeMessage(msg *messages.JSONRPCMessage) {
 	
 	if _, err := s.stdout.Write(data); err != nil {
 		logging.Error("Failed to write to stdout: %v", err)
+		return
+	}
+}
+
+// SendProgressNotification sends a progress notification to the client
+// This is a one-way notification (no response expected)
+func (s *StdioServer) SendProgressNotification(progressToken string, progress float64, total int, message string) {
+	s.writeMutex.Lock()
+	defer s.writeMutex.Unlock()
+	
+	// Create progress notification
+	notification := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "notifications/progress",
+		"params": map[string]interface{}{
+			"progressToken": progressToken,
+			"progress":      progress,
+		},
+	}
+	
+	// Add optional fields
+	if total > 0 {
+		notification["params"].(map[string]interface{})["total"] = total
+	}
+	if message != "" {
+		notification["params"].(map[string]interface{})["message"] = message
+	}
+	
+	// Marshal to JSON
+	data, err := json.Marshal(notification)
+	if err != nil {
+		logging.Error("Failed to marshal progress notification: %v", err)
+		return
+	}
+	
+	// Write to stdout with newline
+	data = append(data, '\n')
+	
+	logging.Debug("Sending progress notification: token=%s, progress=%.2f, message=%s", 
+		progressToken, progress, message)
+	
+	if _, err := s.stdout.Write(data); err != nil {
+		logging.Error("Failed to write progress notification: %v", err)
 		return
 	}
 }

@@ -37,6 +37,7 @@ A Go implementation of the Model Context Protocol (MCP) CLI that enables multi-s
 ✅ **Works as MCP server** - Expose workflows as tools for Claude Desktop or other MCP clients  
 ✅ **Runs locally** - Single Go binary, no dependencies  
 ✅ **Template composition** - Call templates from templates for modular workflows
+✅ **Anthropic Skills as MCP tools** - Exposes Anthropic skills as MCP tools for use with all major LLMs
 
 ### The Core Innovation
 
@@ -82,6 +83,7 @@ This workflow uses **three different AI providers** in sequence, each doing what
 - **Variable Management**: Pass data between workflow steps
 - **Error Handling**: Retries, validation, and graceful failures
 - **Multiple Modes**: Chat, query, interactive, and server modes
+- **Anthropic Skills**: Exposed as MCP tools for use with all LLM Providers
 
 ### 🚧 Experimental
 

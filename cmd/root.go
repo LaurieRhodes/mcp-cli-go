@@ -196,6 +196,7 @@ func init() {
 	RootCmd.AddCommand(ChatCmd)
 	RootCmd.AddCommand(InteractiveCmd)
 	RootCmd.AddCommand(QueryCmd)
+	RootCmd.AddCommand(ServersCmd)
 	RootCmd.AddCommand(EmbeddingsCmd)
 	RootCmd.AddCommand(ConfigCmd)
 	RootCmd.AddCommand(InitCmd)  // Setup wizard

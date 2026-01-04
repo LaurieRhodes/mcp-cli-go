@@ -1,0 +1,45 @@
+# MCP Server Configuration: Research Agent
+# This exposes workflow templates as MCP tools
+
+runas_type: mcp
+version: "1.0"
+
+server_info:
+  name: research_agent
+  version: 1.0.0
+  description: "AI-powered analysis agent with multiple workflow capabilities"
+
+tools:
+  # Tool 1: Multi-step analysis
+  - template: multi_step_analysis
+    name: deep_analysis
+    description: "Performs deep multi-step analysis on a topic"
+    
+    input_schema:
+      type: object
+      properties:
+        query:
+          type: string
+          description: "Topic or question to analyze"
+      required:
+        - query
+    
+    input_mapping:
+      query: "{{input_data}}"
+
+  # Tool 2: Simple analysis
+  - template: simple_analysis
+    name: analyze
+    description: "Performs quick AI-powered analysis on provided data"
+    
+    input_schema:
+      type: object
+      properties:
+        data:
+          type: string
+          description: "Data to analyze"
+      required:
+        - data
+    
+    input_mapping:
+      data: "{{input_data}}"

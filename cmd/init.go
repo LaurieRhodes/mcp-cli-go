@@ -102,6 +102,8 @@ type InitConfig struct {
 	IncludeAzureFoundry bool
 	IncludeVertexAI   bool
 	DefaultProvider   string
+	IncludeSkills     bool
+	SkillsToInclude   []string
 }
 
 func printWelcome() {
@@ -115,10 +117,19 @@ func createQuickConfig() *InitConfig {
 	fmt.Println()
 	
 	return &InitConfig{
-		Providers:      []string{"ollama"},
-		Servers:        []string{}, // Empty - no assumptions about MCP servers
-		IncludeOllama:  true,
+		Providers:       []string{"ollama"},
+		Servers:         []string{}, // Empty - no assumptions about MCP servers
+		IncludeOllama:   true,
 		DefaultProvider: "ollama",
+		IncludeSkills:   true, // Include skills by default in quick mode
+		SkillsToInclude: []string{
+			"test-execution",
+			"docx",
+			"pdf",
+			"pptx",
+			"xlsx",
+			"frontend-design",
+		},
 	}
 }
 
@@ -256,6 +267,26 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 		if response != "" {
 			config.DefaultProvider = response
 		}
+	}
+	
+	// Ask about skills
+	fmt.Println()
+	fmt.Println("🎯 Anthropic Skills System:")
+	fmt.Println("Skills provide helper libraries for document creation, data processing, etc.")
+	fmt.Println("These enable dynamic code execution with helper library imports.")
+	fmt.Println()
+	
+	if askYesNo(reader, "Set up example skills (docx, pdf, pptx, xlsx, test-execution)", true) {
+		config.IncludeSkills = true
+		config.SkillsToInclude = []string{
+			"test-execution",
+			"docx",
+			"pdf",
+			"pptx",
+			"xlsx",
+			"frontend-design",
+		}
+		fmt.Println("   ✓ Will create 6 example skills with helper libraries")
 	}
 	
 	fmt.Println()
@@ -449,6 +480,18 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 		return fmt.Errorf("failed to generate modular config: %w", err)
 	}
 	
+	// Create skills if requested
+	if initCfg.IncludeSkills {
+		if err := createSkillsDirectory(configDir, initCfg); err != nil {
+			return fmt.Errorf("failed to create skills: %w", err)
+		}
+		
+		// Create skills-auto.yaml runas config
+		if err := createSkillsRunAsConfig(configDir); err != nil {
+			return fmt.Errorf("failed to create skills runas config: %w", err)
+		}
+	}
+	
 	// Create .env file at executable level (parent directory)
 	parentDir := filepath.Dir(configDir)
 	if initCfg.IncludeOpenAI || initCfg.IncludeAnthropic || initCfg.IncludeDeepSeek ||
@@ -494,6 +537,14 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 			}
 		}
 	}
+	if cfg.IncludeSkills {
+		fmt.Println("       ├── skills/           # Anthropic skills")
+		for _, skill := range cfg.SkillsToInclude {
+			fmt.Printf("       │   ├── %s/\n", skill)
+		}
+		fmt.Println("       ├── runas/")
+		fmt.Println("       │   └── skills-auto.yaml")
+	}
 	fmt.Println("       ├── servers/")
 	fmt.Println("       │   └── README.md")
 	fmt.Println("       └── templates/")
@@ -513,9 +564,19 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 		cfg.IncludeGemini || cfg.IncludeOpenRouter || cfg.IncludeBedrock ||
 		cfg.IncludeAzureFoundry || cfg.IncludeVertexAI {
 		fmt.Printf("   2. Edit .env: %s/.env\n", parentDir)
-		fmt.Printf("   3. Run: ./mcp-cli query \"hello\"\n")
+		if cfg.IncludeSkills {
+			fmt.Printf("   3. Start skills server: ./mcp-cli serve %s/runas/skills-auto.yaml\n", filepath.Base(configDir))
+			fmt.Printf("   4. Run query: ./mcp-cli query \"hello\"\n")
+		} else {
+			fmt.Printf("   3. Run: ./mcp-cli query \"hello\"\n")
+		}
 	} else {
-		fmt.Printf("   2. Run: ./mcp-cli query \"hello\"\n")
+		if cfg.IncludeSkills {
+			fmt.Printf("   2. Start skills server: ./mcp-cli serve %s/runas/skills-auto.yaml\n", filepath.Base(configDir))
+			fmt.Printf("   3. Run query: ./mcp-cli query \"hello\"\n")
+		} else {
+			fmt.Printf("   2. Run: ./mcp-cli query \"hello\"\n")
+		}
 	}
 	
 	fmt.Println()
@@ -524,5 +585,284 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 	fmt.Println("   • config.yaml is at executable level for easy discovery")
 	fmt.Println("   • Each provider type has its own subdirectory")
 	fmt.Println("   • Add MCP servers in servers/ directory")
+	if cfg.IncludeSkills {
+		fmt.Println("   • Use skills as MCP server: ./mcp-cli serve config/runas/skills-auto.yaml")
+		fmt.Println("   • Skills support dynamic code execution with helper libraries")
+	}
 	fmt.Println()
+}
+
+// createSkillsDirectory creates the skills directory with example skills
+func createSkillsDirectory(configDir string, cfg *InitConfig) error {
+	skillsDir := filepath.Join(configDir, "skills")
+	
+	fmt.Println()
+	color.New(color.FgCyan).Println("📦 Creating Skills Directory...")
+	
+	// Create skills directory
+	if err := os.MkdirAll(skillsDir, 0755); err != nil {
+		return fmt.Errorf("failed to create skills directory: %w", err)
+	}
+	
+	// Get the embedded skills from the running binary's location
+	execDir := getExecutableDir()
+	sourceSkillsDir := filepath.Join(execDir, "config", "skills")
+	
+	// Check if source skills directory exists
+	if _, err := os.Stat(sourceSkillsDir); os.IsNotExist(err) {
+		// Try relative to current directory
+		sourceSkillsDir = "config/skills"
+		if _, err := os.Stat(sourceSkillsDir); os.IsNotExist(err) {
+			fmt.Println("   ⚠️  Skills source directory not found, creating minimal skills")
+			return createMinimalSkills(skillsDir)
+		}
+	}
+	
+	// Copy each requested skill
+	for _, skillName := range cfg.SkillsToInclude {
+		sourceSkillPath := filepath.Join(sourceSkillsDir, skillName)
+		destSkillPath := filepath.Join(skillsDir, skillName)
+		
+		// Check if source skill exists
+		if _, err := os.Stat(sourceSkillPath); err != nil {
+			fmt.Printf("   ⚠️  Skill %s not found in source, skipping\n", skillName)
+			continue
+		}
+		
+		// Copy skill directory
+		if err := copyDir(sourceSkillPath, destSkillPath); err != nil {
+			fmt.Printf("   ⚠️  Failed to copy skill %s: %v\n", skillName, err)
+			continue
+		}
+		
+		fmt.Printf("   ✓ Created skill: %s\n", skillName)
+	}
+	
+	// Create README
+	readmePath := filepath.Join(skillsDir, "README.md")
+	readmeContent := `# MCP Skills Directory
+
+This directory contains Anthropic-compatible skills for mcp-cli.
+
+## What are Skills?
+
+Skills provide:
+- **Documentation** (SKILL.md) - Instructions for the LLM
+- **Helper Libraries** (scripts/) - Reusable code the LLM can import
+- **Dynamic Code Execution** - LLM writes custom code for each task
+
+## Available Skills
+
+### test-execution
+Test skill demonstrating dynamic code execution.
+- Helper functions: greet(), process_text()
+- Helper classes: SimpleProcessor
+
+### docx
+Create and edit Word documents.
+- Helper libraries for OOXML manipulation
+- Document class for tracked changes and comments
+
+### pdf
+Create and manipulate PDF files.
+- Text extraction, form filling, merging/splitting
+
+### pptx
+Create and edit PowerPoint presentations.
+- Slide creation, formatting, layouts
+
+### xlsx
+Create and edit Excel spreadsheets.
+- Formulas, formatting, data analysis
+
+### frontend-design
+Create distinctive, production-grade web interfaces.
+- Design patterns, UI components
+
+## Usage as MCP Server
+
+Start the skills MCP server:
+` + "```bash" + `
+./mcp-cli serve config/runas/skills-auto.yaml
+` + "```" + `
+
+This exposes all skills as MCP tools that Claude can use.
+
+## Dynamic Code Execution
+
+The LLM can execute custom Python code with access to skill helper libraries:
+
+` + "```javascript" + `
+// 1. Read skill documentation
+const docs = await skills.test_execution({mode: "passive"})
+
+// 2. Write custom code
+const code = ` + "`" + `
+from scripts.helpers import greet
+print(greet("World"))
+` + "`" + `
+
+// 3. Execute with skill context
+const result = await execute_skill_code({
+    skill_name: "test-execution",
+    language: "python",
+    code: code
+})
+` + "```" + `
+
+## Adding More Skills
+
+1. Create directory: ` + "`config/skills/my-skill/`" + `
+2. Add SKILL.md with documentation
+3. Add scripts/ directory with helper libraries
+4. Restart MCP server
+
+See existing skills for examples.
+
+## Documentation
+
+- [Phase 2 Implementation](../../docs/skills/PHASE2_READY_TO_USE.md)
+- [Troubleshooting Guide](../../docs/skills/TROUBLESHOOTING.md)
+- [MCP Integration](../../docs/skills/MCP_INTEGRATION_COMPLETE.md)
+`
+	
+	if err := os.WriteFile(readmePath, []byte(readmeContent), 0644); err != nil {
+		return fmt.Errorf("failed to create skills README: %w", err)
+	}
+	
+	fmt.Println("   ✓ Created README.md")
+	fmt.Println()
+	
+	return nil
+}
+
+// createMinimalSkills creates minimal test-execution skill if source not found
+func createMinimalSkills(skillsDir string) error {
+	// Create test-execution skill
+	testSkillDir := filepath.Join(skillsDir, "test-execution")
+	if err := os.MkdirAll(filepath.Join(testSkillDir, "scripts"), 0755); err != nil {
+		return err
+	}
+	
+	// Create SKILL.md
+	skillMD := `---
+name: test-execution
+description: Test skill for verifying dynamic code execution
+---
+
+# Test Execution Skill
+
+Simple test skill for verifying dynamic code execution works.
+
+## Helper Functions
+
+` + "```python" + `
+from scripts.helpers import greet
+message = greet("World")
+print(message)
+` + "```" + `
+`
+	
+	if err := os.WriteFile(filepath.Join(testSkillDir, "SKILL.md"), []byte(skillMD), 0644); err != nil {
+		return err
+	}
+	
+	// Create helpers.py
+	helpersPy := `"""Simple helper functions for testing."""
+
+def greet(name):
+    """Return a greeting message."""
+    return f"Hello, {name}!"
+`
+	
+	if err := os.WriteFile(filepath.Join(testSkillDir, "scripts", "helpers.py"), []byte(helpersPy), 0644); err != nil {
+		return err
+	}
+	
+	// Create __init__.py
+	initPy := `"""Test execution skill helpers."""
+from .helpers import greet
+__all__ = ['greet']
+`
+	
+	if err := os.WriteFile(filepath.Join(testSkillDir, "scripts", "__init__.py"), []byte(initPy), 0644); err != nil {
+		return err
+	}
+	
+	fmt.Println("   ✓ Created minimal test-execution skill")
+	return nil
+}
+
+// createSkillsRunAsConfig creates the skills-auto.yaml runas configuration
+func createSkillsRunAsConfig(configDir string) error {
+	runasDir := filepath.Join(configDir, "runas")
+	if err := os.MkdirAll(runasDir, 0755); err != nil {
+		return err
+	}
+	
+	skillsConfig := `# Skills MCP Server Configuration
+# This configuration exposes all skills in config/skills as MCP tools
+
+runas_type: mcp-skills
+
+server_info:
+  name: skills-engine
+  version: 1.0.0
+  description: MCP server providing Anthropic-compatible skills with dynamic code execution
+
+# Skills configuration
+skills_config:
+  # Auto-detect Docker/Podman for code execution
+  # Modes: auto (detect), active (require), passive (documentation only)
+  execution_mode: auto
+  
+  # Skills directory (relative to config.yaml location)
+  skills_directory: config/skills
+
+# This configuration automatically:
+# 1. Discovers all skills in the skills directory
+# 2. Generates MCP tool definitions for each skill
+# 3. Exposes execute_skill_code tool for dynamic code execution
+# 4. Enables helper library imports from skill scripts/
+
+# Usage:
+#   ./mcp-cli serve config/runas/skills-auto.yaml
+
+# Claude can then:
+# - Load skill documentation (passive mode)
+# - Execute custom Python code with skill helpers
+# - Import from skill's scripts/ directory
+# - Create documents, process data, etc.
+`
+	
+	configPath := filepath.Join(runasDir, "skills-auto.yaml")
+	if err := os.WriteFile(configPath, []byte(skillsConfig), 0644); err != nil {
+		return err
+	}
+	
+	fmt.Println("   ✓ Created runas/skills-auto.yaml")
+	return nil
+}
+
+// copyDir recursively copies a directory
+func copyDir(src, dst string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		
+		// Get relative path
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		
+		dstPath := filepath.Join(dst, relPath)
+		
+		if info.IsDir() {
+			return os.MkdirAll(dstPath, info.Mode())
+		}
+		
+		return copyFile(path, dstPath)
+	})
 }

@@ -1,23 +1,25 @@
 package chat
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/chzyer/readline"
 	"github.com/fatih/color"
 )
 
 // UI manages the user interface for the chat mode
 type UI struct {
-	// Input scanner
-	scanner *bufio.Scanner
+	// Readline instance for input with history
+	rl *readline.Instance
 	
 	// Output colors
 	userColor      *color.Color
@@ -37,6 +39,9 @@ type UI struct {
 	
 	// Buffer for content chunks
 	contentBuffer string
+	
+	// Multiline input buffer
+	multilineBuffer strings.Builder
 }
 
 // NewUI creates a new UI manager
@@ -58,8 +63,30 @@ func NewUI() *UI {
 		}
 	}
 	
+	// Get history file path
+	historyFile := getHistoryFilePath()
+	
+	// Create readline configuration
+	config := &readline.Config{
+		Prompt:                 color.New(color.FgGreen, color.Bold).Sprint("You: "),
+		HistoryFile:            historyFile,
+		HistoryLimit:           1000,
+		DisableAutoSaveHistory: false,
+		InterruptPrompt:        "^C",
+		EOFPrompt:              "/exit",
+		HistorySearchFold:      true,
+		VimMode:                false,
+	}
+	
+	// Create readline instance
+	rl, err := readline.NewEx(config)
+	if err != nil {
+		logging.Warn("Failed to initialize readline: %v, falling back to basic input", err)
+		rl = nil
+	}
+	
 	return &UI{
-		scanner:         bufio.NewScanner(os.Stdin),
+		rl:              rl,
 		userColor:       color.New(color.FgGreen, color.Bold),
 		assistantColor:  color.New(color.FgCyan, color.Bold),
 		systemColor:     color.New(color.FgYellow, color.Bold),
@@ -73,38 +100,111 @@ func NewUI() *UI {
 	}
 }
 
-// ReadUserInput reads a line or multiline input from the user
-func (u *UI) ReadUserInput() (string, error) {
-	u.userColor.Print("You: ")
-	
-	var input strings.Builder
-	
-	// Basic implementation that reads until empty line
-	for u.scanner.Scan() {
-		line := u.scanner.Text()
-		
-		// Check if this is a command (single line starting with /)
-		if strings.HasPrefix(line, "/") && input.Len() == 0 {
-			return line, nil
+// Close cleans up the UI resources
+func (u *UI) Close() error {
+	if u.rl != nil {
+		return u.rl.Close()
+	}
+	return nil
+}
+
+// getHistoryFilePath returns the path to the history file
+func getHistoryFilePath() string {
+	// Try to use XDG config directory first
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		// Fallback to home directory
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			// Last resort: current directory
+			return ".mcp_cli_history"
 		}
-		
-		// Empty line ends multiline input
-		if line == "" && input.Len() > 0 {
-			break
-		}
-		
-		// Add line to input
-		if input.Len() > 0 {
-			input.WriteString("\n")
-		}
-		input.WriteString(line)
+		configDir = filepath.Join(homeDir, ".config")
 	}
 	
-	if err := u.scanner.Err(); err != nil {
+	// Create mcp-cli directory if it doesn't exist
+	mcpDir := filepath.Join(configDir, "mcp-cli")
+	if err := os.MkdirAll(mcpDir, 0755); err != nil {
+		logging.Warn("Failed to create config directory: %v", err)
+		return ".mcp_cli_history"
+	}
+	
+	return filepath.Join(mcpDir, "chat_history")
+}
+
+// ReadUserInput reads input from the user with readline support
+func (u *UI) ReadUserInput() (string, error) {
+	if u.rl == nil {
+		// Fallback to basic input if readline failed
+		return u.readBasicInput()
+	}
+	
+	// Read a line
+	line, err := u.rl.Readline()
+	if err != nil {
+		if err == readline.ErrInterrupt {
+			return "", io.EOF
+		}
+		if err == io.EOF {
+			return "", err
+		}
 		return "", fmt.Errorf("error reading input: %w", err)
 	}
 	
-	return input.String(), nil
+	// Check for multiline continuation with backslash
+	if strings.HasSuffix(strings.TrimSpace(line), "\\") {
+		// Start multiline mode
+		u.multilineBuffer.Reset()
+		u.multilineBuffer.WriteString(strings.TrimSuffix(strings.TrimSpace(line), "\\"))
+		
+		// Read additional lines
+		for {
+			u.rl.SetPrompt(color.New(color.FgGreen).Sprint("  ... "))
+			nextLine, err := u.rl.Readline()
+			if err != nil {
+				if err == readline.ErrInterrupt {
+					fmt.Println("(multiline cancelled)")
+					u.rl.SetPrompt(color.New(color.FgGreen, color.Bold).Sprint("You: "))
+					return u.ReadUserInput() // Start over
+				}
+				return "", err
+			}
+			
+			// Check if this line also continues
+			if strings.HasSuffix(strings.TrimSpace(nextLine), "\\") {
+				u.multilineBuffer.WriteString("\n")
+				u.multilineBuffer.WriteString(strings.TrimSuffix(strings.TrimSpace(nextLine), "\\"))
+				continue
+			}
+			
+			// Final line
+			u.multilineBuffer.WriteString("\n")
+			u.multilineBuffer.WriteString(nextLine)
+			break
+		}
+		
+		// Reset prompt and return multiline result
+		u.rl.SetPrompt(color.New(color.FgGreen, color.Bold).Sprint("You: "))
+		result := u.multilineBuffer.String()
+		u.multilineBuffer.Reset()
+		return result, nil
+	}
+	
+	// Single line - return immediately
+	return line, nil
+}
+
+// readBasicInput provides fallback input without readline
+func (u *UI) readBasicInput() (string, error) {
+	fmt.Print(u.userColor.Sprint("You: "))
+	
+	var line string
+	_, err := fmt.Scanln(&line)
+	if err != nil && err != io.EOF {
+		return "", fmt.Errorf("error reading input: %w", err)
+	}
+	
+	return line, nil
 }
 
 // PrintAssistantResponse prints the assistant's response with markdown rendering
@@ -139,14 +239,15 @@ func (u *UI) StreamAssistantResponse(chunk string) {
 		// If this is the first non-empty chunk, mark the stream as non-empty
 		u.streamEmpty = false
 		
-		// Add to buffer and print
+		// Add to buffer
 		u.contentBuffer += chunk
 		
 		// Log the chunk for debugging
 		logging.Debug("Received content chunk: %s", chunk)
 		
-		// Print the chunk directly to stdout
-		fmt.Print(chunk)
+		// For streaming, we collect chunks but don't print them yet
+		// We'll render the complete markdown at the end
+		// This prevents seeing raw markdown syntax during streaming
 	}
 }
 
@@ -159,6 +260,14 @@ func (u *UI) StartStreamingResponse() {
 	u.streamEmpty = true
 	u.contentBuffer = ""
 	u.assistantColor.Println("\nAssistant:")
+	
+	// Show a subtle indicator that we're collecting the response
+	if !u.noColor {
+		fmt.Print(lipgloss.NewStyle().
+			Foreground(lipgloss.Color("243")).
+			Italic(true).
+			Render("Generating response..."))
+	}
 }
 
 // EndStreamingResponse finalizes the streaming response UI
@@ -171,22 +280,25 @@ func (u *UI) EndStreamingResponse() {
 	if u.streamEmpty {
 		u.systemColor.Println("[Using tools to process your request...]")
 	} else {
-		// For streaming, we've been printing raw chunks
-		// Now try to re-render the complete content with Glamour if possible
-		// This is a bit of a workaround since streaming and markdown don't mix well
-		// In practice, streaming output should already be formatted by the LLM
+		// Clear the "Generating response..." message
+		if !u.noColor {
+			fmt.Print("\r\033[K") // Clear the current line
+		}
+		
+		// Render the complete content with Glamour
 		if u.glamourRenderer != nil && !u.noColor && len(u.contentBuffer) > 0 {
-			// Check if the content looks like markdown (has code fences, headers, etc)
-			if strings.Contains(u.contentBuffer, "```") || 
-			   strings.Contains(u.contentBuffer, "##") ||
-			   strings.Contains(u.contentBuffer, "**") {
-				// Clear the screen line and re-render with formatting
-				fmt.Print("\r\033[K") // Clear current line
-				rendered, err := u.glamourRenderer.Render(u.contentBuffer)
-				if err == nil {
-					fmt.Print(rendered)
-				}
+			// Render the complete markdown content
+			rendered, err := u.glamourRenderer.Render(u.contentBuffer)
+			if err != nil {
+				// Fallback to plain text on error
+				logging.Warn("Failed to render markdown: %v", err)
+				fmt.Print(u.contentBuffer)
+			} else {
+				fmt.Print(rendered)
 			}
+		} else {
+			// No glamour renderer or no color - print plain text
+			fmt.Print(u.contentBuffer)
 		}
 	}
 	
@@ -230,24 +342,60 @@ func (u *UI) PrintToolResult(result string) {
 	// First check if this is JSON and try to format it
 	formattedResult := u.formatToolResultForDisplay(result)
 	
-	// For long results, print a shortened version
-	if len(formattedResult) > 400 {
-		formattedResult = formattedResult[:400] + "... (truncated, full result will be sent to assistant)"
-	}
+	// Check if this looks like markdown documentation
+	isMarkdown := strings.Contains(formattedResult, "##") || 
+		          strings.Contains(formattedResult, "```") ||
+		          strings.Contains(formattedResult, "**") ||
+		          strings.HasPrefix(strings.TrimSpace(formattedResult), "# ")
 	
-	if u.noColor {
-		fmt.Printf("Result: %s\n", formattedResult)
+	// For markdown content, use glamour to render it beautifully
+	if isMarkdown && u.glamourRenderer != nil && !u.noColor {
+		rendered, err := u.glamourRenderer.Render(formattedResult)
+		if err != nil {
+			logging.Warn("Failed to render markdown tool result: %v", err)
+			// Fall back to plain display
+			u.printPlainToolResult(formattedResult)
+			return
+		}
+		
+		// Display rendered markdown with subtle separators
+		separatorStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("240"))
+		
+		fmt.Println(separatorStyle.Render(strings.Repeat("─", 80)))
+		fmt.Print(rendered)
+		fmt.Println(separatorStyle.Render(strings.Repeat("─", 80)))
 		return
 	}
 	
-	// Use lipgloss box for tool results
+	// For non-markdown or when glamour unavailable, use plain display
+	u.printPlainToolResult(formattedResult)
+}
+
+// printPlainToolResult displays tool results in a plain format with optional truncation
+func (u *UI) printPlainToolResult(formattedResult string) {
+	const maxChars = 2000
+	
+	var displayResult string
+	if len(formattedResult) > maxChars {
+		displayResult = formattedResult[:maxChars] + "\n... (truncated, full result sent to assistant)"
+	} else {
+		displayResult = formattedResult
+	}
+	
+	if u.noColor {
+		fmt.Printf("%s\n", displayResult)
+		return
+	}
+	
+	// Use lipgloss box for non-markdown results
 	resultStyle := lipgloss.NewStyle().
 		PaddingLeft(2).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderLeft(true).
 		BorderForeground(lipgloss.Color("240"))
 	
-	fmt.Println(resultStyle.Render(formattedResult))
+	fmt.Println(resultStyle.Render(displayResult))
 }
 
 // formatToolResultForDisplay formats a tool result for display
@@ -319,9 +467,16 @@ func (u *UI) PrintHelp() {
 	fmt.Println("  /exit, /quit - Exit chat mode")
 	fmt.Println("  /help        - Show this help message")
 	fmt.Println("  /clear       - Clear chat history")
+	fmt.Println("  /context     - Show context statistics")
 	fmt.Println("  /system      - Set a custom system prompt")
 	fmt.Println("  /tools       - List available tools")
 	fmt.Println("  /history     - Show conversation history")
+	fmt.Println()
+	u.systemColor.Println("Input tips:")
+	fmt.Println("  ↑/↓          - Navigate command history")
+	fmt.Println("  Enter        - Send message")
+	fmt.Println("  \\            - Continue input on next line (backslash at end)")
+	fmt.Println("  Ctrl+C       - Cancel multiline input / interrupt")
 	fmt.Println()
 }
 
@@ -329,8 +484,9 @@ func (u *UI) PrintHelp() {
 func (u *UI) PrintWelcome() {
 	if u.noColor {
 		fmt.Println("Welcome to MCP CLI Chat Mode!")
-		fmt.Println("Type your messages to chat with the assistant.")
-		fmt.Println("Type '/exit' to quit, '/help' for commands.")
+		fmt.Println("Type your messages and press Enter to send.")
+		fmt.Println("Use \\ at the end of a line for multiline input.")
+		fmt.Println("Type '/help' for commands, '/exit' to quit.")
 		fmt.Println()
 		return
 	}
@@ -346,8 +502,9 @@ func (u *UI) PrintWelcome() {
 	
 	fmt.Println()
 	fmt.Println(titleStyle.Render("Welcome to MCP CLI Chat Mode!"))
-	fmt.Println(infoStyle.Render("Type your messages to chat with the assistant."))
-	fmt.Println(infoStyle.Render("Type '/exit' to quit, '/help' for commands."))
+	fmt.Println(infoStyle.Render("Type your messages and press Enter to send."))
+	fmt.Println(infoStyle.Render("Use \\ at the end of a line for multiline input."))
+	fmt.Println(infoStyle.Render("Type '/help' for commands, '/exit' to quit."))
 	fmt.Println()
 }
 

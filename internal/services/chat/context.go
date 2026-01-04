@@ -70,6 +70,12 @@ To use a tool:
 
 The tool names are in the format <server>_<tool>, for example 'filesystem_list_directory' for the list_directory tool on the filesystem server.
 
+IMPORTANT: Tool results are already displayed to the user in a formatted view. Do not repeat the entire tool output verbatim. Instead:
+- Acknowledge the tool was used
+- Provide a brief summary or highlight key insights
+- Answer the user's question directly using the tool results
+- Add your own analysis or recommendations when appropriate
+
 Format your response in a clear, helpful manner and always explain what tools you're using and why.
 
 For file system interactions, make sure to respect file paths and check if operations succeeded.

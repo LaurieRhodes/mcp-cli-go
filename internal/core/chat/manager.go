@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -148,13 +149,11 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 				m.UI.PrintError("Error executing tool calls: %v", err)
 			}
 			
-			// If there was no textual response, tell the user we're still processing
-			if response.Response == "" {
-				// Get a new response from the model after processing the tools
-				err = m.ProcessAfterToolExecution(userMessage.Content)
-				if err != nil {
-					m.UI.PrintError("Error getting follow-up response: %v", err)
-				}
+			// ALWAYS get a follow-up response after tool execution
+			// The LLM needs to synthesize the tool results into a final answer
+			err = m.ProcessAfterToolExecution(userMessage.Content)
+			if err != nil {
+				m.UI.PrintError("Error getting follow-up response: %v", err)
 			}
 		}
 	}
@@ -596,12 +595,28 @@ func (m *ChatManager) StartChat() error {
 	}
 	m.UI.PrintConnectedServers(serverNames)
 	
+	// Ensure UI cleanup on exit
+	defer func() {
+		if err := m.UI.Close(); err != nil {
+			logging.Warn("Error closing UI: %v", err)
+		}
+	}()
+	
 	// Main chat loop
 	for {
 		// Read user input
 		userInput, err := m.UI.ReadUserInput()
 		if err != nil {
+			if err == io.EOF {
+				m.UI.PrintSystem("Exiting chat mode.")
+				return nil
+			}
 			return fmt.Errorf("error reading input: %w", err)
+		}
+		
+		// Skip empty input
+		if strings.TrimSpace(userInput) == "" {
+			continue
 		}
 		
 		// Process commands

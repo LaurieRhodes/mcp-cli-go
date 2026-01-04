@@ -1,21 +1,23 @@
 package chat
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/chzyer/readline"
 	"github.com/fatih/color"
 )
 
 // UI manages the user interface for the chat mode
 type UI struct {
-	// Input scanner
-	scanner *bufio.Scanner
+	// Readline instance for input with history
+	rl *readline.Instance
 	
 	// Output colors
 	userColor     *color.Color
@@ -31,12 +33,42 @@ type UI struct {
 	
 	// Buffer for content chunks
 	contentBuffer string
+	
+	// Multiline input buffer
+	multilineBuffer strings.Builder
 }
 
 // NewUI creates a new UI manager
 func NewUI() *UI {
-	return &UI{
-		scanner:        bufio.NewScanner(os.Stdin),
+	// Get history file path
+	historyFile := getHistoryFilePath()
+	
+	logging.Info("Initializing readline with history file: %s", historyFile)
+	
+	// Create readline configuration
+	config := &readline.Config{
+		Prompt:                 color.New(color.FgGreen, color.Bold).Sprint("You: "),
+		HistoryFile:            historyFile,
+		HistoryLimit:           1000,
+		DisableAutoSaveHistory: false,
+		InterruptPrompt:        "^C",
+		EOFPrompt:              "/exit",
+		HistorySearchFold:      true,
+		VimMode:                false, // Explicitly disable vim mode
+	}
+	
+	// Create readline instance
+	rl, err := readline.NewEx(config)
+	if err != nil {
+		logging.Warn("Failed to initialize readline: %v, falling back to basic input", err)
+		// If readline fails, we'll handle it in ReadUserInput
+		rl = nil
+	} else {
+		logging.Info("Readline initialized successfully")
+	}
+	
+	ui := &UI{
+		rl:             rl,
 		userColor:      color.New(color.FgGreen, color.Bold),
 		assistantColor: color.New(color.FgCyan, color.Bold),
 		systemColor:    color.New(color.FgYellow, color.Bold),
@@ -46,40 +78,124 @@ func NewUI() *UI {
 		streamEmpty:    true,
 		contentBuffer:  "",
 	}
+	
+	return ui
 }
 
-// ReadUserInput reads a line or multiline input from the user
-func (u *UI) ReadUserInput() (string, error) {
-	u.userColor.Print("You: ")
-	
-	var input strings.Builder
-	
-	// Basic implementation that reads until empty line
-	for u.scanner.Scan() {
-		line := u.scanner.Text()
-		
-		// Check if this is a command (single line starting with /)
-		if strings.HasPrefix(line, "/") && input.Len() == 0 {
-			return line, nil
+// Close cleans up the UI resources
+func (u *UI) Close() error {
+	if u.rl != nil {
+		return u.rl.Close()
+	}
+	return nil
+}
+
+// getHistoryFilePath returns the path to the history file
+func getHistoryFilePath() string {
+	// Try to use XDG config directory first
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		// Fallback to home directory
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			// Last resort: current directory
+			return ".mcp_cli_history"
 		}
-		
-		// Empty line ends multiline input
-		if line == "" && input.Len() > 0 {
-			break
-		}
-		
-		// Add line to input
-		if input.Len() > 0 {
-			input.WriteString("\n")
-		}
-		input.WriteString(line)
+		configDir = filepath.Join(homeDir, ".config")
 	}
 	
-	if err := u.scanner.Err(); err != nil {
+	// Create mcp-cli directory if it doesn't exist
+	mcpDir := filepath.Join(configDir, "mcp-cli")
+	if err := os.MkdirAll(mcpDir, 0755); err != nil {
+		logging.Warn("Failed to create config directory: %v", err)
+		return ".mcp_cli_history"
+	}
+	
+	return filepath.Join(mcpDir, "chat_history")
+}
+
+// ReadUserInput reads input from the user with readline support
+// Supports:
+// - Single Enter to execute
+// - Backslash at end of line for multiline
+// - Up/Down arrows for history
+// - Ctrl+C to interrupt
+func (u *UI) ReadUserInput() (string, error) {
+	if u.rl == nil {
+		logging.Warn("Readline is nil, using fallback")
+		// Fallback to basic input if readline failed
+		return u.readBasicInput()
+	}
+	
+	logging.Debug("About to call rl.Readline()")
+	// Simple single-line mode for now
+	line, err := u.rl.Readline()
+	logging.Debug("rl.Readline() returned: %q, err: %v", line, err)
+	
+	if err != nil {
+		if err == readline.ErrInterrupt {
+			return "", io.EOF
+		}
+		if err == io.EOF {
+			return "", err
+		}
 		return "", fmt.Errorf("error reading input: %w", err)
 	}
 	
-	return input.String(), nil
+	// Check for multiline continuation with backslash
+	if strings.HasSuffix(strings.TrimSpace(line), "\\") {
+		// Start multiline mode
+		u.multilineBuffer.Reset()
+		u.multilineBuffer.WriteString(strings.TrimSuffix(strings.TrimSpace(line), "\\"))
+		
+		// Read additional lines
+		for {
+			u.rl.SetPrompt(color.New(color.FgGreen).Sprint("  ... "))
+			nextLine, err := u.rl.Readline()
+			if err != nil {
+				if err == readline.ErrInterrupt {
+					fmt.Println("(multiline cancelled)")
+					u.rl.SetPrompt(color.New(color.FgGreen, color.Bold).Sprint("You: "))
+					return u.ReadUserInput() // Start over
+				}
+				return "", err
+			}
+			
+			// Check if this line also continues
+			if strings.HasSuffix(strings.TrimSpace(nextLine), "\\") {
+				u.multilineBuffer.WriteString("\n")
+				u.multilineBuffer.WriteString(strings.TrimSuffix(strings.TrimSpace(nextLine), "\\"))
+				continue
+			}
+			
+			// Final line
+			u.multilineBuffer.WriteString("\n")
+			u.multilineBuffer.WriteString(nextLine)
+			break
+		}
+		
+		// Reset prompt and return multiline result
+		u.rl.SetPrompt(color.New(color.FgGreen, color.Bold).Sprint("You: "))
+		result := u.multilineBuffer.String()
+		u.multilineBuffer.Reset()
+		return result, nil
+	}
+	
+	// Single line - return immediately
+	return line, nil
+}
+
+// readBasicInput provides fallback input without readline
+func (u *UI) readBasicInput() (string, error) {
+	fmt.Print(u.userColor.Sprint("You: "))
+	
+	var line string
+	_, err := fmt.Scanln(&line)
+	if err != nil && err != io.EOF {
+		return "", fmt.Errorf("error reading input: %w", err)
+	}
+	
+	return line, nil
 }
 
 // PrintAssistantResponse prints the assistant's response with streaming support
@@ -151,14 +267,35 @@ func (u *UI) PrintToolExecution(toolName, serverName string) {
 
 // PrintToolResult prints the result of a tool execution
 func (u *UI) PrintToolResult(result string) {
-	fmt.Print("Result: ")
-	
-	// First check if this is JSON and try to format it
+	// Format the result for display
 	formattedResult := u.formatToolResultForDisplay(result)
 	
-	// For long results, print a shortened version
-	if len(formattedResult) > 400 {
-		fmt.Printf("%s... (truncated, full result will be sent to assistant)\n", formattedResult[:400])
+	// Determine truncation strategy based on content type
+	const maxChars = 2000  // Increased from 400
+	const previewLines = 20 // Show first 20 lines for long content
+	
+	// Check if this looks like markdown/structured documentation
+	isDocumentation := strings.Contains(formattedResult, "##") || 
+		                strings.Contains(formattedResult, "```") ||
+		                strings.HasPrefix(strings.TrimSpace(formattedResult), "# ")
+	
+	if len(formattedResult) > maxChars {
+		if isDocumentation {
+			// For documentation, show first N lines
+			lines := strings.Split(formattedResult, "\n")
+			if len(lines) > previewLines {
+				preview := strings.Join(lines[:previewLines], "\n")
+				fmt.Printf("%s\n... (%d more lines, full result sent to assistant)\n", 
+					preview, len(lines)-previewLines)
+			} else {
+				// Short enough to show all lines
+				fmt.Printf("%s\n", formattedResult)
+			}
+		} else {
+			// For other content, show first maxChars
+			fmt.Printf("%s... (truncated, full result sent to assistant)\n", 
+				formattedResult[:maxChars])
+		}
 	} else {
 		fmt.Printf("%s\n", formattedResult)
 	}
@@ -233,17 +370,25 @@ func (u *UI) PrintHelp() {
 	fmt.Println("  /exit, /quit - Exit chat mode")
 	fmt.Println("  /help        - Show this help message")
 	fmt.Println("  /clear       - Clear chat history")
+	fmt.Println("  /context     - Show context statistics")
 	fmt.Println("  /system      - Set a custom system prompt")
 	fmt.Println("  /tools       - List available tools")
 	fmt.Println("  /history     - Show conversation history")
+	fmt.Println()
+	u.systemColor.Println("Input tips:")
+	fmt.Println("  ↑/↓          - Navigate command history")
+	fmt.Println("  Enter        - Send message")
+	fmt.Println("  \\            - Continue input on next line (backslash at end)")
+	fmt.Println("  Ctrl+C       - Cancel multiline input / interrupt")
 	fmt.Println()
 }
 
 // PrintWelcome prints the welcome message
 func (u *UI) PrintWelcome() {
 	u.systemColor.Println("Welcome to MCP CLI Chat Mode!")
-	fmt.Println("Type your messages to chat with the assistant.")
-	fmt.Println("Type '/exit' to quit, '/help' for commands.")
+	fmt.Println("Type your messages and press Enter to send.")
+	fmt.Println("Use \\ at the end of a line for multiline input.")
+	fmt.Println("Type '/help' for commands, '/exit' to quit.")
 	fmt.Println()
 }
 

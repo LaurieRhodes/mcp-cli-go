@@ -2,6 +2,8 @@
 
 **Expose your AI workflows as discoverable, callable tools for any MCP client.**
 
+![](./img/MCP%20Server%20Mode.jpeg)
+
 ---
 
 ## The Core Concept
@@ -52,6 +54,76 @@ analyze_data.yaml   →                      →      Custom Applications
 3. **Consistency**: Same analysis/review process across team
 4. **Composability**: Tools can call other tools
 5. **Integration**: Works with any MCP-compatible client
+
+---
+
+## 🎯 Critical Understanding: What the LLM Actually Sees
+
+**This is the most important section to understand.**
+
+When you expose templates as MCP tools, the LLM (or any MCP client) **only sees 3 things**:
+
+1. **Tool name** (e.g., `analyze_code`)
+2. **Tool description** (from your runas config) ← **THIS IS YOUR ONLY CONTROL**
+3. **Parameter schema** (JSON Schema defining inputs)
+
+**The LLM does NOT see:**
+
+- Your template's internal prompts
+- Your workflow steps
+- Your internal logic
+- Your provider choices
+
+### Example: What the LLM Sees vs. What's Hidden
+
+**What the LLM Sees (in tools/list response):**
+
+```json
+{
+  "name": "analyze_code",
+  "description": "Analyze code for bugs and security issues",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "code": {"type": "string", "description": "Code to analyze"}
+    }
+  }
+}
+```
+
+**What the LLM DOESN'T See (your template):**
+
+```yaml
+# This entire workflow is invisible to Claude:
+name: code_analyzer
+steps:
+  - name: detect_language
+    prompt: "Identify language: {{input_data.code}}"
+
+  - name: analyze_bugs
+    prompt: "Find bugs in {{input_data.code}}"
+
+  - name: security_scan
+    prompt: "Check security issues in {{input_data.code}}"
+
+  - name: generate_report
+    prompt: "Create comprehensive report from findings"
+```
+
+### Why This Matters
+
+✅ **Tool descriptions are your ONLY way to guide the LLM**  
+✅ **Rich descriptions = better tool selection** by the LLM  
+✅ **Template complexity doesn't affect the LLM's context** - it's hidden  
+✅ **You control the interface** the LLM sees via the description field
+
+This means:
+
+- **Invest time in great descriptions** - they're critical for discovery
+- **Use complex workflows without worry** - the LLM doesn't see the complexity
+- **Templates can change freely** - as long as the interface (description/schema) stays consistent
+
+**See [Writing Effective Tool Descriptions](tool-descriptions.md) for the complete guide.**
 
 ---
 
@@ -348,9 +420,11 @@ Each example includes:
 
 ## Documentation
 
+- **[Tool Description Guide](tool-descriptions.md)** - **START HERE** - How to write descriptions that Claude understands
 - **[runas Configuration](runas-config.md)** - Complete specification
 - **[Integration Guide](integration.md)** - Client integration patterns
 - **[Examples](examples/)** - Production-ready configurations
+- **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
 
 ---
 

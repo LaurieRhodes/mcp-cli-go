@@ -3,6 +3,7 @@ package runas
 import (
 	"fmt"
 	"os"
+	"strings"
 	
 	"gopkg.in/yaml.v3"
 )
@@ -29,12 +30,38 @@ func (l *Loader) Load(path string) (*RunAsConfig, error) {
 		return nil, fmt.Errorf("failed to parse runas config YAML: %w", err)
 	}
 	
+	// Expand environment variables in proxy config
+	l.expandEnvVars(&config)
+	
 	// Validate
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid runas config: %w", err)
 	}
 	
 	return &config, nil
+}
+
+// expandEnvVars expands environment variables in the config
+func (l *Loader) expandEnvVars(config *RunAsConfig) {
+	// Expand in proxy config if present
+	if config.ProxyConfig != nil {
+		config.ProxyConfig.APIKey = expandEnvVar(config.ProxyConfig.APIKey)
+	}
+}
+
+// expandEnvVar expands environment variables in a string
+// Supports ${VAR_NAME} and $VAR_NAME formats
+// Only expands if the string looks like an environment variable reference
+func expandEnvVar(s string) string {
+	// Check if string contains environment variable patterns
+	hasEnvPattern := strings.Contains(s, "${") || 
+		(strings.Contains(s, "$") && len(s) > 1 && (s[0] == '$' || strings.Contains(s, " $")))
+	
+	if !hasEnvPattern {
+		return s
+	}
+	
+	return os.ExpandEnv(s)
 }
 
 // LoadOrDefault loads a config or returns a default example
