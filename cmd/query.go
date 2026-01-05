@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"  // Note: ioutil is deprecated but commonly used in Go codebases
 	"os"
 	"strings"
 
@@ -79,6 +78,50 @@ Examples:
 			logging.Info("Noisy mode enabled for query command")
 		}
 		
+		// Input validation
+		if maxTokens != 0 && maxTokens < 1 {
+			if errorCodeOnly {
+				os.Exit(query.ErrInvalidArgumentCode)
+			}
+			return fmt.Errorf("--max-tokens must be positive, got %d", maxTokens)
+		}
+		
+		// Validate context file exists if specified
+		if contextFile != "" {
+			if _, err := os.Stat(contextFile); os.IsNotExist(err) {
+				if errorCodeOnly {
+					os.Exit(query.ErrContextNotFoundCode)
+				}
+				return fmt.Errorf("context file does not exist: %s", contextFile)
+			}
+		}
+		
+		// Validate output file path is writable (check parent directory)
+		if outputFile != "" {
+			// Extract directory from output file path
+			outputDir := outputFile
+			if idx := strings.LastIndex(outputFile, "/"); idx != -1 {
+				outputDir = outputFile[:idx]
+			} else if idx := strings.LastIndex(outputFile, "\\"); idx != -1 {
+				outputDir = outputFile[:idx]
+			} else {
+				outputDir = "." // Current directory
+			}
+			
+			// Check if directory exists and is writable
+			if stat, err := os.Stat(outputDir); err != nil {
+				if errorCodeOnly {
+					os.Exit(query.ErrOutputWriteCode)
+				}
+				return fmt.Errorf("output directory does not exist: %s", outputDir)
+			} else if !stat.IsDir() {
+				if errorCodeOnly {
+					os.Exit(query.ErrOutputWriteCode)
+				}
+				return fmt.Errorf("output path is not a directory: %s", outputDir)
+			}
+		}
+		
 		// Combine all args into a single question
 		question := strings.Join(args, " ")
 
@@ -115,47 +158,19 @@ Examples:
 			enhancedAIOptions.Model = modelName
 		}
 
-		// If API key is not in config, try environment variables (for providers that need it)
-		// Skip this check for providers that use alternative authentication (AWS Bedrock, GCP Vertex AI)
-		providersWithoutAPIKey := map[string]bool{
-			"bedrock":   true, // Uses AWS credentials
-			"vertex-ai": true, // Uses GCP service account
-		}
-		
-		if !providersWithoutAPIKey[aiOptions.Provider] && aiOptions.Provider != "ollama" && aiOptions.APIKey == "" {
-			// Try provider-specific environment variables
-			var envKey string
-			switch aiOptions.Provider {
-			case "openai":
-				envKey = os.Getenv("OPENAI_API_KEY")
-			case "anthropic":
-				envKey = os.Getenv("ANTHROPIC_API_KEY")
-			case "gemini":
-				envKey = os.Getenv("GEMINI_API_KEY")
-			case "deepseek":
-				envKey = os.Getenv("DEEPSEEK_API_KEY")
-			case "openrouter":
-				envKey = os.Getenv("OPENROUTER_API_KEY")
-			case "azure-openai":
-				envKey = os.Getenv("AZURE_OPENAI_API_KEY")
-			}
-			
-			// If we found an environment variable API key, use it
-			if envKey != "" {
-				aiOptions.APIKey = envKey
-			} else if aiOptions.APIKey == "" {
-				// If still no API key, return an error
-				if errorCodeOnly {
-					os.Exit(query.ErrProviderNotFoundCode)
-				}
-				return fmt.Errorf("missing API key for %s", aiOptions.Provider)
-			}
+		// Validate API key - the config system has already loaded and expanded environment variables
+		// from the provider config files (e.g., api_key: ${OPENAI_API_KEY})
+		// If the API key is still empty, provide a helpful error message
+		if aiOptions.APIKey == "" {
+			// Note: Some providers (Ollama, etc.) don't require API keys
+			// The provider will return its own error if authentication fails
+			logging.Debug("No API key configured for provider %s (may not be required)", aiOptions.Provider)
 		}
 
 		// Load context file if provided
 		var contextContent string
 		if contextFile != "" {
-			content, err := ioutil.ReadFile(contextFile)
+			content, err := os.ReadFile(contextFile)
 			if err != nil {
 				if errorCodeOnly {
 					os.Exit(query.ErrContextNotFoundCode)
@@ -325,7 +340,7 @@ Examples:
 
 				// Write to file or stdout
 				if outputFile != "" {
-					err = ioutil.WriteFile(outputFile, jsonData, 0644)
+					err = os.WriteFile(outputFile, jsonData, 0644)
 					if err != nil {
 						if errorCodeOnly {
 							os.Exit(query.ErrOutputWriteCode)
@@ -338,7 +353,7 @@ Examples:
 			} else {
 				// Output as plain text
 				if outputFile != "" {
-					err = ioutil.WriteFile(outputFile, []byte(result.Response), 0644)
+					err = os.WriteFile(outputFile, []byte(result.Response), 0644)
 					if err != nil {
 						if errorCodeOnly {
 							os.Exit(query.ErrOutputWriteCode)

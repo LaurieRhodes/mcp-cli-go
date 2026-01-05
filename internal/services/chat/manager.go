@@ -252,7 +252,12 @@ func (m *ChatManager) ProcessAfterToolExecution(userQuery string) error {
 			err = m.HandleToolCalls(response.ToolCalls)
 			if err != nil {
 				m.UI.PrintError("Error executing additional tool calls: %v", err)
+				return err
 			}
+			
+			// Recursively get final response after additional tool execution
+			logging.Debug("Requesting final response after additional tool calls")
+			return m.ProcessAfterToolExecution(userQuery)
 		}
 	}
 	
@@ -303,8 +308,9 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 		}
 		m.Context.AddMessage(toolResultMessage)
 		
-		// Print the result (summarized if too long)
-		m.UI.PrintToolResult(result)
+		// Don't print raw tool results in chat mode - let the LLM synthesize them
+		// The user will see the LLM's response after it processes the tool results
+		// m.UI.PrintToolResult(result)  // Commented out to avoid showing raw tool output
 	}
 	
 	return nil

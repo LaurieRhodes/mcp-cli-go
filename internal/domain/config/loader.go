@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"gopkg.in/yaml.v3"
 )
 
@@ -224,10 +225,16 @@ func (l *Loader) loadSettings(path string, result *ApplicationConfig) error {
 	var settings struct {
 		AI         *AIConfig         `yaml:"ai,omitempty"`
 		Embeddings *EmbeddingsConfig `yaml:"embeddings,omitempty"`
+		Chat       *ChatConfig       `yaml:"chat,omitempty"`
 	}
 
 	if err := yaml.Unmarshal(data, &settings); err != nil {
 		return fmt.Errorf("failed to parse settings file %s: %w", path, err)
+	}
+	
+	logging.Debug("Parsed settings.yaml - Chat config present: %v", settings.Chat != nil)
+	if settings.Chat != nil {
+		logging.Debug("  chat_logs_location: %s", settings.Chat.ChatLogsLocation)
 	}
 
 	// Merge AI settings (settings.yaml takes precedence over main config)
@@ -262,6 +269,26 @@ func (l *Loader) loadSettings(path string, result *ApplicationConfig) error {
 			}
 			if settings.Embeddings.OutputPrecision > 0 {
 				result.Embeddings.OutputPrecision = settings.Embeddings.OutputPrecision
+			}
+		}
+	}
+
+	// Merge chat settings
+	if settings.Chat != nil {
+		if result.Chat == nil {
+			result.Chat = settings.Chat
+			logging.Debug("Chat config set from settings: %s", result.Chat.ChatLogsLocation)
+		} else {
+			// Merge settings, preferring settings.yaml values
+			if settings.Chat.DefaultTemperature > 0 {
+				result.Chat.DefaultTemperature = settings.Chat.DefaultTemperature
+			}
+			if settings.Chat.MaxHistorySize > 0 {
+				result.Chat.MaxHistorySize = settings.Chat.MaxHistorySize
+			}
+			if settings.Chat.ChatLogsLocation != "" {
+				result.Chat.ChatLogsLocation = settings.Chat.ChatLogsLocation
+				logging.Debug("Chat logs location updated: %s", result.Chat.ChatLogsLocation)
 			}
 		}
 	}

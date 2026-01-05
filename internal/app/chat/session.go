@@ -13,6 +13,10 @@ type Session struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	Metadata     map[string]interface{}
+	
+	// For future multi-user support
+	UserID   string // Identifies the user (for authentication/auditing)
+	ClientID string // Identifies the client connection (for multi-session per user)
 }
 
 // NewSession creates a new chat session
@@ -32,7 +36,23 @@ func NewSession(systemPrompt string) *Session {
 		CreatedAt:    now,
 		UpdatedAt:    now,
 		Metadata:     make(map[string]interface{}),
+		UserID:       "", // Will be set when authentication is implemented
+		ClientID:     "", // Will be set when multi-session support is added
 	}
+}
+
+// SetUser sets the user ID for this session
+func (s *Session) SetUser(userID string) {
+	s.UserID = userID
+	s.Metadata["user_id"] = userID
+	s.UpdatedAt = time.Now()
+}
+
+// SetClient sets the client ID for this session
+func (s *Session) SetClient(clientID string) {
+	s.ClientID = clientID
+	s.Metadata["client_id"] = clientID
+	s.UpdatedAt = time.Now()
 }
 
 // AddMessage adds a message to the session

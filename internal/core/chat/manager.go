@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
 	"time"
+	appChat "github.com/LaurieRhodes/mcp-cli-go/internal/app/chat"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
     "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config" 
@@ -39,6 +41,12 @@ type ChatManager struct {
 	
 	// Last assistant message with tool calls
 	lastAssistantMessageWithToolCalls domain.Message
+
+	// Session logging (optional)
+	sessionLogger *appChat.SessionLogger
+	session       *appChat.Session
+	providerName  string
+	modelName     string
 }
 
 // NewChatManager creates a new chat manager
@@ -56,6 +64,7 @@ func NewChatManagerWithConfig(provider domain.LLMProvider, connections []*host.S
 		UI:              NewUI(),
 		StreamResponses: true,
 		toolsCache:      make(map[string][]tools.Tool),
+		modelName:       model,
 	}
 }
 
@@ -74,6 +83,7 @@ func NewChatManagerWithConfigAndUI(provider domain.LLMProvider, connections []*h
 		UI:              ui,
 		StreamResponses: true,
 		toolsCache:      make(map[string][]tools.Tool),
+		modelName:       model,
 	}
 }
 
@@ -85,6 +95,10 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 		Content: userInput,
 	}
 	m.Context.AddMessage(userMessage)
+	// Add to session if logging enabled
+	if m.session != nil {
+		m.session.AddMessage(convertDomainMessage(userMessage))
+	}
 	
 	// Get available tools for the LLM
 	logging.Info("Fetching available tools for LLM")
@@ -154,6 +168,10 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 			ToolCalls: response.ToolCalls,
 		}
 		m.Context.AddMessage(assistantMessage)
+		// Add to session if logging enabled
+		if m.session != nil {
+			m.session.AddMessage(convertDomainMessage(assistantMessage))
+		}
 		
 		// Save this for tool responses if it has tool calls
 		if len(response.ToolCalls) > 0 {
@@ -258,6 +276,10 @@ func (m *ChatManager) ProcessAfterToolExecution(userQuery string) error {
 			ToolCalls: response.ToolCalls,
 		}
 		m.Context.AddMessage(assistantMessage)
+		// Add to session if logging enabled
+		if m.session != nil {
+			m.session.AddMessage(convertDomainMessage(assistantMessage))
+		}
 		
 		// Save this for tool responses if it has tool calls
 		if len(response.ToolCalls) > 0 {
@@ -270,7 +292,12 @@ func (m *ChatManager) ProcessAfterToolExecution(userQuery string) error {
 			err = m.HandleToolCalls(response.ToolCalls)
 			if err != nil {
 				m.UI.PrintError("Error executing additional tool calls: %v", err)
+				return err
 			}
+			
+			// Recursively get final response after additional tool execution
+			logging.Debug("Requesting final response after additional tool calls")
+			return m.ProcessAfterToolExecution(userQuery)
 		}
 	}
 	
@@ -321,8 +348,9 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 		}
 		m.Context.AddMessage(toolResultMessage)
 		
-		// Print the result (summarized if too long)
-		m.UI.PrintToolResult(result)
+		// Don't print raw tool results in chat mode - let the LLM synthesize them
+		// The user will see the LLM's response after it processes the tool results
+		// m.UI.PrintToolResult(result)  // Commented out to avoid showing raw tool output
 	}
 	
 	return nil
@@ -665,7 +693,38 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 }
 
 // StartChat starts the chat loop
+
+// SetSessionLogger sets the session logger for this chat manager
+func (m *ChatManager) SetSessionLogger(logger *appChat.SessionLogger, providerName, modelName string) {
+	m.sessionLogger = logger
+	m.providerName = providerName
+	m.modelName = modelName
+	
+	if logger != nil && logger.IsEnabled() {
+		logging.Info("Session logging enabled for chat")
+	}
+}
+
+// logSession logs the current session if session logging is enabled
+func (m *ChatManager) logSession() {
+	logging.Debug("logSession called - sessionLogger=%v, session=%v", m.sessionLogger != nil, m.session != nil)
+	if m.sessionLogger == nil || !m.sessionLogger.IsEnabled() || m.session == nil {
+		return
+	}
+	
+	if err := m.sessionLogger.LogSession(m.session, m.providerName, m.modelName); err != nil {
+		logging.Warn("Failed to log session: %v", err)
+	}
+}
+
 func (m *ChatManager) StartChat() error {
+	logging.Debug("Session logger status: enabled=%v", m.sessionLogger != nil && m.sessionLogger.IsEnabled())
+	// Create session for logging
+	if m.sessionLogger != nil && m.sessionLogger.IsEnabled() {
+		m.session = appChat.NewSession(m.Context.SystemPrompt)
+		logging.Info("Created chat session: %s", m.session.ID)
+	}
+
 	// Print welcome message
 	m.UI.PrintWelcome()
 	
@@ -730,6 +789,8 @@ func (m *ChatManager) StartChat() error {
 		
 		// Process user message
 		err = m.ProcessUserMessage(userInput)
+		// Log session after processing message
+		m.logSession()
 		if err != nil {
 			m.UI.PrintError("%v", err)
 		}
@@ -810,4 +871,34 @@ func (m *ChatManager) PrintContextStats() {
 	}
 	
 	fmt.Println()
+}
+
+
+
+// convertDomainMessage converts a domain.Message to models.Message for session logging
+func convertDomainMessage(msg domain.Message) models.Message {
+	return models.Message{
+		Role:      models.Role(msg.Role),
+		Content:   msg.Content,
+		ToolCalls: convertToolCalls(msg.ToolCalls),
+	}
+}
+
+// convertToolCalls converts domain tool calls to models tool calls
+func convertToolCalls(toolCalls []domain.ToolCall) []models.ToolCall {
+	if len(toolCalls) == 0 {
+		return nil
+	}
+	result := make([]models.ToolCall, len(toolCalls))
+	for i, tc := range toolCalls {
+		result[i] = models.ToolCall{
+			ID:   tc.ID,
+			Type: models.ToolType(tc.Type),
+			Function: models.FunctionCall{
+				Name:      tc.Function.Name,
+				Arguments: tc.Function.Arguments,
+			},
+		}
+	}
+	return result
 }

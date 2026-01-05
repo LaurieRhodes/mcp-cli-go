@@ -17,6 +17,7 @@ const (
 	ErrInitializationCode    = 17
 	ErrOutputFormatCode      = 18
 	ErrOutputWriteCode       = 19
+	ErrInvalidArgumentCode   = 20
 )
 
 // Error types with wrapped errors for error code mapping
@@ -31,6 +32,7 @@ var (
 	ErrInitialization   = errors.New("query initialization failed")
 	ErrOutputFormat     = errors.New("output formatting failed")
 	ErrOutputWrite      = errors.New("output write failed")
+	ErrInvalidArgument  = errors.New("invalid argument")
 )
 
 // Map errors to exit codes
@@ -45,6 +47,7 @@ var errorExitCodes = map[error]int{
 	ErrInitialization:   ErrInitializationCode,
 	ErrOutputFormat:     ErrOutputFormatCode,
 	ErrOutputWrite:      ErrOutputWriteCode,
+	ErrInvalidArgument:  ErrInvalidArgumentCode,
 }
 
 // GetExitCode returns the appropriate exit code for an error

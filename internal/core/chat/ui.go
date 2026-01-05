@@ -53,13 +53,16 @@ func NewUI() *UI {
 	var renderer *glamour.TermRenderer
 	if !noColor {
 		var err error
+		// Use Dracula theme for excellent contrast on dark terminals
 		renderer, err = glamour.NewTermRenderer(
-			glamour.WithAutoStyle(),
+			glamour.WithStandardStyle("dracula"),
 			glamour.WithWordWrap(100),
 		)
 		if err != nil {
 			logging.Warn("Failed to initialize glamour renderer: %v, falling back to plain text", err)
 			renderer = nil
+		} else {
+			logging.Debug("Initialized glamour renderer with dracula style")
 		}
 	}
 	

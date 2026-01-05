@@ -1,6 +1,7 @@
 package chat
 
 import (
+	appChat "github.com/LaurieRhodes/mcp-cli-go/internal/app/chat"
 	"fmt"
 	"strings"
 
@@ -44,6 +45,14 @@ func (s *Service) StartChat(cfg *Config) error {
 	
 	// Load configuration to get provider config
 	appConfig, err := s.configService.LoadConfig(cfg.ConfigFile)
+	if err == nil {
+		logging.Debug("Loaded application config successfully")
+		if appConfig.Chat != nil {
+			logging.Debug("Chat config found: chat_logs_location=%s", appConfig.Chat.ChatLogsLocation)
+		} else {
+			logging.Debug("Chat config is nil in appConfig")
+		}
+	}
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
@@ -94,7 +103,7 @@ func (s *Service) StartChat(cfg *Config) error {
 
 	// Execute chat with server connections
 	return host.RunCommand(func(conns []*host.ServerConnection) error {
-		return s.runChat(conns, provider, providerConfig, modelName, ui)
+		return s.runChat(conns, provider, providerConfig, modelName, ui, appConfig)
 	}, cfg.ConfigFile, cfg.ServerNames, cfg.UserSpecified)
 }
 
@@ -141,7 +150,31 @@ func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 }
 
 // runChat executes the chat session with server connections
-func (s *Service) runChat(connections []*host.ServerConnection, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string, ui *chat.UI) error {
+// runChat executes the chat session with server connections
+func (s *Service) runChat(connections []*host.ServerConnection, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string, ui *chat.UI, appConfig *config.ApplicationConfig) error {
+	// Get chat configuration from loaded app config
+	var chatConfig *config.ChatConfig
+	if appConfig != nil && appConfig.Chat != nil {
+		chatConfig = appConfig.Chat
+		logging.Debug("Loaded chat config from settings: chat_logs_location=%s", chatConfig.ChatLogsLocation)
+	} else {
+		chatConfig = config.DefaultChatConfig()
+		logging.Debug("Using default chat config (no session logging)")
+	}
+
+	// Create session logger if configured
+	var sessionLogger *appChat.SessionLogger
+	if chatConfig.ChatLogsLocation != "" {
+		logger, err := appChat.NewSessionLogger(chatConfig.ChatLogsLocation)
+		if err != nil {
+			logging.Warn("Failed to create session logger: %v, continuing without session logging", err)
+		} else {
+			sessionLogger = logger
+			logging.Info("Session logger created successfully for: %s", chatConfig.ChatLogsLocation)
+			defer sessionLogger.Close()
+		}
+	}
+
 	// Validate provider configuration
 	if err := provider.ValidateConfig(); err != nil {
 		return fmt.Errorf("provider configuration validation failed: %w", err)
@@ -155,6 +188,12 @@ func (s *Service) runChat(connections []*host.ServerConnection, provider domain.
 	} else {
 		chatManager = chat.NewChatManagerWithUI(provider, connections, ui)
 		logging.Info("Created chat manager with fallback token management")
+	}
+	
+	// Configure session logging if enabled
+	if sessionLogger != nil && sessionLogger.IsEnabled() {
+		providerName := string(provider.GetProviderType())
+		chatManager.SetSessionLogger(sessionLogger, providerName, model)
 	}
 	
 	if err := chatManager.StartChat(); err != nil {

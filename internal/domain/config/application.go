@@ -5,6 +5,7 @@ type ApplicationConfig struct {
 	Servers    map[string]ServerConfig      `yaml:"servers"`
 	AI         *AIConfig                    `yaml:"ai,omitempty"`
 	Embeddings *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
+	Chat       *ChatConfig                  `yaml:"chat,omitempty"`
 	Templates  map[string]*WorkflowTemplate `yaml:"templates,omitempty"`
 	TemplatesV2 map[string]*TemplateV2 `yaml:"-"` // Loaded separately from config/templates/
 }
