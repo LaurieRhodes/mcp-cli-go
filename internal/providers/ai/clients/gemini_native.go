@@ -535,7 +535,20 @@ func convertToGeminiFunctionDeclarations(tools []domain.Tool) []geminiFunctionDe
 		declarations[i] = geminiFunctionDeclaration{
 			Name:        tool.Function.Name,
 			Description: tool.Function.Description,
-			Parameters:  tool.Function.Parameters,
+			Parameters:  tool.Function.Parameters, // Direct pass-through - critical for Gemini
+		}
+		
+		// Enhanced debugging for Gemini tool schema issues
+		if logging.GetDefaultLevel() <= logging.DEBUG {
+			logging.Debug("=== Gemini Tool Declaration ===")
+			logging.Debug("  Name: %s", tool.Function.Name)
+			logging.Debug("  Description: %s", tool.Function.Description)
+			if schemaJSON, err := json.Marshal(tool.Function.Parameters); err == nil {
+				logging.Debug("  Parameters (as-is from MCP): %s", string(schemaJSON))
+			} else {
+				logging.Warn("  Failed to marshal parameters: %v", err)
+			}
+			logging.Debug("===============================")
 		}
 	}
 	

@@ -13,6 +13,7 @@ import (
     "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config" 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	mcplib "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/mcp"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 )
 
@@ -428,8 +429,22 @@ func (m *ChatManager) ExecuteToolCall(toolCall domain.ToolCall) (string, error) 
 		return "", fmt.Errorf("tool execution error: %w", err)
 	}
 	
-	// Check for errors in the result
-	if result.IsError {
+	// Enhanced error detection - check both top-level and nested error formats
+	// This follows MCP spec and handles legacy server implementations
+	errorDetector := mcplib.NewErrorDetector()
+	
+	// Log detailed error info for debugging
+	if logging.GetDefaultLevel() <= logging.DEBUG {
+		errorDetector.LogErrorDetails(result)
+	}
+	
+	// Check for errors using enhanced detection
+	if errorDetector.IsMCPError(result) {
+		// Try to get detailed error message
+		if errMsg, hasMsg := errorDetector.GetErrorMessage(result); hasMsg {
+			return "", fmt.Errorf("tool execution failed: %s", errMsg)
+		}
+		// Fallback to generic error
 		return "", fmt.Errorf("tool execution failed: %s", result.Error)
 	}
 	
@@ -538,12 +553,17 @@ func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
 			continue
 		}
 		
+		logging.Debug("Processing %d tools from server %s for LLM provider", len(serverTools), conn.Name)
+		
 		for _, tool := range serverTools {
 			// Format the tool name to be compatible with OpenAI's requirements
 			formattedName := formatToolNameForOpenAI(conn.Name, tool.Name)
 			
 			// Debug log the name transformation
-			logging.Debug("Transforming tool name for OpenAI: %s.%s -> %s", conn.Name, tool.Name, formattedName)
+			logging.Debug("Transforming tool name for LLM: %s.%s -> %s", conn.Name, tool.Name, formattedName)
+			
+			// CRITICAL: Pass schema directly without transformation (Gemini CLI approach)
+			// This ensures Gemini and other providers receive the schema exactly as MCP server provided it
 			
 			// Create the tool with the formatted name using domain types
 			llmTool := domain.Tool{
@@ -551,9 +571,22 @@ func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
 				Function: domain.ToolFunction{
 					Name:        formattedName,
 					Description: fmt.Sprintf("[%s] %s", conn.Name, tool.Description),
-					Parameters:  tool.InputSchema,
+					Parameters:  tool.InputSchema, // Direct pass-through - no transformation
 				},
 			}
+			
+			// Enhanced logging for debugging Gemini tool calling issues
+			if logging.GetDefaultLevel() <= logging.DEBUG {
+				logging.Debug("=== Tool Registration for LLM ===")
+				logging.Debug("  Original: %s.%s", conn.Name, tool.Name)
+				logging.Debug("  Formatted: %s", formattedName)
+				logging.Debug("  Description: %s", tool.Description)
+				if schemaJSON, err := json.Marshal(tool.InputSchema); err == nil {
+					logging.Debug("  Schema (passed as-is): %s", string(schemaJSON))
+				}
+				logging.Debug("=================================")
+			}
+			
 			llmTools = append(llmTools, llmTool)
 		}
 	}
@@ -562,6 +595,7 @@ func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
 		return nil, fmt.Errorf("failed to get any tools: %w", anyErrors)
 	}
 	
+	logging.Info("Registered %d total tools for LLM provider", len(llmTools))
 	return llmTools, nil
 }
 
@@ -575,6 +609,9 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 	// Get the tools from the server with retry
 	var serverTools []tools.Tool
 	var lastErr error
+	
+	// Create lenient schema validator
+	schemaValidator := mcplib.NewLenientSchemaValidator()
 	
 	for retries := 0; retries < 3; retries++ {
 		if retries > 0 {
@@ -590,9 +627,35 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 			continue
 		}
 		
-		// Cache the tools
-		m.toolsCache[conn.Name] = result.Tools
-		serverTools = result.Tools
+		// Validate and log schemas with lenient validation
+		validatedTools := make([]tools.Tool, 0, len(result.Tools))
+		for _, tool := range result.Tools {
+			// Validate schema (lenient - logs warnings but doesn't reject)
+			if err := schemaValidator.ValidateSchema(tool.InputSchema); err != nil {
+				// This is a catastrophic error (not just validation failure)
+				logging.Error("Catastrophic error validating schema for tool %s.%s: %v", 
+					conn.Name, tool.Name, err)
+				continue // Skip this tool
+			}
+			
+			// Log schema for debugging if in debug mode
+			if logging.GetDefaultLevel() <= logging.DEBUG {
+				schemaValidator.LogSchemaForDebugging(
+					fmt.Sprintf("%s.%s", conn.Name, tool.Name),
+					tool.InputSchema,
+				)
+			}
+			
+			// Accept the tool
+			validatedTools = append(validatedTools, tool)
+		}
+		
+		logging.Info("Validated %d/%d tools from server %s", 
+			len(validatedTools), len(result.Tools), conn.Name)
+		
+		// Cache the validated tools
+		m.toolsCache[conn.Name] = validatedTools
+		serverTools = validatedTools
 		
 		logging.Info("Successfully got %d tools from server %s", len(serverTools), conn.Name)
 		return serverTools, nil
