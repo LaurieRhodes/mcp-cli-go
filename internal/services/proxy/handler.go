@@ -24,7 +24,7 @@ type ToolHandler struct {
 // NewToolHandler creates a new tool handler
 func NewToolHandler(tool *runas.ToolExposure, appConfig *config.ApplicationConfig, proxyServer *ProxyServer) (*ToolHandler, error) {
 	// Only validate template existence for workflow tools (not MCP server tools)
-	if tool.Template != "" {
+	if tool.Template != "" && tool.Template != "load_skill" && tool.Template != "execute_skill_code" {
 		_, existsV1 := appConfig.Templates[tool.Template]
 		_, existsV2 := appConfig.TemplatesV2[tool.Template]
 		

@@ -185,7 +185,7 @@ Claude Desktop Configuration:
 		skillService := skillsvc.NewService()
 		
 		// === Handle mcp-skills type: Auto-discover and generate tools ===
-		if runasConfig.RunAsType == runas.RunAsTypeMCPSkills {
+		if runasConfig.RunAsType == runas.RunAsTypeMCPSkills || runasConfig.RunAsType == runas.RunAsTypeProxySkills {
 			logging.Info("Auto-discovering skills for mcp-skills server type")
 			
 			// Determine skills directory
@@ -316,7 +316,7 @@ Claude Desktop Configuration:
 		}
 		
 		// Check runas type and start appropriate server
-		if runasConfig.RunAsType == runas.RunAsTypeProxy {
+		if runasConfig.RunAsType == runas.RunAsTypeProxy || runasConfig.RunAsType == runas.RunAsTypeProxySkills {
 			// Start HTTP proxy server
 			return startProxyServer(runasConfig, appConfig, configService, skillService)
 		}

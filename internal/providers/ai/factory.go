@@ -36,7 +36,7 @@ func (f *ProviderFactory) CreateProvider(providerType domain.ProviderType, cfg *
 	case config.OllamaNative:
 		return clients.NewOllamaClient(cfg)
 	case config.GeminiNative:
-		return clients.NewGeminiClient(providerType, cfg)
+		return clients.NewGeminiNativeClient(providerType, cfg)
 	case config.AzureOpenAI:
 		return clients.NewAzureOpenAIClient(providerType, cfg)
 	case config.AWSBedrock:

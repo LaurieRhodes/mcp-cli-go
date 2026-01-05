@@ -7,17 +7,22 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
 ## Quick Navigation
 
 ### For New Users
+
 - [Installation & Setup](#getting-started) - Install and configure MCP-CLI
 - [Core Concepts](#core-concepts) - Understand modes, providers, and templates
 - [Quick Start Examples](#quick-start-examples) - Get running in 5 minutes
 
 ### For Developers
+
 - [Templates](#templates) - Create reusable AI workflows
 - [Automation](#automation) - Script and integrate MCP-CLI
 - [Architecture](#architecture) - Technical design and internals
 
 ### For Advanced Users
+
 - [MCP Server Mode](#mcp-server-mode) - Expose workflows as discoverable tools
+- [HTTP Proxy Server](#http-proxy-server) - Convert MCP servers to REST APIs
+- [Skills System](#skills-system) - Anthropic-compatible skills with auto-loading
 - [Debugging](#debugging) - Troubleshoot and optimize
 
 ---
@@ -25,11 +30,13 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
 ## Documentation Structure
 
 ### Getting Started
+
 > **Installation, configuration, and first steps**
 
 *Documentation planned - see project README for basic installation*
 
 **Topics:**
+
 - Installation (binary, build from source, package managers)
 - Initial configuration (config.yaml setup)
 - Provider configuration (OpenAI, Anthropic, Ollama, etc.)
@@ -38,29 +45,34 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
 ---
 
 ### [Guides](guides/)
+
 > **Task-oriented guides for using MCP-CLI effectively**
 
 #### Operational Modes
 
 - **[Chat Mode](guides/chat-mode.md)** - Interactive conversations with AI
+  
   - Conversation history and context
   - Tool integration
   - Commands and shortcuts
   - Use cases: Research, coding assistance, general Q&A
 
 - **[Query Mode](guides/query-mode.md)** - Single-shot queries for automation
+  
   - Scripting and piping
   - Output formatting (text, JSON)
   - Error handling
   - Use cases: CI/CD, data processing, batch operations
 
 - **[Interactive Mode](guides/interactive-mode.md)** - Direct MCP tool execution
+  
   - Tool discovery and inspection
   - Manual tool calling
   - Testing MCP servers
   - Use cases: Tool development, debugging, exploration
 
 - **[Embeddings](guides/embeddings.md)** - Vector embeddings for semantic search
+  
   - Generating embeddings
   - Similarity matching
   - Integration patterns
@@ -69,12 +81,14 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
 #### Advanced Topics
 
 - **[Automation & Scripting](guides/automation.md)** - Integrate MCP-CLI into workflows
+  
   - Shell scripts and piping
   - CI/CD integration (GitHub Actions, GitLab CI)
   - Error handling and retries
   - Environment management
 
 - **[Debugging](guides/debugging.md)** - Troubleshoot and optimize
+  
   - Verbose logging
   - Common issues and solutions
   - Performance optimization
@@ -83,9 +97,11 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
 ---
 
 ### [Templates](templates/)
+
 > **Create reusable, multi-step AI workflows**
 
 - **[Authoring Guide](templates/authoring-guide.md)** - Complete template creation reference
+  
   - Template structure and syntax
   - Variable substitution
   - Step types and execution flow
@@ -94,6 +110,7 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
   - Template composition patterns
 
 - **[Examples](templates/examples/)** - Real, working templates
+  
   - Code review workflows
   - Research and fact-checking
   - Data analysis pipelines
@@ -103,6 +120,7 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
 **What are templates?**
 
 Templates are YAML-defined, multi-step AI workflows that solve specific problems. They enable:
+
 - **Reusability** - Define once, use everywhere
 - **Consistency** - Same process every time
 - **Complexity** - Multi-step reasoning and analysis
@@ -111,6 +129,7 @@ Templates are YAML-defined, multi-step AI workflows that solve specific problems
 ---
 
 ### MCP Server Mode
+
 > **Expose templates as discoverable tools for any MCP client**
 
 *Documentation planned*
@@ -120,6 +139,7 @@ Templates are YAML-defined, multi-step AI workflows that solve specific problems
 Server mode transforms your AI workflows (templates) into tools that can be discovered and used by any MCP-compatible application (Claude Desktop, Cursor IDE, custom applications).
 
 **Planned Documentation:**
+
 - Server setup and configuration
 - runas configuration reference (mapping templates to tools)
 - Tool parameter mapping
@@ -129,12 +149,112 @@ Server mode transforms your AI workflows (templates) into tools that can be disc
 
 ---
 
+### [HTTP Proxy Server](proxy/)
+
+> **Convert MCP servers to REST APIs**
+
+Expose any MCP server as a production-ready REST API with auto-generated OpenAPI documentation.
+
+- **[Server Guide](proxy/proxy-server-guide.md)** - Complete HTTP proxy documentation
+  - Auto-discovery from MCP servers
+  - OpenAPI 3.0 specification generation
+  - Swagger UI integration
+  - API key authentication
+  - CORS support
+  - TLS/HTTPS configuration
+  - Production deployment
+  - OpenWebUI integration
+
+- **[Quick Reference](proxy/proxy-quick-reference.md)** - Fast lookup and common commands
+  - 2-minute setup
+  - Configuration examples
+  - Testing commands
+  - Troubleshooting tips
+
+**What is the HTTP Proxy?**
+
+The HTTP proxy converts MCP servers (stdio/SSE protocol) into standard REST APIs, enabling:
+
+- **Web integration** - Use MCP tools from web applications
+- **Tool aggregation** - Single REST API for multiple MCP servers (e.g., OpenWebUI)
+- **Legacy systems** - Integrate with systems that only support REST
+- **Standard docs** - Auto-generated OpenAPI specs and Swagger UI
+
+**Example:**
+```yaml
+# config/proxy/bash.yaml
+runas_type: proxy
+config_source: config/servers/bash.yaml
+proxy_config:
+  port: 4000
+  api_key: "${API_KEY}"
+```
+
+Instantly creates REST API:
+- `POST /bash` - Execute bash commands
+- `GET /docs` - Swagger UI  
+- `GET /openapi.json` - OpenAPI spec
+
+✅ **Production Status:** Fully implemented and tested with OpenWebUI
+
+---
+
+### [Skills System](skills/)
+
+> **Anthropic-compatible skills with auto-loading**
+
+Auto-discover and expose Anthropic Skills as MCP tools with zero configuration.
+
+- **[Auto-Loading Guide](skills/auto-loading.md)** - Complete skills auto-discovery guide
+  - How auto-loading works
+  - Configuration reference
+  - Directory structure requirements
+  - Troubleshooting guide
+
+- **[Quick Reference](skills/quick-reference.md)** - Fast lookup
+  - 2-minute setup
+  - Common configurations
+  - Debugging commands
+
+- **[Quick Start](skills/quick-start.md)** - Get started in 5 minutes
+  - Initial setup
+  - Testing skills
+  - Claude Desktop integration
+
+- **[Docker/Podman Execution](skills/docker-podman-execution.md)** - Code execution guide
+  - Containerized sandbox execution
+  - Security boundaries
+  - Installation and setup
+  - Performance tuning
+
+**What are Skills?**
+
+Skills are modular packages that extend LLM capabilities with specialized knowledge and helper libraries:
+
+- **Documentation** (`SKILL.md`) - Guidance for Claude
+- **Scripts** (`scripts/`) - Python helper libraries
+- **References** (`references/`) - Additional docs loaded on demand
+
+**Auto-Loading:**
+```yaml
+# config/runasMCP/mcp_skills_stdio.yaml
+runas_type: mcp-skills  # That's it!
+```
+
+All skills in `config/skills/` automatically become MCP tools.
+
+✅ **Production Status:** Skills auto-discovery and `execute_skill_code` fully implemented
+
+---
+
 ### [Architecture](ARCHITECTURE.md)
+
 > **Technical design, internals, and extension points**
 
 Comprehensive technical documentation for developers and contributors.
 
 **Covers:**
+
 - System architecture and layer responsibilities
 - Configuration hierarchy and data flow patterns
 - Security, performance, and testing architecture
@@ -143,6 +263,7 @@ Comprehensive technical documentation for developers and contributors.
 - Code examples and implementation patterns
 
 **Read this to:**
+
 - Understand the internal design
 - Contribute to the codebase
 - Extend with new providers or modes
@@ -156,13 +277,13 @@ Comprehensive technical documentation for developers and contributors.
 
 MCP-CLI operates in several modes, each optimized for different use cases:
 
-| Mode | Purpose | Use When |
-|------|---------|----------|
-| **Chat** | Interactive conversations | Research, exploration, assistance |
-| **Query** | Single-shot queries | Automation, scripting, pipelines |
-| **Interactive** | Direct tool testing | Tool development, debugging |
-| **Template** | Multi-step workflows | Complex analysis, consistent processes |
-| **Server** | Expose tools to clients | IDE integration, team sharing |
+| Mode            | Purpose                   | Use When                               |
+| --------------- | ------------------------- | -------------------------------------- |
+| **Chat**        | Interactive conversations | Research, exploration, assistance      |
+| **Query**       | Single-shot queries       | Automation, scripting, pipelines       |
+| **Interactive** | Direct tool testing       | Tool development, debugging            |
+| **Template**    | Multi-step workflows      | Complex analysis, consistent processes |
+| **Server**      | Expose tools to clients   | IDE integration, team sharing          |
 
 ### Providers
 
@@ -176,6 +297,7 @@ MCP-CLI supports multiple AI providers with a unified interface:
 - **OpenRouter** - Multi-provider gateway
 
 **Provider Selection:**
+
 - Per-command via `--provider` flag
 - Per-template via config section
 - Global default in config.yaml
@@ -191,6 +313,7 @@ MCP enables AI models to interact with external tools and data sources:
 - **Extensibility** - Any application can provide MCP tools
 
 **MCP Servers:**
+
 - Filesystem operations
 - Web search (Brave, Google)
 - Database access
@@ -201,11 +324,13 @@ MCP enables AI models to interact with external tools and data sources:
 ## Quick Start Examples
 
 ### Simple Query
+
 ```bash
 mcp-cli query "Explain quantum computing in simple terms"
 ```
 
 ### Chat Session
+
 ```bash
 mcp-cli chat
 > What are the best practices for API design?
@@ -213,12 +338,14 @@ mcp-cli chat
 ```
 
 ### Template Execution
+
 ```bash
 mcp-cli --template code_review \
   --input-data '{"code": "def hello(): print(\"hi\")", "language": "python"}'
 ```
 
 ### Automation
+
 ```bash
 # In CI/CD pipeline
 cat pull_request.diff | mcp-cli query "Review this code change" > review.txt
@@ -248,6 +375,7 @@ All documentation follows consistent patterns:
 ### Technical Level
 
 Documentation is written for:
+
 - **Getting Started** - No prior knowledge assumed
 - **Guides** - Basic familiarity with MCP-CLI
 - **Templates** - Understanding of AI workflows

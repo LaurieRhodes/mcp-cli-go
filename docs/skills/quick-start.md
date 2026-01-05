@@ -109,20 +109,30 @@ Claude should list:
 
 ### Next Steps
 
+## Next Steps
+
+### Learn About Auto-Loading
+
+- **[Auto-Loading Guide](auto-loading.md)** - Complete guide to automatic skill discovery
+- **[Quick Reference](quick-reference.md)** - Fast lookup for common tasks
+
 ### Learn More About Skills
 
 - **[Overview](overview.md)** - Understand how skills work
-- **[Using Skills](using-skills.md)** - Use existing skills effectively
-- **[Available Skills](available-skills.md)** - Reference for all included skills
+- **[Why Skills Matter](WHY_SKILLS_MATTER.md)** - The philosophy behind skills
 
 ### Create Your Own Skills
 
 - **[Creating Skills Guide](creating-skills.md)** - Build custom skills
-- **[Best Practices](best-practices.md)** - Design patterns
 
 ### Technical Details
 
-- **[Reference](reference.md)** - execute_skill_code API
-- **[Troubleshooting](troubleshooting.md)** - Common issues
+- **[README](README.md)** - Full documentation index
 
-## 
+## Troubleshooting
+
+If skills aren't appearing, see the [Auto-Loading Guide troubleshooting section](auto-loading.md#troubleshooting) or the [Quick Reference](quick-reference.md#-troubleshooting-commands).
+
+---
+
+**Pro Tip:** The auto-loading feature means you can add new skills by just dropping directories into `config/skills/` - no configuration changes needed!

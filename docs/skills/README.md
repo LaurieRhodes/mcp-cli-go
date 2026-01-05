@@ -294,13 +294,59 @@ Use "Creating a new Word document" workflow
 
 ---
 
-## 📚 Key Resources
+## 📚 Documentation
 
-- **Skills Archive**: /config/skills/`
+### Getting Started
+- **[Quick Start](quick-start.md)** - Get up and running in 5 minutes
+- **[Skills Auto-Loading Guide](auto-loading.md)** - Complete guide to automatic skill discovery and MCP exposure
+- **[Quick Reference](quick-reference.md)** - Fast lookup for common tasks
+
+### Understanding Skills
+- **[Overview](overview.md)** - How skills work and why they're different
+- **[Why Skills Matter](WHY_SKILLS_MATTER.md)** - The philosophy behind skills
+
+### Execution & Security
+- **[Docker/Podman Execution](docker-podman-execution.md)** - Complete guide to containerized code execution
+
+### Creating Skills
+- **[Creating Skills](creating-skills.md)** - Build your own skills
+
+### Reference
+- **Skills Archive**: `/config/skills/`
 - **MCP Specification**: https://modelcontextprotocol.io/
 
 ---
 
-**Last Updated**: December 30, 2025  
+## 🎯 Quick Links
+
+**New to skills?** Start with [Quick Start](quick-start.md)
+
+**Want auto-discovery?** See [Auto-Loading Guide](auto-loading.md)
+
+**Need Docker/Podman help?** Read [Docker/Podman Execution](docker-podman-execution.md)
+
+**Building skills?** Read [Creating Skills](creating-skills.md)
+
+**Understanding the system?** Check [Overview](overview.md)
+
+---
+
+## ⚠️ Production Status
+
+**Production-Ready:**
+- ✅ Skills auto-discovery and MCP tool generation
+- ✅ Passive mode (load documentation)
+- ✅ `execute_skill_code` with Docker/Podman sandboxing
+- ✅ PYTHONPATH configuration for skill libraries
+
+**Experimental/Not Implemented:**
+- ⚠️ Active mode with `workflow.yaml` (stub only)
+- ⚠️ Workflow-based orchestration
+
+**Recommended:** Use `execution_mode: auto` for full functionality.
+
+---
+
+**Last Updated**: January 4, 2026  
 **Based on Analysis of**: 17 real-world Anthropic skills  
-**MCP Integration Status**: ✅ Fully mapped and implementable
+**MCP Integration Status**: ✅ Fully implemented with auto-loading

@@ -1,0 +1,53 @@
+# MCP Server: Anthropic Skills
+# Auto-discovers and exposes all Anthropic skills as MCP tools
+
+runas_type: mcp-skills
+version: "1.0"
+
+server_info:
+  name: skills-engine
+  version: 1.0.0
+  description: "Auto-generated MCP server from Anthropic skills directory"
+
+# Optional: Configure skills discovery
+skills_config:
+  # Explicitly specify skills directory (relative to config root, not this file)
+  skills_directory: ../skills
+  
+  # Execution mode: "passive" (docs only), "active" (execute scripts), "auto" (detect Docker/Podman)
+  execution_mode: auto
+  
+  # Optional: only expose these skills
+  # include_skills:
+  #   - python-best-practices
+  #   - docx
+  #   - frontend-design
+  
+  # Optional: exclude these skills
+  # exclude_skills:
+  #   - experimental-skill
+
+# No tools array needed! Tools are auto-generated from skills at runtime.
+# 
+# How it works:
+# 1. Server scans skills directory (default: config/skills/)
+# 2. Reads SKILL.md frontmatter from each skill directory
+# 3. Auto-generates MCP tool from name + description
+# 4. Routes tool calls directly to SkillService
+# 5. No template execution overhead
+#
+# Benefits:
+# - Single source of truth (SKILL.md frontmatter)
+# - Zero configuration - add skill directory, it's exposed
+# - No duplication of metadata
+# - Direct routing (no template chain)
+
+# Add to Claude Desktop config:
+# {
+#   "mcpServers": {
+#     "skills": {
+#       "command": "/path/to/mcp-cli",
+#       "args": ["serve", "/path/to/this/file.yaml"]
+#     }
+#   }
+# }
