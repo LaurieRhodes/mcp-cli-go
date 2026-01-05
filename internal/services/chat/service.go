@@ -84,9 +84,17 @@ func (s *Service) StartChat(cfg *Config) error {
 	}
 	defer provider.Close() // Clean up resources
 
+	// Create UI at service level to ensure cleanup even on timeout
+	ui := chat.NewUI()
+	defer func() {
+		if err := ui.Close(); err != nil {
+			logging.Warn("Error closing UI: %v", err)
+		}
+	}()
+
 	// Execute chat with server connections
 	return host.RunCommand(func(conns []*host.ServerConnection) error {
-		return s.runChat(conns, provider, providerConfig, modelName)
+		return s.runChat(conns, provider, providerConfig, modelName, ui)
 	}, cfg.ConfigFile, cfg.ServerNames, cfg.UserSpecified)
 }
 
@@ -133,7 +141,7 @@ func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 }
 
 // runChat executes the chat session with server connections
-func (s *Service) runChat(connections []*host.ServerConnection, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string) error {
+func (s *Service) runChat(connections []*host.ServerConnection, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string, ui *chat.UI) error {
 	// Validate provider configuration
 	if err := provider.ValidateConfig(); err != nil {
 		return fmt.Errorf("provider configuration validation failed: %w", err)
@@ -142,10 +150,10 @@ func (s *Service) runChat(connections []*host.ServerConnection, provider domain.
 	// Initialize and start chat using the enhanced chat manager with provider configuration
 	var chatManager *chat.ChatManager
 	if providerConfig != nil {
-		chatManager = chat.NewChatManagerWithConfig(provider, connections, providerConfig, model)
+		chatManager = chat.NewChatManagerWithConfigAndUI(provider, connections, providerConfig, model, ui)
 		logging.Info("Created chat manager with provider-aware token management for model: %s", model)
 	} else {
-		chatManager = chat.NewChatManager(provider, connections)
+		chatManager = chat.NewChatManagerWithUI(provider, connections, ui)
 		logging.Info("Created chat manager with fallback token management")
 	}
 	

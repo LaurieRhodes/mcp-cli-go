@@ -29,7 +29,7 @@ func (g *ModularConfigGenerator) Generate(config *GeneratorConfig) error {
 	}
 
 	// Create subdirectories
-	dirs := []string{"providers", "embeddings", "servers", "templates", "runas"}
+	dirs := []string{"providers", "embeddings", "servers", "templates", "runasMCP", "proxy"}
 	for _, dir := range dirs {
 		path := filepath.Join(g.baseDir, dir)
 		if err := os.MkdirAll(path, 0755); err != nil {
@@ -62,9 +62,14 @@ func (g *ModularConfigGenerator) Generate(config *GeneratorConfig) error {
 		return fmt.Errorf("failed to create server files: %w", err)
 	}
 
-	// Create runas directory README
-	if err := g.createRunasReadme(); err != nil {
-		return fmt.Errorf("failed to create runas README: %w", err)
+	// Create runasMCP directory README
+	if err := g.createRunasMCPReadme(); err != nil {
+		return fmt.Errorf("failed to create runasMCP README: %w", err)
+	}
+
+	// Create proxy directory README
+	if err := g.createProxyReadme(); err != nil {
+		return fmt.Errorf("failed to create proxy README: %w", err)
 	}
 
 	// Create README
@@ -87,6 +92,7 @@ type GeneratorConfig struct {
 	IncludeGemini      bool
 	IncludeOpenRouter  bool
 	IncludeLMStudio    bool
+	IncludeMoonshot    bool
 	IncludeBedrock     bool
 	IncludeAzureFoundry bool
 	IncludeVertexAI    bool
@@ -102,7 +108,7 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 		Includes: &IncludeDirectives{
 			Providers:  filepath.Join(configDirName, "providers/*.yaml"),
 			Servers:    filepath.Join(configDirName, "servers/*.yaml"),
-			RunAs:      filepath.Join(configDirName, "runas/*.yaml"),
+			RunAs:      filepath.Join(configDirName, "runasMCP/*.yaml"),
 			Embeddings: filepath.Join(configDirName, "embeddings/*.yaml"),
 			Templates:  filepath.Join(configDirName, "templates/*.yaml"),
 			Settings:   filepath.Join(configDirName, "settings.yaml"),
@@ -204,6 +210,12 @@ func (g *ModularConfigGenerator) createProviderFiles(config *GeneratorConfig) er
 		}
 	}
 
+	if config.IncludeMoonshot {
+		if err := g.createMoonshotProvider(providersDir); err != nil {
+			return err
+		}
+	}
+
 	if config.IncludeBedrock {
 		if err := g.createBedrockProvider(providersDir); err != nil {
 			return err
@@ -298,11 +310,10 @@ func (g *ModularConfigGenerator) createDeepSeekProvider(dir string) error {
 // createGeminiProvider creates gemini.yaml
 func (g *ModularConfigGenerator) createGeminiProvider(dir string) error {
 	provider := map[string]interface{}{
-		"interface_type": "openai_compatible",  // Gemini uses OpenAI-compatible API
+		"interface_type": "gemini_native",  // Gemini native API with thought signatures
 		"provider_name":  "gemini",
 		"config": map[string]interface{}{
 			"api_key":         "${GEMINI_API_KEY}",
-			"api_endpoint":    "https://generativelanguage.googleapis.com",
 			"default_model":   "gemini-2.0-flash-exp",
 			"timeout_seconds": 300,
 			"max_retries":     2,
@@ -347,6 +358,25 @@ func (g *ModularConfigGenerator) createLMStudioProvider(dir string) error {
 	}
 
 	return g.writeProviderFile(dir, "lmstudio.yaml", provider)
+}
+
+// createMoonshotProvider creates kimik2.yaml (Moonshot AI Kimi)
+func (g *ModularConfigGenerator) createMoonshotProvider(dir string) error {
+	provider := map[string]interface{}{
+		"interface_type": "openai_compatible",
+		"provider_name":  "kimik2",
+		"config": map[string]interface{}{
+			"api_key":         "${MOONSHOT_API_KEY}",
+			"api_endpoint":    "https://api.moonshot.ai/v1",
+			"default_model":   "kimi-k2-turbo-preview",
+			"timeout_seconds": 300,
+			"max_retries":     2,
+			"context_window":  128000,
+			"reserve_tokens":  4000,
+		},
+	}
+
+	return g.writeProviderFile(dir, "kimik2.yaml", provider)
 }
 
 // createBedrockProvider creates aws-bedrock.yaml
@@ -803,10 +833,10 @@ func (g *ModularConfigGenerator) writeEmbeddingFile(dir, filename string, data i
 	return nil
 }
 
-// createRunasReadme creates a README for the runas directory
-func (g *ModularConfigGenerator) createRunasReadme() error {
-	runasDir := filepath.Join(g.baseDir, "runas")
-	readmePath := filepath.Join(runasDir, "README.md")
+// createRunasMCPReadme creates a README for the runasMCP directory
+func (g *ModularConfigGenerator) createRunasMCPReadme() error {
+	runasMCPDir := filepath.Join(g.baseDir, "runasMCP")
+	readmePath := filepath.Join(runasMCPDir, "README.md")
 	
 	readme := `# MCP Server Mode Configurations
 
@@ -844,10 +874,10 @@ tools:
 
 ` + "```bash" + `
 # Start server
-mcp-cli serve config/runas/research_agent.yaml
+mcp-cli serve config/runasMCP/research_agent.yaml
 
 # With verbose logging
-mcp-cli serve --verbose config/runas/research_agent.yaml
+mcp-cli serve --verbose config/runasMCP/research_agent.yaml
 ` + "```" + `
 
 ## Configure Claude Desktop
@@ -859,7 +889,7 @@ Add to ` + "`claude_desktop_config.json`" + `:
   "mcpServers": {
     "research-agent": {
       "command": "/usr/local/bin/mcp-cli",
-      "args": ["serve", "/absolute/path/to/config/runas/research_agent.yaml"]
+      "args": ["serve", "/absolute/path/to/config/runasMCP/research_agent.yaml"]
     }
   }
 }
@@ -873,6 +903,83 @@ Add to ` + "`claude_desktop_config.json`" + `:
 - **Template composition** accessible via MCP protocol
 
 Each YAML file in this directory defines a separate MCP server configuration.
+`
+	
+	return os.WriteFile(readmePath, []byte(readme), 0644)
+}
+
+// createProxyReadme creates a README for the proxy directory
+func (g *ModularConfigGenerator) createProxyReadme() error {
+	proxyDir := filepath.Join(g.baseDir, "proxy")
+	readmePath := filepath.Join(proxyDir, "README.md")
+	
+	readme := `# Proxy Mode Configurations
+
+This directory contains configurations for running workflows through the HTTP proxy.
+
+## What is Proxy Mode?
+
+Proxy mode exposes workflows as HTTP endpoints compatible with OpenAI's API format.
+This allows integration with:
+- **OpenWebUI** - Multi-user web interface
+- **LibreChat** - Open-source ChatGPT alternative
+- **Any OpenAI-compatible client**
+
+## Benefits
+
+- **Multi-user support** - Share workflows with teams
+- **Centralized AI** - One mcp-cli instance serves many users
+- **OpenAI compatibility** - Works with existing tools
+- **Authentication** - Add API key validation
+
+## Example Proxy Configuration
+
+Create ` + "`simple_analysis.yaml`" + `:
+
+` + "```yaml" + `
+name: simple-analysis
+description: Simple analysis workflow via proxy
+
+workflow:
+  - name: analyze
+    prompt: "Analyze this: {{input_data}}"
+    provider: anthropic
+    output: result
+
+proxy:
+  enabled: true
+  port: 8080
+  openai_compatible: true
+` + "```" + `
+
+## Running Proxy Server
+
+` + "```bash" + `
+# Start proxy on default port
+mcp-cli proxy config/proxy/simple_analysis.yaml
+
+# Custom port
+mcp-cli proxy --port 8080 config/proxy/simple_analysis.yaml
+` + "```" + `
+
+## Using with OpenWebUI
+
+Configure OpenWebUI to point to:
+- **Base URL**: ` + "`http://localhost:8080/v1`" + `
+- **API Key**: Your configured key (or leave blank)
+- **Model**: Name from your workflow config
+
+## Security Notes
+
+- Add authentication for production use
+- Use HTTPS with reverse proxy (nginx, caddy)
+- Implement rate limiting
+- Monitor API usage
+
+## See Also
+
+- [MCP Server Mode](../runasMCP/README.md) - For Claude Desktop integration
+- [Templates](../templates/README.md) - Workflow templates
 `
 	
 	return os.WriteFile(readmePath, []byte(readme), 0644)
@@ -907,7 +1014,7 @@ config/                  # Modular config directory
 ├── templates/           # Workflow templates
 │   ├── README.md
 │   └── *.yaml
-└── runas/               # MCP server mode configs
+└── runasMCP/               # MCP server mode configs
     ├── README.md
     └── *.yaml
 ` + "```" + `
@@ -921,7 +1028,7 @@ includes:
   providers: config/providers/*.yaml
   embeddings: config/embeddings/*.yaml
   servers: config/servers/*.yaml
-  runas: config/runas/*.yaml
+  runas: config/runasMCP/*.yaml
   templates: config/templates/*.yaml
   settings: config/settings.yaml
 ` + "```" + `
@@ -1011,11 +1118,11 @@ steps:
     prompt: "Summarize: {{analysis}}"
 ` + "```" + `
 
-## MCP Server Mode (runas/)
+## MCP Server Mode (runasMCP/)
 
-Server mode configurations in ` + "`runas/`" + ` expose workflows as MCP tools:
+Server mode configurations in ` + "`runasMCP/`" + ` expose workflows as MCP tools:
 
-**runas/research_agent.yaml:**
+**runasMCP/research_agent.yaml:**
 ` + "```yaml" + `
 server_info:
   name: research-agent
@@ -1030,7 +1137,7 @@ tools:
         topic: {type: string}
 ` + "```" + `
 
-Run with: ` + "`mcp-cli serve config/runas/research_agent.yaml`" + `
+Run with: ` + "`mcp-cli serve config/runasMCP/research_agent.yaml`" + `
 
 ## Environment Variables
 
@@ -1052,7 +1159,7 @@ OPENROUTER_API_KEY=your-key-here
 **config/embeddings/**: Individual embedding provider configs
 **config/servers/**: Individual MCP server configs
 **config/templates/**: Reusable workflow templates
-**config/runas/**: MCP server mode configurations
+**config/runasMCP/**: MCP server mode configurations
 
 Each file is self-contained and can be edited independently.
 Version control friendly - track changes to individual components.

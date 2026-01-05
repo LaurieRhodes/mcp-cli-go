@@ -58,6 +58,24 @@ func NewChatManagerWithConfig(provider domain.LLMProvider, connections []*host.S
 	}
 }
 
+// NewChatManagerWithUI creates a new chat manager with a provided UI
+func NewChatManagerWithUI(provider domain.LLMProvider, connections []*host.ServerConnection, ui *UI) *ChatManager {
+	return NewChatManagerWithConfigAndUI(provider, connections, nil, "", ui)
+}
+
+// NewChatManagerWithConfigAndUI creates a new chat manager with provider configuration and provided UI
+func NewChatManagerWithConfigAndUI(provider domain.LLMProvider, connections []*host.ServerConnection, providerConfig *config.ProviderConfig, model string, ui *UI) *ChatManager {
+	systemPrompt := "You are a helpful assistant with access to tools. Use the tools when necessary to fulfill user requests."
+	return &ChatManager{
+		LLMProvider:     provider,
+		Connections:     connections,
+		Context:         NewChatContextWithProvider(systemPrompt, model, providerConfig),
+		UI:              ui,
+		StreamResponses: true,
+		toolsCache:      make(map[string][]tools.Tool),
+	}
+}
+
 // ProcessUserMessage processes a user message and returns the response
 func (m *ChatManager) ProcessUserMessage(userInput string) error {
 	// Add user message to context
@@ -594,13 +612,6 @@ func (m *ChatManager) StartChat() error {
 		serverNames = append(serverNames, conn.Name)
 	}
 	m.UI.PrintConnectedServers(serverNames)
-	
-	// Ensure UI cleanup on exit
-	defer func() {
-		if err := m.UI.Close(); err != nil {
-			logging.Warn("Error closing UI: %v", err)
-		}
-	}()
 	
 	// Main chat loop
 	for {
