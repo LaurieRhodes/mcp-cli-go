@@ -720,6 +720,13 @@ doc.save("report.docx")
 	}
 	
 	fmt.Println("   ✓ Created README.md")
+	
+	// Create skill-images.yaml
+	if err := createSkillImagesConfig(skillsDir); err != nil {
+		return fmt.Errorf("failed to create skill-images.yaml: %w", err)
+	}
+	fmt.Println("   ✓ Created skill-images.yaml")
+	
 	fmt.Println("   💡 Download skills from: https://github.com/anthropics/skills")
 	fmt.Println()
 	
@@ -774,6 +781,121 @@ skills_config:
 	}
 	
 	fmt.Println("   ✓ Created runasMCP/skills-auto.yaml")
+	return nil
+}
+
+// createSkillImagesConfig creates the skill-images.yaml configuration
+func createSkillImagesConfig(skillsDir string) error {
+	skillImagesConfig := `# Skill Container Image Mapping
+# Maps skill names to their required container images
+#
+# This file allows us to specify which container image each skill needs
+# without modifying the upstream Anthropic skill files.
+#
+# Location: config/skills/skill-images.yaml
+
+# Default image for skills without a specific mapping
+# This should be a general-purpose image with common dependencies
+default_image: python:3.11-alpine
+
+# Per-skill image mappings
+# Key: skill name (must match the skill directory name)
+# Value: container image name
+skills:
+  # Office document skills
+  docx: mcp-skills-docx
+  pptx: mcp-skills-pptx
+  xlsx: mcp-skills-xlsx
+  
+  # PDF skill
+  pdf: mcp-skills-pdf
+  
+  # If you need Excel formula recalculation, use this instead:
+  # xlsx: mcp-skills-xlsx-libreoffice
+  
+  # Other skills can be added here as needed
+  # imagegen: mcp-skills-imagegen
+
+# Container runtime configuration (optional)
+# These settings apply to all container executions
+container_config:
+  # Maximum memory per container
+  memory_limit: "256m"
+  
+  # CPU limit (fractional cores)
+  cpu_limit: "0.5"
+  
+  # Execution timeout (seconds)
+  timeout: 60
+  
+  # Network mode (should always be 'none' for security)
+  network: "none"
+  
+  # Maximum number of processes
+  pids_limit: 100
+
+# Image build information (for reference only)
+# These are not used by the executor
+# Build images with: cd docker/skills && ./build-skills-images.sh
+image_info:
+  mcp-skills-docx:
+    size: "~170 MB"
+    packages:
+      - defusedxml
+      - lxml
+    description: "Word document manipulation via OOXML/XML"
+    
+  mcp-skills-pptx:
+    size: "~190 MB"
+    packages:
+      - python-pptx
+      - Pillow
+      - lxml
+    description: "PowerPoint presentation creation/editing"
+    
+  mcp-skills-xlsx:
+    size: "~175 MB"
+    packages:
+      - openpyxl
+      - lxml
+    description: "Excel spreadsheet manipulation (basic)"
+    
+  mcp-skills-xlsx-libreoffice:
+    size: "~350 MB"
+    packages:
+      - openpyxl
+      - lxml
+      - libreoffice-calc
+    description: "Excel with formula recalculation support"
+    
+  mcp-skills-office:
+    size: "~195 MB"
+    packages:
+      - defusedxml
+      - python-pptx
+      - openpyxl
+      - Pillow
+      - lxml
+    description: "Combined image for all Office formats"
+    
+  mcp-skills-pdf:
+    size: "~220 MB"
+    packages:
+      - pypdf
+      - pdf2image
+      - Pillow
+      - pdfplumber
+      - pytesseract
+      - poppler-utils
+      - tesseract-ocr
+    description: "PDF manipulation, forms, text extraction, OCR"
+`
+	
+	configPath := filepath.Join(skillsDir, "skill-images.yaml")
+	if err := os.WriteFile(configPath, []byte(skillImagesConfig), 0644); err != nil {
+		return err
+	}
+	
 	return nil
 }
 

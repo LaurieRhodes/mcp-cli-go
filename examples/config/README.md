@@ -1,157 +1,201 @@
-# MCP CLI Modular Configuration
+# MCP CLI Modular Configuration Examples
 
-This directory contains your modular MCP CLI configuration files.
+This directory contains example configuration files for MCP CLI.
 
 ## Structure
 
 ```
-mcp-cli                  # Executable
-config.yaml              # Main config at executable level
-config/                  # Config directory
-├── README.md            # This file
-├── providers/           # LLM provider configs
-│   ├── ollama.yaml
-│   ├── openai.yaml
-│   └── anthropic.yaml
-├── embeddings/          # Embedding provider configs
-│   ├── openai.yaml
-│   ├── openrouter.yaml
-│   └── ollama.yaml
-├── servers/             # MCP server configs
-│   └── *.yaml
-└── templates/           # Workflow templates
-    └── *.yaml
+mcp-cli/                    # Project root
+├── config.yaml             # Main config (at executable level)
+└── config/                 # Configuration directory
+    ├── README.md           # Documentation
+    ├── settings.yaml       # Application settings
+    ├── providers/          # LLM provider configurations
+    ├── embeddings/         # Embedding provider configurations
+    ├── servers/            # MCP server configurations
+    ├── templates/          # Workflow templates
+    ├── runasMCP/          # MCP stdio server configs (Claude Desktop)
+    ├── proxy/             # HTTP proxy configurations
+    └── skills/            # Skills configuration
 ```
 
-## Main Config (config.yaml)
+## Configuration Files
 
-The main config file is at the executable level and uses includes to load modular configs:
+### Main Config (config.yaml)
+
+Located at project root, uses includes to load modular configs:
 
 ```yaml
 includes:
   providers: config/providers/*.yaml
   embeddings: config/embeddings/*.yaml
   servers: config/servers/*.yaml
+  runas: config/runasMCP/*.yaml
   templates: config/templates/*.yaml
+  settings: config/settings.yaml
+```
 
+### Application Settings (settings.yaml)
+
+Global application configuration:
+
+```yaml
 ai:
-  default_provider: ollama
-  default_system_prompt: You are a helpful assistant.
+  default_provider: deepseek
 
-embeddings:
-  default_chunk_strategy: sentence
-  default_max_chunk_size: 512
+chat:
+  default_temperature: 0.7
+  max_history_size: 50
+  chat_logs_location: ""
+
+skills:
+  outputs_dir: "/tmp/mcp-outputs"
+
+logging:
+  format: text
+  level: info
 ```
 
-## Provider Files (LLM)
+## Directory Contents
 
-Each LLM provider gets its own file in `providers/`:
+### providers/
 
-**providers/ollama.yaml:**
-```yaml
-interface_type: openai_compatible
-provider_name: ollama
-config:
-  api_endpoint: http://localhost:11434
-  default_model: qwen2.5:32b
-  timeout_seconds: 300
-```
+LLM provider configurations. Each file defines connection details for an AI provider:
 
-## Embedding Files
+- `anthropic.yaml` - Anthropic Claude
+- `openai.yaml` - OpenAI GPT models
+- `ollama.yaml` - Local Ollama models
+- `deepseek.yaml` - DeepSeek models
+- `gemini.yaml` - Google Gemini
+- `kimik2.yaml` - Moonshot Kimi
+- `openrouter.yaml` - OpenRouter proxy
+- `lmstudio.yaml` - Local LM Studio
+- `aws-bedrock.yaml` - AWS Bedrock
+- `azure-foundry.yaml` - Azure AI Foundry
+- `gcp-vertex-ai.yaml` - Google Cloud Vertex AI
 
-Embedding providers are separate from LLM providers in `embeddings/`:
+### embeddings/
 
-**embeddings/openai.yaml:**
-```yaml
-interface_type: openai_compatible
-provider_name: openai
-config:
-  api_key: ${OPENAI_API_KEY}
-  default_embedding_model: text-embedding-3-small
-  embedding_models:
-    text-embedding-3-small:
-      max_tokens: 8191
-      dimensions: 1536
-      default: true
-```
+Embedding provider configurations for vector operations:
 
-## Server Files
+- `openai.yaml` - OpenAI embeddings
+- `ollama.yaml` - Ollama embeddings
+- `openrouter.yaml` - OpenRouter embeddings
+- `aws-bedrock.yaml` - AWS Bedrock embeddings
+- `azure-foundry.yaml` - Azure embeddings
 
-MCP servers are configured in `servers/`:
+### servers/
 
-**servers/filesystem.yaml:**
-```yaml
-server_name: filesystem
-config:
-  command: /path/to/filesystem-server
-  args: []
-```
+MCP server configurations for external tools:
 
-## Templates
+- `bash.yaml` - Bash command execution
+- `filesystem.yaml` - File system operations
+- `search.yaml` - Web search capabilities
 
-Workflow templates go in `templates/`:
+### templates/
 
-**templates/analyze.yaml:**
-```yaml
-name: analyze
-description: Analyze input data
-steps:
-  - step: 1
-    name: analyze
-    base_prompt: Analyze this: {{input_data}}
-```
+Workflow template definitions for multi-step AI operations.
+
+### runasMCP/
+
+Configurations for running mcp-cli as MCP stdio servers (primarily for Claude Desktop integration):
+
+- `mcp_skills_stdio.yaml` - Skills server
+- `document_intelligence_agent.yaml` - Document analysis agent
+- `research_agent.yaml` - Research assistant
+- `simple_analysis.yaml` - Simple analysis workflows
+
+### proxy/
+
+HTTP proxy configurations for exposing MCP servers as REST APIs:
+
+- `bash.yaml` - Bash proxy
+- `filesystem.yaml` - Filesystem proxy
+- `skills.yaml` - Skills proxy
+- Various workflow proxies
+
+### skills/
+
+Skills system configuration:
+
+- `skill-images.yaml` - Container image mappings for skills
+- `README.md` - Skills documentation
+
+## Getting Started
+
+1. **Copy examples to config directory:**
+   ```bash
+   cp -r examples/config/* config/
+   ```
+
+2. **Set API keys in `.env`:**
+   ```bash
+   echo "OPENAI_API_KEY=sk-..." >> .env
+   echo "ANTHROPIC_API_KEY=sk-ant-..." >> .env
+   ```
+
+3. **Build skills container images:**
+   ```bash
+   cd docker/skills
+   ./build-skills-images.sh
+   ```
+
+4. **Test configuration:**
+   ```bash
+   ./mcp-cli query "Hello, world!"
+   ```
 
 ## Environment Variables
 
-API keys should be set in `.env` (next to executable):
+API keys should be set in `.env` file at project root:
 
 ```bash
-OPENAI_API_KEY=your-key-here
-ANTHROPIC_API_KEY=your-key-here
-DEEPSEEK_API_KEY=your-key-here
-GEMINI_API_KEY=your-key-here
-OPENROUTER_API_KEY=your-key-here
+# LLM Providers
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+DEEPSEEK_API_KEY=...
+GEMINI_API_KEY=...
+MOONSHOT_API_KEY=...
+
+# MCP Servers (if needed)
+BRAVE_API_KEY=...
+
+# Proxy API Keys (if using proxies)
+BASH_PROXY_API_KEY=...
+FILESYSTEM_PROXY_API_KEY=...
 ```
 
-## Usage
+## Customization
 
-The CLI will automatically find config.yaml next to the executable:
+### Adding a New Provider
 
-```bash
-# Automatic detection
-./mcp-cli query "hello"
+1. Create `config/providers/myprovider.yaml`
+2. Follow existing examples for structure
+3. Restart mcp-cli
 
-# Explicit config file
-./mcp-cli --config config.yaml query "hello"
-```
+### Adding a New Template
 
-## Separation of Concerns
+1. Create `config/templates/myworkflow.yaml`
+2. Define steps and prompts
+3. Use with: `./mcp-cli --template myworkflow`
 
-**LLM Providers** (`providers/`):
-- Chat completions
-- Text generation
-- Conversation models
+### Exposing as MCP Server
 
-**Embedding Providers** (`embeddings/`):
-- Vector embeddings
-- Semantic search
-- RAG applications
-- May use same API but different models
+1. Create `config/runasMCP/myagent.yaml`
+2. Reference templates to expose
+3. Add to Claude Desktop config
+4. Restart Claude Desktop
 
-**Benefits**:
-- Clear separation between LLM and embedding configs
-- Easy to configure different embedding providers than LLM providers
-- Independent model selection for each purpose
-- Clean organization for version control
+## Documentation
 
-## Why Separate Embeddings?
+- **Full Documentation:** [docs/](../../docs/)
+- **Getting Started:** [docs/getting-started/](../../docs/getting-started/)
+- **Skills Guide:** [docs/skills/](../../docs/skills/)
+- **Templates:** [docs/templates/](../../docs/templates/)
 
-While many providers support both LLM and embeddings through the same API,
-they serve different purposes:
+## Notes
 
-1. **Different Models**: Embedding models (text-embedding-3-small) vs LLM models (gpt-4o)
-2. **Different Use Cases**: Vector search vs text generation
-3. **Different Pricing**: Embedding tokens are much cheaper
-4. **Independent Selection**: You might use OpenAI for embeddings but Ollama for LLM
-
-This modular structure lets you mix and match providers for each purpose.
+- All API keys use environment variable references: `${VAR_NAME}`
+- Server paths should be absolute or relative to project root
+- Skills require Docker/Podman for execution
+- Proxy configurations expose MCP tools as REST APIs

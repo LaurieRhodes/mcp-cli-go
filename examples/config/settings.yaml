@@ -1,6 +1,31 @@
+# Application Settings
+# This file configures global mcp-cli settings
+
+ai:
+    # Default AI provider to use
+    default_provider: ollama
+
 chat:
+    # Default temperature for chat completions (0.0 = deterministic, 1.0 = creative)
     default_temperature: 0.7
+    
+    # Maximum number of messages to keep in chat history
     max_history_size: 50
+    
+    # Directory to store chat session logs for auditing (optional)
+    # Leave empty to disable session logging
+    # Example: ./logs/chat or /var/log/mcp-cli/sessions
+    chat_logs_location: ""
+
+skills:
+    # Directory where skill-generated files are persisted
+    # This directory is mounted as /outputs inside skill containers
+    # Files written to /outputs in containers appear here on the host
+    outputs_dir: "/tmp/mcp-outputs"
+
 logging:
+    # Log format: text or json
     format: text
+    
+    # Log level: debug, info, warn, error
     level: info

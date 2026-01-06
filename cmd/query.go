@@ -29,11 +29,16 @@ var (
 
 // QueryCmd represents the query command
 var QueryCmd = &cobra.Command{
-	Use:   "query [question]",
+	Use:   "query [question] or --input-data \"question\"",
 	Short: "Ask a single question and get a response",
 	Long: `Query mode asks a single question to the AI model and returns a response
 without entering an interactive session. Perfect for scripting, automation,
 and integration with other tools.
+
+The question can be provided either as:
+  • Positional argument: query "question"
+  • --input-data flag: query --input-data "question"
+  • stdin: echo "question" | query --input-data -
 
 The query command supports:
   • Multiple MCP servers for tool access
@@ -67,8 +72,14 @@ Examples:
   mcp-cli query --raw-data "Show latest security incidents"
   
   # Output to file
-  mcp-cli query "Analyze this code" --output analysis.txt`,
-	Args: cobra.MinimumNArgs(1),
+  mcp-cli query "Analyze this code" --output analysis.txt
+  
+  # Using --input-data flag instead of positional argument
+  mcp-cli query --input-data "What is the weather today?"
+  
+  # Both work the same way
+  mcp-cli query "question" --provider anthropic
+  mcp-cli query --provider anthropic --input-data "question"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// ARCHITECTURAL FIX: Handle noisy flag override for query command
 		// This allows --noisy to override the default quiet behavior of query mode
@@ -122,8 +133,21 @@ Examples:
 			}
 		}
 		
-		// Combine all args into a single question
-		question := strings.Join(args, " ")
+		// Get question from either positional args or --input-data flag
+		var question string
+		if len(args) > 0 {
+			// Use positional arguments if provided
+			question = strings.Join(args, " ")
+		} else if inputData != "" {
+			// Use --input-data flag if no positional args
+			question = inputData
+		} else {
+			// No question provided
+			if errorCodeOnly {
+				os.Exit(query.ErrInvalidArgumentCode)
+			}
+			return fmt.Errorf("question required: provide as argument or use --input-data flag")
+		}
 
 		// Process server configuration options - use local ProcessOptions with configFile
 		serverNames, userSpecified := ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
@@ -540,6 +564,5 @@ func init() {
 	QueryCmd.Flags().BoolVarP(&noisy, "noisy", "n", false, "Show detailed logs and server messages")
 	QueryCmd.Flags().BoolVar(&rawDataOutput, "raw-data", false, "Output raw data from tools instead of AI summary")
 
-	// Add the command to root
-	RootCmd.AddCommand(QueryCmd)
+	// Note: QueryCmd is added to RootCmd in root.go init() with other commands
 }

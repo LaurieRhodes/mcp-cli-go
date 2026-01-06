@@ -1,0 +1,15 @@
+# MCP Server: Simple Analysis
+# Single template example - minimal configuration
+
+runas_type: mcp
+version: "1.0"
+
+server_info:
+  name: simple_analysis
+  version: 1.0.0
+  description: "Basic analysis template for testing"
+
+templates:
+  - config_source: config/templates/simple_analysis.yaml
+
+# That's it! Tool name, description, schema all derived from template.

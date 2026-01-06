@@ -1,0 +1,42 @@
+# PPTX Skills Container
+# Supports: pptx skill (PowerPoint manipulation)
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Container for PPTX skill (PowerPoint manipulation)"
+LABEL skills="pptx"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Required for Pillow (image processing)
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    libtiff6 \
+    libwebp7 \
+    # Utilities for ZIP manipulation (.pptx is a ZIP)
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    # PowerPoint manipulation
+    python-pptx==0.6.23 \
+    # Image processing
+    Pillow==10.1.0 \
+    # Python 2/3 compatibility (required by python-pptx)
+    six==1.16.0 \
+    # XML processing
+    lxml==5.1.0
+
+# Create workspace directory
+RUN mkdir -p /workspace /skill
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["python3"]

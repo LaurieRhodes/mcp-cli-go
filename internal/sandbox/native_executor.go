@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
 // NativeExecutor uses Docker/Podman CLI from host (for native deployments)
@@ -48,6 +50,7 @@ func (n *NativeExecutor) ExecutePython(ctx context.Context, skillDir, scriptPath
 		"--security-opt=no-new-privileges",        // No privilege escalation
 		"--cap-drop=ALL",                          // Drop all capabilities
 		"-v", fmt.Sprintf("%s:/skill:ro", skillDir), // Mount skill dir read-only
+		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir),  // Persistent outputs directory
 		"-w", "/skill",                            // Working directory
 		n.config.PythonImage,                      // Python image
 		"python", scriptPath,                      // Command
@@ -117,6 +120,10 @@ func (n *NativeExecutor) GetInfo() string {
 // workspaceDir: read-write workspace for files and code execution
 // skillLibsDir: read-only skill directory for importing helper libraries
 func (n *NativeExecutor) ExecutePythonCode(ctx context.Context, workspaceDir, skillLibsDir, scriptPath string, args []string) (string, error) {
+	// Get the appropriate image for this skill
+	image := n.config.GetImageForSkill(skillLibsDir)
+	logging.Info("🐳 Executing skill from '%s' with image '%s'", skillLibsDir, image)
+	
 	// Build docker/podman run command with dual mounts
 	cmdArgs := []string{
 		"run",
@@ -130,10 +137,11 @@ func (n *NativeExecutor) ExecutePythonCode(ctx context.Context, workspaceDir, sk
 		"--cap-drop=ALL",                            // Drop all capabilities
 		"-v", fmt.Sprintf("%s:/workspace:rw", workspaceDir),     // Read-write workspace
 		"-v", fmt.Sprintf("%s:/skill:ro", skillLibsDir),         // Read-only skill libs
+		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir),  // Persistent outputs directory
 		"-w", "/workspace",                          // Working directory
 		"-e", "PYTHONPATH=/skill",                   // Can import from /skill
 		"--tmpfs", "/tmp:rw,exec,size=100m",        // Writable /tmp for Python
-		n.config.PythonImage,                        // Python image
+		image,                                       // Use skill-specific image
 		"python", scriptPath,                        // Command (relative to /workspace)
 	}
 	cmdArgs = append(cmdArgs, args...)

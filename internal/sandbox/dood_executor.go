@@ -52,7 +52,8 @@ func (d *DooDockerExecutor) IsAvailable() bool {
 
 // ExecutePython runs a Python script using Docker API
 func (d *DooDockerExecutor) ExecutePython(ctx context.Context, skillDir, scriptPath string, args []string) (string, error) {
-	return d.executeInContainer(ctx, skillDir, d.config.PythonImage, "python", scriptPath, args)
+	image := d.config.GetImageForSkill(skillDir)
+	return d.executeInContainer(ctx, skillDir, image, "python", scriptPath, args)
 }
 
 // ExecuteBash runs a Bash script using Docker API
@@ -89,7 +90,10 @@ func (d *DooDockerExecutor) executeInContainer(
 			WorkingDir:      "/skill",
 		},
 		HostConfig: &docker.HostConfig{
-			Binds:          []string{fmt.Sprintf("%s:/skill:ro", skillDir)},
+			Binds:          []string{
+				fmt.Sprintf("%s:/skill:ro", skillDir),
+				fmt.Sprintf("%s:/outputs:rw", d.config.OutputsDir),
+			},
 			ReadonlyRootfs: true,
 			PidsLimit:      &pidsLimit,
 			SecurityOpt:    []string{"no-new-privileges"},
@@ -214,7 +218,8 @@ func (d *DooDockerExecutor) GetInfo() string {
 // workspaceDir: read-write workspace for files and code execution
 // skillLibsDir: read-only skill directory for importing helper libraries
 func (d *DooDockerExecutor) ExecutePythonCode(ctx context.Context, workspaceDir, skillLibsDir, scriptPath string, args []string) (string, error) {
-	return d.executeCodeInContainer(ctx, workspaceDir, skillLibsDir, d.config.PythonImage, "python", scriptPath, args)
+	image := d.config.GetImageForSkill(skillLibsDir)
+	return d.executeCodeInContainer(ctx, workspaceDir, skillLibsDir, image, "python", scriptPath, args)
 }
 
 // executeCodeInContainer handles container execution with dual mounts
@@ -249,7 +254,8 @@ func (d *DooDockerExecutor) executeCodeInContainer(
 		HostConfig: &docker.HostConfig{
 			Binds: []string{
 				fmt.Sprintf("%s:/workspace:rw", workspaceDir),  // Read-write workspace
-				fmt.Sprintf("%s:/skill:ro", skillLibsDir),      // Read-only skill libs
+				fmt.Sprintf("%s:/skill:ro", skillLibsDir),      // Read-only skill libs,
+				fmt.Sprintf("%s:/outputs:rw", d.config.OutputsDir), // Persistent outputs directory
 			},
 			ReadonlyRootfs: false, // Can't be read-only with /tmp needed
 			Tmpfs:          map[string]string{"/tmp": "rw,exec,size=100m"},

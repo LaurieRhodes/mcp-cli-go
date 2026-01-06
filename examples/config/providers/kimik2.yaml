@@ -1,0 +1,10 @@
+interface_type: openai_compatible
+provider_name: kimik2
+config:
+  api_endpoint: https://api.moonshot.ai/v1
+  api_key: ${MOONSHOT_API_KEY}
+  context_window: 128000
+  default_model: kimi-k2-turbo-preview
+  max_retries: 2
+  reserve_tokens: 4000
+  timeout_seconds: 300

@@ -11,6 +11,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/mcp"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 )
@@ -294,16 +295,20 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 		// Add tool call to history
 		m.Context.AddToolCall(toolCall, result, err)
 		
+		// Prepare tool result content (use error message if execution failed)
+		var toolResultContent string
 		if err != nil {
 			m.UI.PrintError("Tool execution failed: %v", err)
-			// Continue with other tool calls despite error
-			continue
+			toolResultContent = fmt.Sprintf("Error: %v", err)
+		} else {
+			toolResultContent = result
 		}
 		
-		// Add tool result message to context, making sure to link to the correct assistant message
+		// CRITICAL: Always add tool result message, even for errors
+		// DeepSeek and other OpenAI-compatible APIs require a tool result for every tool_call_id
 		toolResultMessage := domain.Message{
 			Role:        "tool",
-			Content:     result,
+			Content:     toolResultContent,
 			ToolCallID:  toolCall.ID,
 		}
 		m.Context.AddMessage(toolResultMessage)
@@ -419,7 +424,17 @@ func (m *ChatManager) ExecuteToolCall(toolCall domain.ToolCall) (string, error) 
 	
 	// Check for errors in the result
 	if result.IsError {
-		return "", fmt.Errorf("tool execution failed: %s", result.Error)
+		// Extract error message from content if Error field is empty
+		errorMsg := result.Error
+		if errorMsg == "" {
+			// Try to extract from content array (MCP standard format)
+			errorDetector := mcp.NewErrorDetector()
+			errorMsg = errorDetector.ExtractTextFromContent(result.Content)
+		}
+		if errorMsg == "" {
+			errorMsg = "unknown error"
+		}
+		return "", fmt.Errorf("tool execution failed: %s", errorMsg)
 	}
 	
 	// Convert result to string if needed

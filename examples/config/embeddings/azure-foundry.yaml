@@ -1,0 +1,50 @@
+# Azure AI Foundry Embeddings Configuration
+# OpenAI-compatible embedding models on Azure infrastructure
+
+interface_type: openai_compatible
+provider_name: azure-foundry
+config:
+  # Azure OpenAI v1 endpoint (OpenAI-compatible)
+  # Format: https://{your-resource-name}.openai.azure.com/openai/v1/
+  api_endpoint: https://your-resource.openai.azure.com/openai/v1/
+  
+  # Azure API key
+  # Found in Azure Portal > Your AI Foundry Resource > Keys and Endpoint
+  api_key: ${AZURE_FOUNDRY_API_KEY}
+  
+  # Default embedding model (your deployment name)
+  default_model: text-embedding-3-small
+  
+  # Timeout and retries
+  timeout_seconds: 30
+  max_retries: 3
+  
+  # Embedding model configurations
+  # Note: Model names here are your deployment names, not OpenAI model IDs
+  embedding_models:
+      text-embedding-3-small:
+          description: Most capable embedding model for both english and non-english tasks
+          dimensions: 1536
+          max_tokens: 8191
+      
+      text-embedding-3-large:
+          description: Larger embedding model with higher performance
+          dimensions: 3072
+          max_tokens: 8191
+      
+      text-embedding-ada-002:
+          description: Previous generation embedding model
+          dimensions: 1536
+          max_tokens: 8191
+
+# SETUP INSTRUCTIONS:
+# 
+# 1. Create Azure AI Foundry resource at https://ai.azure.com/
+# 2. Deploy embedding model(s) - use deployment names as model keys above
+# 3. Get endpoint and API key from Azure Portal > Keys and Endpoint
+# 4. Set environment variable: export AZURE_FOUNDRY_API_KEY="your-key-here"
+# 5. Update api_endpoint and default_model in this config
+#
+# TESTING:
+#   ./mcp-cli embeddings "test text" --provider azure-foundry
+#   ./mcp-cli embeddings "test text" --provider azure-foundry --model text-embedding-3-large

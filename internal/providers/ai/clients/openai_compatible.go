@@ -239,6 +239,44 @@ func (c *OpenAICompatibleClient) CreateCompletion(ctx context.Context, req *doma
 	return nil, fmt.Errorf("failed after %d attempts: %w", c.maxRetries+1, lastErr)
 }
 
+
+// isRetryableError determines if an error should be retried
+func isRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+	
+	errStr := err.Error()
+	
+	// Retry on network/timeout errors
+	if strings.Contains(errStr, "context deadline exceeded") ||
+		strings.Contains(errStr, "connection reset") ||
+		strings.Contains(errStr, "connection refused") ||
+		strings.Contains(errStr, "timeout") {
+		return true
+	}
+	
+	// Retry on server errors (5xx) and rate limiting (429)
+	if strings.Contains(errStr, "500 Internal Server Error") ||
+		strings.Contains(errStr, "502 Bad Gateway") ||
+		strings.Contains(errStr, "503 Service Unavailable") ||
+		strings.Contains(errStr, "504 Gateway Timeout") ||
+		strings.Contains(errStr, "429 Too Many Requests") {
+		return true
+	}
+	
+	// Do NOT retry on client errors (4xx except 429)
+	if strings.Contains(errStr, "400 Bad Request") ||
+		strings.Contains(errStr, "401 Unauthorized") ||
+		strings.Contains(errStr, "403 Forbidden") ||
+		strings.Contains(errStr, "404 Not Found") {
+		return false
+	}
+	
+	// Default: don't retry unknown errors
+	return false
+}
+
 // StreamCompletion implements domain.LLMProvider
 func (c *OpenAICompatibleClient) StreamCompletion(ctx context.Context, req *domain.CompletionRequest, writer io.Writer) (*domain.CompletionResponse, error) {
 	messages := convertToOpenAIMessages(req.Messages, req.SystemPrompt)
@@ -267,6 +305,12 @@ func (c *OpenAICompatibleClient) StreamCompletion(ctx context.Context, req *doma
 		if err != nil {
 			lastErr = fmt.Errorf("%s API streaming error (attempt %d/%d): %w", c.providerType, retry+1, c.maxRetries+1, err)
 			logging.Error("%v", lastErr)
+			
+			// Don't retry client errors (4xx except 429)
+			if !isRetryableError(err) {
+				logging.Error("Non-retryable error detected, failing immediately")
+				break
+			}
 			continue
 		}
 
@@ -274,8 +318,9 @@ func (c *OpenAICompatibleClient) StreamCompletion(ctx context.Context, req *doma
 		fullContent, toolCalls, streamErr := c.processStreamingResponse(resp, writer)
 		if streamErr != nil {
 			lastErr = streamErr
-			if strings.Contains(streamErr.Error(), "context deadline exceeded") ||
-				strings.Contains(streamErr.Error(), "connection reset") {
+			
+			// Only retry on retryable errors
+			if isRetryableError(streamErr) {
 				continue
 			}
 			break

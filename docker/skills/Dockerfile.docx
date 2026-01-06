@@ -1,0 +1,38 @@
+# DOCX Skills Container
+# Supports: docx skill (OOXML manipulation)
+# The docx skill works directly with Office Open XML format
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Container for DOCX skill (OOXML/XML manipulation)"
+LABEL skills="docx"
+
+# Install system dependencies for XML processing
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Required for lxml (faster XML processing)
+    libxml2 \
+    libxslt1.1 \
+    # Utilities for ZIP manipulation (.docx is a ZIP)
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    # Secure XML parsing (prevents XML attacks)
+    defusedxml==0.7.1 \
+    # Fast XML processing (optional but recommended)
+    lxml==5.1.0 \
+    # python-docx for creating documents (used by test scripts)
+    python-docx==1.1.0
+
+# Create workspace directory
+RUN mkdir -p /workspace /skill
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["python3"]

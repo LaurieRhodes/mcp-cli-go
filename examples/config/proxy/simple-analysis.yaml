@@ -1,0 +1,24 @@
+# HTTP Proxy for simple_analysis workflow template
+# Exposes this template as a REST API tool
+
+runas_type: proxy
+version: "1.0"
+
+# Source of the workflow template
+config_source: config/templates/simple_analysis.yaml
+
+proxy_config:
+  port: 9000
+  
+  # HTTP proxy authentication key
+  api_key: "${SIMPLE_ANALYSIS_PROXY_API_KEY}"
+  
+  cors_origins: ["*"]
+  
+  # Optional: Enable HTTPS
+  # tls:
+  #   cert_file: /path/to/cert.crt
+  #   key_file: /path/to/key.key
+
+# Start: mcp-cli serve config/proxy/simple-analysis.yaml
+# Call: POST http://localhost:9000/tools/simple_analysis

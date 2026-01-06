@@ -1,0 +1,52 @@
+# PDF Skills Container
+# Supports: pdf skill (PDF manipulation, forms, text extraction)
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Container for PDF skill (PDF manipulation and processing)"
+LABEL skills="pdf"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # For pdf2image (PDF to image conversion)
+    poppler-utils \
+    # For Pillow (image processing)
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    # For pytesseract (OCR - optional but useful)
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    # Utilities for ZIP manipulation
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    # PDF manipulation
+    pypdf==4.0.1 \
+    # PDF to image conversion
+    pdf2image==1.17.0 \
+    # Image processing
+    Pillow==10.1.0 \
+    # Advanced PDF text/table extraction
+    pdfplumber==0.11.0 \
+    # OCR support
+    pytesseract==0.3.10
+
+# Create workspace directory
+RUN mkdir -p /workspace /skill
+
+# Set working directory
+WORKDIR /workspace
+
+# Verify installations
+RUN python3 -c "import pypdf, pdf2image, PIL, pdfplumber, pytesseract; print('All PDF packages installed')" && \
+    which pdftotext && \
+    which tesseract
+
+# Default command
+CMD ["python3"]

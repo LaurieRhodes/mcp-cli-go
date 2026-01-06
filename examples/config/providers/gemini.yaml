@@ -1,7 +1,6 @@
-interface_type: openai_compatible
+interface_type: gemini_native
 provider_name: gemini
 config:
-  api_endpoint: https://generativelanguage.googleapis.com
   api_key: ${GEMINI_API_KEY}
   context_window: 1000000
   default_model: gemini-2.0-flash-exp

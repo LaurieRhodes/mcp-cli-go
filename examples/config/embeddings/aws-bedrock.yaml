@@ -1,0 +1,26 @@
+interface_type: aws_bedrock
+provider_name: bedrock
+config:
+  aws_access_key_id: ${AWS_ACCESS_KEY_ID}
+  aws_region: ${AWS_REGION}
+  aws_secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+  default_model: cohere.embed-english-v3
+  embedding_models:
+      amazon.titan-embed-g1-text-02:
+          description: Amazon Titan Text Embeddings G1 - Text
+          dimensions: 1536
+          max_tokens: 8192
+      amazon.titan-embed-text-v2:0:
+          description: Amazon Titan Text Embeddings V2 with improved performance
+          dimensions: 1024
+          max_tokens: 8192
+      cohere.embed-english-v3:
+          description: Cohere English text embeddings optimized for semantic search (serverless)
+          dimensions: 1024
+          max_tokens: 512
+      cohere.embed-multilingual-v3:
+          description: Cohere multilingual embeddings supporting 100+ languages (serverless)
+          dimensions: 1024
+          max_tokens: 512
+  max_retries: 3
+  timeout_seconds: 30

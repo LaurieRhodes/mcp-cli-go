@@ -149,6 +149,9 @@ func (g *ModularConfigGenerator) createSettings(config *GeneratorConfig) error {
 			"default_temperature": 0.7,
 			"max_history_size":    50,
 		},
+		"skills": map[string]interface{}{
+			"outputs_dir": "/tmp/mcp-outputs",
+		},
 	}
 
 	data, err := yaml.Marshal(settings)

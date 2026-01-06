@@ -1,0 +1,5 @@
+server_name: search
+config:
+  command: /path/to/mcp-servers/search/search-mcp
+  args: []
+  env: {}

@@ -18,6 +18,7 @@ A Go implementation of the Model Context Protocol (MCP) CLI that enables multi-s
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Real-World Examples](#real-world-examples)
+- [Skills: Cross-LLM Document Creation](#skills-cross-llm-document-creation)
 - [MCP Server Mode](#mcp-server-mode)
 - [Documentation](#documentation) 📚
 - [Usage Modes](#usage-modes)
@@ -36,8 +37,8 @@ A Go implementation of the Model Context Protocol (MCP) CLI that enables multi-s
 ✅ **Uses YAML templates** - Define reusable AI workflows without code  
 ✅ **Works as MCP server** - Expose workflows as tools for Claude Desktop or other MCP clients  
 ✅ **Runs locally** - Single Go binary, no dependencies  
-✅ **Template composition** - Call templates from templates for modular workflows
-✅ **Anthropic Skills as MCP tools** - Exposes Anthropic skills as MCP tools for use with all major LLMs
+✅ **Template composition** - Call templates from templates for modular workflows  
+✅ **Cross-LLM document creation** - GPT-4, DeepSeek, Gemini can create PowerPoints, Excel files, etc. via Skills
 
 ### The Core Innovation
 
@@ -76,14 +77,14 @@ This workflow uses **three different AI providers** in sequence, each doing what
 
 ### ✅ Currently Available
 
-- **Multiple AI Providers**: OpenAI, Anthropic, Ollama, DeepSeek, Gemini, Kimi K2, OpenRouter, LM Studio, AWS Bedrock, Azure Foundry. Google Vertex
+- **Multiple AI Providers**: OpenAI, Anthropic, Ollama, DeepSeek, Gemini, Kimi K2, OpenRouter, LM Studio, AWS Bedrock, Azure Foundry, Google Vertex
 - **YAML Workflow Templates**: Define multi-step workflows without code
 - **Template Composition**: Call templates from within templates
-- **MCP Server Mode**: Expose workflows as tools for Claude Desktop
+- **MCP Server Mode**: Expose workflows as tools for LLMs
+- **Skills System**: Cross-LLM document creation (PowerPoint, Excel, Word, PDF) via containerized execution
 - **Variable Management**: Pass data between workflow steps
 - **Error Handling**: Retries, validation, and graceful failures
 - **Multiple Modes**: Chat, query, interactive, and server modes
-- **Anthropic Skills**: Exposed as MCP tools for use with all LLM Providers
 
 ### 🚧 Experimental
 
@@ -318,6 +319,83 @@ steps:
 
 ---
 
+## Skills: Cross-LLM Document Creation
+
+**Skills** enable LLMs to create documents (PowerPoint, Excel, Word, PDFs) through secure container-based execution.
+
+### What Makes This Special
+
+Traditional approach: Only Claude can create documents (via Anthropic's computer use)  
+**Skills approach**: GPT-4, DeepSeek, Gemini, Claude - all can create documents via MCP
+
+### How It Works
+
+```
+LLM Request → Skills Documentation → LLM Writes Code → Secure Container → File on Host
+```
+
+Skills provide:
+
+- **Documentation** - Instructions for LLMs on library usage
+- **Helper Libraries** - Pre-installed packages (python-pptx, openpyxl, etc.)
+- **Container Execution** - Isolated, secure Python environment
+- **File Persistence** - Output files appear on your filesystem
+
+### Quick Start
+
+**1. Build container images:**
+
+```bash
+cd docker/skills
+./build-skills-images.sh
+```
+
+**2. Configure outputs** (in `config/settings.yaml`):
+
+```yaml
+skills:
+  outputs_dir: "/tmp/mcp-outputs"
+```
+
+**3. Start skills server:**
+
+```bash
+mcp-cli serve config/runasMCP/mcp_skills_stdio.yaml
+```
+
+**4. Use with any LLM via MCP**
+
+### Available Skills
+
+- **docx** - Word documents
+- **pptx** - PowerPoint presentations  
+- **xlsx** - Excel spreadsheets
+- **pdf** - PDF manipulation and forms
+
+### Example Usage
+
+User to GPT-4 via MCP: *"Create a PowerPoint about Q4 sales"*
+
+GPT-4:
+
+1. Reads pptx skill documentation
+2. Writes Python code using python-pptx
+3. Code executes in container
+4. File appears at `~/outputs/q4-sales.pptx`
+
+### Security
+
+All code runs in isolated containers with:
+
+- No network access
+- Read-only root filesystem
+- Memory and CPU limits
+- Automatic cleanup
+
+**📚 Complete documentation:** [docs/skills/](docs/skills/)
+
+---
+
 ## MCP Server Mode
 
 Expose workflows as MCP tools for Claude Desktop or other clients.
@@ -512,6 +590,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory.
 | --------------------------------------------------- | ------------------------------------------ |
 | **[Documentation Index](docs/README.md)**           | Start here - complete navigation guide     |
 | **[Industry Showcases](docs/templates/showcases/)** | ⭐ 22 working templates across 6 industries |
+| **[Skills Documentation](docs/skills/)**            | Cross-LLM document creation guide          |
 | **[Getting Started](docs/getting-started/)**        | Installation, configuration, first steps   |
 | **[Usage Guides](docs/guides/)**                    | Mode-specific guides and best practices    |
 | **[Templates](docs/templates/)**                    | Template authoring and examples            |

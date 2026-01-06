@@ -1,0 +1,54 @@
+# Combined Office Skills Container
+# Supports: docx, pptx, xlsx skills (all Office formats)
+# Recommended for general use when working with multiple Office formats
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Combined container for all Office skills (docx, pptx, xlsx)"
+LABEL skills="docx,pptx,xlsx"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # For Pillow (pptx skill)
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    libtiff6 \
+    libwebp7 \
+    # For lxml (all skills)
+    libxml2 \
+    libxslt1.1 \
+    # Utilities (all skills)
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    # DOCX skill - OOXML manipulation
+    defusedxml==0.7.1 \
+    # PPTX skill - PowerPoint manipulation
+    python-pptx==0.6.23 \
+    # PPTX skill - Image processing
+    Pillow==10.1.0 \
+    # PPTX skill - Python 2/3 compatibility
+    six==1.16.0 \
+    # XLSX skill - Excel manipulation
+    openpyxl==3.1.2 \
+    # XLSX skill - Excel file support
+    et-xmlfile==1.1.0 \
+    # All skills - XML processing
+    lxml==5.1.0 \
+    # All skills - Date/time handling
+    python-dateutil==2.8.2
+
+# Create workspace directory
+RUN mkdir -p /workspace /skill
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["python3"]

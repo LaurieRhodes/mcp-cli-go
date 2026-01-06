@@ -1,0 +1,10 @@
+interface_type: openai_compatible
+provider_name: azure-foundry
+config:
+  api_endpoint: https://your-resource.openai.azure.com/openai/v1/
+  api_key: ${AZURE_FOUNDRY_API_KEY}
+  context_window: 128000
+  default_model: gpt-4o
+  max_retries: 3
+  reserve_tokens: 4000
+  timeout_seconds: 60

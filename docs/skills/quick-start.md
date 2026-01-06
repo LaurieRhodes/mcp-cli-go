@@ -1,138 +1,83 @@
-# Quick Start Guide
+# Quick Start
 
-Get up and running with skills in 5 minutes.
+Get skills running in 5 minutes.
 
 ## Prerequisites
 
-- mcp-cli installed
 - Docker or Podman installed
-- Claude Desktop (optional, for MCP integration)
+- mcp-cli built
 
-## Step 1: Initialize with Skills
-
-```bash
-./mcp-cli init
-```
-
-When prompted:
-
-```
-🎯 Anthropic Skills System:
-Skills provide helper libraries for document creation, data processing, etc.
-Set up example skills (docx, pdf, pptx, xlsx, test-execution)? [Y/n]: y
-```
-
-This creates:
-
-```
-config/
-├── skills/
-│   ├── test-execution/
-│   ├── docx/
-│   ├── pdf/
-│   ├── pptx/
-│   ├── xlsx/
-│   └── frontend-design/
-└── runas/
-    └── skills-auto.yaml
-```
-
-## Step 2: Start Skills MCP Server
+## Step 1: Build Container Images
 
 ```bash
-./mcp-cli serve config/runas/skills-auto.yaml
+cd docker/skills
+./build-skills-images.sh
+```
+
+## Step 2: Configure Outputs
+
+Edit `config/settings.yaml`:
+
+```yaml
+skills:
+  outputs_dir: "/tmp/mcp-outputs"
+```
+
+Create directory:
+
+```bash
+mkdir -p /tmp/mcp-outputs
+```
+
+## Step 3: Start MCP Server
+
+```bash
+./mcp-cli serve config/runasMCP/mcp_skills_stdio.yaml
 ```
 
 You should see:
 
 ```
-✅ Executor initialized: Podman 4.9.3 (native)
-✅ Script execution enabled for 6 skills
-✅ Initialized skill service with 18 skills
-Auto-generated 19 MCP tool definitions from skills
+✅ Initialized skill service with N skills
 ```
 
-## Step 3: Configure Claude Desktop
+## Step 4: Test with LLM
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or  
-`%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+If using Claude Desktop, add to `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "skills": {
       "command": "/absolute/path/to/mcp-cli",
-      "args": ["serve", "/absolute/path/to/config/runas/skills-auto.yaml"]
+      "args": ["serve", "/absolute/path/to/config/runasMCP/mcp_skills_stdio.yaml"]
     }
   }
 }
 ```
 
-**Important:** Use absolute paths!
+Restart Claude Desktop.
 
-## Step 4: Restart Claude Desktop
+## Step 5: Verify
 
-Close and reopen Claude Desktop to load the skills server.
+Ask the LLM:
 
-## Step 5: Test It!
+> "Create a simple PowerPoint presentation"
 
-In Claude Desktop, try:
-
-> "Can you use the test-execution skill to create a greeting using the helper library?"
-
-Claude should:
-
-1. Load test-execution skill documentation
-2. See that `greet()` function is available
-3. Write code that imports and uses it
-4. Execute via `execute_skill_code`
-5. Show you the result
-
-**Expected output:**
-
-```
-Hello, [Name]!
-```
-
-## Verify It's Working
-
-### Check Available Tools
-
-In Claude Desktop, skills should appear as tools. You can verify by asking:
-
-> "What skills/tools do you have access to?"
-
-Claude should list:
-
-- test_execution (and other skill tools)
-- execute_skill_code
-
-### Next Steps
-
-## Next Steps
-
-### Learn About Auto-Loading
-
-- **[Auto-Loading Guide](auto-loading.md)** - Complete guide to automatic skill discovery
-- **[Quick Reference](quick-reference.md)** - Fast lookup for common tasks
-
-### Learn More About Skills
-
-- **[Overview](overview.md)** - Understand how skills work
-- **[Why Skills Matter](WHY_SKILLS_MATTER.md)** - The philosophy behind skills
-
-### Create Your Own Skills
-
-- **[Creating Skills Guide](creating-skills.md)** - Build custom skills
-
-### Technical Details
-
-- **[README](README.md)** - Full documentation index
+The LLM should use the skills to create a .pptx file in your outputs directory.
 
 ## Troubleshooting
 
-If skills aren't appearing, see the [Auto-Loading Guide troubleshooting section](auto-loading.md#troubleshooting) or the [Quick Reference](quick-reference.md#-troubleshooting-commands).
+**Files not appearing?**
+- Check `config/settings.yaml` has correct `outputs_dir`
+- Verify directory exists: `ls -ld /tmp/mcp-outputs`
+
+**Images not built?**
+- Run: `docker images | grep mcp-skills`
+- Rebuild: `cd docker/skills && ./build-skills-images.sh`
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for more help.
 
 ---
 
-**Pro Tip:** The auto-loading feature means you can add new skills by just dropping directories into `config/skills/` - no configuration changes needed!
+Last updated: January 6, 2026

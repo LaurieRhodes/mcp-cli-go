@@ -1,0 +1,31 @@
+# MCP Server: Research Agent
+# Exposes research workflow templates as MCP tools for Claude Desktop
+
+runas_type: mcp
+version: "1.0"
+
+server_info:
+  name: research_agent
+  version: 1.0.0
+  description: "Multi-step analytical workflows for comprehensive data and topic analysis"
+
+# Templates to expose as tools
+# Information is derived from the template configs
+templates:
+  - config_source: config/templates/multi_step_analysis.yaml
+    name: deep_analysis  # Optional custom name
+  
+  - config_source: config/templates/simple_analysis.yaml
+    # Uses template name from source if not specified
+  
+  - config_source: config/templates/parallel_analysis.yaml
+
+# Add to Claude Desktop config:
+# {
+#   "mcpServers": {
+#     "research-agent": {
+#       "command": "/path/to/mcp-cli",
+#       "args": ["serve", "/path/to/this/file.yaml"]
+#     }
+#   }
+# }

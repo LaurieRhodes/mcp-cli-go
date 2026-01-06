@@ -11,6 +11,82 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// getColorizedHelp returns a colorized help message for the CLI
+func getColorizedHelp() string {
+	// Define colors
+	cyan := color.New(color.FgCyan, color.Bold).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
+	magenta := color.New(color.FgMagenta, color.Bold).SprintFunc()
+	white := color.New(color.FgWhite).SprintFunc()
+	
+	header := cyan("================================================================================") + "\n" +
+		cyan("                          MCP Command-Line Tool") + "\n" +
+		cyan("          Protocol-level CLI for Model Context Provider servers") + "\n" +
+		cyan("================================================================================") + "\n\n" +
+		white("A versatile command-line interface for interacting with AI models through the\n") +
+		white("Model Context Protocol (MCP). Supports multiple AI providers, workflow templates,\n") +
+		white("embeddings generation, and can run as an MCP server itself.\n\n")
+	
+	setup := yellow("+----------------------------------------------------------------------------+\n") +
+		yellow("| ") + magenta("First Time Setup") + yellow("                                                           |\n") +
+		yellow("+----------------------------------------------------------------------------+\n") +
+		yellow("| ") + green("mcp-cli init --quick") + "         Quick setup (30 seconds)                     " + yellow("|\n") +
+		yellow("| ") + green("mcp-cli init") + "                 Interactive guided setup                     " + yellow("|\n") +
+		yellow("| ") + green("mcp-cli init --full") + "          Complete setup with all options              " + yellow("|\n") +
+		yellow("+----------------------------------------------------------------------------+\n\n")
+	
+	usage := blue("+----------------------------------------------------------------------------+\n") +
+		blue("| ") + magenta("Basic Usage") + blue("                                                                |\n") +
+		blue("+----------------------------------------------------------------------------+\n") +
+		blue("| ") + green("mcp-cli") + "                      Start interactive chat (default)             " + blue("|\n") +
+		blue("| ") + green("mcp-cli chat") + "                 Explicitly start chat mode                   " + blue("|\n") +
+		blue("| ") + green("mcp-cli query \"question\"") + "     Ask a single question                        " + blue("|\n") +
+		blue("| ") + green("mcp-cli interactive") + "          Interactive mode with slash commands         " + blue("|\n") +
+		blue("+----------------------------------------------------------------------------+\n\n")
+	
+	templates := cyan("+----------------------------------------------------------------------------+\n") +
+		cyan("| ") + magenta("Workflow Templates") + cyan("                                                         |\n") +
+		cyan("+----------------------------------------------------------------------------+\n") +
+		cyan("| ") + white("Templates chain multiple AI requests with different providers and pass    ") + cyan("|\n") +
+		cyan("| ") + white("data between steps for complex, automated workflows.                      ") + cyan("|\n") +
+		cyan("|                                                                            |\n") +
+		cyan("| ") + green("mcp-cli --list-templates") + "                List available templates          " + cyan("|\n") +
+		cyan("| ") + green("mcp-cli --template analyze") + "              Run 'analyze' template            " + cyan("|\n") +
+		cyan("| ") + green("mcp-cli --template analyze --input-data \"data\"") + "  With input data           " + cyan("|\n") +
+		cyan("| ") + green("echo \"data\" | mcp-cli --template analyze") + "        From stdin                " + cyan("|\n") +
+		cyan("+----------------------------------------------------------------------------+\n\n")
+	
+	server := yellow("+----------------------------------------------------------------------------+\n") +
+		yellow("| ") + magenta("MCP Server Mode") + yellow("                                                            |\n") +
+		yellow("+----------------------------------------------------------------------------+\n") +
+		yellow("| ") + white("Run mcp-cli as an MCP server, exposing workflow templates as callable     ") + yellow("|\n") +
+		yellow("| ") + white("tools that other applications (like Claude Desktop) can use.              ") + yellow("|\n") +
+		yellow("|                                                                            |\n") +
+		yellow("| ") + green("mcp-cli serve config/runas/agent.yaml") + "   Start MCP server                  " + yellow("|\n") +
+		yellow("| ") + green("mcp-cli serve --verbose agent.yaml") + "      With detailed logging             " + yellow("|\n") +
+		yellow("+----------------------------------------------------------------------------+\n\n")
+	
+	embeddings := blue("+----------------------------------------------------------------------------+\n") +
+		blue("| ") + magenta("Embeddings & Vector Search") + blue("                                                 |\n") +
+		blue("+----------------------------------------------------------------------------+\n") +
+		blue("| ") + green("mcp-cli embeddings \"text\"") + "                    Generate embeddings          " + blue("|\n") +
+		blue("| ") + green("mcp-cli embeddings --input-file doc.txt") + "      From file                    " + blue("|\n") +
+		blue("| ") + green("mcp-cli embeddings --model text-embedding-3-large") + "  Specific model         " + blue("|\n") +
+		blue("| ") + green("echo \"text\" | mcp-cli embeddings") + "             From stdin                   " + blue("|\n") +
+		blue("+----------------------------------------------------------------------------+\n\n")
+	
+	configSection := cyan("+----------------------------------------------------------------------------+\n") +
+		cyan("| ") + magenta("Configuration") + cyan("                                                              |\n") +
+		cyan("+----------------------------------------------------------------------------+\n") +
+		cyan("| ") + green("mcp-cli config validate") + "                      Validate configuration       " + cyan("|\n") +
+		cyan("| ") + green("mcp-cli config --help") + "                        See all config commands      " + cyan("|\n") +
+		cyan("+----------------------------------------------------------------------------+")
+	
+	return header + setup + usage + templates + server + embeddings + configSection
+}
+
 var (
 	// Configuration options
 	configFile        string
@@ -30,69 +106,7 @@ var (
 	RootCmd = &cobra.Command{
 		Use:   "mcp-cli",
 		Short: "MCP Command-Line Tool - Interact with AI models and MCP servers",
-		Long: `================================================================================
-                          MCP Command-Line Tool
-          Protocol-level CLI for Model Context Provider servers
-================================================================================
-
-A versatile command-line interface for interacting with AI models through the
-Model Context Protocol (MCP). Supports multiple AI providers, workflow templates,
-embeddings generation, and can run as an MCP server itself.
-
-+----------------------------------------------------------------------------+
-| First Time Setup                                                           |
-+----------------------------------------------------------------------------+
-| mcp-cli init --quick         Quick setup (30 seconds)                     |
-| mcp-cli init                 Interactive guided setup                     |
-| mcp-cli init --full          Complete setup with all options              |
-+----------------------------------------------------------------------------+
-
-+----------------------------------------------------------------------------+
-| Basic Usage                                                                |
-+----------------------------------------------------------------------------+
-| mcp-cli                      Start interactive chat (default)             |
-| mcp-cli chat                 Explicitly start chat mode                   |
-| mcp-cli query "question"     Ask a single question                        |
-| mcp-cli interactive          Interactive mode with slash commands         |
-+----------------------------------------------------------------------------+
-
-+----------------------------------------------------------------------------+
-| Workflow Templates                                                         |
-+----------------------------------------------------------------------------+
-| Templates chain multiple AI requests with different providers and pass    |
-| data between steps for complex, automated workflows.                      |
-|                                                                            |
-| mcp-cli --list-templates                List available templates          |
-| mcp-cli --template analyze              Run 'analyze' template            |
-| mcp-cli --template analyze --input-data "data"  With input data           |
-| echo "data" | mcp-cli --template analyze        From stdin                |
-+----------------------------------------------------------------------------+
-
-+----------------------------------------------------------------------------+
-| MCP Server Mode                                                            |
-+----------------------------------------------------------------------------+
-| Run mcp-cli as an MCP server, exposing workflow templates as callable     |
-| tools that other applications (like Claude Desktop) can use.              |
-|                                                                            |
-| mcp-cli serve config/runas/agent.yaml   Start MCP server                  |
-| mcp-cli serve --verbose agent.yaml      With detailed logging             |
-+----------------------------------------------------------------------------+
-
-+----------------------------------------------------------------------------+
-| Embeddings & Vector Search                                                 |
-+----------------------------------------------------------------------------+
-| mcp-cli embeddings "text"                    Generate embeddings          |
-| mcp-cli embeddings --input-file doc.txt      From file                    |
-| mcp-cli embeddings --model text-embedding-3-large  Specific model         |
-| echo "text" | mcp-cli embeddings             From stdin                   |
-+----------------------------------------------------------------------------+
-
-+----------------------------------------------------------------------------+
-| Configuration                                                              |
-+----------------------------------------------------------------------------+
-| mcp-cli config validate                      Validate configuration       |
-| mcp-cli config --help                        See all config commands      |
-+----------------------------------------------------------------------------+`,
+		Long:  getColorizedHelp(),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Skip config check for init command, help, and serve (serve handles config loading internally)
 			cmdName := cmd.Name()

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 	
+	domainConfig "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/sandbox"
@@ -21,6 +22,8 @@ type Service struct {
 	skills        map[string]*skills.Skill
 	executor      sandbox.Executor
 	executionMode skills.ExecutionMode
+	imageMapping  *SkillImageMapping
+	appConfig     *domainConfig.ApplicationConfig
 }
 
 // NewService creates a new skill service
@@ -28,6 +31,11 @@ func NewService() *Service {
 	return &Service{
 		skills: make(map[string]*skills.Skill),
 	}
+}
+
+// SetConfig sets the application configuration for the service
+func (s *Service) SetConfig(config *domainConfig.ApplicationConfig) {
+	s.appConfig = config
 }
 
 // Initialize scans the skills directory and loads all skills
@@ -38,6 +46,18 @@ func (s *Service) Initialize(skillsDir string, executionMode skills.ExecutionMod
 	
 	s.skillsDir = skillsDir
 	s.executionMode = executionMode
+	
+	// Load skill image mapping
+	mappingPath := filepath.Join(skillsDir, "skill-images.yaml")
+	mapping, err := LoadSkillImageMapping(mappingPath)
+	if err != nil {
+		logging.Warn("Failed to load skill image mapping: %v", err)
+		// Continue with default mapping
+	} else {
+		s.imageMapping = mapping
+		logging.Info("✅ Loaded skill image mappings: %d skills, default: %s", 
+			len(mapping.Skills), mapping.DefaultImage)
+	}
 	
 	// Initialize executor if needed
 	if executionMode == skills.ExecutionModeActive || executionMode == skills.ExecutionModeAuto {
@@ -75,6 +95,22 @@ func (s *Service) Initialize(skillsDir string, executionMode skills.ExecutionMod
 // initializeExecutor sets up the script executor
 func (s *Service) initializeExecutor() error {
 	config := sandbox.DefaultConfig()
+	
+	// Configure persistent outputs directory from settings
+	if s.appConfig != nil && s.appConfig.Skills != nil {
+		config.OutputsDir = s.appConfig.Skills.GetOutputsDir()
+		logging.Info("Using outputs directory from config: %s", config.OutputsDir)
+	} else {
+		// Fallback to default if no config provided
+		config.OutputsDir = "/tmp/mcp-outputs"
+		logging.Warn("No config provided, using default outputs directory: %s", config.OutputsDir)
+	}
+	
+	// Pass image mapping to executor if available
+	if s.imageMapping != nil {
+		config.ImageMapping = s.imageMapping
+	}
+	
 	executor, err := sandbox.DetectExecutor(config)
 	if err != nil {
 		return err
@@ -731,7 +767,28 @@ func (s *Service) ExecuteCode(request *skills.CodeExecutionRequest) (*skills.Exe
 func (s *Service) LoadAsActive(skill *skills.Skill, request *skills.SkillLoadRequest) (*skills.SkillLoadResult, error) {
 	logging.Info("Loading skill '%s' in active mode", skill.Name)
 	
-	return s.ExecuteWorkflow(skill, request.InputData)
+	// Check if skill has a workflow
+	if skill.HasWorkflow {
+		return s.ExecuteWorkflow(skill, request.InputData)
+	}
+	
+	// If no workflow, return guidance for using execute_skill_code
+	return &skills.SkillLoadResult{
+		SkillName: skill.Name,
+		Mode:      skills.SkillLoadModeActive,
+		Result: fmt.Sprintf(`Skill '%s' does not have a workflow.yaml file.
+
+To use this skill programmatically, use the 'execute_skill_code' tool instead:
+
+Example:
+{
+  "skill_name": "%s",
+  "code": "from pptx import Presentation\n\nprs = Presentation()\n# Add slides...\nprs.save('/outputs/output.pptx')",
+  "language": "python"
+}
+
+Files created in /outputs/ will persist and be available on the host.`, skill.Name, skill.Name),
+	}, nil
 }
 
 // LoadSkillByRequest loads a skill according to the request

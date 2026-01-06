@@ -7,6 +7,9 @@ type SettingsConfig struct {
 	
 	// MaxToolFollowUp sets the maximum number of follow-up tool calling requests (default: 2)
 	MaxToolFollowUp int `yaml:"max_tool_follow_up,omitempty"`
+	
+	// OutputsDir is the directory where skill outputs are persisted
+	OutputsDir string `yaml:"outputs_dir,omitempty"`
 }
 
 // ServerSettings represents server-specific settings
@@ -24,6 +27,14 @@ func (s *SettingsConfig) GetMaxToolFollowUp() int {
 		return 2 // Default value
 	}
 	return s.MaxToolFollowUp
+}
+
+// GetOutputsDir returns the outputs directory from settings, with fallback to default
+func (s *SettingsConfig) GetOutputsDir() string {
+	if s == nil || s.OutputsDir == "" {
+		return "/tmp/mcp-outputs" // Default value
+	}
+	return s.OutputsDir
 }
 
 // GetMaxToolFollowUp returns the maximum tool follow-up attempts from server settings, with fallback to default

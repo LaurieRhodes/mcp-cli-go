@@ -1,0 +1,26 @@
+# HTTP Proxy for brave-search MCP server
+# Exposes all tools from brave-search as REST API
+
+runas_type: proxy
+version: "1.0"
+
+# Source of the MCP Server or Workflow Template
+# Points to the actual config file being proxied
+config_source: config/servers/search.yaml
+
+proxy_config:
+  port: 8081
+  
+  # This is the HTTP proxy authentication key (NOT Brave API key)
+  # Brave API key is configured in config/servers/search.yaml
+  api_key: "${BRAVE_PROXY_API_KEY}"
+  
+  cors_origins: ["*"]
+  
+  # Optional: Enable HTTPS with TLS certificate
+  # tls:
+  #   cert_file: /path/to/certificate.crt
+  #   key_file: /path/to/private.key
+
+# Start: mcp-cli serve config/proxy/brave-search.yaml
+# Access: https://localhost:8081 (if TLS enabled) or http://localhost:8081

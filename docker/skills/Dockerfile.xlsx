@@ -1,0 +1,40 @@
+# XLSX Skills Container (Basic)
+# Supports: xlsx skill (Excel manipulation without formula recalculation)
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Container for XLSX skill (basic Excel manipulation)"
+LABEL skills="xlsx"
+LABEL features="read,write,format"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Required for lxml (XML processing in Excel files)
+    libxml2 \
+    libxslt1.1 \
+    # Utilities for ZIP manipulation (.xlsx is a ZIP)
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    # Excel manipulation
+    openpyxl==3.1.2 \
+    # XML processing
+    lxml==5.1.0 \
+    # Excel file support
+    et-xmlfile==1.1.0 \
+    # Date/time handling
+    python-dateutil==2.8.2
+
+# Create workspace directory
+RUN mkdir -p /workspace /skill
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["python3"]

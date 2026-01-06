@@ -1,0 +1,46 @@
+# XLSX Skills Container (Advanced with LibreOffice)
+# Supports: xlsx skill with formula recalculation
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Container for XLSX skill with LibreOffice (formula recalculation)"
+LABEL skills="xlsx"
+LABEL features="read,write,format,recalc-formulas"
+
+# Install system dependencies including LibreOffice
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # LibreOffice (for formula recalculation)
+    libreoffice-calc \
+    libreoffice-core \
+    # Required for lxml
+    libxml2 \
+    libxslt1.1 \
+    # Utilities
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    # Excel manipulation
+    openpyxl==3.1.2 \
+    # XML processing
+    lxml==5.1.0 \
+    # Excel file support
+    et-xmlfile==1.1.0 \
+    # Date/time handling
+    python-dateutil==2.8.2
+
+# Create workspace directory
+RUN mkdir -p /workspace /skill
+
+# Set working directory
+WORKDIR /workspace
+
+# Verify LibreOffice installation
+RUN which soffice && soffice --version
+
+# Default command
+CMD ["python3"]

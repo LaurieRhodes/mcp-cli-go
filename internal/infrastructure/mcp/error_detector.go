@@ -161,6 +161,41 @@ func (d *ErrorDetector) GetErrorMessageFromMap(result map[string]interface{}) (s
 	return "", false
 }
 
+
+// ExtractTextFromContent extracts text content from various MCP response formats
+// Handles both array format [{"text": "...", "type": "text"}] and string format
+func (d *ErrorDetector) ExtractTextFromContent(content interface{}) string {
+	if content == nil {
+		return ""
+	}
+	
+	// Handle string content
+	if str, ok := content.(string); ok {
+		return str
+	}
+	
+	// Handle array of content items (MCP standard format)
+	if contentArray, ok := content.([]interface{}); ok {
+		for _, item := range contentArray {
+			if itemMap, ok := item.(map[string]interface{}); ok {
+				// Extract text field if it exists
+				if text, ok := itemMap["text"].(string); ok && text != "" {
+					return text
+				}
+			}
+		}
+	}
+	
+	// Handle map format
+	if contentMap, ok := content.(map[string]interface{}); ok {
+		if text, ok := contentMap["text"].(string); ok && text != "" {
+			return text
+		}
+	}
+	
+	return ""
+}
+
 // LogErrorDetails logs detailed error information for debugging
 func (d *ErrorDetector) LogErrorDetails(result *tools.ToolsCallResult) {
 	if result == nil {

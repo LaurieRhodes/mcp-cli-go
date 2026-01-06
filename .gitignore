@@ -56,22 +56,12 @@ ehthumbs.db
 Thumbs.db
 
 # Configuration files with sensitive data
-# CRITICAL: Only ignore actual user config files with secrets
-# DO NOT ignore source code directories like internal/*/config/ or examples/
-#
-# Pattern: Only ignore /config/ at root, and only specific file types
+# CRITICAL: Ignore entire /config/ directory (production configurations)
+# Source code directories like internal/*/config/ are NOT ignored
+# Examples directory is explicitly preserved below
+/config/
 /config.yaml
 /config.yml
-/config/*.yaml
-/config/*.yml
-/config/*.json
-/config/.env
-/config/providers/*.yaml
-/config/providers/*.yml
-/config/templates/*.yaml
-/config/templates/*.yml
-/config/runas/*.yaml
-/config/runas/*.yml
 
 # Legacy config files
 server_config.json
@@ -79,9 +69,8 @@ server_config.json.txt
 server_config.json.private
 *.private
 
-# Explicitly ALLOW example files (negation pattern)
+# Explicitly ALLOW example configurations (negation pattern)
 !/config.example.yaml
-!/config/*.example.yaml
 !/examples/
 
 # Environment files
@@ -122,13 +111,4 @@ coverage/
 # Local development
 /tmp/
 /temp/
-config/embeddings/ollama.yaml
-config/embeddings/openai.yaml
-config/embeddings/openrouter.yaml
-config/README.md
-config/servers/README.md
-config/embeddings/aws-bedrock.yaml
-config/embeddings/azure-foundry.yaml
-config/servers/bash.yaml
-config/servers/filesystem.yaml
-config/servers/search.yaml
+mcp-cli-go

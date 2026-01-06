@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
 // Executor executes scripts in sandboxed environments
@@ -30,10 +33,12 @@ type Executor interface {
 
 // ExecutorConfig holds common configuration
 type ExecutorConfig struct {
-	PythonImage string
-	Timeout     time.Duration
-	MemoryLimit string
-	CPULimit    string
+	PythonImage  string
+	Timeout      time.Duration
+	MemoryLimit  string
+	CPULimit     string
+	OutputsDir   string      // Persistent directory for skill outputs
+	ImageMapping interface{} // Holds *skills.SkillImageMapping to avoid circular dependency
 }
 
 // DefaultConfig returns default executor configuration
@@ -43,7 +48,35 @@ func DefaultConfig() ExecutorConfig {
 		Timeout:     30 * time.Second,
 		MemoryLimit: "256m",
 		CPULimit:    "0.5",
+		OutputsDir:   "/media/laurie/Data/outputs",
 	}
+}
+
+// GetImageForSkill returns the appropriate image for a skill based on its directory path
+// If a mapping is configured, uses that; otherwise falls back to default PythonImage
+func (c *ExecutorConfig) GetImageForSkill(skillLibsDir string) string {
+	// Extract skill name from path (e.g., /path/to/skills/docx -> "docx")
+	skillName := filepath.Base(skillLibsDir)
+	
+	// If no mapping, use default
+	if c.ImageMapping == nil {
+		return c.PythonImage
+	}
+	
+	// Type assert the mapping (avoid circular dependency by using interface{})
+	type imageMapper interface {
+		GetImageForSkill(string) string
+	}
+	
+	if mapper, ok := c.ImageMapping.(imageMapper); ok {
+		image := mapper.GetImageForSkill(skillName)
+		// Log the image being used for debugging
+		logging.Debug("Skill '%s' -> Image '%s' (from mapping)", skillName, image)
+		return image
+	}
+	
+	logging.Debug("Skill '%s' -> Image '%s' (default, no mapping)", skillName, c.PythonImage)
+	return c.PythonImage
 }
 
 // DetectExecutor determines which executor to use

@@ -2,12 +2,13 @@ package config
 
 // ApplicationConfig represents the complete application configuration
 type ApplicationConfig struct {
-	Servers    map[string]ServerConfig      `yaml:"servers"`
-	AI         *AIConfig                    `yaml:"ai,omitempty"`
-	Embeddings *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
-	Chat       *ChatConfig                  `yaml:"chat,omitempty"`
-	Templates  map[string]*WorkflowTemplate `yaml:"templates,omitempty"`
-	TemplatesV2 map[string]*TemplateV2 `yaml:"-"` // Loaded separately from config/templates/
+	Servers     map[string]ServerConfig      `yaml:"servers"`
+	AI          *AIConfig                    `yaml:"ai,omitempty"`
+	Embeddings  *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
+	Chat        *ChatConfig                  `yaml:"chat,omitempty"`
+	Skills      *SkillsConfig                `yaml:"skills,omitempty"`
+	Templates   map[string]*WorkflowTemplate `yaml:"templates,omitempty"`
+	TemplatesV2 map[string]*TemplateV2       `yaml:"-"` // Loaded separately from config/templates/
 }
 
 // ValidateWorkflowTemplates validates all workflow templates in the configuration
@@ -49,4 +50,18 @@ func (c *ApplicationConfig) ListWorkflowTemplates() []string {
 	}
 
 	return names
+}
+
+// SkillsConfig represents skills-related configuration
+type SkillsConfig struct {
+	// OutputsDir is the directory where skill outputs are persisted
+	OutputsDir string `yaml:"outputs_dir,omitempty"`
+}
+
+// GetOutputsDir returns the outputs directory with fallback to default
+func (s *SkillsConfig) GetOutputsDir() string {
+	if s == nil || s.OutputsDir == "" {
+		return "/tmp/mcp-outputs"
+	}
+	return s.OutputsDir
 }

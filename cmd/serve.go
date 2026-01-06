@@ -183,6 +183,7 @@ Claude Desktop Configuration:
 		
 		// Initialize skills service
 		skillService := skillsvc.NewService()
+		skillService.SetConfig(appConfig)
 		
 		// === Handle mcp-skills type: Auto-discover and generate tools ===
 		if runasConfig.RunAsType == runas.RunAsTypeMCPSkills || runasConfig.RunAsType == runas.RunAsTypeProxySkills {

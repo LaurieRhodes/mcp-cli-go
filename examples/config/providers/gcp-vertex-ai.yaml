@@ -1,0 +1,22 @@
+interface_type: gcp_vertex_ai
+provider_name: vertex-ai
+config:
+  context_window: 1000000
+  credentials_path: ${GOOGLE_APPLICATION_CREDENTIALS}
+  default_model: gemini-2.5-flash
+  embedding_models:
+      text-embedding-004:
+          default: true
+          dimensions: 768
+          max_tokens: 3072
+      text-multilingual-embedding-002:
+          dimensions: 768
+          max_tokens: 3072
+      textembedding-gecko@003:
+          dimensions: 768
+          max_tokens: 3072
+  location: ${GCP_LOCATION:-us-central1}
+  max_retries: 3
+  project_id: ${GCP_PROJECT_ID}
+  reserve_tokens: 4000
+  timeout_seconds: 60

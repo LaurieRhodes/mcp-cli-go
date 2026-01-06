@@ -1,0 +1,30 @@
+# MCP Server: Document Intelligence Agent
+# Document processing and analysis workflows for Claude Desktop
+
+runas_type: mcp
+version: "1.0"
+
+server_info:
+  name: document_intelligence_agent
+  version: 1.0.0
+  description: "Natural language processing and document intelligence workflows"
+
+# Templates to expose as tools
+templates:
+  - config_source: config/templates/document_intelligence.yaml
+  
+  - config_source: config/templates/entity_extraction.yaml
+  
+  - config_source: config/templates/sentiment_analysis.yaml
+  
+  - config_source: config/templates/summarization.yaml
+
+# Add to Claude Desktop config:
+# {
+#   "mcpServers": {
+#     "document-intelligence": {
+#       "command": "/path/to/mcp-cli",
+#       "args": ["serve", "/path/to/this/file.yaml"]
+#     }
+#   }
+# }

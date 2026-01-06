@@ -1,0 +1,20 @@
+# HTTP Proxy for Anthropic skills
+# Auto-discovers and exposes all skills as REST API
+
+runas_type: proxy-skills
+version: "1.0"
+
+proxy_config:
+  port: 4002
+  
+  # HTTP proxy authentication key
+  api_key: "${SKILLS_PROXY_API_KEY}"
+  
+  cors_origins: ["*"]
+  
+  # Optional: Enable HTTPS
+  # tls:
+  #   cert_file: /path/to/cert.crt
+  #   key_file: /path/to/key.key
+
+# Start: mcp-cli serve config/proxy/skills.yaml
