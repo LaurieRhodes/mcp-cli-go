@@ -1,0 +1,23 @@
+$schema: "workflow/v2.0"
+name: planner
+version: 1.0.0
+description: Creates requirements and milestones for a coding task
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.3
+
+steps:
+  - name: analyze
+    run: |
+      Analyze this coding request and create clear requirements.
+      
+      Request: {{input}}
+      
+      Provide:
+      1. What needs to be built (2-3 sentences)
+      2. Key requirements (3-5 bullet points)
+      3. Success criteria (what makes it complete)
+      
+      Be specific and concise.

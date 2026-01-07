@@ -1,0 +1,33 @@
+$schema: "workflow/v2.0"
+name: hello
+version: 1.0.0
+description: Simple greeting workflow demonstrating basic workflow structure
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.7
+
+steps:
+  - name: greet
+    run: |
+      Generate a friendly greeting for: {{input}}
+      
+      Make it warm and personalized.
+
+# Usage:
+#
+# ./mcp-cli --workflow hello --input-data "Alice"
+#
+# Or:
+# ./mcp-cli --workflow hello --input-data "the development team"
+#
+# This is the simplest possible workflow:
+# - Single step
+# - Direct input interpolation
+# - One LLM call
+#
+# Perfect for:
+# - Learning workflow syntax
+# - Testing workflow system
+# - Understanding basic structure

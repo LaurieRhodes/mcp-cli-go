@@ -1,0 +1,51 @@
+$schema: "workflow/v2.0"
+name: iterative_developer
+version: 1.0.0
+description: Complete iterative development - plan, test, develop until passing
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.5
+  logging: verbose
+
+steps:
+  - name: requirements
+    template:
+      name: planner
+      with:
+        input: "{{input}}"
+  
+  - name: test_criteria
+    needs: [requirements]
+    template:
+      name: test_designer
+      with:
+        input: "{{requirements}}"
+
+  - name: final_report
+    needs: [develop_until_pass]
+    run: |
+      Development Summary:
+      
+      Original request: {{input}}
+      
+      Iterations completed: {{loop.iteration}}
+      
+      Final code:
+      {{develop_until_pass}}
+      
+      Provide a brief 2-3 sentence summary of what was built and how many iterations it took.
+
+loops:
+  - name: develop_until_pass
+    workflow: dev_cycle
+    with:
+      requirements: "{{requirements}}"
+      tests: "{{test_criteria}}"
+      previous_code: "{{loop.last.output}}"
+      previous_feedback: "From last review"
+    max_iterations: 5
+    until: "The review says PASS"
+    on_failure: continue
+    accumulate: development_history

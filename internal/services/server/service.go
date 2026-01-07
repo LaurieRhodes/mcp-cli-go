@@ -13,7 +13,6 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 	workflowservice "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
 )
 
@@ -248,13 +247,13 @@ func (s *Service) executeTemplate(toolExposure *runas.ToolExposure, arguments ma
 	
 	// Check if template exists (v2 first, then v1)
 	var isV2 bool
-	var templateV2 *config.TemplateV2
+	var workflowV2 *config.WorkflowV2
 	
-	if tmpl, exists := s.appConfig.TemplatesV2[toolExposure.Template]; exists {
+	if tmpl, exists := s.appConfig.Workflows[toolExposure.Template]; exists {
 		isV2 = true
-		templateV2 = tmpl
+		workflowV2 = tmpl
 		logging.Debug("Using template v2: %s", toolExposure.Template)
-	} else if _, exists := s.appConfig.Templates[toolExposure.Template]; !exists {
+	} else if _, exists := s.appConfig.Workflows[toolExposure.Template]; !exists {
 		return "", fmt.Errorf("template not found: %s", toolExposure.Template)
 	}
 	
@@ -268,7 +267,7 @@ func (s *Service) executeTemplate(toolExposure *runas.ToolExposure, arguments ma
 	
 	// Execute template based on version
 	if isV2 {
-		return s.executeTemplateV2(templateV2, inputData, toolExposure)
+		return s.executeWorkflowV2(workflowV2, inputData, toolExposure)
 	}
 	
 	return s.executeTemplateV1(toolExposure.Template, inputData, toolExposure)
@@ -312,7 +311,7 @@ func (s *Service) executeTemplateV1(templateName string, inputData string, toolE
 }
 
 // executeTemplateV2 executes a v2 template
-func (s *Service) executeTemplateV2(tmpl *config.TemplateV2, inputData string, toolExposure *runas.ToolExposure) (string, error) {
+func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, toolExposure *runas.ToolExposure) (string, error) {
 	logging.Info("Executing template v2: %s", tmpl.Name)
 	
 	// Get provider configuration
@@ -323,8 +322,8 @@ func (s *Service) executeTemplateV2(tmpl *config.TemplateV2, inputData string, t
 	if toolExposure.Overrides != nil && toolExposure.Overrides.Provider != "" {
 		providerName = toolExposure.Overrides.Provider
 		providerConfig, _, err = s.configService.GetProviderConfig(providerName)
-	} else if tmpl.Config != nil && tmpl.Config.Defaults != nil && tmpl.Config.Defaults.Provider != "" {
-		providerName = tmpl.Config.Defaults.Provider
+	} else if tmpl.Execution.Provider != "" {
+		providerName = tmpl.Execution.Provider
 		providerConfig, _, err = s.configService.GetProviderConfig(providerName)
 	} else {
 		providerName, providerConfig, _, err = s.configService.GetDefaultProvider()
@@ -337,63 +336,57 @@ func (s *Service) executeTemplateV2(tmpl *config.TemplateV2, inputData string, t
 	// Override model if specified
 	if toolExposure.Overrides != nil && toolExposure.Overrides.Model != "" {
 		providerConfig.DefaultModel = toolExposure.Overrides.Model
-	} else if tmpl.Config != nil && tmpl.Config.Defaults != nil && tmpl.Config.Defaults.Model != "" {
-		providerConfig.DefaultModel = tmpl.Config.Defaults.Model
+	} else if tmpl.Execution.Model != "" {
+		providerConfig.DefaultModel = tmpl.Execution.Model
 	}
 	
 	logging.Info("Using provider: %s (model: %s)", providerName, providerConfig.DefaultModel)
 	
 	// Import the provider factory and domain types to create the actual provider
 	// This implementation mirrors the CLI's executeTemplateV2 function
-	return s.executeTemplateV2WithProvider(tmpl, inputData, providerName, providerConfig)
+	return s.executeWorkflowV2WithProvider(tmpl, inputData, providerName, providerConfig)
 }
 
 // executeTemplateV2WithProvider executes a template with the actual provider
-func (s *Service) executeTemplateV2WithProvider(tmpl *config.TemplateV2, inputData string, providerName string, providerConfig *config.ProviderConfig) (string, error) {
+func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputData string, providerName string, providerConfig *config.ProviderConfig) (string, error) {
 	// Convert provider name to ProviderType (configuration-driven)
 	providerType := domain.ProviderType(providerName)
 	
 	logging.Debug("Creating provider: %s", providerType)
 	
 	// Get interface type from configuration
-	_, interfaceType, err := s.configService.GetProviderConfig(providerName)
-	if err != nil {
-		return "", fmt.Errorf("failed to get provider interface type: %w", err)
-	}
 	
-	// Create provider using factory
-	providerFactory := ai.NewProviderFactory()
-	provider, err := providerFactory.CreateProvider(providerType, providerConfig, interfaceType)
-	if err != nil {
-		return "", fmt.Errorf("failed to create provider: %w", err)
-	}
+	// Create logger for workflow
+	logger := workflowservice.NewLogger(tmpl.Execution.Logging)
 	
-	// For MCP server context, we don't manage external server connections
-	// Templates should use their own server configurations
-	// Create an empty server manager for now
-	serverManager := NewEmptyServerManager()
+	// Create orchestrator with workflow
+	orchestrator := workflowservice.NewOrchestrator(tmpl, logger)
 	
-	// Create workflow service v2
-	workflowServiceV2 := workflowservice.NewServiceV2(s.appConfig, provider, serverManager)
+	// Set application config for nested workflow calls
+	orchestrator.SetAppConfigForWorkflows(s.appConfig)
 	
-	// Execute template
+	// Execute workflow
 	ctx := context.Background()
-	result, err := workflowServiceV2.ExecuteTemplate(ctx, tmpl.Name, inputData)
+	err := orchestrator.Execute(ctx, inputData)
 	if err != nil {
-		return "", fmt.Errorf("template execution failed: %w", err)
+		return "", fmt.Errorf("workflow execution failed: %w", err)
 	}
 	
-	// Check for execution error
-	if result.Error != nil {
-		return "", result.Error
+	// Get result from last step
+	result := ""
+	if len(tmpl.Steps) > 0 {
+		lastStepName := tmpl.Steps[len(tmpl.Steps)-1].Name
+		if output, ok := orchestrator.GetStepResult(lastStepName); ok {
+			result = output
+		}
 	}
 	
-	// Return final output
-	if result.FinalOutput != "" {
-		return result.FinalOutput, nil
+	// Return result
+	if result != "" {
+		return result, nil
 	}
 	
-	return fmt.Sprintf("Template '%s' completed but produced no output", tmpl.Name), nil
+	return fmt.Sprintf("Workflow '%s' completed but produced no output", tmpl.Name), nil
 }
 
 // handleSkillToolCall handles calls to skill tools (tools using load_skill template)
@@ -562,6 +555,7 @@ func (s *Service) errorResponse(message string) map[string]interface{} {
 			},
 		},
 		"isError": true,
+		"error": message,  // Add error field for proper error propagation
 	}
 }
 

@@ -1,0 +1,180 @@
+$schema: "workflow/v2.0"
+name: resilient_health_monitor
+version: 2.0.0
+description: Resilient health monitoring with provider failover and systematic triage
+
+execution:
+  # Provider failover chain - continues if one fails
+  providers:
+    - provider: anthropic
+      model: claude-sonnet-4
+    - provider: openai
+      model: gpt-4o
+    - provider: deepseek
+      model: deepseek-chat
+  temperature: 0.3
+
+steps:
+  # Step 1: Collect health status (even if some servers fail)
+  - name: health_check
+    run: |
+      Parse this health check data and extract key metrics:
+      
+      {{input}}
+      
+      For each service/server, extract:
+      - Service name
+      - Status (UP/DOWN/DEGRADED)
+      - Response time
+      - Error rate
+      - Resource usage (CPU, memory, disk)
+      - Last successful health check
+      
+      Return structured JSON summary of all services.
+
+  # Step 2: Identify issues requiring attention
+  - name: identify_issues
+    needs: [health_check]
+    run: |
+      Based on this health data:
+      
+      {{health_check}}
+      
+      Identify issues requiring attention:
+      
+      **CRITICAL (Immediate action required):**
+      - Services completely DOWN
+      - Error rates > 10%
+      - Response times > 5 seconds
+      - Resource usage > 90%
+      
+      **WARNING (Monitor closely):**
+      - Services DEGRADED
+      - Error rates 1-10%
+      - Response times 2-5 seconds
+      - Resource usage 75-90%
+      
+      **HEALTHY:**
+      - Services UP with normal metrics
+      
+      For each issue, provide:
+      - Service name
+      - Severity (CRITICAL/WARNING)
+      - Current metric value
+      - Threshold exceeded
+      - Duration (if known)
+
+  # Step 3: Root cause analysis for critical issues
+  - name: root_cause_analysis
+    needs: [identify_issues]
+    run: |
+      Perform root cause analysis for critical issues:
+      
+      {{identify_issues}}
+      
+      For each CRITICAL issue:
+      
+      **Service:** [name]
+      **Symptom:** [what's wrong]
+      
+      **Likely Root Causes:**
+      1. [Most likely cause based on symptoms]
+      2. [Second most likely cause]
+      3. [Third possibility]
+      
+      **Diagnostic Steps:**
+      1. [First thing to check]
+      2. [Second diagnostic step]
+      3. [Third step if needed]
+      
+      **Quick Remediation:**
+      - Immediate action to restore service
+      - Estimated time to recovery
+      - Risk of remediation
+
+  # Step 4: Generate incident report with action plan
+  - name: incident_report
+    needs: [root_cause_analysis]
+    run: |
+      Generate incident report and action plan:
+      
+      # Health Monitoring Report
+      
+      **Timestamp:** {{execution.timestamp}}
+      **Workflow:** {{workflow.name}} v{{workflow.version}}
+      
+      ---
+      
+      ## Executive Summary
+      
+      [2-3 sentence summary of system health and critical issues]
+      
+      ---
+      
+      ## Service Status Overview
+      
+      {{health_check}}
+      
+      ---
+      
+      ## Issues Requiring Attention
+      
+      {{identify_issues}}
+      
+      ---
+      
+      ## Root Cause Analysis
+      
+      {{root_cause_analysis}}
+      
+      ---
+      
+      ## Immediate Action Plan
+      
+      ### CRITICAL (Act Now)
+      
+      For each critical issue:
+      1. Service: [name]
+      2. Action: [immediate remediation]
+      3. ETA: [estimated recovery time]
+      4. Owner: [assign to team/person]
+      
+      ### WARNING (Monitor)
+      
+      Services to watch closely:
+      - [List services with warnings]
+      - Escalate to CRITICAL if metrics worsen
+      
+      ---
+      
+      ## Next Steps
+      
+      1. **Immediate:** Execute remediation for CRITICAL issues
+      2. **Within 1 hour:** Verify services restored
+      3. **Within 24 hours:** Investigate root causes
+      4. **This week:** Implement preventive measures
+      
+      ---
+      
+      ## Resilience Note
+      
+      This workflow used provider failover to ensure monitoring continues
+      even if preferred AI provider is unavailable. Current provider: {{execution.provider}}
+
+# Usage:
+#
+# ./mcp-cli --workflow resilient_health_monitor --input-data "$(cat health_status.json)"
+#
+# Or pipe from monitoring system:
+# curl http://monitoring-system/health | ./mcp-cli --workflow resilient_health_monitor
+#
+# Business Value:
+# - Provider failover ensures monitoring continues if one AI fails
+# - Systematic triage from status → issues → root causes → action plan
+# - Step dependencies ensure nothing is skipped in analysis
+# - Continues operation even if some monitored services are down
+#
+# Resilience Features:
+# - Multiple provider fallback (anthropic → openai → deepseek)
+# - Degrades gracefully if preferred provider unavailable
+# - Returns actionable report even with partial data

@@ -53,9 +53,9 @@ func getColorizedHelp() string {
 		cyan("| ") + white("data between steps for complex, automated workflows.                      ") + cyan("|\n") +
 		cyan("|                                                                            |\n") +
 		cyan("| ") + green("mcp-cli --list-templates") + "                List available templates          " + cyan("|\n") +
-		cyan("| ") + green("mcp-cli --template analyze") + "              Run 'analyze' template            " + cyan("|\n") +
-		cyan("| ") + green("mcp-cli --template analyze --input-data \"data\"") + "  With input data           " + cyan("|\n") +
-		cyan("| ") + green("echo \"data\" | mcp-cli --template analyze") + "        From stdin                " + cyan("|\n") +
+		cyan("| ") + green("mcp-cli --workflow analyze") + "              Run 'analyze' template            " + cyan("|\n") +
+		cyan("| ") + green("mcp-cli --workflow analyze --input-data \"data\"") + "  With input data           " + cyan("|\n") +
+		cyan("| ") + green("echo \"data\" | mcp-cli --workflow analyze") + "        From stdin                " + cyan("|\n") +
 		cyan("+----------------------------------------------------------------------------+\n\n")
 	
 	server := yellow("+----------------------------------------------------------------------------+\n") +
@@ -98,9 +98,9 @@ var (
 	noColor           bool
 	
 	// Template-based workflow flags
-	templateName      string
+	workflowName      string
 	inputData         string
-	listTemplates     bool
+	listWorkflows     bool
 
 	// RootCmd represents the base command when called without any subcommands
 	RootCmd = &cobra.Command{
@@ -121,7 +121,7 @@ var (
 			var outputConfig *models.OutputConfig
 			
 			isQueryCommand := cmd.Name() == "query"
-			isTemplateMode := templateName != ""
+			isTemplateMode := workflowName != ""
 			isEmbeddingsCommand := cmd.Name() == "embeddings"
 			
 			if verbose {
@@ -161,8 +161,8 @@ var (
 		// If no subcommand is provided, check for template mode or run chat command
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check for list templates flag
-			if listTemplates {
-				if err := executeListTemplates(); err != nil {
+			if listWorkflows {
+				if err := executeListWorkflows(); err != nil {
 					logging.Error("Failed to list templates: %v", err)
 					os.Exit(1)
 				}
@@ -170,8 +170,8 @@ var (
 			}
 			
 			// Check for template execution
-			if templateName != "" {
-				if err := executeTemplate(); err != nil {
+			if workflowName != "" {
+				if err := executeWorkflow(); err != nil {
 					logging.Error("Template execution failed: %v", err)
 					os.Exit(1)
 				}
@@ -202,9 +202,9 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colored output (for piping or logging)")
 	
 	// Template-based workflow flags
-	RootCmd.PersistentFlags().StringVar(&templateName, "template", "", "Execute workflow template by name")
+	RootCmd.PersistentFlags().StringVar(&workflowName, "workflow", "", "Execute workflow by name")
 	RootCmd.PersistentFlags().StringVar(&inputData, "input-data", "", "Input data for template (JSON or plain text)")
-	RootCmd.PersistentFlags().BoolVar(&listTemplates, "list-templates", false, "List all available workflow templates")
+	RootCmd.PersistentFlags().BoolVar(&listWorkflows, "list-workflows", false, "List all available workflows")
 
 	// Add subcommands
 	RootCmd.AddCommand(ChatCmd)

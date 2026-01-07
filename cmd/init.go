@@ -19,7 +19,7 @@ var InitCmd = &cobra.Command{
 	Long: `Interactive setup wizard for mcp-cli configuration.
 
 Creates a modular configuration structure with separate directories for
-providers, embeddings, servers, and templates.
+providers, embeddings, servers, and workflows.
 
 Modes:
   --quick     Quick setup with minimal questions (uses ollama, no API keys)
@@ -541,7 +541,7 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 	}
 	fmt.Println("       ├── servers/")
 	fmt.Println("       │   └── README.md")
-	fmt.Println("       └── templates/")
+	fmt.Println("       └── workflows/")
 	fmt.Println()
 	
 	if cfg.IncludeOpenAI || cfg.IncludeAnthropic || cfg.IncludeDeepSeek ||

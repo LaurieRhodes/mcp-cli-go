@@ -1,0 +1,166 @@
+$schema: "workflow/v2.0"
+name: multi_provider
+version: 1.0.0
+description: Get consensus from multiple AI providers for critical decisions
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.3
+
+steps:
+  # Step 1: Claude's Analysis
+  - name: claude_analysis
+    provider: anthropic
+    model: claude-sonnet-4
+    run: |
+      You are an analytical AI assistant providing thorough analysis.
+      
+      Analyze this question:
+      
+      {{input}}
+      
+      Provide:
+      1. Your interpretation of the question
+      2. Key considerations and factors
+      3. Recommended approach or answer
+      4. Potential risks or caveats
+      5. Confidence level in your analysis
+      
+      Be thorough but concise.
+  
+  # Step 2: GPT-4's Analysis  
+  - name: gpt_analysis
+    needs: [claude_analysis]
+    provider: openai
+    model: gpt-4o
+    run: |
+      You are an analytical AI assistant providing thorough analysis.
+      
+      Analyze this question:
+      
+      {{input}}
+      
+      Provide:
+      1. Your interpretation of the question
+      2. Key considerations and factors
+      3. Recommended approach or answer
+      4. Potential risks or caveats
+      5. Confidence level in your analysis
+      
+      Be thorough but concise.
+  
+  # Step 3: Compare and Synthesize
+  - name: compare_analyses
+    needs: [claude_analysis, gpt_analysis]
+    run: |
+      Compare these two AI analyses of the same question:
+      
+      Claude's Analysis:
+      {{claude_analysis}}
+      
+      GPT-4's Analysis:
+      {{gpt_analysis}}
+      
+      Provide a synthesis that:
+      
+      1. **Consensus Points** - Where both analyses agree
+         List all points of agreement clearly.
+      
+      2. **Divergent Views** - Where analyses differ
+         Explain the differences and why they might exist.
+      
+      3. **Confidence Assessment**
+         - High confidence: Both agree on core points
+         - Medium confidence: Agree on some, differ on others
+         - Low confidence: Significant disagreement
+      
+      4. **Balanced Recommendation**
+         Based on both analyses, what is the most reliable answer?
+      
+      5. **Areas for Further Investigation**
+         What questions remain or need more research?
+      
+      Format as clear markdown with sections.
+  
+  # Step 4: Final Validation with Consensus
+  - name: final_validation
+    needs: [compare_analyses]
+    consensus:
+      prompt: |
+        Based on these analyses, validate the final recommendation:
+        
+        Synthesis:
+        {{compare_analyses}}
+        
+        Does this synthesis accurately represent both viewpoints
+        and provide a balanced recommendation?
+        
+        Answer YES if synthesis is accurate and balanced.
+        Answer NO if synthesis misrepresents views or lacks balance.
+        
+        Explain your reasoning briefly.
+      executions:
+        - provider: anthropic
+          model: claude-sonnet-4
+          temperature: 0
+        - provider: openai
+          model: gpt-4o
+          temperature: 0
+      require: unanimous
+      timeout: 60s
+  
+  # Step 5: Final Report
+  - name: final_report
+    needs: [final_validation]
+    run: |
+      Create final multi-provider analysis report:
+      
+      Original Question:
+      {{input}}
+      
+      Synthesis:
+      {{compare_analyses}}
+      
+      Validation Result:
+      {{final_validation}}
+      
+      Format as:
+      
+      # Multi-Provider Analysis Report
+      
+      ## Question
+      [Restate the question]
+      
+      ## Consensus Findings
+      [Points where all providers agree]
+      
+      ## Alternative Perspectives
+      [Different viewpoints discovered]
+      
+      ## Validated Recommendation
+      [Final recommendation with validation status]
+      
+      ## Confidence Level
+      [Overall confidence based on provider agreement]
+
+# Usage:
+#
+# ./mcp-cli --workflow multi_provider --input-data \
+#   "Should we migrate our monolith to microservices?"
+#
+# Or:
+# ./mcp-cli --workflow multi_provider --input-data \
+#   "What are the proven benefits of intermittent fasting?"
+#
+# Strategy:
+# - Claude and GPT-4 provide independent analyses
+# - Comparison identifies agreements and differences
+# - Consensus validates the synthesis
+# - Final report presents validated findings
+#
+# Best for:
+# - High-stakes decisions
+# - Fact-checking critical information
+# - Reducing single-model bias
+# - Building confidence through agreement

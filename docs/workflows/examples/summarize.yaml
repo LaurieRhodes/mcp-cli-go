@@ -1,0 +1,71 @@
+$schema: "workflow/v2.0"
+name: summarize
+version: 1.0.0
+description: Multi-step document summarization with extraction and categorization
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.5
+
+steps:
+  # Step 1: Extract key points from document
+  - name: extract_key_points
+    run: |
+      Extract the key points from this document:
+      
+      {{input}}
+      
+      Focus on:
+      - Main arguments
+      - Important facts
+      - Key conclusions
+      - Supporting evidence
+      
+      Return as a structured list with brief explanations.
+  
+  # Step 2: Categorize points by theme
+  - name: categorize
+    needs: [extract_key_points]
+    run: |
+      Categorize these key points by topic:
+      
+      {{extract_key_points}}
+      
+      Group related points together.
+      Identify 3-5 main themes.
+      
+      Format:
+      Theme 1: [theme name]
+      - Point 1
+      - Point 2
+      
+      Theme 2: [theme name]
+      - Point 1
+      - Point 2
+  
+  # Step 3: Create final summary
+  - name: create_summary
+    needs: [categorize]
+    run: |
+      Create a concise summary from these categorized points:
+      
+      {{categorize}}
+      
+      Target length: 200-300 words
+      
+      Structure:
+      1. Opening statement (main idea in 1-2 sentences)
+      2. Key themes (2-3 sentences each)
+      3. Conclusion (1-2 sentences)
+      
+      Style: Professional and clear
+
+# Usage:
+# 
+# ./mcp-cli --workflow summarize --input-data "Your document text here"
+#
+# Or with file:
+# ./mcp-cli --workflow summarize --input-data "$(cat document.txt)"
+#
+# Output: A well-structured 200-300 word summary

@@ -139,7 +139,7 @@ func NewAWSBedrockClient(providerType domain.ProviderType, cfg *config.ProviderC
 	}
 
 	maxRetries := 3
-	if cfg.MaxRetries > 0 {
+	if cfg.MaxRetries >= 0 {
 		maxRetries = cfg.MaxRetries
 	}
 

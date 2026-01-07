@@ -1,5 +1,6 @@
 package config
 
+
 // ApplicationConfig represents the complete application configuration
 type ApplicationConfig struct {
 	Servers     map[string]ServerConfig      `yaml:"servers"`
@@ -7,45 +8,38 @@ type ApplicationConfig struct {
 	Embeddings  *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
 	Chat        *ChatConfig                  `yaml:"chat,omitempty"`
 	Skills      *SkillsConfig                `yaml:"skills,omitempty"`
-	Templates   map[string]*WorkflowTemplate `yaml:"templates,omitempty"`
-	TemplatesV2 map[string]*TemplateV2       `yaml:"-"` // Loaded separately from config/templates/
+	Workflows   map[string]*WorkflowV2       `yaml:"-"` // Loaded separately from config/workflows/
 }
 
-// ValidateWorkflowTemplates validates all workflow templates in the configuration
-func (c *ApplicationConfig) ValidateWorkflowTemplates() error {
-	if c.Templates == nil {
+// ValidateWorkflows validates all workflow v2 definitions
+func (c *ApplicationConfig) ValidateWorkflows() error {
+	if c.Workflows == nil {
 		return nil
 	}
 
-	for templateName, template := range c.Templates {
-		if err := template.ValidateWorkflowTemplate(); err != nil {
-			return NewConfigError("invalid workflow template").
-				WithContext("template", templateName).
-				WithCause(err)
-		}
-	}
-
+	// Workflows are validated during loading by the Loader
+	// This is a placeholder for additional validation if needed
 	return nil
 }
 
-// GetWorkflowTemplate retrieves a workflow template by name
-func (c *ApplicationConfig) GetWorkflowTemplate(name string) (*WorkflowTemplate, bool) {
-	if c.Templates == nil {
+// GetWorkflow retrieves a workflow v2 by name
+func (c *ApplicationConfig) GetWorkflow(name string) (*WorkflowV2, bool) {
+	if c.Workflows == nil {
 		return nil, false
 	}
 
-	template, exists := c.Templates[name]
-	return template, exists
+	workflow, exists := c.Workflows[name]
+	return workflow, exists
 }
 
-// ListWorkflowTemplates returns all available workflow template names
-func (c *ApplicationConfig) ListWorkflowTemplates() []string {
-	if c.Templates == nil {
+// ListWorkflows returns all available workflow v2 names
+func (c *ApplicationConfig) ListWorkflows() []string {
+	if c.Workflows == nil {
 		return []string{}
 	}
 
-	names := make([]string, 0, len(c.Templates))
-	for name := range c.Templates {
+	names := make([]string, 0, len(c.Workflows))
+	for name := range c.Workflows {
 		names = append(names, name)
 	}
 

@@ -1,0 +1,151 @@
+$schema: "workflow/v2.0"
+name: composed_analysis
+version: 1.0.0
+description: Comprehensive analysis by composing specialized workflows
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.5
+
+steps:
+  # Step 1: Run code review workflow
+  - name: code_review_results
+    template:
+      name: code_review
+      with:
+        input: "{{input}}"
+  
+  # Step 2: Run security-focused analysis
+  - name: security_check_results
+    needs: [code_review_results]
+    template:
+      name: security_analysis
+      with:
+        code: "{{input}}"
+        review: "{{code_review_results}}"
+  
+  # Step 3: Run performance analysis
+  - name: performance_check_results
+    needs: [code_review_results]
+    template:
+      name: performance_analysis
+      with:
+        code: "{{input}}"
+  
+  # Step 4: Synthesize all analyses
+  - name: comprehensive_report
+    needs: [code_review_results, security_check_results, performance_check_results]
+    run: |
+      Create a comprehensive analysis report combining all specialized analyses:
+      
+      Code Review:
+      {{code_review_results}}
+      
+      Security Analysis:
+      {{security_check_results}}
+      
+      Performance Analysis:
+      {{performance_check_results}}
+      
+      Format as:
+      
+      # Comprehensive Code Analysis
+      
+      ## Executive Summary
+      Provide 3-4 sentence overview of code health across all dimensions.
+      
+      ## Detailed Findings
+      
+      ### General Code Review
+      [Key findings from code review]
+      - Strengths
+      - Areas for improvement
+      
+      ### Security Assessment
+      [Critical security findings]
+      - Vulnerabilities identified
+      - Security score
+      - Priority fixes
+      
+      ### Performance Evaluation
+      [Performance concerns and opportunities]
+      - Bottlenecks
+      - Optimization opportunities
+      - Scalability considerations
+      
+      ## Integrated Recommendations
+      Combine insights from all analyses:
+      1. [Highest priority action - consider security, quality, performance]
+      2. [Second priority action]
+      3. [Third priority action]
+      4. [Fourth priority action]
+      5. [Fifth priority action]
+      
+      ## Risk Assessment
+      - Security Risk: [HIGH/MEDIUM/LOW]
+      - Quality Risk: [HIGH/MEDIUM/LOW]
+      - Performance Risk: [HIGH/MEDIUM/LOW]
+      - Overall Risk: [Assessment]
+      
+      ## Deployment Readiness
+      [Ready/Not Ready for production with explanation]
+      
+      ## Next Steps
+      [Specific actions to take in priority order]
+  
+  # Step 5: Validation with consensus
+  - name: approval_validation
+    needs: [comprehensive_report]
+    consensus:
+      prompt: |
+        Validate this comprehensive analysis:
+        
+        {{comprehensive_report}}
+        
+        Is this analysis:
+        - Complete (covers all important aspects)?
+        - Accurate (findings are correct)?
+        - Actionable (recommendations are specific)?
+        
+        Answer VALIDATED if yes to all three.
+        Answer NEEDS_REVISION if no to any.
+        
+        Explain briefly.
+      executions:
+        - provider: anthropic
+          model: claude-sonnet-4
+          temperature: 0
+        - provider: openai
+          model: gpt-4o
+          temperature: 0
+      require: unanimous
+
+# Supporting workflows needed (create separately):
+#
+# security_analysis.yaml:
+# $schema: "workflow/v2.0"
+# name: security_analysis
+# steps:
+#   - name: analyze
+#     run: "Security analysis of: {{code}}"
+#
+# performance_analysis.yaml:
+# $schema: "workflow/v2.0"
+# name: performance_analysis
+# steps:
+#   - name: analyze
+#     run: "Performance analysis of: {{code}}"
+
+# Usage:
+#
+# ./mcp-cli --workflow composed_analysis --input-data "$(cat mycode.py)"
+#
+# Benefits of composition:
+# 1. Reusability - Each analysis workflow can be used independently
+# 2. Maintainability - Update one workflow, all compositions benefit
+# 3. Modularity - Clean separation of concerns
+# 4. Flexibility - Easy to add/remove analysis types
+#
+# This demonstrates the power of workflow composition for
+# building complex analysis systems from simpler components.

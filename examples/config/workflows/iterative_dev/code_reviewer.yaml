@@ -1,0 +1,31 @@
+$schema: "workflow/v2.0"
+name: code_reviewer
+version: 1.0.0
+description: Reviews code against test criteria
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.3
+
+steps:
+  - name: review
+    run: |
+      Review this code against the test criteria.
+      
+      Test Criteria:
+      {{tests}}
+      
+      Code to review:
+      {{code}}
+      
+      Check each test case. Respond in this EXACT format:
+      
+      If ALL tests would pass:
+      PASS: All test criteria met
+      
+      If ANY test would fail:
+      FAIL: [specific issue found]
+      Suggestion: [how to fix it]
+      
+      Be strict but fair. Only say PASS if code truly meets ALL criteria.

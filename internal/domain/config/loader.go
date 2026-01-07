@@ -6,340 +6,215 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"gopkg.in/yaml.v3"
 )
 
-// Loader handles loading and saving configuration files
+// Loader handles loading configuration files in both monolithic and modular formats
 type Loader struct {
-	baseDir string // Base directory for resolving relative paths
+	baseDir string
 }
 
-// NewLoader creates a new configuration loader
+// NewLoader creates a new config loader
 func NewLoader() *Loader {
 	return &Loader{}
 }
 
-// IncludeDirectives defines file patterns to include for modular configs
+// IncludeDirectives specifies file patterns to include for modular config
 type IncludeDirectives struct {
 	Providers  string `yaml:"providers,omitempty"`  // e.g., "config/providers/*.yaml"
 	Servers    string `yaml:"servers,omitempty"`    // e.g., "config/servers/*.yaml"
 	RunAs      string `yaml:"runas,omitempty"`      // e.g., "config/runas/*.yaml"
 	Embeddings string `yaml:"embeddings,omitempty"` // e.g., "config/embeddings/*.yaml"
-	Templates  string `yaml:"templates,omitempty"`  // e.g., "config/templates/**/*.yaml"
+	Workflows  string `yaml:"workflows,omitempty"`  // e.g., "config/workflows/*.yaml"
 	Settings   string `yaml:"settings,omitempty"`   // e.g., "config/settings.yaml"
 }
 
 // MainConfigFile represents the main config file with optional includes
 type MainConfigFile struct {
 	Includes   *IncludeDirectives `yaml:"includes,omitempty"`
-	// Legacy fields for backward compatibility - prefer using settings.yaml
+	// Legacy fields for backward compatibility with old monolithic configs
 	Servers    map[string]ServerConfig      `yaml:"servers,omitempty"`
 	AI         *AIConfig                    `yaml:"ai,omitempty"`
 	Embeddings *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
-	Templates  map[string]*WorkflowTemplate `yaml:"templates,omitempty"`
 }
 
 // Load loads configuration from a single file or detects modular structure
 func (l *Loader) Load(path string) (*ApplicationConfig, error) {
-	// Check if path is a directory
-	info, err := os.Stat(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to stat config path: %w", err)
-	}
-
-	if info.IsDir() {
-		// Directory: look for config.yaml inside
-		configFile := filepath.Join(path, "config.yaml")
-		return l.LoadWithIncludes(configFile)
-	}
-
-	// Single file: load directly
-	return l.loadSingleFile(path)
-}
-
-// LoadWithIncludes loads a config file and processes include directives
-func (l *Loader) LoadWithIncludes(mainFile string) (*ApplicationConfig, error) {
-	// Set base directory for resolving relative paths
-	l.baseDir = filepath.Dir(mainFile)
+	// Set base directory for relative path resolution
+	l.baseDir = filepath.Dir(path)
 
 	// Read main config file
-	data, err := os.ReadFile(mainFile)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read main config file: %w", err)
-	}
-
-	// Parse main config
-	var mainConfig MainConfigFile
-	if err := yaml.Unmarshal(data, &mainConfig); err != nil {
-		return nil, fmt.Errorf("failed to parse main config file: %w", err)
-	}
-
-	// Start with config from main file
-	result := &ApplicationConfig{
-		Servers:    mainConfig.Servers,
-		AI:         mainConfig.AI,
-		Embeddings: mainConfig.Embeddings,
-		Templates:  mainConfig.Templates,
-		TemplatesV2: make(map[string]*TemplateV2),
-	}
-
-	// Initialize empty maps if nil
-	if result.Servers == nil {
-		result.Servers = make(map[string]ServerConfig)
-	}
-	if result.Templates == nil {
-		result.Templates = make(map[string]*WorkflowTemplate)
-	}
-
-	// Process includes if present
-	if mainConfig.Includes != nil {
-		if err := l.processIncludes(mainConfig.Includes, result); err != nil {
-			return nil, fmt.Errorf("failed to process includes: %w", err)
-		}
-	}
-
-	return result, nil
-}
-
-// loadSingleFile loads a monolithic config file
-func (l *Loader) loadSingleFile(path string) (*ApplicationConfig, error) {
-	// Set base directory for resolving relative paths
-	l.baseDir = filepath.Dir(path)
-	
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	// Try to parse as MainConfigFile first to check for includes
+	// Parse main config
 	var mainConfig MainConfigFile
-	if err := yaml.Unmarshal(data, &mainConfig); err == nil && mainConfig.Includes != nil {
-		// File has includes, process them
-		result := &ApplicationConfig{
-			Servers:    mainConfig.Servers,
-			AI:         mainConfig.AI,
-			Embeddings: mainConfig.Embeddings,
-			Templates:  mainConfig.Templates,
-		}
-		
-		// Initialize empty maps if nil
-		if result.Servers == nil {
-			result.Servers = make(map[string]ServerConfig)
-		}
-		if result.Templates == nil {
-			result.Templates = make(map[string]*WorkflowTemplate)
-		}
-		
-		// Process includes
-		if err := l.processIncludes(mainConfig.Includes, result); err != nil {
-			return nil, fmt.Errorf("failed to process includes: %w", err)
-		}
-		
-		return result, nil
-	}
-	
-	// No includes, parse as regular ApplicationConfig
-	var config ApplicationConfig
-	if err := yaml.Unmarshal(data, &config); err != nil {
+	if err := yaml.Unmarshal(data, &mainConfig); err != nil {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
 
-	// Initialize empty maps if nil
-	if config.Servers == nil {
-		config.Servers = make(map[string]ServerConfig)
-	}
-	if config.Templates == nil {
-		config.Templates = make(map[string]*WorkflowTemplate)
+	// Check if this is a modular config (has includes)
+	if mainConfig.Includes != nil {
+		return l.loadModular(mainConfig.Includes)
 	}
 
-	return &config, nil
+	// Handle monolithic config
+	return l.loadMonolithic(&mainConfig)
 }
 
-// processIncludes processes all include directives and merges into result
-func (l *Loader) processIncludes(includes *IncludeDirectives, result *ApplicationConfig) error {
-	// Process settings first (if present)
+// loadModular loads configuration from modular structure
+func (l *Loader) loadModular(includes *IncludeDirectives) (*ApplicationConfig, error) {
+	result := &ApplicationConfig{
+		Servers:   make(map[string]ServerConfig),
+		Workflows: make(map[string]*WorkflowV2),
+	}
+
+	// Load settings first (contains AI, embeddings, etc.)
 	if includes.Settings != "" {
 		if err := l.loadSettings(includes.Settings, result); err != nil {
-			return fmt.Errorf("failed to load settings: %w", err)
+			return nil, fmt.Errorf("failed to load settings: %w", err)
 		}
 	}
 
-	// Process provider includes
+	// Initialize maps if nil
+	if result.Servers == nil {
+		result.Servers = make(map[string]ServerConfig)
+	}
+	if result.Workflows == nil {
+		result.Workflows = make(map[string]*WorkflowV2)
+	}
+
+	// Load components in order
+	if err := l.loadIncludes(includes, result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// loadMonolithic loads configuration from a single file
+func (l *Loader) loadMonolithic(mainConfig *MainConfigFile) (*ApplicationConfig, error) {
+	result := &ApplicationConfig{
+		Servers:   mainConfig.Servers,
+		AI:        mainConfig.AI,
+		Embeddings: mainConfig.Embeddings,
+		Workflows: make(map[string]*WorkflowV2),
+	}
+
+	// Initialize maps if nil
+	if result.Servers == nil {
+		result.Servers = make(map[string]ServerConfig)
+	}
+	if result.Workflows == nil {
+		result.Workflows = make(map[string]*WorkflowV2)
+	}
+
+	return result, nil
+}
+
+// loadSettings loads settings from a YAML file
+func (l *Loader) loadSettings(pattern string, result *ApplicationConfig) error {
+	// Make pattern absolute if needed
+	if !filepath.IsAbs(pattern) && l.baseDir != "" {
+		pattern = filepath.Join(l.baseDir, pattern)
+	}
+
+	data, err := os.ReadFile(pattern)
+	if err != nil {
+		return fmt.Errorf("failed to read settings file: %w", err)
+	}
+
+	// Parse settings into a temporary struct
+	var settings struct {
+		AI         *AIConfig         `yaml:"ai,omitempty"`
+		Embeddings *EmbeddingsConfig `yaml:"embeddings,omitempty"`
+		Chat       *ChatConfig       `yaml:"chat,omitempty"`
+		Skills     *SkillsConfig     `yaml:"skills,omitempty"`
+	}
+
+	if err := yaml.Unmarshal(data, &settings); err != nil {
+		return fmt.Errorf("failed to parse settings: %w", err)
+	}
+
+	// Copy to result
+	result.AI = settings.AI
+	result.Embeddings = settings.Embeddings
+	result.Chat = settings.Chat
+	result.Skills = settings.Skills
+
+	return nil
+}
+
+// loadIncludes loads all included configuration files
+func (l *Loader) loadIncludes(includes *IncludeDirectives, result *ApplicationConfig) error {
+	// Load providers
 	if includes.Providers != "" {
 		if err := l.loadProviders(includes.Providers, result); err != nil {
 			return fmt.Errorf("failed to load providers: %w", err)
 		}
 	}
 
-	// Process server includes
-	if includes.Servers != "" {
-		if err := l.loadServers(includes.Servers, result); err != nil {
-			return fmt.Errorf("failed to load servers: %w", err)
-		}
-	}
-
-	// Process runas includes (runas configs define MCP servers)
-	// Skip if MCP_CLI_SERVE_MODE is set to prevent recursive loading
-	if includes.RunAs != "" && os.Getenv("MCP_CLI_SERVE_MODE") != "true" {
-		if err := l.loadRunAsServers(includes.RunAs, result); err != nil {
-			return fmt.Errorf("failed to load runas servers: %w", err)
-		}
-	}
-
-	// Process embedding includes
+	// Load embeddings
 	if includes.Embeddings != "" {
 		if err := l.loadEmbeddings(includes.Embeddings, result); err != nil {
 			return fmt.Errorf("failed to load embeddings: %w", err)
 		}
 	}
 
-	// Process template includes
-	if includes.Templates != "" {
-		if err := l.loadTemplates(includes.Templates, result); err != nil {
-			return fmt.Errorf("failed to load templates: %w", err)
+	// Load servers
+	if includes.Servers != "" {
+		if err := l.loadServers(includes.Servers, result); err != nil {
+			return fmt.Errorf("failed to load servers: %w", err)
+		}
+	}
+
+	// Load workflows (new v2.0 system)
+	if includes.Workflows != "" {
+		if err := l.loadWorkflows(includes.Workflows, result); err != nil {
+			return fmt.Errorf("failed to load workflows: %w", err)
 		}
 	}
 
 	return nil
 }
 
-// loadSettings loads global settings from settings.yaml
-func (l *Loader) loadSettings(path string, result *ApplicationConfig) error {
-	// Make path absolute relative to base directory
-	if !filepath.IsAbs(path) && l.baseDir != "" {
-		path = filepath.Join(l.baseDir, path)
-	}
-
-	// Read settings file
-	data, err := os.ReadFile(path)
-	if err != nil {
-		// Settings file is optional
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return fmt.Errorf("failed to read settings file %s: %w", path, err)
-	}
-
-	// Parse settings file
-	var settings struct {
-		AI         *AIConfig         `yaml:"ai,omitempty"`
-		Embeddings *EmbeddingsConfig `yaml:"embeddings,omitempty"`
-		Chat       *ChatConfig       `yaml:"chat,omitempty"`
-	}
-
-	if err := yaml.Unmarshal(data, &settings); err != nil {
-		return fmt.Errorf("failed to parse settings file %s: %w", path, err)
-	}
-	
-	logging.Debug("Parsed settings.yaml - Chat config present: %v", settings.Chat != nil)
-	if settings.Chat != nil {
-		logging.Debug("  chat_logs_location: %s", settings.Chat.ChatLogsLocation)
-	}
-
-	// Merge AI settings (settings.yaml takes precedence over main config)
-	if settings.AI != nil {
-		if result.AI == nil {
-			result.AI = settings.AI
-		} else {
-			// Merge settings, preferring settings.yaml values
-			if settings.AI.DefaultProvider != "" {
-				result.AI.DefaultProvider = settings.AI.DefaultProvider
-			}
-			if settings.AI.DefaultSystemPrompt != "" {
-				result.AI.DefaultSystemPrompt = settings.AI.DefaultSystemPrompt
-			}
-		}
-	}
-
-	// Merge embeddings settings
-	if settings.Embeddings != nil {
-		if result.Embeddings == nil {
-			result.Embeddings = settings.Embeddings
-		} else {
-			// Merge settings, preferring settings.yaml values
-			if settings.Embeddings.DefaultChunkStrategy != "" {
-				result.Embeddings.DefaultChunkStrategy = settings.Embeddings.DefaultChunkStrategy
-			}
-			if settings.Embeddings.DefaultMaxChunkSize > 0 {
-				result.Embeddings.DefaultMaxChunkSize = settings.Embeddings.DefaultMaxChunkSize
-			}
-			if settings.Embeddings.DefaultOverlap > 0 {
-				result.Embeddings.DefaultOverlap = settings.Embeddings.DefaultOverlap
-			}
-			if settings.Embeddings.OutputPrecision > 0 {
-				result.Embeddings.OutputPrecision = settings.Embeddings.OutputPrecision
-			}
-		}
-	}
-
-	// Merge chat settings
-	if settings.Chat != nil {
-		if result.Chat == nil {
-			result.Chat = settings.Chat
-			logging.Debug("Chat config set from settings: %s", result.Chat.ChatLogsLocation)
-		} else {
-			// Merge settings, preferring settings.yaml values
-			if settings.Chat.DefaultTemperature > 0 {
-				result.Chat.DefaultTemperature = settings.Chat.DefaultTemperature
-			}
-			if settings.Chat.MaxHistorySize > 0 {
-				result.Chat.MaxHistorySize = settings.Chat.MaxHistorySize
-			}
-			if settings.Chat.ChatLogsLocation != "" {
-				result.Chat.ChatLogsLocation = settings.Chat.ChatLogsLocation
-				logging.Debug("Chat logs location updated: %s", result.Chat.ChatLogsLocation)
-			}
-		}
-	}
-
-	return nil
-}
-
-// loadProviders loads provider configurations from files matching pattern
+// loadProviders loads provider configurations from files
 func (l *Loader) loadProviders(pattern string, result *ApplicationConfig) error {
 	files, err := l.glob(pattern)
 	if err != nil {
 		return err
 	}
 
-	// Ensure AI config exists
-	if result.AI == nil {
-		result.AI = &AIConfig{
-			Interfaces: make(map[InterfaceType]InterfaceConfig),
-		}
-	}
-	if result.AI.Interfaces == nil {
-		result.AI.Interfaces = make(map[InterfaceType]InterfaceConfig)
-	}
-
 	for _, file := range files {
-		// Read provider file
 		data, err := os.ReadFile(file)
 		if err != nil {
 			return fmt.Errorf("failed to read provider file %s: %w", file, err)
 		}
 
-		// Parse as a single provider config wrapped in interface structure
-		var providerFile struct {
-			InterfaceType InterfaceType `yaml:"interface_type"`
-			ProviderName  string        `yaml:"provider_name"`
+		var provider struct {
+			InterfaceType InterfaceType  `yaml:"interface_type"`
+			ProviderName  string         `yaml:"provider_name"`
 			Config        ProviderConfig `yaml:"config"`
 		}
 
-		if err := yaml.Unmarshal(data, &providerFile); err != nil {
+		if err := yaml.Unmarshal(data, &provider); err != nil {
 			return fmt.Errorf("failed to parse provider file %s: %w", file, err)
 		}
 
-		// Add to appropriate interface
-		interfaceType := providerFile.InterfaceType
-		if interfaceType == "" {
-			// Auto-detect interface type from provider name
-			interfaceType = inferInterfaceType(providerFile.ProviderName)
+		// Initialize AI config if needed
+		if result.AI == nil {
+			result.AI = &AIConfig{
+				Interfaces: make(map[InterfaceType]InterfaceConfig),
+			}
+		}
+		if result.AI.Interfaces == nil {
+			result.AI.Interfaces = make(map[InterfaceType]InterfaceConfig)
 		}
 
 		// Get or create interface config
-		interfaceConfig, exists := result.AI.Interfaces[interfaceType]
+		interfaceConfig, exists := result.AI.Interfaces[provider.InterfaceType]
 		if !exists {
 			interfaceConfig = InterfaceConfig{
 				Providers: make(map[string]ProviderConfig),
@@ -349,126 +224,50 @@ func (l *Loader) loadProviders(pattern string, result *ApplicationConfig) error 
 			interfaceConfig.Providers = make(map[string]ProviderConfig)
 		}
 
-		// Add provider to interface
-		interfaceConfig.Providers[providerFile.ProviderName] = providerFile.Config
-		result.AI.Interfaces[interfaceType] = interfaceConfig
+		// Add provider
+		interfaceConfig.Providers[provider.ProviderName] = provider.Config
+		result.AI.Interfaces[provider.InterfaceType] = interfaceConfig
 	}
 
 	return nil
 }
 
-// loadServers loads server configurations from files matching pattern
-func (l *Loader) loadServers(pattern string, result *ApplicationConfig) error {
-	files, err := l.glob(pattern)
-	if err != nil {
-		return err
-	}
-
-	for _, file := range files {
-		// Read server file
-		data, err := os.ReadFile(file)
-		if err != nil {
-			return fmt.Errorf("failed to read server file %s: %w", file, err)
-		}
-
-		// Parse as a single server config
-		var serverFile struct {
-			ServerName string       `yaml:"server_name"`
-			Config     ServerConfig `yaml:"config"`
-		}
-
-		if err := yaml.Unmarshal(data, &serverFile); err != nil {
-			return fmt.Errorf("failed to parse server file %s: %w", file, err)
-		}
-
-		// Add to servers map
-		result.Servers[serverFile.ServerName] = serverFile.Config
-	}
-
-	return nil
-}
-
-// loadRunAsServers loads runas configurations and converts them to server configs
-func (l *Loader) loadRunAsServers(pattern string, result *ApplicationConfig) error {
-	files, err := l.glob(pattern)
-	if err != nil {
-		return err
-	}
-
-	// Get the executable path for mcp-cli
-	// We'll use the same binary that's currently running
-	exePath, err := os.Executable()
-	if err != nil {
-		return fmt.Errorf("failed to get executable path: %w", err)
-	}
-
-	for _, file := range files {
-		// Get absolute path for the runas config
-		absPath, err := filepath.Abs(file)
-		if err != nil {
-			return fmt.Errorf("failed to get absolute path for %s: %w", file, err)
-		}
-
-		// Derive server name from filename (without extension)
-		serverName := strings.TrimSuffix(filepath.Base(file), filepath.Ext(file))
-
-		// Create ServerConfig that runs "mcp-cli serve <runas-config>"
-		serverConfig := ServerConfig{
-			Command: exePath,
-			Args:    []string{"serve", absPath},
-			// Optional: could add description from runas config
-		}
-
-		// Add to servers map
-		result.Servers[serverName] = serverConfig
-	}
-
-	return nil
-}
-
-// loadEmbeddings loads embedding configurations from files matching pattern
+// loadEmbeddings loads embedding provider configurations
+// loadEmbeddings loads embedding provider configurations
 func (l *Loader) loadEmbeddings(pattern string, result *ApplicationConfig) error {
 	files, err := l.glob(pattern)
 	if err != nil {
 		return err
 	}
 
-	// Ensure embeddings config exists
-	if result.Embeddings == nil {
-		result.Embeddings = &EmbeddingsConfig{
-			Interfaces: make(map[InterfaceType]EmbeddingInterfaceConfig),
-		}
-	}
-	if result.Embeddings.Interfaces == nil {
-		result.Embeddings.Interfaces = make(map[InterfaceType]EmbeddingInterfaceConfig)
-	}
-
 	for _, file := range files {
-		// Read embedding file
 		data, err := os.ReadFile(file)
 		if err != nil {
 			return fmt.Errorf("failed to read embedding file %s: %w", file, err)
 		}
 
-		// Parse as a single embedding provider config
-		var embeddingFile struct {
-			InterfaceType InterfaceType           `yaml:"interface_type"`
-			ProviderName  string                  `yaml:"provider_name"`
+		var embedding struct {
+			InterfaceType InterfaceType         `yaml:"interface_type"`
+			ProviderName  string                `yaml:"provider_name"`
 			Config        EmbeddingProviderConfig `yaml:"config"`
 		}
 
-		if err := yaml.Unmarshal(data, &embeddingFile); err != nil {
+		if err := yaml.Unmarshal(data, &embedding); err != nil {
 			return fmt.Errorf("failed to parse embedding file %s: %w", file, err)
 		}
 
-		// Add to appropriate interface
-		interfaceType := embeddingFile.InterfaceType
-		if interfaceType == "" {
-			interfaceType = inferInterfaceType(embeddingFile.ProviderName)
+		// Initialize embeddings config if needed
+		if result.Embeddings == nil {
+			result.Embeddings = &EmbeddingsConfig{
+				Interfaces: make(map[InterfaceType]EmbeddingInterfaceConfig),
+			}
+		}
+		if result.Embeddings.Interfaces == nil {
+			result.Embeddings.Interfaces = make(map[InterfaceType]EmbeddingInterfaceConfig)
 		}
 
 		// Get or create interface config
-		interfaceConfig, exists := result.Embeddings.Interfaces[interfaceType]
+		interfaceConfig, exists := result.Embeddings.Interfaces[embedding.InterfaceType]
 		if !exists {
 			interfaceConfig = EmbeddingInterfaceConfig{
 				Providers: make(map[string]EmbeddingProviderConfig),
@@ -478,70 +277,81 @@ func (l *Loader) loadEmbeddings(pattern string, result *ApplicationConfig) error
 			interfaceConfig.Providers = make(map[string]EmbeddingProviderConfig)
 		}
 
-		// Add provider to interface
-		interfaceConfig.Providers[embeddingFile.ProviderName] = embeddingFile.Config
-		result.Embeddings.Interfaces[interfaceType] = interfaceConfig
+		// Add embedding provider
+		interfaceConfig.Providers[embedding.ProviderName] = embedding.Config
+		result.Embeddings.Interfaces[embedding.InterfaceType] = interfaceConfig
 	}
 
 	return nil
 }
 
-// loadTemplates loads workflow templates from files matching pattern
-func (l *Loader) loadTemplates(pattern string, result *ApplicationConfig) error {
+
+// loadServers loads server configurations from files
+func (l *Loader) loadServers(pattern string, result *ApplicationConfig) error {
 	files, err := l.glob(pattern)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
-		// Read template file
 		data, err := os.ReadFile(file)
 		if err != nil {
-			return fmt.Errorf("failed to read template file %s: %w", file, err)
+			return fmt.Errorf("failed to read server file %s: %w", file, err)
 		}
 
-		// Try to detect template version by checking for "version" field
-		var versionCheck struct {
-			Version string `yaml:"version"`
+		var server struct {
+			ServerName string       `yaml:"server_name"`
+			Config     ServerConfig `yaml:"config"`
 		}
-		yaml.Unmarshal(data, &versionCheck)
 
-		if versionCheck.Version != "" {
-			// This is a template v2
-			var templateV2 TemplateV2
-			if err := yaml.Unmarshal(data, &templateV2); err != nil {
-				return fmt.Errorf("failed to parse template v2 file %s: %w", file, err)
-			}
-
-			// Validate template v2
-			// Basic validation - full validation happens in template package
-			if templateV2.Name == "" {
-				templateV2.Name = strings.TrimSuffix(filepath.Base(file), filepath.Ext(file))
-			}
-
-			// Add to templates v2 map
-			if result.TemplatesV2 == nil {
-				result.TemplatesV2 = make(map[string]*TemplateV2)
-			}
-			result.TemplatesV2[templateV2.Name] = &templateV2
-		} else {
-			// This is an old workflow template
-			var template WorkflowTemplate
-			if err := yaml.Unmarshal(data, &template); err != nil {
-				return fmt.Errorf("failed to parse template file %s: %w", file, err)
-			}
-
-			// Use template name from file or filename as key
-			templateName := template.Name
-			if templateName == "" {
-				// Use filename without extension as template name
-				templateName = strings.TrimSuffix(filepath.Base(file), filepath.Ext(file))
-				template.Name = templateName
-			}
-
-			// Add to old templates map
-			result.Templates[templateName] = &template
+		if err := yaml.Unmarshal(data, &server); err != nil {
+			return fmt.Errorf("failed to parse server file %s: %w", file, err)
 		}
+
+		result.Servers[server.ServerName] = server.Config
+	}
+
+	return nil
+}
+
+// loadWorkflows loads workflow v2.0 files
+func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error {
+	files, err := l.glob(pattern)
+	if err != nil {
+		return err
+	}
+
+	// Use workflow loader for validation
+	workflowLoader := NewWorkflowLoader()
+
+	for _, file := range files {
+		data, err := os.ReadFile(file)
+		if err != nil {
+			return fmt.Errorf("failed to read workflow file %s: %w", file, err)
+		}
+
+		// Check if this is a workflow v2.0 by looking for schema field
+		var schemaCheck struct {
+			Schema string `yaml:"$schema"`
+		}
+		if err := yaml.Unmarshal(data, &schemaCheck); err != nil {
+			return fmt.Errorf("failed to parse workflow file %s: %w", file, err)
+		}
+
+		// Only load workflow v2.0 files
+		if schemaCheck.Schema != "workflow/v2.0" {
+			// Skip non-v2.0 files
+			continue
+		}
+
+		// Parse and validate using workflow loader
+		workflow, err := workflowLoader.LoadFromBytes(data)
+		if err != nil {
+			return fmt.Errorf("failed to load workflow from %s: %w", file, err)
+		}
+
+		// Use workflow name as key
+		result.Workflows[workflow.Name] = workflow
 	}
 
 	return nil
@@ -605,7 +415,7 @@ func (l *Loader) recursiveGlob(pattern string) ([]string, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to walk directory for pattern %s: %w", pattern, err)
+		return nil, fmt.Errorf("failed to walk directory: %w", err)
 	}
 
 	return results, nil
@@ -613,11 +423,6 @@ func (l *Loader) recursiveGlob(pattern string) ([]string, error) {
 
 // Save saves configuration to a file
 func (l *Loader) Save(config *ApplicationConfig, path string) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
-	}
-
 	data, err := yaml.Marshal(config)
 	if err != nil {
 		return fmt.Errorf("failed to marshal config: %w", err)
@@ -630,28 +435,31 @@ func (l *Loader) Save(config *ApplicationConfig, path string) error {
 	return nil
 }
 
-// inferInterfaceType determines interface type from provider name (fallback for configs without interface_type)
-func inferInterfaceType(providerName string) InterfaceType {
-	// This is a fallback for old configs that don't specify interface_type
-	// New configs should always specify interface_type in the provider file
-	providerLower := strings.ToLower(providerName)
-	
-	switch {
-	case providerLower == "anthropic":
-		return AnthropicNative
-	case providerLower == "ollama":
-		return OllamaNative
-	case providerLower == "gemini":
-		return GeminiNative
-	case strings.Contains(providerLower, "azure"):
-		return AzureOpenAI
-	case strings.Contains(providerLower, "bedrock"):
-		return AWSBedrock
-	case strings.Contains(providerLower, "vertex"):
-		return GCPVertexAI
-	default:
-		// Safe default for OpenAI-compatible providers
-		// This includes: openai, deepseek, openrouter, lmstudio, and any custom providers
-		return OpenAICompatible
+// NewWorkflowLoader creates a workflow-specific loader
+func NewWorkflowLoader() *WorkflowLoader {
+	return &WorkflowLoader{}
+}
+
+// WorkflowLoader is a helper that delegates to the workflow service loader
+type WorkflowLoader struct{}
+
+// LoadFromBytes loads a workflow from bytes
+func (wl *WorkflowLoader) LoadFromBytes(data []byte) (*WorkflowV2, error) {
+	var workflow WorkflowV2
+	if err := yaml.Unmarshal(data, &workflow); err != nil {
+		return nil, fmt.Errorf("failed to parse workflow: %w", err)
 	}
+
+	// Basic validation
+	if workflow.Name == "" {
+		return nil, fmt.Errorf("workflow name is required")
+	}
+	if workflow.Version == "" {
+		return nil, fmt.Errorf("workflow version is required")
+	}
+	if len(workflow.Steps) == 0 {
+		return nil, fmt.Errorf("workflow must have at least one step")
+	}
+
+	return &workflow, nil
 }

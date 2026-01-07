@@ -1,0 +1,132 @@
+$schema: "workflow/v2.0"
+name: code_review
+version: 1.0.0
+description: Comprehensive code review with security and quality analysis
+
+execution:
+  provider: openai
+  model: gpt-4o
+  temperature: 0.3  # Lower temperature for focused technical analysis
+
+steps:
+  # Step 1: Security Analysis
+  - name: security_analysis
+    run: |
+      You are a security expert specializing in vulnerability detection.
+      Focus on finding security issues, not general code quality.
+      
+      Review this code for security vulnerabilities:
+      
+      ```
+      {{input}}
+      ```
+      
+      Check for:
+      - SQL injection vulnerabilities
+      - XSS (Cross-Site Scripting) attacks
+      - Authentication and authorization issues
+      - Sensitive data exposure
+      - Input validation problems
+      - Cryptography misuse
+      
+      List findings with severity levels:
+      - CRITICAL: Immediate security risk
+      - HIGH: Serious vulnerability
+      - MEDIUM: Potential security issue
+      - LOW: Minor security concern
+      
+      For each finding, provide:
+      - Location in code
+      - Vulnerability description
+      - Potential impact
+      - Recommended fix
+  
+  # Step 2: Code Quality Analysis
+  - name: quality_analysis
+    needs: [security_analysis]
+    run: |
+      You are a code quality expert focusing on maintainability,
+      readability, and best practices.
+      
+      Review this code for quality issues:
+      
+      ```
+      {{input}}
+      ```
+      
+      Check for:
+      - Code smells (duplicated code, long functions, etc.)
+      - Naming conventions
+      - Function and class complexity
+      - Error handling adequacy
+      - Documentation and comments
+      - Test coverage concerns
+      - Design patterns usage
+      
+      For each issue, provide:
+      - Location
+      - Problem description
+      - Impact on maintainability
+      - Specific recommendation for improvement
+  
+  # Step 3: Generate Final Report
+  - name: create_report
+    needs: [security_analysis, quality_analysis]
+    run: |
+      Create a comprehensive code review report in markdown format.
+      
+      Security Findings:
+      {{security_analysis}}
+      
+      Quality Findings:
+      {{quality_analysis}}
+      
+      Format as:
+      
+      # Code Review Report
+      
+      ## Executive Summary
+      Provide a brief overview (2-3 sentences) of the main concerns
+      and overall code health.
+      
+      ## Security Analysis
+      Organize security findings by severity:
+      ### Critical Issues
+      [List critical issues]
+      
+      ### High Priority Issues
+      [List high priority issues]
+      
+      ### Medium Priority Issues
+      [List medium issues]
+      
+      ### Low Priority Items
+      [List low priority items]
+      
+      ## Code Quality
+      Present quality issues and recommendations:
+      ### Maintainability
+      [Issues affecting long-term maintenance]
+      
+      ### Readability
+      [Issues affecting code understanding]
+      
+      ### Best Practices
+      [Violations of best practices]
+      
+      ## Priority Actions
+      List top 3-5 items to address first, ordered by importance.
+      
+      ## Conclusion
+      Provide overall assessment and next steps.
+
+# Usage:
+#
+# ./mcp-cli --workflow code_review --input-data "$(cat mycode.py)"
+#
+# Or directly:
+# ./mcp-cli --workflow code_review --input-data 'def login(username, password):
+#     query = "SELECT * FROM users WHERE username = %s" % username
+#     # ... rest of code'
+#
+# Output: Complete markdown code review report

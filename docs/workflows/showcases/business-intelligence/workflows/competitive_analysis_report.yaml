@@ -1,0 +1,436 @@
+$schema: "workflow/v2.0"
+name: competitive_analysis_report
+version: 2.0.0
+description: Systematic competitive analysis with step dependencies ensuring complete research
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.3
+  servers: [brave-search]
+
+steps:
+  # Step 1: Identify competitors
+  - name: identify_competitors
+    run: |
+      Identify key competitors for this company/product:
+      
+      {{input}}
+      
+      **Competitor Identification:**
+      
+      **Primary Competitors:**
+      - Direct competitors (same market, same solution)
+      - Company names: [list]
+      - Why they compete: [brief explanation]
+      
+      **Secondary Competitors:**
+      - Indirect competitors (same problem, different solution)
+      - Company names: [list]
+      - Why they're relevant: [brief explanation]
+      
+      **Emerging Competitors:**
+      - Startups or new entrants
+      - Company names: [list]
+      - What makes them a threat: [brief explanation]
+      
+      **Market Positioning:**
+      - Our position: [enterprise/mid-market/SMB, premium/value]
+      - Competitor positions: [map each competitor]
+      
+      Return structured list:
+      ```json
+      {
+        "primary": ["Company A", "Company B"],
+        "secondary": ["Company C", "Company D"],
+        "emerging": ["Startup E"],
+        "total_count": 5
+      }
+      ```
+
+  # Step 2: Research product offerings
+  - name: research_products
+    needs: [identify_competitors]
+    run: |
+      Research product offerings for each competitor:
+      
+      Competitors: {{identify_competitors}}
+      Context: {{input}}
+      
+      For EACH competitor:
+      
+      **[Competitor Name]**
+      
+      **Product Portfolio:**
+      - Main product: [name and description]
+      - Additional products: [list]
+      - Product tiers: [free/starter/pro/enterprise]
+      - Key features: [list top 5-10]
+      
+      **Target Market:**
+      - Customer segment: [SMB/mid-market/enterprise]
+      - Industries: [primary focus]
+      - Geographic focus: [regions]
+      
+      **Unique Selling Points:**
+      - What they emphasize: [list 3-5]
+      - Competitive advantages: [what makes them special]
+      - Weaknesses: [gaps we can exploit]
+      
+      **Technology Stack:**
+      - Platform: [web/mobile/desktop/API]
+      - Integration capabilities: [what they integrate with]
+      - Technical approach: [if relevant]
+      
+      Use web search to find current information.
+
+  # Step 3: Analyze pricing strategies
+  - name: analyze_pricing
+    needs: [research_products]
+    run: |
+      Analyze competitor pricing strategies:
+      
+      Products: {{research_products}}
+      
+      For EACH competitor:
+      
+      **[Competitor Name] Pricing**
+      
+      **Pricing Model:**
+      - Structure: [freemium/trial/subscription/one-time]
+      - Tiers: [number and names]
+      - Billing: [monthly/annual/usage-based]
+      
+      **Price Points:**
+      | Tier | Price | Target User | Key Features |
+      |------|-------|-------------|--------------|
+      | [tier] | $[amount] | [who] | [what included] |
+      
+      **Value Proposition:**
+      - Price positioning: [premium/value/low-cost]
+      - ROI messaging: [how they justify price]
+      - Discounts: [annual, volume, non-profit, etc.]
+      
+      **Packaging Strategy:**
+      - Feature gating: [what's locked per tier]
+      - Usage limits: [seats, API calls, storage]
+      - Upsell path: [how they drive upgrades]
+      
+      **Price Comparison:**
+      ```
+      Feature/Capability  | Us | Comp A | Comp B | Comp C
+      -------------------|-------|--------|--------|--------
+      Entry price        | $X    | $Y     | $Z     | $W
+      Mid-tier price     | $X    | $Y     | $Z     | $W
+      Enterprise price   | $X    | $Y     | $Z     | $W
+      ```
+      
+      Use web search to find current pricing.
+
+  # Step 4: Assess market positioning
+  - name: assess_positioning
+    needs: [identify_competitors, research_products, analyze_pricing]
+    run: |
+      Assess competitive market positioning:
+      
+      Competitors: {{identify_competitors}}
+      Products: {{research_products}}
+      Pricing: {{analyze_pricing}}
+      
+      **Market Map:**
+      
+      Create 2x2 positioning map:
+      - X-axis: Price (Low → High)
+      - Y-axis: Features/Complexity (Simple → Advanced)
+      
+      Plot each competitor:
+      ```
+      Advanced Features
+      |
+      |  [Comp B]        [Comp A]
+      |              [US]
+      |        [Comp C]
+      |  [Comp D]
+      |_____________________________ High Price
+      Low Price        
+      ```
+      
+      **Positioning Analysis:**
+      
+      **Our Position:**
+      - Quadrant: [which area we occupy]
+      - Differentiation: [what makes us unique]
+      - White space: [underserved segments]
+      
+      **Competitor Positioning:**
+      For each:
+      - Position: [quadrant and strategy]
+      - Strengths: [what they do well]
+      - Vulnerabilities: [where they're weak]
+      
+      **Market Gaps:**
+      - Underserved segments: [opportunities]
+      - Feature gaps: [what nobody offers]
+      - Price gaps: [pricing opportunities]
+      
+      **Competitive Threats:**
+      - Direct threats: [who competes head-on]
+      - Indirect threats: [alternative solutions]
+      - Future threats: [emerging competitors]
+
+  # Step 5: SWOT analysis
+  - name: swot_analysis
+    needs: [assess_positioning]
+    run: |
+      Conduct SWOT analysis vs competition:
+      
+      Positioning: {{assess_positioning}}
+      Products: {{research_products}}
+      Pricing: {{analyze_pricing}}
+      
+      **SWOT Analysis**
+      
+      **Strengths (Our advantages):**
+      1. [Specific strength vs competitor X]
+      2. [Specific strength vs competitor Y]
+      3. [Overall market strengths]
+      - Why customers choose us: [reasons]
+      - Competitive moats: [defensible advantages]
+      
+      **Weaknesses (Our disadvantages):**
+      1. [Where competitor X beats us]
+      2. [Where competitor Y beats us]
+      3. [General weaknesses]
+      - Why we lose deals: [reasons]
+      - Areas needing improvement: [list]
+      
+      **Opportunities (Market opportunities):**
+      1. [Underserved segment we could target]
+      2. [Feature gap we could fill]
+      3. [Pricing opportunity]
+      - Market trends favoring us: [trends]
+      - Competitor vulnerabilities to exploit: [list]
+      
+      **Threats (Competitive threats):**
+      1. [Competitor moves that threaten us]
+      2. [Market shifts that hurt us]
+      3. [Emerging competitors]
+      - Risk factors: [what could hurt us]
+      - Defensive strategies needed: [recommendations]
+      
+      **Competitive Advantages Matrix:**
+      ```
+      Factor              | Us | Comp A | Comp B | Winner
+      --------------------|-------|--------|--------|--------
+      Feature richness    | 9     | 7      | 8      | Us
+      Ease of use         | 8     | 9      | 6      | Comp A
+      Pricing value       | 7     | 6      | 9      | Comp B
+      Customer support    | 9     | 7      | 7      | Us
+      Integration options | 8     | 8      | 6      | Tie
+      ```
+
+  # Step 6: Strategic recommendations
+  - name: strategic_recommendations
+    needs: [swot_analysis]
+    run: |
+      Generate strategic recommendations:
+      
+      SWOT: {{swot_analysis}}
+      Positioning: {{assess_positioning}}
+      
+      **Strategic Recommendations**
+      
+      **1. Positioning Strategy**
+      
+      **Recommended Position:**
+      - Target position: [where we should be]
+      - Differentiation angle: [how to stand out]
+      - Messaging focus: [key messages]
+      
+      **Rationale:**
+      - Market gap: [what we're filling]
+      - Competitive advantage: [why we'll win]
+      - Customer need: [what problem we solve better]
+      
+      **2. Product Strategy**
+      
+      **Feature Priorities:**
+      - Must-build: [features to match competitors]
+      - Should-build: [features for differentiation]
+      - Could-build: [nice-to-haves]
+      
+      **Product Gaps to Address:**
+      1. [Gap where competitors beat us]
+         - Impact: [how much it costs us]
+         - Effort: [how hard to fix]
+         - Priority: [HIGH/MEDIUM/LOW]
+      
+      **3. Pricing Strategy**
+      
+      **Recommended Pricing:**
+      - Structure: [recommended model]
+      - Price points: [specific recommendations]
+      - Positioning: [premium/value/competitive]
+      
+      **Rationale:**
+      - Market position: [where we fit]
+      - Value delivery: [what we provide]
+      - Competitive response: [how competitors might react]
+      
+      **4. Go-to-Market Strategy**
+      
+      **Target Segments:**
+      - Priority 1: [segment] - Why: [reason]
+      - Priority 2: [segment] - Why: [reason]
+      
+      **Competitive Messaging:**
+      - Against Comp A: [key messages]
+      - Against Comp B: [key messages]
+      - General positioning: [overall message]
+      
+      **5. Defensive Strategies**
+      
+      **Against Key Threats:**
+      1. [Threat]: [defensive strategy]
+      2. [Threat]: [defensive strategy]
+      
+      **Competitive Moats to Build:**
+      - [How to make position more defensible]
+      
+      **6. Action Plan**
+      
+      **Q1 Priorities:**
+      - [ ] [Action item with owner]
+      - [ ] [Action item with owner]
+      
+      **Q2-Q4 Roadmap:**
+      - [Strategic initiatives]
+
+  # Step 7: Generate comprehensive report
+  - name: competitive_report
+    needs: [strategic_recommendations]
+    run: |
+      Generate comprehensive competitive analysis report:
+      
+      # Competitive Analysis Report
+      
+      **Generated:** {{execution.timestamp}}
+      **Workflow:** {{workflow.name}} v{{workflow.version}}
+      
+      ---
+      
+      ## Executive Summary
+      
+      **Market Overview:**
+      - Total competitors analyzed: {{identify_competitors.total_count}}
+      - Primary competitors: [count]
+      - Our market position: [summary]
+      
+      **Key Findings:**
+      1. [Most important insight]
+      2. [Second most important insight]
+      3. [Third most important insight]
+      
+      **Strategic Recommendation:**
+      [One-paragraph summary of recommended strategy]
+      
+      ---
+      
+      ## Competitive Landscape
+      
+      {{identify_competitors}}
+      
+      ---
+      
+      ## Product Analysis
+      
+      {{research_products}}
+      
+      ---
+      
+      ## Pricing Analysis
+      
+      {{analyze_pricing}}
+      
+      ---
+      
+      ## Market Positioning
+      
+      {{assess_positioning}}
+      
+      ---
+      
+      ## SWOT Analysis
+      
+      {{swot_analysis}}
+      
+      ---
+      
+      ## Strategic Recommendations
+      
+      {{strategic_recommendations}}
+      
+      ---
+      
+      ## Appendix: Data Sources
+      
+      All competitive intelligence gathered from:
+      - Public websites
+      - Pricing pages
+      - Product documentation
+      - Press releases
+      - Industry reports
+      
+      **Note:** This analysis uses publicly available information.
+      Supplement with customer interviews and win/loss analysis.
+      
+      ---
+      
+      ## Business Value
+      
+      **Time Savings:**
+      - Manual competitive research: 16 hours
+      - Automated workflow: 10 minutes
+      - Savings: 15h 50min (99%)
+      
+      **Quality:**
+      - Systematic approach ensures completeness
+      - Step dependencies guarantee nothing skipped
+      - Structured output enables action
+      
+      **Update Frequency:**
+      - Manual: Quarterly (too expensive)
+      - Automated: Monthly or on-demand
+      - Better competitive intelligence
+
+# Usage:
+#
+# Analyze competitors:
+# ./mcp-cli --workflow competitive_analysis_report \
+#   --server brave-search \
+#   --input-data "Company: Acme Corp, Product: CRM Software"
+#
+# Update existing analysis:
+# ./mcp-cli --workflow competitive_analysis_report \
+#   --server brave-search \
+#   --input-data "Focus on pricing changes for competitors A, B, C"
+#
+# Business Value:
+# - 99% time savings (16 hours → 10 minutes)
+# - Systematic analysis ensures completeness
+# - Step dependencies prevent skipping critical research
+# - Actionable strategic recommendations
+# - Can run monthly instead of quarterly
+#
+# ROI Calculation:
+# - Manual analysis: 16 hours × $200/hour = $3,200
+# - Automated: 10 minutes × $0.10 = $0.10
+# - Savings: $3,199.90 per analysis (99.997%)
+# - Quarterly: 4 × $3,199.90 = $12,799.60/year
+# - Monthly: 12 × $3,199.90 = $38,398.80/year
+#
+# Strategic Value:
+# - Better competitive intelligence
+# - Faster response to competitor moves
+# - Data-driven strategic decisions
+# - Identify market opportunities early

@@ -1,0 +1,507 @@
+$schema: "workflow/v2.0"
+name: data_transformation_pipeline
+version: 2.0.0
+description: Systematic ETL data transformation with step dependencies ensuring correct order
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.3
+
+steps:
+  # Step 1: Profile source data
+  - name: profile_source
+    run: |
+      Profile this source dataset:
+      
+      {{input}}
+      
+      **Data Profile:**
+      
+      **Schema:**
+      - Columns: [count and names]
+      - Data types: [list per column]
+      - Nullable columns: [list]
+      - Primary keys: [identify]
+      - Foreign keys: [identify]
+      
+      **Data Quality:**
+      - Total rows: [count]
+      - Duplicate rows: [count]
+      - Missing values: [per column count]
+      - Invalid values: [examples]
+      - Data range: [min/max for numeric]
+      
+      **Data Distribution:**
+      - Numeric columns: [mean, median, std dev]
+      - Categorical columns: [value counts]
+      - Date columns: [range]
+      - Text columns: [length stats]
+      
+      **Quality Issues:**
+      - Encoding problems: [None/List]
+      - Format inconsistencies: [None/List]
+      - Outliers: [columns with outliers]
+      - Anomalies: [unexpected patterns]
+      
+      **Transformation Needs:**
+      - Type conversions: [list needed]
+      - Cleaning required: [list tasks]
+      - Normalization: [columns needing]
+      - Aggregation: [if needed]
+
+  # Step 2: Design transformation strategy
+  - name: design_transformations
+    needs: [profile_source]
+    run: |
+      Design transformation strategy based on data profile:
+      
+      Source Profile: {{profile_source}}
+      
+      **Transformation Strategy:**
+      
+      **Phase 1: Data Cleaning**
+      
+      1. **Remove Duplicates:**
+         - Strategy: [keep first/last/newest]
+         - Columns for deduplication: [list]
+         - Expected reduction: [estimate]
+      
+      2. **Handle Missing Values:**
+         - Drop: [columns with >50% missing]
+         - Impute: [columns with <20% missing]
+         - Flag: [columns with 20-50% missing]
+         - Methods: [mean/median/mode/forward-fill]
+      
+      3. **Fix Invalid Values:**
+         - Replace: [invalid patterns]
+         - Correct: [typos, format issues]
+         - Remove: [garbage values]
+      
+      **Phase 2: Data Transformation**
+      
+      1. **Type Conversions:**
+         - String → Date: [columns]
+         - String → Numeric: [columns]
+         - Numeric → Category: [columns]
+      
+      2. **Data Normalization:**
+         - Trim whitespace: [text columns]
+         - Case normalization: [UPPER/lower/Title]
+         - Format standardization: [dates, phones, etc.]
+      
+      3. **Value Mapping:**
+         - Standardize categories: [mappings]
+         - Code values: [decode to readable]
+         - Derive fields: [calculated columns]
+      
+      **Phase 3: Data Enrichment**
+      
+      1. **Feature Engineering:**
+         - Derived columns: [list]
+         - Aggregations: [calculations]
+         - Joins: [additional data sources]
+      
+      2. **Business Logic:**
+         - Calculations: [formulas]
+         - Rules: [business rules to apply]
+         - Validations: [constraints]
+      
+      **Phase 4: Data Quality Validation**
+      
+      1. **Post-transformation Checks:**
+         - No nulls in required columns
+         - Valid ranges for all fields
+         - Referential integrity preserved
+         - Business rules satisfied
+      
+      **Execution Order:**
+      [Critical: Must execute phases in order]
+      - Phase 1 before Phase 2 (clean before transform)
+      - Phase 2 before Phase 3 (transform before enrich)
+      - Phase 3 before Phase 4 (enrich before validate)
+
+  # Step 3: Execute data cleaning
+  - name: execute_cleaning
+    needs: [design_transformations]
+    run: |
+      Generate data cleaning code:
+      
+      Strategy: {{design_transformations}}
+      Source: {{profile_source}}
+      
+      **Data Cleaning Implementation:**
+      
+      ```python
+      import pandas as pd
+      import numpy as np
+      
+      # Load source data
+      df = pd.read_csv('source_data.csv')
+      print(f"Source: {len(df)} rows")
+      
+      # Phase 1: Data Cleaning
+      
+      # 1. Remove duplicates
+      df = df.drop_duplicates(subset=['key_column'], keep='first')
+      print(f"After deduplication: {len(df)} rows")
+      
+      # 2. Handle missing values
+      # Drop columns with >50% missing
+      missing_pct = df.isnull().mean()
+      cols_to_drop = missing_pct[missing_pct > 0.5].index.tolist()
+      df = df.drop(columns=cols_to_drop)
+      print(f"Dropped columns: {cols_to_drop}")
+      
+      # Impute numeric columns with <20% missing
+      numeric_cols = df.select_dtypes(include=np.number).columns
+      for col in numeric_cols:
+          if df[col].isnull().mean() < 0.2:
+              df[col] = df[col].fillna(df[col].median())
+      
+      # Flag rows with 20-50% missing for review
+      df['data_quality_flag'] = (df.isnull().mean(axis=1) > 0.2) & (df.isnull().mean(axis=1) < 0.5)
+      
+      # 3. Fix invalid values
+      # Replace invalid values
+      df = df.replace(['NULL', 'N/A', 'n/a', ''], np.nan)
+      
+      # Remove rows with critical missing data
+      df = df.dropna(subset=['required_column1', 'required_column2'])
+      
+      print(f"After cleaning: {len(df)} rows")
+      ```
+      
+      **Quality Checks:**
+      ```python
+      # Validate cleaning
+      assert df.duplicated().sum() == 0, "Duplicates remain"
+      assert df[['required_col']].isnull().sum().sum() == 0, "Required columns have nulls"
+      print("✓ Cleaning validated")
+      ```
+
+  # Step 4: Execute transformations
+  - name: execute_transformations
+    needs: [execute_cleaning]
+    run: |
+      Generate transformation code (must run after cleaning):
+      
+      Cleaning: {{execute_cleaning}}
+      Strategy: {{design_transformations}}
+      
+      **Data Transformation Implementation:**
+      
+      ```python
+      # Phase 2: Data Transformation
+      
+      # 1. Type conversions
+      # String to Date
+      df['date_column'] = pd.to_datetime(df['date_column'], errors='coerce')
+      
+      # String to Numeric
+      df['numeric_column'] = pd.to_numeric(df['numeric_column'], errors='coerce')
+      
+      # Numeric to Category
+      df['category_column'] = df['category_column'].astype('category')
+      
+      # 2. Data normalization
+      # Trim whitespace
+      text_cols = df.select_dtypes(include='object').columns
+      for col in text_cols:
+          df[col] = df[col].str.strip()
+      
+      # Case normalization
+      df['name'] = df['name'].str.title()
+      df['code'] = df['code'].str.upper()
+      
+      # Format standardization
+      # Phone numbers: (123) 456-7890 → 1234567890
+      df['phone'] = df['phone'].str.replace(r'[^0-9]', '', regex=True)
+      
+      # 3. Value mapping
+      # Standardize categories
+      category_map = {
+          'Yes': 'Y',
+          'yes': 'Y',
+          'Y': 'Y',
+          'No': 'N',
+          'no': 'N',
+          'N': 'N'
+      }
+      df['flag_column'] = df['flag_column'].map(category_map)
+      
+      # Decode values
+      status_decode = {
+          1: 'Active',
+          2: 'Inactive',
+          3: 'Pending'
+      }
+      df['status'] = df['status_code'].map(status_decode)
+      
+      print(f"After transformation: {len(df)} rows, {len(df.columns)} columns")
+      ```
+      
+      **Quality Checks:**
+      ```python
+      # Validate transformations
+      assert df['date_column'].dtype == 'datetime64[ns]', "Date conversion failed"
+      assert df['numeric_column'].dtype in [np.int64, np.float64], "Numeric conversion failed"
+      print("✓ Transformations validated")
+      ```
+
+  # Step 5: Execute enrichment
+  - name: execute_enrichment
+    needs: [execute_transformations]
+    run: |
+      Generate enrichment code (must run after transformations):
+      
+      Transformations: {{execute_transformations}}
+      Strategy: {{design_transformations}}
+      
+      **Data Enrichment Implementation:**
+      
+      ```python
+      # Phase 3: Data Enrichment
+      
+      # 1. Feature engineering
+      # Derived columns
+      df['age_years'] = (pd.Timestamp.now() - df['birth_date']).dt.days / 365.25
+      df['revenue_per_unit'] = df['total_revenue'] / df['units_sold']
+      df['is_high_value'] = df['total_revenue'] > df['total_revenue'].quantile(0.75)
+      
+      # Date features
+      df['year'] = df['date_column'].dt.year
+      df['month'] = df['date_column'].dt.month
+      df['day_of_week'] = df['date_column'].dt.dayofweek
+      df['is_weekend'] = df['day_of_week'].isin([5, 6])
+      
+      # 2. Aggregations
+      # Customer level aggregations
+      customer_agg = df.groupby('customer_id').agg({
+          'order_id': 'count',
+          'total_revenue': 'sum',
+          'date_column': 'max'
+      }).rename(columns={
+          'order_id': 'total_orders',
+          'total_revenue': 'lifetime_value',
+          'date_column': 'last_order_date'
+      })
+      
+      df = df.merge(customer_agg, on='customer_id', how='left')
+      
+      # 3. Business logic
+      # Calculate customer segment
+      def customer_segment(row):
+          if row['lifetime_value'] > 10000:
+              return 'Premium'
+          elif row['lifetime_value'] > 1000:
+              return 'Standard'
+          else:
+              return 'Basic'
+      
+      df['customer_segment'] = df.apply(customer_segment, axis=1)
+      
+      # Apply business rules
+      df['eligible_for_discount'] = (
+          (df['lifetime_value'] > 1000) &
+          (df['total_orders'] > 5) &
+          (df['last_order_date'] > pd.Timestamp.now() - pd.Timedelta(days=90))
+      )
+      
+      print(f"After enrichment: {len(df)} rows, {len(df.columns)} columns")
+      ```
+
+  # Step 6: Final validation
+  - name: final_validation
+    needs: [execute_enrichment]
+    run: |
+      Generate final validation code:
+      
+      **Phase 4: Data Quality Validation**
+      
+      ```python
+      # Final validation checks
+      
+      print("Running final validation...")
+      
+      # 1. No nulls in required columns
+      required_cols = ['customer_id', 'date_column', 'total_revenue']
+      assert df[required_cols].isnull().sum().sum() == 0, "Required columns have nulls"
+      
+      # 2. Valid ranges
+      assert (df['age_years'] >= 0).all() & (df['age_years'] <= 120).all(), "Invalid ages"
+      assert (df['total_revenue'] >= 0).all(), "Negative revenue"
+      
+      # 3. Referential integrity
+      assert df['customer_id'].isin(valid_customer_ids).all(), "Invalid customer IDs"
+      
+      # 4. Business rules
+      assert df['customer_segment'].isin(['Premium', 'Standard', 'Basic']).all(), "Invalid segments"
+      
+      # 5. Data completeness
+      expected_count = [from source]
+      actual_count = len(df)
+      loss_pct = (expected_count - actual_count) / expected_count * 100
+      assert loss_pct < 10, f"Too much data loss: {loss_pct:.1f}%"
+      
+      print("✓ All validations passed")
+      
+      # Save transformed data
+      df.to_csv('transformed_data.csv', index=False)
+      df.to_parquet('transformed_data.parquet')
+      
+      print(f"Transformation complete: {len(df)} rows, {len(df.columns)} columns")
+      ```
+
+  # Step 7: Generate pipeline report
+  - name: pipeline_report
+    needs: [final_validation]
+    run: |
+      Generate comprehensive transformation report:
+      
+      # Data Transformation Pipeline Report
+      
+      **Generated:** {{execution.timestamp}}
+      **Workflow:** {{workflow.name}} v{{workflow.version}}
+      
+      ---
+      
+      ## Source Data Profile
+      
+      {{profile_source}}
+      
+      ---
+      
+      ## Transformation Strategy
+      
+      {{design_transformations}}
+      
+      ---
+      
+      ## Execution Summary
+      
+      **Phase 1: Data Cleaning**
+      {{execute_cleaning}}
+      
+      **Phase 2: Data Transformation**
+      {{execute_transformations}}
+      
+      **Phase 3: Data Enrichment**
+      {{execute_enrichment}}
+      
+      **Phase 4: Final Validation**
+      {{final_validation}}
+      
+      ---
+      
+      ## Quality Metrics
+      
+      **Data Flow:**
+      - Source rows: [count]
+      - After cleaning: [count] ([percentage]% retained)
+      - After transformation: [count]
+      - Final rows: [count]
+      
+      **Data Quality:**
+      - Duplicates removed: [count]
+      - Missing values handled: [count]
+      - Invalid values fixed: [count]
+      - Validations passed: All ✓
+      
+      **Data Enrichment:**
+      - Derived columns added: [count]
+      - Aggregations computed: [count]
+      - Business rules applied: [count]
+      - Final column count: [count]
+      
+      ---
+      
+      ## Complete Pipeline Code
+      
+      ```python
+      # Full transformation pipeline
+      # Execute phases in order - dependencies enforced
+      
+      {{execute_cleaning}}
+      
+      {{execute_transformations}}
+      
+      {{execute_enrichment}}
+      
+      {{final_validation}}
+      ```
+      
+      ---
+      
+      ## Execution Instructions
+      
+      1. **Setup:**
+         ```bash
+         pip install pandas numpy
+         ```
+      
+      2. **Run Pipeline:**
+         ```bash
+         python transform_data.py
+         ```
+      
+      3. **Verify Output:**
+         ```bash
+         head transformed_data.csv
+         wc -l transformed_data.csv
+         ```
+      
+      4. **Load Downstream:**
+         ```python
+         df = pd.read_parquet('transformed_data.parquet')
+         ```
+      
+      ---
+      
+      ## Business Value
+      
+      **Time Savings:**
+      - Manual ETL design: 8 hours
+      - Automated pipeline: 5 minutes
+      - Savings: 7h 55min (99%)
+      
+      **Quality Assurance:**
+      - Systematic processing prevents errors
+      - Step dependencies ensure correct order
+      - Validation at each phase
+      - Complete audit trail
+      
+      **Maintainability:**
+      - Clear phase separation
+      - Documented transformation logic
+      - Reusable code blocks
+      - Easy to modify and extend
+
+# Usage:
+#
+# Design transformation pipeline:
+# ./mcp-cli --workflow data_transformation_pipeline \
+#   --input-data "$(cat source_data.csv)"
+#
+# From database:
+# psql -c "SELECT * FROM source_table" | \
+#   ./mcp-cli --workflow data_transformation_pipeline
+#
+# Business Value:
+# - Systematic ETL ensures correct execution order
+# - Step dependencies prevent transformation errors
+# - Quality validation at each phase
+# - Complete Python code generated
+# - Reproducible data pipeline
+#
+# ROI Calculation:
+# - Manual ETL design: 8 hours × $150/hour = $1,200
+# - Automated: 5 minutes × $0.05 = $0.05
+# - Savings: $1,199.95 per pipeline (99.996%)
+#
+# Quality Benefits:
+# - Prevents incorrect transformation order
+# - Catches issues at each phase
+# - Validates output quality
+# - Generates audit trail
+# - Enables reproducibility

@@ -1,0 +1,134 @@
+$schema: "workflow/v2.0"
+name: document_pipeline
+version: 1.0.0
+description: Sequential document processing through extraction, analysis, and reporting stages
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  servers: [filesystem]
+  temperature: 0.4
+
+steps:
+  # Stage 1: Extract structured information
+  - name: extract_information
+    run: |
+      Extract structured information from this document:
+      
+      {{input}}
+      
+      Extract:
+      1. Document type (contract, report, article, etc.)
+      2. Key entities (people, organizations, dates)
+      3. Main sections and their purposes
+      4. Important numbers, metrics, or data
+      5. Action items or deadlines
+      
+      Format as structured data.
+  
+  # Stage 2: Analyze content
+  - name: analyze_content
+    needs: [extract_information]
+    run: |
+      Analyze this document content:
+      
+      Extracted Information:
+      {{extract_information}}
+      
+      Original Document:
+      {{input}}
+      
+      Provide analysis of:
+      1. Purpose and intent of document
+      2. Key themes and topics
+      3. Important relationships between entities
+      4. Critical information or concerns
+      5. Completeness and clarity assessment
+      
+      Be specific with examples.
+  
+  # Stage 3: Identify risks or issues
+  - name: identify_issues
+    needs: [analyze_content]
+    run: |
+      Identify potential risks, issues, or concerns:
+      
+      Content Analysis:
+      {{analyze_content}}
+      
+      Look for:
+      - Ambiguous language
+      - Missing information
+      - Potential conflicts
+      - Compliance concerns
+      - Areas needing clarification
+      
+      Rate each issue by severity:
+      - HIGH: Critical issue requiring immediate attention
+      - MEDIUM: Important issue to address
+      - LOW: Minor concern for consideration
+  
+  # Stage 4: Generate comprehensive report
+  - name: generate_report
+    needs: [extract_information, analyze_content, identify_issues]
+    run: |
+      Generate comprehensive document analysis report:
+      
+      Extracted Data:
+      {{extract_information}}
+      
+      Content Analysis:
+      {{analyze_content}}
+      
+      Issues Identified:
+      {{identify_issues}}
+      
+      Format as:
+      
+      # Document Analysis Report
+      
+      ## Document Overview
+      [Type, purpose, key entities]
+      
+      ## Key Findings
+      ### Extracted Information
+      [Structured data from document]
+      
+      ### Content Analysis
+      [Main themes, relationships, critical info]
+      
+      ### Issues & Risks
+      #### High Priority
+      [Critical issues]
+      
+      #### Medium Priority
+      [Important concerns]
+      
+      #### Low Priority
+      [Minor items]
+      
+      ## Summary Assessment
+      [Overall document quality and completeness]
+      
+      ## Recommendations
+      [Specific actions to take]
+      
+      ## Next Steps
+      [Suggested follow-up activities]
+
+# Usage:
+#
+# ./mcp-cli --workflow document_pipeline \
+#   --server filesystem \
+#   --input-data "$(cat contract.txt)"
+#
+# Or:
+# ./mcp-cli --workflow document_pipeline \
+#   --input-data "Long document text here..."
+#
+# Best for:
+# - Contract analysis
+# - Report review
+# - Document classification
+# - Compliance checking
+# - Systematic document processing

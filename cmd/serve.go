@@ -127,8 +127,8 @@ Claude Desktop Configuration:
 				templateName := strings.TrimSuffix(basename, filepath.Ext(basename))
 				
 				// Verify template exists
-				_, existsV1 := appConfig.Templates[templateName]
-				templateV2, existsV2 := appConfig.TemplatesV2[templateName]
+				_, existsV1 := appConfig.Workflows[templateName]
+				templateV2, existsV2 := appConfig.Workflows[templateName]
 				
 				if !existsV1 && !existsV2 {
 					return fmt.Errorf("template source '%s' points to unknown template: %s", 
@@ -307,8 +307,8 @@ Claude Desktop Configuration:
 				continue
 			}
 			
-			_, existsV1 := appConfig.Templates[tool.Template]
-			_, existsV2 := appConfig.TemplatesV2[tool.Template]
+			_, existsV1 := appConfig.Workflows[tool.Template]
+			_, existsV2 := appConfig.Workflows[tool.Template]
 			
 			if !existsV1 && !existsV2 {
 				return fmt.Errorf("tool %d (%s) references unknown template: %s", 

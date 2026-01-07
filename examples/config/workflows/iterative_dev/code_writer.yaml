@@ -1,0 +1,27 @@
+$schema: "workflow/v2.0"
+name: code_writer
+version: 1.0.0
+description: Writes or improves code based on requirements and feedback
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.7
+
+steps:
+  - name: write_code
+    run: |
+      Write Python code for this requirement.
+      
+      Requirements: {{requirements}}
+      
+      Previous attempt: {{previous_code}}
+      
+      Feedback from review: {{feedback}}
+      
+      Rules:
+      - Write complete, working code
+      - Include docstrings
+      - Handle edge cases
+      - Output ONLY the code, no explanations
+      - No markdown formatting (no ```python)

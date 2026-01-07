@@ -34,39 +34,50 @@ A Go implementation of the Model Context Protocol (MCP) CLI that enables multi-s
 **MCP-CLI-Go** is a command-line tool for building AI workflows that:
 
 ✅ **Chains multiple AI providers** - Mix Claude, GPT-4, Ollama, and others in one workflow  
-✅ **Uses YAML templates** - Define reusable AI workflows without code  
+✅ **Uses YAML workflows** - Define reusable AI workflows without code  
 ✅ **Works as MCP server** - Expose workflows as tools for Claude Desktop or other MCP clients  
 ✅ **Runs locally** - Single Go binary, no dependencies  
-✅ **Template composition** - Call templates from templates for modular workflows  
-✅ **Cross-LLM document creation** - GPT-4, DeepSeek, Gemini can create PowerPoints, Excel files, etc. via Skills
+✅ **Workflow composition** - Call workflows from workflows for modular designs  
+✅ **Cross-LLM document creation** - GPT-4, DeepSeek, Gemini can create PowerPoints, Excel files, etc. via Skills  
+✅ **Iterative refinement** - LLM-evaluated loops improve output until criteria met
 
 ### The Core Innovation
 
 Traditional AI tools execute single requests. MCP-CLI enables **multi-step workflows** where:
 
 - Each step can use a different AI provider
-- Steps can call other templates (composition)
+- Steps can call other workflows (composition)
+- Loops can improve output iteratively based on LLM-evaluated exit conditions
+- Consensus validation uses multiple providers for critical decisions
 - Context is managed efficiently between steps
 - Workflows are defined in YAML, not code
 
 **Example:**
 
 ```yaml
+$schema: "workflow/v2.0"
 name: research_workflow
+version: 1.0.0
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
 steps:
   - name: research
-    provider: anthropic
-    prompt: "Research:  {{input_data}}"
-    output: findings
+    run: "Research: {{input}}"
 
   - name: verify
+    needs: [research]
     provider: openai
-    prompt: "Fact-check: {{findings}}"
-    output: verified
+    model: gpt-4o
+    run: "Fact-check: {{research}}"
 
   - name: summarize
+    needs: [verify]
     provider: ollama
-    prompt: "Summarize: {{verified}}"
+    model: llama3.2
+    run: "Summarize: {{verify}}"
 ```
 
 This workflow uses **three different AI providers** in sequence, each doing what they do best.
@@ -78,19 +89,25 @@ This workflow uses **three different AI providers** in sequence, each doing what
 ### ✅ Currently Available
 
 - **Multiple AI Providers**: OpenAI, Anthropic, Ollama, DeepSeek, Gemini, Kimi K2, OpenRouter, LM Studio, AWS Bedrock, Azure Foundry, Google Vertex
-- **YAML Workflow Templates**: Define multi-step workflows without code
-- **Template Composition**: Call templates from within templates
+- **YAML Workflow System (v2.0)**: Define multi-step workflows with advanced features
+- **Iterative Loops**: LLM-evaluated exit conditions for automatic improvement
+- **Consensus Validation**: Multi-provider agreement for critical decisions
+- **Workflow Composition**: Call workflows from within workflows
+- **Property Inheritance**: Set defaults once, override where needed
+- **Step Dependencies**: Control execution order with `needs`
 - **MCP Server Mode**: Expose workflows as tools for LLMs
 - **Skills System**: Cross-LLM document creation (PowerPoint, Excel, Word, PDF) via containerized execution
 - **Variable Management**: Pass data between workflow steps
-- **Error Handling**: Retries, validation, and graceful failures
+- **Error Handling**: Retries, fallback chains, and graceful failures
 - **Multiple Modes**: Chat, query, interactive, and server modes
 
-### 🚧 Experimental
+### 🎯 Workflow v2.0 Highlights
 
-- **Parallel Execution**: Run multiple steps concurrently
-- **Conditional Routing**: Branch workflows based on results
-- **Recursion Control**: Prevent infinite template loops
+- **LLM-Evaluated Loops**: Continue iterating until "all tests pass" or "quality exceeds 8"
+- **Consensus Mode**: Get unanimous agreement from multiple providers
+- **Semantic Exit Conditions**: No exact string matching - LLM understands intent
+- **Loop Variables**: Access previous iterations with `{{loop.last.output}}`
+- **Provider Failover**: Automatic failover across provider chains
 
 ---
 
@@ -175,7 +192,7 @@ config/
 ├── providers/      # AI provider configs
 ├── embeddings/     # Embedding configs
 ├── servers/        # MCP server configs
-└── templates/      # Workflow templates
+└── workflows/      # Workflow definitions
 ```
 
 ### 2. Run a Simple Query
@@ -191,137 +208,197 @@ mcp-cli query --provider anthropic "Explain MCP in detail"
 mcp-cli query --json "List cloud providers" > result.json
 ```
 
-### 3. Create Your First Template
+### 3. Create Your First Workflow
 
-Create `config/templates/analyze.yaml`:
+Create `config/workflows/analyze.yaml`:
 
 ```yaml
+$schema: "workflow/v2.0"
 name: analyze
-description: Simple analysis workflow
 version: 1.0.0
+description: Simple analysis workflow
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
 
 steps:
   - name: analyze
-    prompt: "Analyze this: {{stdin}}"
-    output: analysis
+    run: "Analyze this: {{input}}"
 
   - name: summarize
-    prompt: "Summarize in 3 bullets: {{analysis}}"
+    needs: [analyze]
+    run: "Summarize in 3 bullets: {{analyze}}"
 ```
 
 Run it:
 
 ```bash
-echo "Sales data for Q4..." | mcp-cli --template analyze
+./mcp-cli --workflow analyze --input-data "Sales data for Q4..."
 ```
 
-### 4. Use Template Composition
+### 4. Use Workflow Composition
 
-Create `config/templates/research.yaml`:
+Create `config/workflows/research.yaml`:
 
 ```yaml
+$schema: "workflow/v2.0"
 name: deep_research
-description: Multi-step research with verification
 version: 1.0.0
+description: Multi-step research with verification
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
 
 steps:
   - name: research
-    template: web_search      # Calls another template
-    output: findings
+    template:
+      name: web_search      # Calls another workflow
+      with:
+        query: "{{input}}"
 
   - name: verify
-    template: fact_check      # Calls another template
-    template_input: "{{findings}}"
-    output: verified
+    needs: [research]
+    template:
+      name: fact_check      # Calls another workflow
+      with:
+        content: "{{research}}"
 
   - name: report
-    prompt: "Create report: {{verified}}"
+    needs: [verify]
+    run: "Create report: {{verify}}"
 ```
 
 ```bash
-echo "Impact of AI on healthcare" | mcp-cli --template deep_research
+./mcp-cli --workflow deep_research --input-data "Impact of AI on healthcare"
 ```
 
-**📚 Want to learn more?** See the [comprehensive guides](docs/guides/) and [template documentation](docs/templates/).
+### 5. Use Iterative Loops
+
+Create `config/workflows/iterative_dev.yaml`:
+
+```yaml
+$schema: "workflow/v2.0"
+name: iterative_developer
+version: 1.0.0
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+
+steps:
+  - name: requirements
+    run: "Analyze request: {{input}}"
+
+loops:
+  - name: develop
+    workflow: code_cycle
+    with:
+      requirements: "{{requirements}}"
+      previous: "{{loop.last.output}}"
+    max_iterations: 5
+    until: "All tests pass"  # LLM evaluates this
+    on_failure: continue
+```
+
+The loop continues until LLM determines "all tests pass"!
+
+**📚 Want to learn more?** See [Workflow Documentation](docs/workflows/) and [examples](docs/workflows/examples/).
 
 ---
 
 ## Real-World Examples
 
-### 🎯 Industry Showcases
-
-**NEW:** Comprehensive industry-specific showcase examples
-
-| Industry                                                                     | Templates | What It Demonstrates                       | ROI                |
-| ---------------------------------------------------------------------------- | --------- | ------------------------------------------ | ------------------ |
-| **[DevOps](docs/templates/showcases/devops/)**                               | 3 YAML    | Consensus validation, failover resilience  | 99.9% uptime       |
-| **[Security](docs/templates/showcases/security/)**                           | 5 YAML    | SOAR automation, threat intelligence       | 500× faster triage |
-| **[Data Engineering](docs/templates/showcases/data-engineering/)**           | 3 YAML    | RAG pipelines, ML data quality             | 99.9% time savings |
-| **[Development](docs/templates/showcases/development/)**                     | 4 YAML    | API docs, query optimization               | 99% time savings   |
-| **[Business Intelligence](docs/templates/showcases/business-intelligence/)** | 3 YAML    | Template composition, recurring automation | 97% savings        |
-| **[Market Analysis](docs/templates/showcases/market-analysis/)**             | 4 YAML    | Multi-factor analysis with real APIs       | 71× ROI            |
-
-**Key Features:**
-
-- ✅ Production-ready YAML templates
-- ✅ Real MCP server integration (FRED, Unusual Whales, Estimize, SEC EDGAR)
-- ✅ Measured ROI (not speculative claims)
-- ✅ Expert-informed methodology
-- ✅ Honest about limitations
-
-👉 **[Browse all showcases →](docs/templates/showcases/)**
-
----
-
-### Quick Template Examples
+### Quick Workflow Examples
 
 ### Document Analysis Pipeline
 
 ```yaml
+$schema: "workflow/v2.0"
 name: document_intelligence
 version: 1.0.0
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
 steps:
-  - name: sentiment
-    template: sentiment_analysis
-    output: sentiment
+  - name: extract
+    run: "Extract key information from: {{input}}"
 
-  - name: entities
-    template: entity_extraction
-    output: entities
+  - name: analyze
+    needs: [extract]
+    run: "Analyze content: {{extract}}"
 
-  - name: summary
-    prompt: |
+  - name: summarize
+    needs: [analyze]
+    run: |
       Create intelligence report:
-      Sentiment: {{sentiment}}
-      Entities: {{entities}}
+      Analysis: {{analyze}}
 ```
 
-### Multi-Provider Validation
+### Multi-Provider Consensus
 
 ```yaml
-name: validated_answer
+$schema: "workflow/v2.0"
+name: validated_decision
 version: 1.0.0
-steps:
-  - name: answer
-    provider: anthropic
-    model: claude-sonnet-4
-    prompt: "{{question}}"
-    output: initial
 
-  - name: verify
-    provider: openai
-    model: gpt-4o
-    prompt: "Fact-check: {{input_data}}"
-    output: verified
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
+steps:
+  - name: validate
+    consensus:
+      prompt: "Is this safe to deploy? {{input}}"
+      executions:
+        - provider: anthropic
+          model: claude-sonnet-4
+        - provider: openai
+          model: gpt-4o
+      require: unanimous
 ```
 
-**📚 More examples:** See [Template Examples](docs/templates/examples/) and [Industry Showcases](docs/templates/showcases/) for production-ready patterns.
+### Iterative Code Development
+
+```yaml
+$schema: "workflow/v2.0"
+name: code_developer
+version: 1.0.0
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+
+steps:
+  - name: requirements
+    run: "Define requirements: {{input}}"
+
+loops:
+  - name: develop
+    workflow: write_and_test
+    with:
+      requirements: "{{requirements}}"
+      previous: "{{loop.last.output}}"
+    max_iterations: 5
+    until: "All tests pass"
+```
+
+**📚 More examples:** 
+
+- [Workflow Examples](docs/workflows/examples/) - 13 working examples
+- [Workflow Patterns](docs/workflows/patterns/) - Design patterns
+- Working example: `config/workflows/iterative_dev/`
+
+> **Note:** Industry showcases in `docs/templates/showcases/` use the older template format and are being migrated to workflow v2.0. Check back soon for updated versions!
 
 ---
 
 ## Skills: Cross-LLM Document Creation
 
-**Skills** enable LLMs to create documents (PowerPoint, Excel, Word, PDFs) through secure container-based execution.
+**Skills** enable any LLM to create documents (PowerPoint, Excel, Word, PDFs) through secure container-based execution.
 
 ### What Makes This Special
 
@@ -402,7 +479,7 @@ Expose workflows as MCP tools for Claude Desktop or other clients.
 
 ### 1. Create Server Config
 
-`config/runas/research_server.yaml`:
+`config/runasMCP/research_server.yaml`:
 
 ```yaml
 server_info:
@@ -413,7 +490,7 @@ server_info:
 tools:
   - name: research_topic
     description: Research a topic
-    template: deep_research
+    workflow: deep_research  # Points to workflow file
     input_schema:
       type: object
       properties:
@@ -425,7 +502,7 @@ tools:
 ### 2. Start Server
 
 ```bash
-mcp-cli serve config/runas/research_server.yaml
+mcp-cli serve config/runasMCP/research_server.yaml
 ```
 
 ### 3. Configure Claude Desktop
@@ -437,7 +514,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "research-agent": {
       "command": "/usr/local/bin/mcp-cli",
-      "args": ["serve", "/absolute/path/to/config/runas/research_server.yaml"]
+      "args": ["serve", "/absolute/path/to/config/runasMCP/research_server.yaml"]
     }
   }
 }
@@ -467,8 +544,8 @@ mcp-cli chat --provider anthropic
 # Single query
 mcp-cli query "Your question here"
 
-# With template
-mcp-cli --template analyze --input-data "Some text"
+# With workflow
+mcp-cli --workflow analyze --input-data "Some text"
 ```
 
 ### Interactive Mode
@@ -485,7 +562,7 @@ mcp-cli tools
 
 ```bash
 # Run as MCP server
-mcp-cli serve config/runas/your_server.yaml
+mcp-cli serve config/runasMCP/your_server.yaml
 ```
 
 ---
@@ -506,32 +583,52 @@ models:
 api_key: ${OPENAI_API_KEY}
 ```
 
-### Template Structure
+### Workflow Structure (v2.0)
 
 ```yaml
-name: template_name
-description: What this does
+$schema: "workflow/v2.0"
+name: workflow_name
 version: 1.0.0
+description: What this workflow does
 
-# Default settings
-defaults:
+# Execution context (defaults for all steps)
+execution:
   provider: anthropic
   model: claude-sonnet-4
   temperature: 0.7
+  servers: [filesystem, brave-search]
 
-# Workflow steps
+# Environment variables
+env:
+  API_KEY: ${CUSTOM_API_KEY}
+
+# Sequential steps
 steps:
   - name: step1
-    prompt: "Your prompt with  {{input_data}}"
-    output: result1
+    run: "Your prompt with {{input}}"
 
   - name: step2
-    template: another_template  # Template composition
-    template_input: "{{result1}}"
-    output: result2
+    needs: [step1]
+    run: "Process result: {{step1}}"
+
+# Iterative loops
+loops:
+  - name: improve
+    workflow: refinement_cycle
+    with:
+      content: "{{input}}"
+      previous: "{{loop.last.output}}"
+    max_iterations: 5
+    until: "Quality score exceeds 8"
+    on_failure: continue
 ```
 
-**📚 For complete configuration reference:** See [Templates Documentation](docs/templates/authoring-guide.md)
+**📚 For complete configuration reference:**
+
+- [Schema Documentation](docs/workflows/SCHEMA.md) - Complete schema reference
+- [Authoring Guide](docs/workflows/AUTHORING_GUIDE.md) - How to write workflows
+- [Loop Guide](docs/workflows/LOOPS.md) - Iterative execution
+- [Examples](docs/workflows/examples/) - Working examples
 
 ---
 
@@ -549,9 +646,9 @@ mcp-cli query "question"
 mcp-cli query --provider openai "question"
 mcp-cli query --json "question"
 
-# Templates
-mcp-cli --template <name>
-mcp-cli --list-templates
+# Workflows
+mcp-cli --workflow <name> --input-data "..."
+mcp-cli --list-workflows
 
 # Chat
 mcp-cli chat
@@ -571,8 +668,9 @@ mcp-cli <command> --help
 ```bash
 --provider <name>       # AI provider (openai, anthropic, ollama, etc.)
 --model <name>          # Model name
---template <name>       # Template to execute
---input-data <string>   # Input data for template
+--workflow <name>       # Workflow to execute
+--input-data <string>   # Input data for workflow
+--server <name>         # MCP server to use
 --json                  # JSON output
 --verbose               # Verbose logging
 --quiet                 # Minimal output
@@ -586,23 +684,22 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory.
 
 ### 📚 Quick Links
 
-| Documentation                                       | Description                                |
-| --------------------------------------------------- | ------------------------------------------ |
-| **[Documentation Index](docs/README.md)**           | Start here - complete navigation guide     |
-| **[Industry Showcases](docs/templates/showcases/)** | ⭐ 22 working templates across 6 industries |
-| **[Skills Documentation](docs/skills/)**            | Cross-LLM document creation guide          |
-| **[Getting Started](docs/getting-started/)**        | Installation, configuration, first steps   |
-| **[Usage Guides](docs/guides/)**                    | Mode-specific guides and best practices    |
-| **[Templates](docs/templates/)**                    | Template authoring and examples            |
-| **[MCP Server Mode](docs/mcp-server/)**             | Expose workflows as MCP tools              |
-| **[Architecture](docs/architecture/)**              | Technical design and internals             |
+| Documentation                                | Description                              |
+| -------------------------------------------- | ---------------------------------------- |
+| **[Documentation Index](docs/README.md)**    | Start here - complete navigation guide   |
+| **[Workflow Documentation](docs/workflows/)** | ⭐ Complete workflow v2.0 system         |
+| **[Skills Documentation](docs/skills/)**     | Cross-LLM document creation guide        |
+| **[Getting Started](docs/getting-started/)** | Installation, configuration, first steps |
+| **[Usage Guides](docs/guides/)**             | Mode-specific guides and best practices  |
+| **[MCP Server Mode](docs/mcp-server/)**      | Expose workflows as MCP tools            |
+| **[Architecture](docs/architecture/)**       | Technical design and internals           |
 
 ### 📖 By Topic
 
 **New Users:**
 
 - [Installation Guide](docs/getting-started/installation.md) - Install and configure MCP-CLI
-- [Core Concepts](docs/getting-started/concepts.md) - Understand modes, providers, templates
+- [Core Concepts](docs/getting-started/concepts.md) - Understand modes, providers, workflows
 - [FAQ](docs/getting-started/faq.md) - Common questions answered
 
 **Usage Guides:**
@@ -613,56 +710,101 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory.
 - [Automation & Scripting](docs/guides/automation.md) - CI/CD integration patterns
 - [Debugging](docs/guides/debugging.md) - Troubleshooting and logging
 
-**Template Development:**
+**Workflow Development (v2.0):**
 
-- **[Industry Showcases](docs/templates/showcases/)** - ⭐ 22 production-ready templates (DevOps, Security, Data Engineering, Development, BI, Market Analysis)
-- [Template Authoring Guide](docs/templates/authoring-guide.md) - Complete template reference
-- [Template Examples](docs/templates/examples/) - Real-world template patterns
+- **[Schema Reference](docs/workflows/SCHEMA.md)** - Complete schema documentation
+- **[Authoring Guide](docs/workflows/AUTHORING_GUIDE.md)** - How to write workflows
+- **[Loop Guide](docs/workflows/LOOPS.md)** - Iterative execution patterns
+- **[Patterns](docs/workflows/patterns/)** - Design patterns (Iterative Refinement, Consensus Validation, Document Pipeline)
+- **[Examples](docs/workflows/examples/)** - 13 working examples from simple to advanced
+- Working example: `config/workflows/iterative_dev/` - Complete iterative development workflow
 
 **Advanced Topics:**
 
-- [MCP Server Documentation](docs/mcp-server/) - Expose templates as discoverable tools
+- [MCP Server Documentation](docs/mcp-server/) - Expose workflows as discoverable tools
 - [Architecture Documentation](docs/architecture/) - System design for developers
 
 ---
 
 ## Architecture
 
-### Template Composition
+### Workflow Composition
 
-Templates can call other templates, creating modular, reusable workflows:
+Workflows can call other workflows, creating modular, reusable designs:
 
 ```
-parent_template
-  ├─> Calls child_template_1 (executes independently)
+parent_workflow
+  ├─> Calls child_workflow_1 (executes independently)
   │     └─> Returns result
-  ├─> Calls child_template_2 (executes independently)
+  ├─> Calls child_workflow_2 (executes independently)
   │     └─> Returns result
   └─> Synthesizes results into final output
 ```
 
 **Benefits:**
 
-- **Modularity**: Reuse templates across workflows
-- **Context Efficiency**: Each template has isolated context
-- **Maintainability**: Update templates independently
-- **Testability**: Test templates in isolation
+- **Modularity**: Reuse workflows across projects
+- **Context Efficiency**: Each workflow has isolated context
+- **Maintainability**: Update workflows independently
+- **Testability**: Test workflows in isolation
 
 ### Multi-Provider Workflows
 
 Each step in a workflow can use a different provider:
 
 ```yaml
+execution:
+  provider: anthropic  # Default
+
 steps:
-  - provider: anthropic    # Use Claude for research
-    prompt: "Research {{input_data}}"
+  - name: research
+    run: "Research {{input}}"
+    # Uses anthropic (inherited)
 
-  - provider: openai       # Use GPT-4 for analysis
-    prompt: "Analyze {{research}}"
+  - name: analyze
+    provider: openai  # Override
+    model: gpt-4o
+    run: "Analyze {{research}}"
 
-  - provider: ollama       # Use local model for synthesis
-    prompt: "Synthesize {{analysis}}"
+  - name: synthesize
+    provider: ollama  # Override
+    model: llama3.2
+    run: "Synthesize {{analyze}}"
 ```
+
+### Provider Failover
+
+Automatic failover across provider chains:
+
+```yaml
+execution:
+  providers:
+    - provider: anthropic
+      model: claude-sonnet-4
+    - provider: openai
+      model: gpt-4o
+    - provider: ollama
+      model: llama3.2
+```
+
+If Anthropic fails → tries OpenAI → falls back to Ollama
+
+### Iterative Loops
+
+LLM-evaluated exit conditions enable agentic workflows:
+
+```yaml
+loops:
+  - name: improve
+    workflow: refinement_cycle
+    with:
+      content: "{{input}}"
+      previous: "{{loop.last.output}}"
+    max_iterations: 5
+    until: "Quality score exceeds 8"  # LLM evaluates
+```
+
+Loop continues until LLM determines condition is met!
 
 ---
 
@@ -688,7 +830,7 @@ This project is shared as example code for your own development. Feel free to:
 - Fork and modify for your needs
 - Open issues for bugs
 - Submit pull requests for fixes
-- Share your templates and workflows
+- Share your workflows and patterns
 
 I'm happy to review contributions, though I can't promise active maintenance.
 
@@ -702,7 +844,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-**Original Project:** This started as a go fork of [chrishayuk/mcp-cli](https://github.com/chrishayuk/mcp-cli) in its first few weeks of development.  That project is actively maintained by a team of talented developers who have incorporated many new features sinve February 2025.  Check it out and give it a deserved star!
+**Original Project:** This started as a Go fork of [chrishayuk/mcp-cli](https://github.com/chrishayuk/mcp-cli) in its first few weeks of development. That project is actively maintained by a team of talented developers who have incorporated many new features since February 2025. Check it out and give it a deserved star!
 
 **Model Context Protocol:** Created by Anthropic - [modelcontextprotocol.io](https://modelcontextprotocol.io)
 
@@ -715,10 +857,11 @@ MIT License - see [LICENSE](LICENSE) for details.
 ### Documentation
 
 - **[Complete Documentation](docs/README.md)** - Comprehensive guides and references
-- **[Industry Showcases](docs/templates/showcases/)** - ⭐ 22 working templates with real tool integration
+- **[Workflow Documentation](docs/workflows/)** - ⭐ v2.0 workflows with loops, consensus, composition
+- **[Workflow Examples](docs/workflows/examples/)** - 13 working examples from beginner to advanced
+- **[Workflow Patterns](docs/workflows/patterns/)** - Design patterns for common use cases
 - **[Getting Started](docs/getting-started/)** - Installation and configuration
 - **[Usage Guides](docs/guides/)** - Mode-specific tutorials
-- **[Template Authoring](docs/templates/)** - Creating workflows
 - **[MCP Server Mode](docs/mcp-server/)** - Expose workflows as tools
 - **[Architecture](docs/architecture/)** - Technical design documentation
 
@@ -738,7 +881,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Built with Go • Powered by MCP**
+**Built with Go • Powered by MCP • Workflow v2.0**
 
 If this project helps you, please give it a ⭐!
 

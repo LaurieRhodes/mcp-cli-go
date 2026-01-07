@@ -1,0 +1,74 @@
+$schema: "workflow/v2.0"
+name: performance_analysis
+version: 1.0.0
+description: Code performance and optimization analysis
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.3
+
+steps:
+  - name: performance_scan
+    run: |
+      Analyze this code for performance issues and optimization opportunities:
+      
+      {{code}}
+      
+      Analyze:
+      
+      1. **Algorithmic Complexity**
+         - Time complexity (Big O notation)
+         - Space complexity
+         - Inefficient algorithms
+         - Better algorithm suggestions
+      
+      2. **Resource Usage**
+         - Memory leaks
+         - Excessive memory allocation
+         - Resource pooling opportunities
+         - Connection/handle management
+      
+      3. **I/O Operations**
+         - Blocking I/O
+         - Unnecessary disk access
+         - Network call efficiency
+         - Caching opportunities
+      
+      4. **Data Structures**
+         - Inappropriate data structure choices
+         - Better alternatives
+         - Index usage
+         - Query optimization (if database code)
+      
+      5. **Concurrency & Parallelism**
+         - Missed parallelization opportunities
+         - Lock contention
+         - Race conditions
+         - Thread pool usage
+      
+      6. **Common Bottlenecks**
+         - N+1 query problems
+         - Redundant computations
+         - Unnecessary loops
+         - String concatenation in loops
+         - Excessive object creation
+      
+      For each issue:
+      - **Impact**: HIGH / MEDIUM / LOW
+      - **Location**: Where in code
+      - **Problem**: What's inefficient
+      - **Measurement**: Expected performance impact (e.g., "O(n²) vs O(n)")
+      - **Solution**: Specific optimization
+      - **Trade-offs**: Any costs of optimization
+      
+      Provide performance score (1-10) where:
+      - 10 = Highly optimized
+      - 7-9 = Good, minor improvements possible
+      - 4-6 = Moderate concerns
+      - 1-3 = Serious performance issues
+      
+      Include:
+      - Top 3 optimization priorities
+      - Expected performance gain for each
+      - Complexity of implementing each fix

@@ -1,0 +1,39 @@
+$schema: "workflow/v2.0"
+name: dev_cycle
+version: 1.0.0
+description: Single iteration of code development - write and review
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.5
+
+steps:
+  - name: write
+    run: |
+      Write Python code for this requirement.
+      
+      Requirements: {{requirements}}
+      
+      Tests to satisfy: {{tests}}
+      
+      Previous code (if any): {{previous_code}}
+      
+      Previous feedback (if any): {{previous_feedback}}
+      
+      Improve the code based on feedback. Output ONLY the code.
+  
+  - name: review
+    needs: [write]
+    run: |
+      Review this code against test criteria.
+      
+      Tests: {{tests}}
+      
+      Code: {{write}}
+      
+      Format your response EXACTLY as:
+      - "PASS: All tests met" if code passes all tests
+      - "FAIL: [issue]" if any test fails
+      
+      Be specific about what's wrong.

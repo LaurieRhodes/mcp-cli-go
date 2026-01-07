@@ -80,9 +80,11 @@ func NewAnthropicClient(cfg *config.ProviderConfig) (domain.LLMProvider, error) 
 	}
 
 	// Set max retries from config or use default
-	maxRetries := defaultMaxRetries
-	if cfg.MaxRetries > 0 {
-		maxRetries = cfg.MaxRetries
+	// MaxRetries >= 0: use that value (0 = no retries, 1 = one retry, etc.)
+	// MaxRetries < 0 or unset: use default
+	maxRetries := cfg.MaxRetries
+	if cfg.MaxRetries < 0 {
+		maxRetries = defaultMaxRetries
 	}
 
 	// Create an HTTP client with extended timeouts

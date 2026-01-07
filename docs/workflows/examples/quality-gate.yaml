@@ -1,0 +1,145 @@
+$schema: "workflow/v2.0"
+name: quality_gate
+version: 1.0.0
+description: Iterative development with consensus approval gate
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.5
+
+steps:
+  # Define requirements
+  - name: requirements
+    run: |
+      Analyze this development request:
+      {{input}}
+      
+      Provide:
+      1. Clear functional requirements
+      2. Quality criteria (what makes it "done")
+      3. Success metrics
+      4. Edge cases to handle
+      
+      Be specific and measurable.
+
+loops:
+  # Iteratively develop until requirements met
+  - name: develop
+    workflow: build_and_test
+    with:
+      requirements: "{{requirements}}"
+      previous_attempt: "{{loop.last.output}}"
+      iteration: "{{loop.iteration}}"
+    max_iterations: 5
+    until: "All requirements are met"
+    on_failure: continue
+    accumulate: development_history
+
+steps:
+  # Consensus approval gate
+  - name: approval_gate
+    needs: [develop]
+    consensus:
+      prompt: |
+        Review this implementation for production approval:
+        
+        Requirements:
+        {{requirements}}
+        
+        Implementation:
+        {{develop}}
+        
+        Development History ({{loop.iteration}} iterations):
+        {{development_history}}
+        
+        Approve for production?
+        
+        Answer APPROVED if:
+        - All requirements met
+        - Code quality is high
+        - No critical issues
+        
+        Answer REJECTED if:
+        - Requirements not met
+        - Quality concerns
+        - Critical issues present
+        
+        Explain your decision briefly.
+      executions:
+        - provider: anthropic
+          model: claude-sonnet-4
+          temperature: 0
+        - provider: openai
+          model: gpt-4o
+          temperature: 0
+      require: unanimous
+      timeout: 90s
+  
+  # Generate deployment report
+  - name: deployment_report
+    needs: [approval_gate]
+    run: |
+      Generate deployment approval report:
+      
+      Requirements:
+      {{requirements}}
+      
+      Final Implementation:
+      {{develop}}
+      
+      Iterations: {{loop.iteration}}
+      
+      Approval Status:
+      {{approval_gate}}
+      
+      Format as:
+      
+      # Deployment Approval Report
+      
+      ## Request
+      [Original request]
+      
+      ## Requirements
+      [List requirements]
+      
+      ## Implementation
+      [Show final code/solution]
+      
+      ## Development Process
+      - Iterations completed: {{loop.iteration}}
+      - Improvements made across iterations
+      
+      ## Quality Gate Results
+      ### Provider Approvals
+      [Show each provider's decision]
+      
+      ### Consensus
+      [Unanimous approval or issues identified]
+      
+      ## Deployment Decision
+      [APPROVED or REJECTED]
+      
+      ## Next Steps
+      [If approved: deployment steps]
+      [If rejected: required changes]
+
+# Supporting workflow: build_and_test.yaml
+# Should exist in same directory
+
+# Usage:
+#
+# ./mcp-cli --workflow quality_gate --input-data \
+#   "Create a function to validate email addresses with proper error handling"
+#
+# This workflow:
+# 1. Defines clear requirements
+# 2. Iteratively develops solution (up to 5 attempts)
+# 3. Requires unanimous approval from Claude and GPT-4
+# 4. Generates comprehensive deployment report
+#
+# Use for:
+# - Production code deployment
+# - Critical functionality
+# - Compliance-required validation
+# - High-stakes releases

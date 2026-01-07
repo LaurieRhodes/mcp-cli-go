@@ -29,7 +29,7 @@ func (g *ModularConfigGenerator) Generate(config *GeneratorConfig) error {
 	}
 
 	// Create subdirectories
-	dirs := []string{"providers", "embeddings", "servers", "templates", "runasMCP", "proxy"}
+	dirs := []string{"providers", "embeddings", "servers", "workflows", "runasMCP", "proxy"}
 	for _, dir := range dirs {
 		path := filepath.Join(g.baseDir, dir)
 		if err := os.MkdirAll(path, 0755); err != nil {
@@ -110,7 +110,7 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 			Servers:    filepath.Join(configDirName, "servers/*.yaml"),
 			RunAs:      filepath.Join(configDirName, "runasMCP/*.yaml"),
 			Embeddings: filepath.Join(configDirName, "embeddings/*.yaml"),
-			Templates:  filepath.Join(configDirName, "templates/*.yaml"),
+			Workflows:  filepath.Join(configDirName, "workflows/*.yaml"),
 			Settings:   filepath.Join(configDirName, "settings.yaml"),
 		},
 	}
@@ -901,7 +901,7 @@ Add to ` + "`claude_desktop_config.json`" + `:
 ## Benefits
 
 - **Expose workflows as tools** for AI assistants
-- **Reuse templates** without rewriting code
+- **Reuse workflows** without rewriting code
 - **Multi-provider workflows** available to Claude
 - **Template composition** accessible via MCP protocol
 
@@ -982,7 +982,7 @@ Configure OpenWebUI to point to:
 ## See Also
 
 - [MCP Server Mode](../runasMCP/README.md) - For Claude Desktop integration
-- [Templates](../templates/README.md) - Workflow templates
+- [Workflows](../workflows/README.md) - Workflow documentation
 `
 	
 	return os.WriteFile(readmePath, []byte(readme), 0644)
@@ -1014,7 +1014,7 @@ config/                  # Modular config directory
 ├── servers/             # MCP server configs
 │   ├── README.md
 │   └── *.yaml
-├── templates/           # Workflow templates
+├── workflows/           # Workflows
 │   ├── README.md
 │   └── *.yaml
 └── runasMCP/               # MCP server mode configs
@@ -1032,7 +1032,7 @@ includes:
   embeddings: config/embeddings/*.yaml
   servers: config/servers/*.yaml
   runas: config/runasMCP/*.yaml
-  templates: config/templates/*.yaml
+  workflows: config/workflows/*.yaml
   settings: config/settings.yaml
 ` + "```" + `
 
@@ -1107,9 +1107,9 @@ config:
 
 ## Templates
 
-Workflow templates go in ` + "`templates/`" + `:
+Workflows go in ` + "`workflows/`" + `:
 
-**templates/analyze.yaml:**
+**workflows/analyze.yaml:**
 ` + "```yaml" + `
 name: analyze
 description: Analyze input data
@@ -1161,7 +1161,7 @@ OPENROUTER_API_KEY=your-key-here
 **config/providers/**: Individual LLM provider configs
 **config/embeddings/**: Individual embedding provider configs
 **config/servers/**: Individual MCP server configs
-**config/templates/**: Reusable workflow templates
+**config/workflows/**: Reusable workflows
 **config/runasMCP/**: MCP server mode configurations
 
 Each file is self-contained and can be edited independently.

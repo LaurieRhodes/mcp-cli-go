@@ -1,0 +1,88 @@
+$schema: "workflow/v2.0"
+name: iterative_improvement
+version: 1.0.0
+description: Iteratively improve content until quality threshold is met
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.7
+
+steps:
+  # Define quality criteria
+  - name: define_criteria
+    run: |
+      Define quality criteria for this content:
+      {{input}}
+      
+      Create measurable criteria for:
+      1. Clarity (1-10): Is the message clear and easy to understand?
+      2. Conciseness (1-10): Is it appropriately brief without losing meaning?
+      3. Accuracy (1-10): Is the information correct and well-supported?
+      4. Engagement (1-10): Is it interesting and compelling?
+      5. Grammar (1-10): Is it grammatically correct and well-written?
+      
+      For each criterion, describe what a score of 8+ would look like.
+
+loops:
+  # Iteratively improve the content
+  - name: improve_content
+    workflow: improvement_cycle
+    with:
+      original: "{{input}}"
+      criteria: "{{define_criteria}}"
+      previous_version: "{{loop.last.output}}"
+      iteration_number: "{{loop.iteration}}"
+    max_iterations: 3
+    until: "Overall quality score is 8 or higher"
+    on_failure: continue
+    accumulate: improvement_history
+
+steps:
+  # Create final report
+  - name: final_report
+    needs: [improve_content]
+    run: |
+      Create improvement report:
+      
+      Original Content:
+      {{input}}
+      
+      Final Version:
+      {{improve_content}}
+      
+      Iterations Completed: {{loop.iteration}}
+      
+      Format as:
+      
+      # Content Improvement Report
+      
+      ## Original Version
+      [Show original]
+      
+      ## Final Version
+      [Show improved version]
+      
+      ## Improvements Made
+      [Summarize the changes across {{loop.iteration}} iterations]
+      
+      ## Quality Assessment
+      [Final quality scores based on criteria]
+      
+      ## Summary
+      [Brief summary of the improvement process]
+
+# Supporting workflow: improvement_cycle.yaml
+# This workflow should exist in the same directory
+
+# Usage:
+#
+# ./mcp-cli --workflow iterative_improvement --input-data \
+#   "Write a blog post about AI safety. It should convince 
+#    policymakers to invest in AI safety research."
+#
+# The workflow will:
+# 1. Define quality criteria
+# 2. Iteratively improve content (up to 3 times)
+# 3. Stop when quality score reaches 8+
+# 4. Generate report showing improvement

@@ -179,7 +179,9 @@ func (s *Service) LoadConfig(filePath string) (*domainConfig.ApplicationConfig, 
 
 // LoadConfigOrCreateExample loads config or creates an example if it doesn't exist
 func (s *Service) LoadConfigOrCreateExample(filePath string) (*domainConfig.ApplicationConfig, bool, error) {
-	if config, err := s.LoadConfig(filePath); err == nil {
+	config, err := s.LoadConfig(filePath)
+	if err != nil {
+	} else {
 		return config, false, nil
 	}
 
@@ -200,7 +202,6 @@ func (s *Service) LoadConfigOrCreateExample(filePath string) (*domainConfig.Appl
 				},
 			},
 		},
-		Templates: make(map[string]*domainConfig.WorkflowTemplate),
 	}
 
 	// Save example config
@@ -211,7 +212,7 @@ func (s *Service) LoadConfigOrCreateExample(filePath string) (*domainConfig.Appl
 		return nil, false, fmt.Errorf("failed to create example config: %w", err)
 	}
 
-	config, err := s.LoadConfig(filePath)
+	config, err = s.LoadConfig(filePath)
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to load created example config: %w", err)
 	}
@@ -424,7 +425,7 @@ func (s *Service) ValidateConfig(config *domainConfig.ApplicationConfig) error {
 		return domain.NewDomainError(domain.ErrCodeProviderNotFound, fmt.Sprintf("default provider '%s' not found in configuration", config.AI.DefaultProvider))
 	}
 
-	if err := config.ValidateWorkflowTemplates(); err != nil {
+	if err := config.ValidateWorkflows(); err != nil {
 		return fmt.Errorf("workflow template validation failed: %w", err)
 	}
 

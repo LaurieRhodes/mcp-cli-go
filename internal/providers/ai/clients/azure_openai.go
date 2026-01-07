@@ -64,7 +64,7 @@ func NewAzureOpenAIClient(providerType domain.ProviderType, cfg *config.Provider
 	}
 
 	maxRetries := 3
-	if cfg.MaxRetries > 0 {
+	if cfg.MaxRetries >= 0 {
 		maxRetries = cfg.MaxRetries
 	}
 

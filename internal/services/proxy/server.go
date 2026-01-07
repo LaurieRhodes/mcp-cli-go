@@ -27,7 +27,7 @@ import (
 type ProxyServer struct {
 	config          *runas.RunAsConfig
 	appConfig       *config.ApplicationConfig
-	workflowService *workflow.Service
+	workflowService *workflow.Orchestrator
 	skillsService   *skills.Service
 	mcpServers      []*host.ServerConnection
 	httpServer      *http.Server
@@ -37,7 +37,7 @@ type ProxyServer struct {
 
 // NewServer creates a new HTTP proxy server
 // This matches the expected signature from serve.go
-func NewServer(runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, workflowSvc *workflow.Service, skillsSvc *skills.Service) *ProxyServer {
+func NewServer(runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, workflowSvc *workflow.Orchestrator, skillsSvc *skills.Service) *ProxyServer {
 	return &ProxyServer{
 		config:          runasConfig,
 		appConfig:       appConfig,
@@ -353,14 +353,14 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 // initializeToolHandlers creates handlers for all tools
 func (s *ProxyServer) initializeToolHandlers() error {
 	// Create schema generator with MCP server connections
-	schemaGen := NewSchemaGenerator(s.appConfig, s.mcpServers)
+	schemaGen := NewSchemaGenerator(s.appConfig)
 	
 	for i := range s.config.Tools {
 		tool := &s.config.Tools[i]
 		
 		// Auto-generate schema and description if not provided
 		if tool.InputSchema == nil || tool.Description == "" {
-			schema, description, err := schemaGen.GenerateSchema(tool)
+			schema, description, err := schemaGen.GenerateForTool(tool)
 			if err != nil {
 				logging.Warn("Failed to auto-generate schema for tool %s: %v, using generic schema", tool.Name, err)
 				// Use generic schema as fallback
@@ -389,10 +389,7 @@ func (s *ProxyServer) initializeToolHandlers() error {
 		}
 		
 		// Create handler for this tool
-		handler, err := NewToolHandler(tool, s.appConfig, s)
-		if err != nil {
-			return fmt.Errorf("failed to create handler for tool %s: %w", tool.Name, err)
-		}
+		handler := NewToolHandler(tool, s); _ = handler
 		
 		s.toolHandlers[tool.Name] = handler
 		logging.Debug("Initialized handler for tool: %s", tool.Name)

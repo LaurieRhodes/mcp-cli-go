@@ -1,0 +1,235 @@
+$schema: "workflow/v2.0"
+name: incident_response
+version: 2.0.0
+description: Systematic incident response with triage, analysis, and action planning
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.4
+
+steps:
+  # Step 1: Initial triage and severity assessment
+  - name: triage
+    run: |
+      Perform initial triage on this incident:
+      
+      {{input}}
+      
+      Provide:
+      
+      **Severity Assessment:**
+      - P1 (Critical): Complete outage, data loss, security breach
+      - P2 (High): Major degradation, affecting multiple users
+      - P3 (Medium): Minor degradation, workarounds available
+      - P4 (Low): Cosmetic issues, no impact
+      
+      **Impact Analysis:**
+      - Affected services
+      - Affected users (estimate)
+      - Business impact
+      - Data at risk
+      
+      **Initial Assessment:**
+      - What appears to be wrong
+      - When did it start
+      - What changed recently
+      - Is it still ongoing
+      
+      Assign severity: [P1|P2|P3|P4]
+
+  # Step 2: Technical analysis and diagnostics
+  - name: technical_analysis
+    needs: [triage]
+    run: |
+      Perform technical analysis:
+      
+      Incident:
+      {{input}}
+      
+      Triage Assessment:
+      {{triage}}
+      
+      Provide:
+      
+      **Timeline Reconstruction:**
+      - T-0: [When incident started]
+      - Key events leading up to incident
+      - What was observed and when
+      
+      **Technical Root Causes (Hypotheses):**
+      1. [Most likely technical cause]
+         - Evidence supporting this
+         - How to verify
+      2. [Second possibility]
+         - Evidence supporting this
+         - How to verify
+      3. [Third possibility]
+         - Evidence supporting this
+         - How to verify
+      
+      **Diagnostic Steps:**
+      1. [First check to perform]
+      2. [Second diagnostic step]
+      3. [Third diagnostic step]
+      
+      **Data to Collect:**
+      - Logs to examine
+      - Metrics to review
+      - Configuration to check
+      - Recent changes to investigate
+
+  # Step 3: Remediation planning
+  - name: remediation_plan
+    needs: [technical_analysis]
+    run: |
+      Create remediation plan:
+      
+      Incident Details:
+      {{input}}
+      
+      Triage:
+      {{triage}}
+      
+      Analysis:
+      {{technical_analysis}}
+      
+      Provide:
+      
+      **Immediate Actions (Stop the Bleeding):**
+      1. [First action to contain incident]
+         - Steps to execute
+         - Expected outcome
+         - Rollback plan if it fails
+      2. [Second containment action]
+         - Steps to execute
+         - Expected outcome
+         - Rollback plan
+      
+      **Short-Term Fix (Restore Service):**
+      1. [Primary restoration approach]
+         - Estimated time: [duration]
+         - Risk level: [LOW/MEDIUM/HIGH]
+         - Success criteria
+      2. [Backup restoration approach if primary fails]
+         - Estimated time: [duration]
+         - Risk level
+      
+      **Long-Term Prevention:**
+      1. [Root cause fix]
+      2. [Monitoring improvements]
+      3. [Process improvements]
+      
+      **Communication Plan:**
+      - Who to notify now
+      - Status update frequency
+      - Stakeholder communication
+
+  # Step 4: Generate incident response document
+  - name: incident_document
+    needs: [remediation_plan]
+    run: |
+      Generate comprehensive incident response document:
+      
+      # Incident Response Document
+      
+      **Incident ID:** {{workflow.execution_id}}
+      **Timestamp:** {{execution.timestamp}}
+      **Workflow:** {{workflow.name}} v{{workflow.version}}
+      
+      ---
+      
+      ## Incident Summary
+      
+      {{triage}}
+      
+      ---
+      
+      ## Technical Analysis
+      
+      {{technical_analysis}}
+      
+      ---
+      
+      ## Remediation Plan
+      
+      {{remediation_plan}}
+      
+      ---
+      
+      ## Immediate Actions (Next 15 Minutes)
+      
+      [ ] Action 1: [from remediation plan]
+      [ ] Action 2: [from remediation plan]
+      [ ] Action 3: [from remediation plan]
+      
+      **On-Call Assignment:** [Name/Team]
+      **Status Update Due:** [Time]
+      
+      ---
+      
+      ## Success Criteria
+      
+      Incident resolved when:
+      - [ ] Service restored to normal operation
+      - [ ] Users can access without errors
+      - [ ] Metrics return to baseline
+      - [ ] No data loss confirmed
+      
+      ---
+      
+      ## Communication
+      
+      **Internal:**
+      - Notify: [Teams/People]
+      - Frequency: Every [duration] until resolved
+      
+      **External (if needed):**
+      - Customer communication: [if P1/P2]
+      - Status page update: [if customer-facing]
+      
+      ---
+      
+      ## Follow-Up Actions
+      
+      After incident resolved:
+      1. Schedule post-mortem (within 48 hours)
+      2. Document lessons learned
+      3. Implement preventive measures
+      4. Update runbooks
+      
+      ---
+      
+      ## Incident Timeline
+      
+      [To be updated as incident progresses]
+      
+      - T+0min: Incident detected
+      - T+5min: On-call notified
+      - T+10min: This analysis completed
+      - T+[X]min: [Update as actions taken]
+
+# Usage:
+#
+# ./mcp-cli --workflow incident_response --input-data "$(cat incident_details.txt)"
+#
+# Or:
+# ./mcp-cli --workflow incident_response --input-data '{
+#   "summary": "Database connection pool exhausted",
+#   "reported_by": "monitoring",
+#   "time": "2024-01-07 14:30 UTC",
+#   "symptoms": "API returning 503 errors"
+# }'
+#
+# Business Value:
+# - Systematic triage ensures nothing is missed
+# - Step dependencies guarantee complete analysis before action
+# - Structured approach reduces chaos during incidents
+# - Documented plan enables clear communication
+# - Reproducible process improves over time
+#
+# Process Flow:
+# 1. Triage (severity, impact, initial assessment)
+# 2. Technical Analysis (timeline, root causes, diagnostics)
+# 3. Remediation Plan (immediate, short-term, long-term)
+# 4. Incident Document (comprehensive response plan)

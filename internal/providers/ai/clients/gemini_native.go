@@ -117,7 +117,7 @@ func NewGeminiNativeClient(providerType domain.ProviderType, cfg *config.Provide
 
 	// Set max retries from config or use default
 	maxRetries := 3
-	if cfg.MaxRetries > 0 {
+	if cfg.MaxRetries >= 0 {
 		maxRetries = cfg.MaxRetries
 	}
 

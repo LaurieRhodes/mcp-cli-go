@@ -1,0 +1,19 @@
+$schema: "workflow/v2.0"
+name: simple_test
+version: 1.0.0
+description: Simple test to verify workflows are accessible
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+
+steps:
+  - name: test_planner
+    template:
+      name: planner
+      with:
+        input: "Write a function to add two numbers"
+  
+  - name: confirm
+    needs: [test_planner]
+    run: "Say: Planner workflow executed successfully. Requirements created."

@@ -1,0 +1,26 @@
+$schema: "workflow/v2.0"
+name: test_designer
+version: 1.0.0
+description: Creates test criteria for code validation
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.3
+
+steps:
+  - name: create_tests
+    run: |
+      Based on these requirements, create test criteria to validate the code.
+      
+      Requirements: {{input}}
+      
+      Provide 3-5 test cases that should PASS. Format:
+      
+      TEST 1: [description]
+      Expected: [what should happen]
+      
+      TEST 2: [description]
+      Expected: [what should happen]
+      
+      Be specific about inputs and expected outputs.

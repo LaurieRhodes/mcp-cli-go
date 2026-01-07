@@ -86,8 +86,8 @@ func (p *ExposureParser) parseStringExposure(name string, index int) ([]ToolExpo
 	}
 	
 	// Check if it's a template
-	_, existsV2 := p.appConfig.TemplatesV2[name]
-	_, existsV1 := p.appConfig.Templates[name]
+	_, existsV2 := p.appConfig.Workflows[name]
+	_, existsV1 := p.appConfig.Workflows[name]
 	
 	if existsV2 || existsV1 {
 		logging.Debug("Exposing template: %s", name)

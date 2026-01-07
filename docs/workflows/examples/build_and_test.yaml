@@ -1,0 +1,57 @@
+$schema: "workflow/v2.0"
+name: build_and_test
+version: 1.0.0
+description: Build solution and test against requirements
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.5
+
+steps:
+  # Build the solution
+  - name: build
+    run: |
+      Build a solution for these requirements:
+      {{requirements}}
+      
+      {% if previous_attempt %}
+      Previous Attempt (Iteration {{iteration}}):
+      {{previous_attempt}}
+      
+      Improve based on the previous version.
+      Identify and fix any issues.
+      {% else %}
+      This is iteration 1 - create initial implementation.
+      {% endif %}
+      
+      Output complete, working code.
+      Include comments explaining key logic.
+  
+  # Test against requirements
+  - name: test
+    needs: [build]
+    run: |
+      Test this implementation against requirements:
+      
+      Requirements:
+      {{requirements}}
+      
+      Implementation:
+      {{build}}
+      
+      For each requirement:
+      - State the requirement
+      - Test if implementation meets it
+      - Mark as PASS or FAIL
+      - Explain any failures
+      
+      At the end, state clearly:
+      - "All requirements are met" if everything passes
+      - "Requirements not met: [list]" if failures exist
+      
+      Be thorough and specific.
+
+# This workflow is called by quality_gate.yaml
+# It builds and tests iteratively
+# Loop exits when "All requirements are met"

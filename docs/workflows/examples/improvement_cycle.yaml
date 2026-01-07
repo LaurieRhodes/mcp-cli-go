@@ -1,0 +1,73 @@
+$schema: "workflow/v2.0"
+name: improvement_cycle
+version: 1.0.0
+description: Single cycle of content improvement and scoring
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  temperature: 0.7
+
+steps:
+  # Improve the content
+  - name: improve
+    run: |
+      Improve this content based on the quality criteria.
+      
+      Criteria:
+      {{criteria}}
+      
+      {% if previous_version %}
+      Previous Version (Iteration {{iteration_number}}):
+      {{previous_version}}
+      
+      Improve based on the previous attempt.
+      {% else %}
+      Original Content:
+      {{original}}
+      
+      This is the first improvement attempt.
+      {% endif %}
+      
+      Focus on:
+      - Enhancing clarity
+      - Improving conciseness
+      - Ensuring accuracy
+      - Increasing engagement
+      - Perfecting grammar
+      
+      Output the improved content only, no explanations.
+  
+  # Score the improved content
+  - name: score
+    needs: [improve]
+    run: |
+      Score this improved content against the criteria:
+      
+      Criteria:
+      {{criteria}}
+      
+      Content to Score:
+      {{improve}}
+      
+      Provide scores (1-10) for each criterion:
+      1. Clarity: [score]/10 - [brief justification]
+      2. Conciseness: [score]/10 - [brief justification]
+      3. Accuracy: [score]/10 - [brief justification]
+      4. Engagement: [score]/10 - [brief justification]
+      5. Grammar: [score]/10 - [brief justification]
+      
+      Overall Score: [average]/10
+      
+      Then output the improved content:
+      
+      ---IMPROVED CONTENT---
+      {{improve}}
+      ---END CONTENT---
+      
+      Format your response EXACTLY as shown, with scores
+      followed by the content marker.
+
+# This workflow is called by iterative_improvement.yaml
+# It improves content and scores it
+# The loop exits when "Overall quality score is 8 or higher"
