@@ -190,49 +190,18 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 		},
 	}
 	
-	// Process conversation history to ensure correct message format
-	// We need to make sure that 'tool' role messages properly reference their parent assistant messages
-	var processedMessages []domain.Message
-	
-	// Track tool calls from assistant messages to associate them with tool responses
-	toolCallIDToAssistantIndex := make(map[string]int)
-	
-	// First pass: add all non-tool messages and build the tool call ID mapping
-	for _, msg := range c.Messages {
-		if msg.Role == "assistant" && len(msg.ToolCalls) > 0 {
-			// Register the tool call IDs with this assistant message
-			for _, toolCall := range msg.ToolCalls {
-				toolCallIDToAssistantIndex[toolCall.ID] = len(processedMessages)
-			}
-		}
-		
-		// For tool messages, ensure they reference a valid assistant message
-		if msg.Role == "tool" && msg.ToolCallID != "" {
-			// Find the assistant message index that contains this tool call
-			if assistantIndex, exists := toolCallIDToAssistantIndex[msg.ToolCallID]; exists {
-				// Only include the tool message if its parent assistant message is included
-				if assistantIndex >= 0 {
-					processedMessages = append(processedMessages, msg)
-				} else {
-					logging.Warn("Skipping tool message with ID %s as its parent assistant message was not found", msg.ToolCallID)
-				}
-			} else {
-				// Skip tool messages that don't have a corresponding assistant message with tool calls
-				logging.Warn("Skipping tool message with ID %s as no parent assistant message was found", msg.ToolCallID)
-				continue
-			}
-		} else {
-			// Add all non-tool messages
-			processedMessages = append(processedMessages, msg)
-		}
-	}
-	
-	// Add the processed messages
-	messages = append(messages, processedMessages...)
+	// Add all conversation messages (no validation yet)
+	messages = append(messages, c.Messages...)
 
-	// Apply token-based trimming if token manager is available
+	// Apply token-based trimming FIRST (before validation)
+	// This ensures we only validate messages that will actually be sent
 	if c.TokenManager != nil {
+		originalCount := len(messages)
 		messages = c.TokenManager.TrimMessagesToFit(messages, 0) // Use default reserve tokens
+		
+		if len(messages) != originalCount {
+			logging.Debug("Trimmed messages: %d -> %d", originalCount, len(messages))
+		}
 		
 		// Log context utilization
 		utilization := c.TokenManager.GetContextUtilization(messages)
@@ -249,9 +218,36 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 		}
 	}
 	
+	// CRITICAL FIX: Validate tool call/response pairing AFTER trimming
+	// This prevents orphaned tool messages when trimming removes assistant messages
+	validatedMessages := []domain.Message{messages[0]} // Keep system message
+	toolCallIDToIndex := make(map[string]int)
+	
+	// Build mapping and validate pairing on the FINAL (post-trim) message set
+	for _, msg := range messages[1:] {
+		if msg.Role == "assistant" && len(msg.ToolCalls) > 0 {
+			// Register tool call IDs from this assistant message
+			for _, toolCall := range msg.ToolCalls {
+				toolCallIDToIndex[toolCall.ID] = len(validatedMessages)
+			}
+			validatedMessages = append(validatedMessages, msg)
+		} else if msg.Role == "tool" && msg.ToolCallID != "" {
+			// Only include tool messages that have a corresponding assistant message
+			if _, exists := toolCallIDToIndex[msg.ToolCallID]; exists {
+				validatedMessages = append(validatedMessages, msg)
+			} else {
+				// This can happen if trimming removed the assistant message
+				logging.Warn("Skipping orphaned tool message with ID %s (parent assistant message not in final set)", msg.ToolCallID)
+			}
+		} else {
+			// Add all other messages (user, system, etc.)
+			validatedMessages = append(validatedMessages, msg)
+		}
+	}
+	
 	// Log the message structure for debugging
-	logging.Debug("Sending %d messages to LLM", len(messages))
-	for i, msg := range messages {
+	logging.Debug("Sending %d messages to LLM (after validation)", len(validatedMessages))
+	for i, msg := range validatedMessages {
 		if i == 0 {
 			logging.Debug("Message %d: role=%s, content=[system prompt]", i, msg.Role)
 		} else {
@@ -259,7 +255,7 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 		}
 	}
 	
-	return messages
+	return validatedMessages
 }
 
 // BuildSystemPrompt builds the system prompt including tool descriptions
