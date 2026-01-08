@@ -348,24 +348,29 @@ func (h *QueryHandler) Execute(question string) (*QueryResult, error) {
 			
 			messages = append(messages, assistantMessage)
 			
+			// Track the starting index for tool calls in this round
+			toolCallsStartIndex := len(h.toolCalls)
+			
 			// Execute tools and get results
 			if err := h.handleToolCalls(response.ToolCalls); err != nil {
 				return nil, fmt.Errorf("%w: %v", ErrToolExecution, err)
 			}
 			
 			// Add tool result messages to conversation history
+			// CRITICAL FIX: Use correct indexing for cumulative tool calls array
 			for i, toolCall := range response.ToolCalls {
-				toolInfo := h.toolCalls[i]
+				// Get the tool info from the correct index in the cumulative array
+				toolInfo := h.toolCalls[toolCallsStartIndex+i]
 				
-				// Add tool result message
+				// Add tool result message with matching tool_call_id
 				toolResultMessage := domain.Message{
 					Role:       "tool",
 					Content:    toolInfo.Result,
 					ToolCallID: toolCall.ID,
 				}
 				messages = append(messages, toolResultMessage)
-				logging.Debug("Added tool result message for %s with ID %s: %s", 
-					toolCall.Function.Name, toolCall.ID, toolInfo.Result)
+				logging.Debug("Added tool result message for %s with ID %s (index: %d): %s", 
+					toolCall.Function.Name, toolCall.ID, toolCallsStartIndex+i, toolInfo.Result)
 			}
 			
 			// For Ollama alternative format, add a special clarification message to help process the results
