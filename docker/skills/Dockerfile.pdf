@@ -35,7 +35,9 @@ RUN pip install --no-cache-dir \
     # Advanced PDF text/table extraction
     pdfplumber==0.11.0 \
     # OCR support
-    pytesseract==0.3.10
+    pytesseract==0.3.10 \
+    # PDF generation (ReportLab Toolkit)
+    reportlab==4.0.9
 
 # Create workspace directory
 RUN mkdir -p /workspace /skill
@@ -44,7 +46,7 @@ RUN mkdir -p /workspace /skill
 WORKDIR /workspace
 
 # Verify installations
-RUN python3 -c "import pypdf, pdf2image, PIL, pdfplumber, pytesseract; print('All PDF packages installed')" && \
+RUN python3 -c "import pypdf, pdf2image, PIL, pdfplumber, pytesseract, reportlab; print('All PDF packages installed')" && \
     which pdftotext && \
     which tesseract
 
