@@ -109,6 +109,12 @@ func (s *Service) initializeExecutor() error {
 		logging.Warn("No config provided, using default outputs directory: %s", config.OutputsDir)
 	}
 	
+	// Ensure outputs directory exists
+	if err := os.MkdirAll(config.OutputsDir, 0755); err != nil {
+		return fmt.Errorf("failed to create outputs directory: %w", err)
+	}
+	logging.Debug("Outputs directory ready: %s", config.OutputsDir)
+	
 	// Pass image mapping to executor if available
 	if s.imageMapping != nil {
 		config.ImageMapping = s.imageMapping

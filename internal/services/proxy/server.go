@@ -323,6 +323,15 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 	// Store connection
 	s.mcpServers = append(s.mcpServers, conn)
 	
+	// Auto-populate server_info if not set in proxy config
+	if s.config.ServerInfo.Name == "" {
+		s.config.ServerInfo.Name = fmt.Sprintf("%s-proxy", initResult.ServerInfo.Name)
+		s.config.ServerInfo.Version = initResult.ServerInfo.Version
+		s.config.ServerInfo.Description = fmt.Sprintf("HTTP proxy for %s", initResult.ServerInfo.Name)
+		logging.Info("Auto-populated server_info from source: %s v%s", 
+			s.config.ServerInfo.Name, s.config.ServerInfo.Version)
+	}
+	
 	// Get tools from server using tools/list
 	toolsResult, err := tools.SendToolsList(client, nil)
 	if err != nil {
