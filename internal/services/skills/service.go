@@ -57,7 +57,7 @@ func (s *Service) Initialize(skillsDir string, executionMode skills.ExecutionMod
 	s.executionMode = executionMode
 	
 	// Load skill image mapping
-	mappingPath := filepath.Join(skillsDir, "skill-images.yaml")
+	mappingPath := filepath.Join(absSkillsDir, "skill-images.yaml")
 	mapping, err := LoadSkillImageMapping(mappingPath)
 	if err != nil {
 		logging.Warn("Failed to load skill image mapping: %v", err)
@@ -81,13 +81,13 @@ func (s *Service) Initialize(skillsDir string, executionMode skills.ExecutionMod
 	}
 	
 	// Check if directory exists
-	if _, err := os.Stat(skillsDir); os.IsNotExist(err) {
-		logging.Warn("Skills directory does not exist: %s", skillsDir)
+	if _, err := os.Stat(absSkillsDir); os.IsNotExist(err) {
+		logging.Warn("Skills directory does not exist: %s", absSkillsDir)
 		return nil // Not an error, just no skills available
 	}
 	
 	// Scan directory
-	discovered, err := s.ScanSkillsDirectory(skillsDir)
+	discovered, err := s.ScanSkillsDirectory(absSkillsDir)
 	if err != nil {
 		return fmt.Errorf("failed to scan skills directory: %w", err)
 	}
@@ -694,6 +694,119 @@ func (s *Service) ExecuteSkillScript(skillName string, scriptName string, args [
 	return result, nil
 }
 
+// validateCodePaths checks if code tries to save to invalid paths and provides helpful errors
+func validateCodePaths(code string) error {
+	var invalidPaths []string
+	
+	// Split code into lines
+	lines := strings.Split(code, "\n")
+	for i, line := range lines {
+		// Skip comments and empty lines
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		
+		// Check for file operation patterns
+		if strings.Contains(line, ".save(") || strings.Contains(line, "open(") || 
+		   strings.Contains(line, "to_csv(") || strings.Contains(line, "to_excel(") ||
+		   strings.Contains(line, "Path(") {
+			// Look for quoted paths in both single and double quotes
+			for _, quote := range []string{"'", "\""} {
+				if strings.Contains(line, quote+"/") {
+					// Extract the path
+					start := strings.Index(line, quote+"/")
+					if start == -1 {
+						continue
+					}
+					start += len(quote)
+					
+					end := strings.Index(line[start:], quote)
+					if end == -1 {
+						continue
+					}
+					
+					path := line[start : start+end]
+					
+					// Check if it's an absolute path not starting with /outputs/
+					if strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "/outputs/") {
+						invalidPaths = append(invalidPaths, fmt.Sprintf("Line %d: %s", i+1, trimmed))
+					}
+				}
+			}
+		}
+	}
+	
+	if len(invalidPaths) > 0 {
+		errorMsg := "❌ Invalid file paths detected in code:\n\n"
+		errorMsg += "The code tries to save files to paths outside the /outputs/ directory.\n"
+		errorMsg += "Files can only be saved to /outputs/ which maps to the host filesystem.\n\n"
+		errorMsg += "Invalid paths found:\n"
+		for _, path := range invalidPaths {
+			errorMsg += "  • " + path + "\n"
+		}
+		errorMsg += "\n"
+		errorMsg += "✅ Correct usage:\n"
+		errorMsg += "  doc.save('/outputs/myfile.docx')  ← Saves to host /tmp/mcp-outputs/\n"
+		errorMsg += "  open('/outputs/data.txt', 'w')    ← Accessible on host\n\n"
+		errorMsg += "❌ Invalid usage:\n"
+		errorMsg += "  doc.save('/media/laurie/file.docx')  ← Not accessible in container\n"
+		errorMsg += "  doc.save('/home/user/file.docx')     ← Not accessible in container\n"
+		return fmt.Errorf(errorMsg)
+	}
+	
+	return nil
+}
+
+// validatePythonSyntax checks if Python code has basic syntax errors
+func validatePythonSyntax(code string) error {
+	// Look for common syntax errors that AI models make
+	lines := strings.Split(code, "\n")
+	
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		
+		// Skip empty lines and comments
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		
+		// Check for unescaped quotes in strings
+		// This is a simplified check - look for patterns like: "text "more text""
+		if strings.Count(line, "\"")%2 != 0 {
+			// Odd number of quotes - might be unterminated
+			return fmt.Errorf("❌ Python syntax error detected:\n\n" +
+				"Line %d has unbalanced quotes - likely unterminated string literal.\n\n" +
+				"Line content:\n  %s\n\n" +
+				"Common fixes:\n" +
+				"1. Escape internal quotes:\n" +
+				"   \"He said \\\"hello\\\" to me\"  ← Use backslash before quotes\n\n" +
+				"2. Use single quotes for outer string:\n" +
+				"   'He said \"hello\" to me'  ← Mix quote types\n\n" +
+				"3. Use triple quotes for multi-line strings:\n" +
+				"   \"\"\"He said \"hello\" to me\"\"\"  ← Triple quotes allow internal quotes\n\n" +
+				"4. Use raw strings if many backslashes:\n" +
+				"   r'C:\\path\\to\\file'  ← Raw strings don't interpret backslashes\n",
+				i+1, trimmed)
+		}
+		
+		// Check for multiple consecutive quotes that might indicate escaping issues
+		if strings.Contains(line, "\"\"\"\"") && !strings.HasPrefix(trimmed, "\"\"\"") {
+			return fmt.Errorf("❌ Python syntax error detected:\n\n" +
+				"Line %d has suspicious quote pattern (\"\"\"\")\n\n" +
+				"Line content:\n  %s\n\n" +
+				"This usually indicates improperly escaped quotes in a string.\n\n" +
+				"Fix: Escape internal quotes with backslash:\n" +
+				"  \"He said \\\"hello\\\" to me\"\n" +
+				"Or use single quotes for the outer string:\n" +
+				"  'He said \"hello\" to me'\n",
+				i+1, trimmed)
+		}
+	}
+	
+	return nil
+}
+
 // ExecuteCode executes arbitrary code with access to skill's helper libraries
 // This is the correct implementation matching Anthropic's design:
 // - LLM reads skill documentation
@@ -709,6 +822,18 @@ func (s *Service) ExecuteCode(request *skills.CodeExecutionRequest) (*skills.Exe
 	}
 	if request.Code == "" {
 		return nil, fmt.Errorf("code is required")
+	}
+	
+	// Validate file paths in code
+	if err := validateCodePaths(request.Code); err != nil {
+		return nil, err
+	}
+	
+	// Validate Python syntax (only for Python code)
+	if request.Language == "python" {
+		if err := validatePythonSyntax(request.Code); err != nil {
+			return nil, err
+		}
 	}
 	
 	// Get skill
@@ -942,10 +1067,12 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 	executeCodeTool := map[string]interface{}{
 		"name": "execute_skill_code",
 		"description": "[SKILL CODE EXECUTION] Execute code with access to a skill's helper libraries. " +
+			"**CRITICAL: All output files MUST be saved to /outputs/ directory.** " +
 			"Use this to: (1) Create documents dynamically, (2) Process files with custom logic, " +
 			"(3) Use skill helper libraries (e.g., Document class from docx skill). " +
-			"The code executes in a sandboxed environment with the skill's scripts/ directory " +
-			"available for imports via PYTHONPATH.",
+			"The code executes in a sandboxed Docker container. The /outputs/ directory is the ONLY writable location " +
+			"that persists to the host filesystem (/tmp/mcp-outputs/). Any other paths will fail. " +
+			"Example: doc.save('/outputs/myfile.docx') NOT doc.save('/home/user/myfile.docx')",
 		"template": "execute_skill_code", // Special marker for this tool
 		"input_schema": map[string]interface{}{
 			"type": "object",
@@ -962,7 +1089,7 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 				},
 				"code": map[string]interface{}{
 					"type":        "string",
-					"description": "Python code to execute. Can import from 'scripts' module to use skill helper libraries.",
+					"description": "Python code to execute. IMPORTANT: Save all files to /outputs/ directory only. Example: doc.save('/outputs/file.docx')",
 				},
 				"files": map[string]interface{}{
 					"type":        "object",
