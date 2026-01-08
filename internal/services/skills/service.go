@@ -46,7 +46,14 @@ func (s *Service) Initialize(skillsDir string, executionMode skills.ExecutionMod
 	logging.Info("Initializing skill service from directory: %s", skillsDir)
 	logging.Info("Execution mode: %s", executionMode)
 	
-	s.skillsDir = skillsDir
+	// Convert skills directory to absolute path (required for Docker bind mounts)
+	absSkillsDir, err := filepath.Abs(skillsDir)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for skills directory: %w", err)
+	}
+	
+	s.skillsDir = absSkillsDir
+	logging.Debug("Absolute skills directory: %s", absSkillsDir)
 	s.executionMode = executionMode
 	
 	// Load skill image mapping
