@@ -338,16 +338,20 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 		// Add tool call to history
 		m.Context.AddToolCall(toolCall, result, err)
 		
+		// Prepare tool result content (use error message if execution failed)
+		var toolResultContent string
 		if err != nil {
 			m.UI.PrintError("Tool execution failed: %v", err)
-			// Continue with other tool calls despite error
-			continue
+			toolResultContent = fmt.Sprintf("Error: %v", err)
+		} else {
+			toolResultContent = result
 		}
 		
-		// Add tool result message to context, making sure to link to the correct assistant message
+		// CRITICAL: Always add tool result message, even for errors
+		// DeepSeek and other OpenAI-compatible APIs require a tool result for every tool_call_id
 		toolResultMessage := domain.Message{
 			Role:        "tool",
-			Content:     result,
+			Content:     toolResultContent,
 			ToolCallID:  toolCall.ID,
 		}
 		m.Context.AddMessage(toolResultMessage)

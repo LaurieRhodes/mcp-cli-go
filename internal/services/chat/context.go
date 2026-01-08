@@ -224,6 +224,17 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 		}
 	}
 	
+	// Debug: Log ALL messages BEFORE validation
+	logging.Debug("=== ALL MESSAGES BEFORE VALIDATION (count: %d) ===", len(messages))
+	for i, msg := range messages {
+		logging.Debug("  Pre-validation Message %d: role=%s, tool_call_id='%s', has_tool_calls=%v, content_len=%d", 
+			i, msg.Role, msg.ToolCallID, len(msg.ToolCalls) > 0, len(msg.Content))
+		if msg.Role == "tool" && msg.ToolCallID == "" {
+			logging.Warn("  ⚠️  Tool message %d has EMPTY ToolCallID!", i)
+		}
+	}
+	logging.Debug("=== END PRE-VALIDATION MESSAGES ===")
+	
 	// CRITICAL FIX: Validate tool call/response pairing AFTER trimming
 	// This prevents orphaned tool messages when trimming removes assistant messages
 	validatedMessages := []domain.Message{messages[0]} // Keep system message
@@ -233,17 +244,22 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 	for _, msg := range messages[1:] {
 		if msg.Role == "assistant" && len(msg.ToolCalls) > 0 {
 			// Register tool call IDs from this assistant message
+			logging.Debug("Registering %d tool_call_ids from assistant message", len(msg.ToolCalls))
 			for _, toolCall := range msg.ToolCalls {
 				toolCallIDToIndex[toolCall.ID] = len(validatedMessages)
+				logging.Debug("  Registered tool_call_id: %s", toolCall.ID)
 			}
 			validatedMessages = append(validatedMessages, msg)
 		} else if msg.Role == "tool" && msg.ToolCallID != "" {
 			// Only include tool messages that have a corresponding assistant message
+			logging.Debug("Checking tool message with ToolCallID: %s", msg.ToolCallID)
 			if _, exists := toolCallIDToIndex[msg.ToolCallID]; exists {
+				logging.Debug("  Tool message INCLUDED (ID found in map)")
 				validatedMessages = append(validatedMessages, msg)
 			} else {
 				// This can happen if trimming removed the assistant message
 				logging.Warn("Skipping orphaned tool message with ID %s (parent assistant message not in final set)", msg.ToolCallID)
+				logging.Debug("  Available tool_call_ids in map: %v", getMapKeys(toolCallIDToIndex))
 			}
 		} else {
 			// Add all other messages (user, system, etc.)
@@ -357,4 +373,13 @@ func (c *ChatContext) FormatToolHistoryForLLM() string {
 	}
 	
 	return history.String()
+}
+
+// getMapKeys returns the keys of a map for debugging
+func getMapKeys(m map[string]int) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }

@@ -216,6 +216,17 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 				c.TokenManager.CountTokensInMessages(messages),
 				c.TokenManager.GetMaxTokens())
 		}
+
+	// Debug: Log ALL messages BEFORE validation
+	logging.Debug("=== ALL MESSAGES BEFORE VALIDATION (count: %d) ===", len(messages))
+	for i, msg := range messages {
+		logging.Debug("  Pre-validation Message %d: role=%s, tool_call_id='%s', has_tool_calls=%v, content_len=%d", 
+			i, msg.Role, msg.ToolCallID, len(msg.ToolCalls) > 0, len(msg.Content))
+		if msg.Role == "tool" && msg.ToolCallID == "" {
+			logging.Warn("  ⚠️  Tool message %d has EMPTY ToolCallID!", i)
+		}
+	}
+	logging.Debug("=== END PRE-VALIDATION MESSAGES ===")
 	}
 	
 	// CRITICAL FIX: Validate tool call/response pairing AFTER trimming
