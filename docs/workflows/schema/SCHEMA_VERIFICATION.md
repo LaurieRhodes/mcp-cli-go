@@ -85,7 +85,7 @@ type LoopV2 struct {
 
 ## Special Modes - VERIFIED ✅
 
-### TemplateMode
+### WorkflowMode
 
 ```go
 type TemplateMode struct {

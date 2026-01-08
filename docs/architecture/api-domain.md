@@ -122,7 +122,7 @@ type ConfigurationService interface {
 
 ---
 
-### TemplateExecutor Interface
+### WorkflowExecutor Interface
 
 **Purpose:** Template execution engine
 
@@ -558,7 +558,7 @@ type ServerConfig struct {
 
 ---
 
-### TemplatesConfig
+### WorkflowsConfig
 
 ```go
 type TemplatesConfig struct {
@@ -699,9 +699,9 @@ type ContentBlock struct {
 
 ---
 
-## Template Schema
+## Workflow Schema
 
-### Template Structure
+### Workflow Structure
 
 ```go
 type Template struct {
@@ -722,7 +722,7 @@ type Template struct {
 }
 ```
 
-### TemplateStep
+### WorkflowStep
 
 ```go
 type TemplateStep struct {

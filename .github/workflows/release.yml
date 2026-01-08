@@ -133,60 +133,160 @@ jobs:
       - name: Generate release notes
         id: release_notes
         run: |
-          cat > release_notes.md << 'EOF'
-          ## MCP-CLI Release ${{ github.ref_name }}
+          cat > release_notes.md << 'EOFNOTES'
+          ## MCP-CLI-Go Release ${{ github.ref_name }}
           
-          ### Installation
+          ### Quick Start
           
-          Download the appropriate binary for your platform:
+          **1. Download for your platform:**
           
           **Linux (x86_64):**
           ```bash
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-linux-amd64
           chmod +x mcp-cli-linux-amd64
-          sudo mv mcp-cli-linux-amd64 /usr/local/bin/mcp-cli
+          mv mcp-cli-linux-amd64 mcp-cli
           ```
           
           **Linux (ARM64):**
           ```bash
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-linux-arm64
           chmod +x mcp-cli-linux-arm64
-          sudo mv mcp-cli-linux-arm64 /usr/local/bin/mcp-cli
+          mv mcp-cli-linux-arm64 mcp-cli
           ```
           
           **macOS (Intel):**
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-darwin-amd64
-          chmod +x mcp-cli-darwin-amd64
-          sudo mv mcp-cli-darwin-amd64 /usr/local/bin/mcp-cli
+          curl -L -o mcp-cli https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-darwin-amd64
+          chmod +x mcp-cli
           ```
           
           **macOS (Apple Silicon):**
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-darwin-arm64
-          chmod +x mcp-cli-darwin-arm64
-          sudo mv mcp-cli-darwin-arm64 /usr/local/bin/mcp-cli
+          curl -L -o mcp-cli https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-darwin-arm64
+          chmod +x mcp-cli
           ```
           
           **Windows (x86_64):**
-          Download `mcp-cli-windows-amd64.exe` and add to your PATH.
+          - Download: [mcp-cli-windows-amd64.exe](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/mcp-cli-windows-amd64.exe)
+          - Rename to `mcp-cli.exe`
+          
+          ---
+          
+          **2. Initialize configuration (REQUIRED):**
+          
+          ```bash
+          # Run from a directory where you have write permissions
+          ./mcp-cli init
+          ```
+          
+          **⚠️ Important:** 
+          - The `init` command creates a `config/` directory in your current location
+          - You need write permissions to create and edit config files
+          - Never run `mcp-cli init` with sudo/as root!
+          
+          **3. Start using:**
+          
+          ```bash
+          ./mcp-cli chat
+          ```
+          
+          ---
+          
+          ### Installation Options
+          
+          #### Option 1: Local Directory (Recommended)
+          
+          Keep the binary in your project/workspace directory:
+          
+          ```bash
+          # After downloading as shown above
+          ./mcp-cli init
+          ./mcp-cli chat
+          ```
+          
+          **Pros:** Simple, no system changes, easy config access  
+          **Cons:** Must use `./mcp-cli` or specify path
+          
+          #### Option 2: User Binary Directory (No sudo needed)
+          
+          ```bash
+          # Create user bin if needed
+          mkdir -p ~/bin
+          
+          # Move binary
+          mv mcp-cli ~/bin/
+          
+          # Add to PATH (if not already)
+          echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+          source ~/.bashrc
+          
+          # Initialize in workspace
+          cd ~/my-workspace
+          mcp-cli init
+          ```
+          
+          **Pros:** Available from anywhere, no sudo  
+          **Cons:** Must manage PATH
+          
+          #### Option 3: System-Wide (Requires sudo)
+          
+          ```bash
+          # Install system-wide
+          sudo mv mcp-cli /usr/local/bin/
+          
+          # Initialize in workspace (NOT as root!)
+          cd ~/my-workspace
+          mcp-cli init
+          ```
+          
+          **⚠️ Warning:** Only use sudo for moving the binary, never for init or running!
+          
+          ---
+          
+          ### Configuration Requirements
+          
+          MCP-CLI creates configuration in `./config/` (current directory):
+          
+          - ✅ Write permissions needed for config directory
+          - ✅ Ability to edit YAML files
+          - ✅ Run from a user-writable location
+          
+          **For restricted environments:**
+          ```bash
+          # Use a writable workspace directory
+          cd ~/mcp-workspace
+          mcp-cli init
+          ```
+          
+          ---
           
           ### Verification
           
-          Verify your download using the SHA256 checksums:
+          **Check version:**
+          ```bash
+          ./mcp-cli --version
+          ```
+          
+          **Verify download (checksums provided):**
           ```bash
           sha256sum -c mcp-cli-<platform>-<arch>.sha256
           ```
           
+          ---
+          
           ### Documentation
           
-          - [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/docs/getting-started/quick-start.md)
-          - [Full Documentation](https://github.com/${{ github.repository }}/blob/main/docs/)
+          - **[Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/docs/getting-started/)** - Get started in 5 minutes
+          - **[Installation Guide](https://github.com/${{ github.repository }}/blob/main/docs/getting-started/installation.md)** - Detailed setup instructions
+          - **[Configuration Guide](https://github.com/${{ github.repository }}/blob/main/docs/getting-started/concepts.md)** - Understanding configuration
+          - **[Full Documentation](https://github.com/${{ github.repository }}/blob/main/docs/)** - Complete guides and references
+          
+          ---
           
           ### What's New
           
-          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
-          EOF
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for complete release details.
+          EOFNOTES
           
           cat release_notes.md
       

@@ -83,7 +83,7 @@ your-executable-location/
     ├── runas/               # MCP definitions for workflows
     ├── servers/             # MCP server configs
     │   └── README.md
-    └── templates/           # Workflow templates
+    └── workflows/           # Workflows
         └── README.md
 ```
 
@@ -169,11 +169,11 @@ config:
 3. Configure the command, args, and environment variables
 4. Reference the server by name in queries
 
-#### `templates/` - Workflow Templates
+#### `workflows/` - AI Workflows
 
 Templates define reusable AI workflows. They're the most powerful feature of MCP-CLI.
 
-**Example:** `config/templates/analyze.yaml`
+**Example:** `config/workflows/analyze.yaml`
 
 ```yaml
 name: analyze
@@ -277,7 +277,7 @@ Templates are where MCP-CLI really shines. Let's create a simple analysis workfl
 
 ### 1. Create the Template
 
-Create `config/templates/simple_analysis.yaml`:
+Create `config/workflows/simple_analysis.yaml`:
 
 ```yaml
 name: simple_analysis
@@ -329,7 +329,7 @@ mcp-cli --list-templates
 
 Here's where it gets powerful - using different AI providers for different tasks:
 
-Create `config/templates/research_workflow.yaml`:
+Create `config/workflows/research_workflow.yaml`:
 
 ```yaml
 name: research_workflow
@@ -387,7 +387,7 @@ mcp-cli query --server filesystem,brave-search "Find files and search web"
 # In templates
 ```
 
-Create `config/templates/web_research.yaml`:
+Create `config/workflows/web_research.yaml`:
 
 ```yaml
 name: web_research
@@ -477,7 +477,7 @@ If missing, add it or run `mcp-cli init` again.
 mcp-cli --list-templates
 
 # Check templates directory
-ls config/templates/
+ls config/workflows/
 ```
 
 ### Ollama "connection refused"
@@ -622,7 +622,7 @@ mcp-cli query --provider openai "question"  # Specific provider
 mcp-cli query --json "question"           # JSON output
 mcp-cli query --server brave-search "q"   # With MCP server
 
-# Templates
+# Workflows
 mcp-cli --template template_name          # Run template
 mcp-cli --list-templates                  # List templates
 mcp-cli --template name --input-data "x"  # With input

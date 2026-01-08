@@ -404,7 +404,7 @@ Embeddings step uses:
 
 ---
 
-## Template Mode Inheritance
+## Workflow Mode Inheritance
 
 ```yaml
 execution:

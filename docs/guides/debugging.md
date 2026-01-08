@@ -551,7 +551,7 @@ cat config/servers/filesystem.yaml
 
 ---
 
-## Template Debugging
+## Workflow Debugging
 
 ### Test Template Step-by-Step
 
@@ -570,10 +570,10 @@ mcp-cli --verbose --template my_template
 
 ```bash
 # Check template location
-ls config/templates/
+ls config/workflows/
 
 # Check template name
-cat config/templates/my_template.yaml
+cat config/workflows/my_template.yaml
 # Verify "name:" field matches
 
 # List available templates
@@ -600,7 +600,7 @@ steps:
 mcp-cli --verbose --template failing_template
 
 # Check step configuration
-cat config/templates/failing_template.yaml
+cat config/workflows/failing_template.yaml
 
 # Test step prompt separately
 mcp-cli query "The exact prompt from the step"

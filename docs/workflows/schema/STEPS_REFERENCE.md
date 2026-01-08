@@ -193,7 +193,7 @@ steps:
         processed_data: "{{stage1}}"
 ```
 
-### Template Call Directory Structure
+### Workflow Call Directory Structure
 
 ```
 config/workflows/

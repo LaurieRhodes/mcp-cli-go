@@ -109,7 +109,7 @@ parameters:
 
 **Maps to template:**
 ```yaml
-# Template receives: {{input_data.name}}
+# Workflow receives: {{input_data.name}}
 ```
 
 ---
@@ -129,7 +129,7 @@ parameters:
 
 **Maps to template:**
 ```yaml
-# Template receives: {{input_data.count}}
+# Workflow receives: {{input_data.count}}
 ```
 
 ---
@@ -147,7 +147,7 @@ parameters:
 
 **Maps to template:**
 ```yaml
-# Template uses:
+# Workflow uses:
 {% if input_data.verbose %}
   Detailed output...
 {% endif %}
@@ -173,7 +173,7 @@ parameters:
 
 **Maps to template:**
 ```yaml
-# Template receives:
+# Workflow receives:
 # {{input_data.config.mode}}
 # {{input_data.config.threshold}}
 ```
@@ -194,7 +194,7 @@ parameters:
 
 **Maps to template:**
 ```yaml
-# Template can iterate:
+# Workflow can iterate:
 {% for file in input_data.files %}
   Process: {{file}}
 {% endfor %}
@@ -219,7 +219,7 @@ parameters:
 
 **Maps to template:**
 ```yaml
-# Template iterates over structured data:
+# Workflow iterates over structured data:
 {% for task in input_data.tasks %}
   Task: {{task.name}}, Priority: {{task.priority}}
 {% endfor %}
@@ -420,14 +420,14 @@ steps:
 - **No spaces** or special characters
 - **Descriptive** names preferred
 
-### Template References
+### Workflow References
 
 - **Must exist** in template paths
 - **Name only** (no .yaml extension)
 - **Case sensitive**
 
 **Example:**
-- Template file: `config/templates/code_analyzer.yaml`
+- Template file: `config/workflows/code_analyzer.yaml`
 - Reference: `template: code_analyzer` ✓
 - Not: `template: code_analyzer.yaml` ❌
 
@@ -724,4 +724,4 @@ tools:
 
 - **[Integration Guide](integration.md)** - How to connect MCP clients
 - **[Examples](examples/)** - Production-ready configurations
-- **[Template Documentation](../templates/)** - Creating templates
+- **[Workflow Documentation](../workflows/)** - Creating templates

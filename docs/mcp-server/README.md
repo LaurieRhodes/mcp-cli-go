@@ -300,14 +300,14 @@ Client sees one tool, gets multi-step workflow.
 **Different templates can use different AI providers:**
 
 ```yaml
-# Template 1: Use fast, cheap model
+# Workflow 1: Use fast, cheap model
 name: quick_check
 config:
   defaults:
     provider: ollama
     model: qwen2.5:32b
 
-# Template 2: Use powerful model
+# Workflow 2: Use powerful model
 name: deep_analysis
 config:
   defaults:
@@ -373,7 +373,7 @@ Each example includes:
 **Prerequisites:**
 
 - MCP-CLI installed and configured
-- Working templates in `config/templates/`
+- Working templates in `config/workflows/`
 - MCP client (Claude Desktop, Cursor, etc.)
 
 **Steps:**

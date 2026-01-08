@@ -13,7 +13,7 @@ Tool appears in client but fails when called.
 
 **1. Check template exists:**
 ```bash
-ls config/templates/your_template.yaml
+ls config/workflows/your_template.yaml
 ```
 
 **2. Test template directly:**
@@ -35,20 +35,20 @@ mcp-cli serve --verbose config/runas/server.yaml
 template: code_analyzer  # ← Must match filename exactly
 
 # Must exist:
-# config/templates/code_analyzer.yaml  ✓
-# NOT: config/templates/code-analyzer.yaml  ✗
+# config/workflows/code_analyzer.yaml  ✓
+# NOT: config/workflows/code-analyzer.yaml  ✗
 ```
 
 **Parameter mismatch:**
 ```yaml
 # Client sends: {"code": "..."}
-# Template expects: {{input_data.code}}
+# Workflow expects: {{input_data.code}}
 # Not: {{code}}  ✗
 ```
 
 **Missing API key:**
 ```bash
-# Template uses provider but key not set
+# Workflow uses provider but key not set
 echo $OPENAI_API_KEY  # Should show key, not empty
 ```
 
@@ -90,7 +90,7 @@ parameters:
     properties:
       mode: {type: string}
 
-# Template access:
+# Workflow access:
 # Correct: {{input_data.config.mode}}
 # Wrong: {{input_data.config}}  ✗ (gets whole object)
 ```
@@ -262,7 +262,7 @@ parameters:
 
 **Template execution failure:**
 ```yaml
-# Template references undefined variable
+# Workflow references undefined variable
 prompt: "Process: {{input_data.undefined}}"
 # Client didn't send 'undefined' parameter
 ```
@@ -292,7 +292,7 @@ time mcp-cli --template template_name
 **Check template complexity:**
 ```yaml
 # Count steps
-grep "^  - name:" config/templates/template.yaml | wc -l
+grep "^  - name:" config/workflows/template.yaml | wc -l
 # Many steps = longer execution
 ```
 
@@ -453,7 +453,7 @@ tools:
 
 2. **Add logging:**
    ```yaml
-   # Template debug step
+   # Workflow debug step
    steps:
      - name: debug_input
        prompt: "Echo input: {{input_data}}"
@@ -473,8 +473,8 @@ tools:
 
 4. **Verify assumptions:**
    ```bash
-   # Template exists?
-   ls config/templates/template.yaml
+   # Workflow exists?
+   ls config/workflows/template.yaml
    
    # YAML valid?
    python3 -c "import yaml; yaml.safe_load(open('...'))"

@@ -103,4 +103,4 @@ tools:
 
 - **[runas Configuration](../runas-config.md)** - Complete specification
 - **[Integration Guide](../integration.md)** - Deployment patterns
-- **[Template Documentation](../../templates/)** - Building workflows
+- **[Workflow Documentation](../../workflows/)** - Building workflows

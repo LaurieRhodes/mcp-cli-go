@@ -312,7 +312,7 @@ echo "$data" | mcp-cli --template analyze
 
 ---
 
-### Template Features
+### Workflow Features
 
 Templates support:
 
@@ -376,7 +376,7 @@ steps:
 
 ---
 
-## Template Composition
+## Workflow Composition
 
 **Template composition** allows templates to call other templates, creating modular, reusable workflows.
 
@@ -782,7 +782,7 @@ Total: 3100 tokens sent
 
 **Benefit:** 50% token savings!
 
-### Template Composition Isolation
+### Workflow Composition Isolation
 
 ```yaml
 # Parent template
@@ -976,8 +976,8 @@ steps:
 Now that you understand the concepts:
 
 1. **[Quick Start Guide](../quick-start.md)** - Run your first template
-2. **[Template Authoring Guide](../templates/authoring-guide.md)** - Create templates
-3. **[Template Examples](../templates/examples/)** - Real-world examples
+2. **[Workflow Authoring Guide](../workflows/authoring-guide.md)** - Create templates
+3. **[Workflow Examples](../workflows/examples/)** - Real-world examples
 4. **[Provider Guide](../providers/)** - Configure AI providers
 
 ---
@@ -986,6 +986,6 @@ Now that you understand the concepts:
 
 - **Need help?** [GitHub Discussions](https://github.com/LaurieRhodes/mcp-cli-go/discussions)
 - **Found a bug?** [Issues](https://github.com/LaurieRhodes/mcp-cli-go/issues)
-- **Want examples?** [Template Examples](../templates/examples/)
+- **Want examples?** [Workflow Examples](../workflows/examples/)
 
 Understanding these concepts unlocks the full power of MCP-CLI-Go! 🚀

@@ -476,7 +476,7 @@ your-directory/
     │   └── ollama.yaml
     ├── embeddings/          # Embedding configs (optional, for RAG)
     ├── servers/             # MCP server configs (tools for AI)
-    ├── templates/           # Your workflow templates
+    ├── workflows/           # Your workflows
     │   └── examples/        # Example templates
     └── runas/               # Server mode configs (advanced)
 ```
@@ -487,7 +487,7 @@ your-directory/
 - **`config.yaml`**: Index file pointing to all other configs
 - **`settings.yaml`**: Your preferences (which AI to use by default)
 - **`providers/`**: Each AI provider's configuration
-- **`templates/`**: Your multi-step AI workflows
+- **`workflows/`**: Your multi-step AI workflows
 
 ---
 
@@ -596,7 +596,7 @@ Now that MCP-CLI is installed:
 
 1. **[Quick Start Guide](../quick_start.md)** - Run your first queries and templates
 2. **[Core Concepts](concepts.md)** - Understand how MCP-CLI works
-3. **[Template Examples](../templates/examples/)** - See what you can build
+3. **[Workflow Examples](../workflows/examples/)** - See what you can build
 
 **Try this right now:**
 
@@ -954,7 +954,7 @@ After installation:
 1. **[Quick Start Guide](quick-start.md)** - Get running in 5 minutes
 2. **[Core Concepts](concepts.md)** - Understand how MCP-CLI works
 3. **[Configuration Guide](../../CLI-REFERENCE.md)** - Configure providers and servers
-4. **[Template Guide](../templates/authoring-guide.md)** - Create your first template
+4. **[Workflow Guide](../workflows/authoring-guide.md)** - Create your first template
 
 ---
 

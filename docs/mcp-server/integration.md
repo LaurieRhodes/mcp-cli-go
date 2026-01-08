@@ -357,7 +357,7 @@ tools:
 
 ```yaml
 # Quick checks use local model
-# config/templates/quick_check.yaml
+# config/workflows/quick_check.yaml
 name: quick_check
 config:
   defaults:
@@ -365,7 +365,7 @@ config:
     model: qwen2.5:32b
 
 # Deep analysis uses powerful model
-# config/templates/deep_analysis.yaml
+# config/workflows/deep_analysis.yaml
 name: deep_analysis
 config:
   defaults:
@@ -482,7 +482,7 @@ const comprehensive = combineResults(codeReview, securityScan, testSuggestions);
 **For long-running operations:**
 
 ```yaml
-# Template configured for streaming
+# Workflow configured for streaming
 name: long_research
 config:
   defaults:

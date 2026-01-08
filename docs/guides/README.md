@@ -163,7 +163,7 @@ git diff | mcp-cli query "Review this code" > review.md
 
 **Example:**
 ```yaml
-# config/templates/code-review.yaml
+# config/workflows/code-review.yaml
 name: code_review
 steps:
   - name: analyze
@@ -185,7 +185,7 @@ cat bugfix.go | mcp-cli --template code_review
 
 **Cost:** ~$0.01-0.10 depending on complexity
 
-**See:** [Automation Guide](automation.md) and [Template Authoring](../templates/authoring-guide.md)
+**See:** [Automation Guide](automation.md) and [Workflow Authoring](../workflows/authoring-guide.md)
 
 ---
 
@@ -282,7 +282,7 @@ mcp-cli chat --provider anthropic
 **...automate a task**
 ```bash
 # Create template first
-cat > config/templates/my-task.yaml << EOF
+cat > config/workflows/my-task.yaml << EOF
 name: my_task
 steps:
   - name: step1
@@ -327,12 +327,12 @@ Choose your guide based on your goal:
 **New to MCP-CLI?**
 1. [Chat Mode](chat-mode.md) - Start here
 2. [Core Concepts](../getting-started/concepts.md) - Understand the system
-3. [Templates](../templates/authoring-guide.md) - Create workflows
+3. [Templates](../workflows/authoring-guide.md) - Create workflows
 
 **Building automation?**
 1. [Automation Guide](automation.md) - Best practices
 2. [Query Mode](query-mode.md) - Scripting reference
-3. [Template Examples](../templates/examples/) - Working examples
+3. [Workflow Examples](../workflows/examples/) - Working examples
 
 **Testing or developing?**
 1. [Interactive Mode](interactive-mode.md) - Test tools

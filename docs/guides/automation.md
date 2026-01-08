@@ -45,7 +45,7 @@ Use AI in your scripts, CI/CD, and scheduled tasks - the right way.
 
 **1. Create a template:**
 ```yaml
-# config/templates/analyze-code.yaml
+# config/workflows/analyze-code.yaml
 name: analyze_code
 version: 1.0.0
 steps:
@@ -141,7 +141,7 @@ mkdir -p scripts
 
 # 6. Create example template
 mkdir -p config/templates
-cat > config/templates/example.yaml << 'EOF'
+cat > config/workflows/example.yaml << 'EOF'
 name: example
 description: Example automation template
 version: 1.0.0
@@ -176,7 +176,7 @@ echo "Setup complete! 🎉"
 echo ""
 echo "Next steps:"
 echo "1. Edit .env with your real API keys"
-echo "2. Create templates in config/templates/"
+echo "2. Create templates in config/workflows/"
 echo "3. Create automation scripts in scripts/"
 echo ""
 echo "Try: ./mcp-cli --template example"
@@ -198,7 +198,7 @@ mcp-automation/
 ├── config/
 │   ├── settings.yaml          # ✓ Global settings
 │   ├── providers/             # ✓ AI provider configs
-│   └── templates/             # ✓ Your workflows here!
+│   └── workflows/             # ✓ Your workflows here!
 │       └── example.yaml
 └── scripts/                   # ✓ Your automation scripts
 ```
@@ -221,7 +221,7 @@ my-automation-project/
 ├── config.yaml                # Main config (git if no secrets)
 ├── config/
 │   ├── settings.yaml          # ✓ In git
-│   └── templates/             # ✓ In git (this is your code!)
+│   └── workflows/             # ✓ In git (this is your code!)
 │       ├── code-review.yaml
 │       ├── daily-report.yaml
 │       └── analyze-logs.yaml
@@ -233,7 +233,7 @@ my-automation-project/
 ```
 
 **What goes in git:**
-- ✅ Templates (config/templates/)
+- ✅ Templates (config/workflows/)
 - ✅ Scripts (scripts/)
 - ✅ README, documentation
 - ✅ .gitignore
@@ -248,7 +248,7 @@ my-automation-project/
 
 ---
 
-## Template-Based Automation
+## Workflow-Based Automation
 
 ### Example 1: Code Review Template
 
@@ -257,7 +257,7 @@ my-automation-project/
 **Create the template:**
 
 ```yaml
-# config/templates/code-review.yaml
+# config/workflows/code-review.yaml
 name: code_review
 description: Automated code review for quality and security
 version: 1.0.0
@@ -360,7 +360,7 @@ echo "✓ No critical issues"
 **Create the template:**
 
 ```yaml
-# config/templates/daily-report.yaml
+# config/workflows/daily-report.yaml
 name: daily_report
 description: Generate daily development report
 version: 1.0.0
@@ -501,7 +501,7 @@ and resolved several security warnings.
 **Create the template:**
 
 ```yaml
-# config/templates/thorough-analysis.yaml
+# config/workflows/thorough-analysis.yaml
 name: thorough_analysis
 description: Multi-provider analysis for critical decisions
 version: 1.0.0
@@ -614,7 +614,7 @@ jobs:
       # 3. Add code-review template
       - name: Add Review Template
         run: |
-          cat > config/templates/code-review.yaml << 'EOF'
+          cat > config/workflows/code-review.yaml << 'EOF'
           name: code_review
           version: 1.0.0
           config:
@@ -697,7 +697,7 @@ analyze:
   script:
     # Create analysis template
     - |
-      cat > config/templates/commit-analysis.yaml << 'EOF'
+      cat > config/workflows/commit-analysis.yaml << 'EOF'
       name: commit_analysis
       version: 1.0.0
       steps:
@@ -729,7 +729,7 @@ WORKDIR /workspace
 RUN mcp-cli init --quick
 
 # Copy templates
-COPY config/templates/ /workspace/config/templates/
+COPY config/workflows/ /workspace/config/workflows/
 
 # API keys via env vars at runtime
 ENV ANTHROPIC_API_KEY=""
@@ -789,7 +789,7 @@ mail -s "Daily Report - $REPORT_DATE" \
 
 **Template:**
 ```yaml
-# config/templates/system-health.yaml
+# config/workflows/system-health.yaml
 name: system_health
 description: Analyze system health metrics
 version: 1.0.0
@@ -863,7 +863,7 @@ fi
 **Better approach:**
 
 ```yaml
-# config/templates/error-triage.yaml
+# config/workflows/error-triage.yaml
 name: error_triage
 version: 1.0.0
 steps:
@@ -888,7 +888,7 @@ RESULT=$(echo "$ERROR_MSG" | ./mcp-cli --template error_triage)
 # Project structure
 my-project/
 ├── config/
-│   └── templates/          # ← In git!
+│   └── workflows/          # ← In git!
 │       ├── review.yaml
 │       ├── analyze.yaml
 │       └── report.yaml
@@ -905,7 +905,7 @@ config.yaml          # If it has embedded secrets
 config/providers/    # If providers have embedded keys
 
 # Keep these:
-# config/templates/
+# config/workflows/
 ```
 
 ### 2. Initialize Once, Use Everywhere
@@ -928,7 +928,7 @@ config:
 EOF
 
 # Add to version control
-git add config/templates/
+git add config/workflows/
 git commit -m "Add automation templates"
 ```
 
@@ -946,7 +946,7 @@ git commit -m "Add automation templates"
 **Build complex workflows from simple templates:**
 
 ```yaml
-# config/templates/complete-review.yaml
+# config/workflows/complete-review.yaml
 name: complete_review
 version: 1.0.0
 
@@ -1025,7 +1025,7 @@ analyze() {
 **Convert to:**
 
 ```yaml
-# config/templates/code-analyze.yaml
+# config/workflows/code-analyze.yaml
 name: code_analyze
 version: 1.0.0
 steps:
@@ -1062,7 +1062,7 @@ mcp-cli query "Test"
 
 ### Create Template
 ```yaml
-# config/templates/my-workflow.yaml
+# config/workflows/my-workflow.yaml
 name: my_workflow
 version: 1.0.0
 steps:
@@ -1089,8 +1089,8 @@ mcp-cli --template my_workflow --input-data "$DATA"
 
 ## Next Steps
 
-- **[Template Authoring](../templates/authoring-guide.md)** - Learn template creation
-- **[Template Examples](../templates/examples/)** - Working examples
+- **[Workflow Authoring](../workflows/authoring-guide.md)** - Learn template creation
+- **[Workflow Examples](../workflows/examples/)** - Working examples
 - **[Query Mode](query-mode.md)** - When to use query mode
 - **[Debugging](debugging.md)** - Troubleshoot automation
 

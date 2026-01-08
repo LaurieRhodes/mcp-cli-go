@@ -222,7 +222,7 @@ steps:
 
 ---
 
-### TemplateCall Object
+### WorkflowCall Object
 
 Calls another workflow.
 

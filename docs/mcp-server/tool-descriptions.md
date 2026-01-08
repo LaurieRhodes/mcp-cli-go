@@ -319,7 +319,7 @@ You: Quick code check
 
 ---
 
-## Template for New Tools
+## Workflow for New Tools
 
 ```yaml
 description: |

@@ -113,7 +113,7 @@ All three show strong job demand and active communities.
 mkdir -p config/templates
 
 # Create analyze.yaml
-cat > config/templates/analyze.yaml <<'EOF'
+cat > config/workflows/analyze.yaml <<'EOF'
 name: analyze
 description: Analyze text and create summary
 version: 1.0.0
@@ -213,7 +213,7 @@ mcp-cli --template research --input-data "impact of AI on healthcare"
 - Automation patterns
 
 **For template creators:**
-→ [Template Authoring Guide](../templates/authoring-guide.md)
+→ [Workflow Authoring Guide](../workflows/authoring-guide.md)
 - Advanced template features
 - Conditions, loops, parallel execution
 - Template composition
@@ -278,7 +278,7 @@ mcp-cli chat --server filesystem,brave-search
 /exit      # Exit chat
 ```
 
-### Template Mode (Multi-Step Workflows)
+### Workflow Mode (Multi-Step Workflows)
 ```bash
 # Run template with piped input
 echo "data" | mcp-cli --template analyze
@@ -330,11 +330,11 @@ your-directory/
     ├── providers/           # AI provider configs
     ├── embeddings/          # Embedding configs
     ├── servers/             # MCP server configs
-    ├── templates/           # Workflow templates
+    ├── workflows/           # Workflows
     └── runas/               # MCP server mode configs
 ```
 
-### Template Basics
+### Workflow Basics
 
 Minimal template:
 
@@ -366,15 +366,15 @@ steps:
 
 ### Intermediate Path
 
-1. **[Template Authoring](../templates/authoring-guide.md)** - Write powerful templates
-2. **[Template Examples](../templates/examples/)** - Learn from examples
+1. **[Workflow Authoring](../workflows/authoring-guide.md)** - Write powerful templates
+2. **[Workflow Examples](../workflows/examples/)** - Learn from examples
 3. **[Multi-Provider Guide](../providers/)** - Mix different AIs
 4. **[MCP Server Setup](../mcp-server/)** - Expose as tools
 5. **[Automation Guide](../guides/automation.md)** - Production workflows
 
 ### Advanced Path
 
-1. **[Template Patterns](../templates/patterns/)** - Design patterns
+1. **[Workflow Patterns](../workflows/patterns/)** - Design patterns
 2. **[Architecture](../architecture/)** - System design
 3. **[Deployment](../deployment/)** - Production deployment
 4. **[Performance](../performance/)** - Optimization
@@ -401,7 +401,7 @@ mcp-cli query --json "List cloud providers" | jq '.response'
 ### Simple Template
 
 ```yaml
-# config/templates/analyze.yaml
+# config/workflows/analyze.yaml
 name: analyze
 description: Analyze and summarize text
 version: 1.0.0
@@ -424,7 +424,7 @@ echo "Sales data Q4..." | mcp-cli --template analyze
 ### Multi-Provider Template
 
 ```yaml
-# config/templates/research.yaml
+# config/workflows/research.yaml
 name: research
 description: Multi-provider research workflow
 version: 1.0.0
@@ -482,9 +482,9 @@ Begin with:
 
 Don't start from scratch:
 
-- Copy [example templates](../templates/examples/)
-- Adapt [design patterns](../templates/patterns/)
-- Learn from [real-world use cases](../templates/examples/real-world.md)
+- Copy [example templates](../workflows/examples/)
+- Adapt [design patterns](../workflows/patterns/)
+- Learn from [real-world use cases](../workflows/examples/real-world.md)
 
 ### 4. Test Incrementally
 
@@ -507,7 +507,7 @@ MCP-CLI provides detailed errors:
 
 ```
 Error: Template 'analyze' not found
-Searched: config/templates/analyze.yaml
+Searched: config/workflows/analyze.yaml
 Available templates: research, summarize, extract
 ```
 
@@ -524,7 +524,7 @@ mcp-cli --verbose --template my_template
 ### Documentation
 
 - **Guides**: [docs/guides/](../guides/)
-- **Templates**: [docs/templates/](../templates/)
+- **Templates**: [docs/workflows/](../workflows/)
 - **Providers**: [docs/providers/](../providers/)
 - **Architecture**: [docs/architecture/](../architecture/)
 
@@ -563,11 +563,11 @@ mcp-cli --verbose --template my_template
 
 **Templates**
 
-- [Authoring Guide](../templates/authoring-guide.md)
-- [Reference](../templates/reference.md)
-- [Examples](../templates/examples/)
-- [Patterns](../templates/patterns/)
-- [Best Practices](../templates/best-practices.md)
+- [Authoring Guide](../workflows/authoring-guide.md)
+- [Reference](../workflows/reference.md)
+- [Examples](../workflows/examples/)
+- [Patterns](../workflows/patterns/)
+- [Best Practices](../workflows/best-practices.md)
 
 **Providers**
 

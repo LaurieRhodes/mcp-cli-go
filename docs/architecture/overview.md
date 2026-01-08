@@ -331,7 +331,7 @@ core/interactive/service.go
 - Direct MCP communication
 - Tool schema inspection
 
-### Template Mode
+### Workflow Mode
 
 **Purpose:** Multi-step AI workflows
 

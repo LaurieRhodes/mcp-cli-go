@@ -215,7 +215,7 @@ mcp-cli --template research --provider anthropic --model claude-sonnet-4
 
 **Template Structure:**
 
-Templates are defined in `config/templates/*.yaml`:
+Templates are defined in `config/workflows/*.yaml`:
 
 ```yaml
 name: analyze
@@ -499,7 +499,7 @@ mcp-cli query "Hello"
 includes:
   providers: config/providers/*.yaml
   servers: config/servers/*.yaml
-  templates: config/templates/*.yaml
+  templates: config/workflows/*.yaml
 
 ai:
   default_provider: ollama

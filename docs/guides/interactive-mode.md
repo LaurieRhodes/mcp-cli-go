@@ -644,7 +644,7 @@ mcp-cli chat --server filesystem
 You> List files in current directory
 
 # 3. Create template
-cat > config/templates/list-files.yaml << EOF
+cat > config/workflows/list-files.yaml << EOF
 name: list_files
 steps:
   - name: list

@@ -223,9 +223,9 @@ services/
 │   └── commands.go         # Command handlers
 │
 └── template/
-    ├── executor.go         # Template executor
-    ├── parser.go           # Template parser
-    └── validator.go        # Template validator
+    ├── executor.go         # Workflow executor
+    ├── parser.go           # Workflow parser
+    └── validator.go        # Workflow validator
 ```
 
 ---
@@ -325,7 +325,7 @@ func (s *queryService) executeWithRetry(ctx context.Context, provider domain.LLM
 
 ---
 
-### Template Executor
+### Workflow Executor
 
 **Purpose:** Execute multi-step template workflows
 

@@ -96,11 +96,11 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
 
 ---
 
-### [Templates](templates/)
+### [Workflows](workflows/)
 
 > **Create reusable, multi-step AI workflows**
 
-- **[Authoring Guide](templates/authoring-guide.md)** - Complete template creation reference
+- **[Authoring Guide](workflows/AUTHORING_GUIDE.md)** - Complete template creation reference
   
   - Template structure and syntax
   - Variable substitution
@@ -109,7 +109,7 @@ Complete documentation for MCP-CLI-Go: A powerful command-line interface for AI 
   - Provider selection per step
   - Template composition patterns
 
-- **[Examples](templates/examples/)** - Real, working templates
+- **[Examples](workflows/examples/)** - Real, working templates
   
   - Code review workflows
   - Research and fact-checking
@@ -337,7 +337,7 @@ mcp-cli chat
 > Can you review this OpenAPI spec? [paste spec]
 ```
 
-### Template Execution
+### Workflow Execution
 
 ```bash
 mcp-cli --template code_review \
@@ -419,7 +419,7 @@ When contributing:
 
 - **GitHub Issues** - Bug reports and feature requests
 - **GitHub Discussions** - Questions and community help
-- **Examples** - Check [templates/examples](templates/examples/) first
+- **Examples** - Check [workflows/examples](workflows/examples/) first
 
 ---
 
@@ -452,7 +452,7 @@ mcp-cli query --provider anthropic "question"
 # With MCP server
 mcp-cli chat --server filesystem
 
-# Template execution
+# Workflow execution
 mcp-cli --template template_name
 
 # List templates
@@ -469,7 +469,7 @@ mcp-cli serve config/runas/server.yaml
 
 - **Main config:** `config.yaml`
 - **Providers:** `config/providers/*.yaml`
-- **Templates:** `config/templates/*.yaml`
+- **Templates:** `config/workflows/*.yaml`
 - **MCP servers:** `config/mcp/*.yaml`
 - **Server configs:** `config/runas/*.yaml`
 
@@ -484,4 +484,4 @@ MCP_CLI_CONFIG=/path/to/config.yaml
 
 ---
 
-**Ready to dive in?** Start with [Chat Mode](guides/chat-mode.md) or explore [Templates](templates/authoring-guide.md).
+**Ready to dive in?** Start with [Chat Mode](guides/chat-mode.md) or explore [Templates](workflows/AUTHORING_GUIDE.md).

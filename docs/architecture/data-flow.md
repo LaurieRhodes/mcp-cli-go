@@ -385,7 +385,7 @@ User: /call filesystem read_file {"path": "test.txt"}
 
 ---
 
-## Template Execution Flow
+## Workflow Execution Flow
 
 ### Multi-Step Workflow
 
@@ -473,7 +473,7 @@ Command: mcp-cli --template code_review
 ### Variable Substitution Example
 
 ```yaml
-# Template step
+# Workflow step
 steps:
   - name: analyze
     prompt: "Analyze this {{input_data.language}} code: {{input_data.code}}"

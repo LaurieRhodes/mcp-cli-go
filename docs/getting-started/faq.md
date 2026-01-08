@@ -281,7 +281,7 @@ mcp-cli --config /path/to/config.yaml query "..."
 
 **A:** Check these:
 
-1. **Location**: Templates must be in `config/templates/`
+1. **Location**: Templates must be in `config/workflows/`
 2. **Extension**: Must be `.yaml` or `.yml`
 3. **Name**: Use the `name` field in YAML, not filename
 
@@ -290,10 +290,10 @@ mcp-cli --config /path/to/config.yaml query "..."
 mcp-cli --list-templates
 
 # Check template location
-ls config/templates/
+ls config/workflows/
 
 # Verify template syntax
-cat config/templates/your-template.yaml
+cat config/workflows/your-template.yaml
 ```
 
 ---
@@ -380,13 +380,13 @@ if mcp-cli query "Is the sky blue?" | grep -q "yes"; then
     echo "Correct!"
 fi
 
-# Template execution
+# Workflow execution
 cat data.txt | mcp-cli --template analyze > report.txt
 ```
 
 ---
 
-## Templates
+## Workflows
 
 ### Q: What's template composition?
 
@@ -485,7 +485,7 @@ steps:
 
 ```bash
 # Make sure YAML is valid
-cat config/templates/my_template.yaml | yaml-lint
+cat config/workflows/my_template.yaml | yaml-lint
 ```
 
 ---
@@ -746,7 +746,7 @@ mcp-cli --verbose query "..."
 # See even more detail
 mcp-cli --verbose --verbose query "..."
 
-# Template execution
+# Workflow execution
 mcp-cli --verbose --template my_template
 ```
 
@@ -835,7 +835,7 @@ Or submit to template library (coming soon).
 - **Documentation**: [docs/](../)
 - **Discussions**: [GitHub Discussions](https://github.com/LaurieRhodes/mcp-cli-go/discussions)
 - **Issues**: [GitHub Issues](https://github.com/LaurieRhodes/mcp-cli-go/issues)
-- **Examples**: [Template Examples](../templates/examples/)
+- **Examples**: [Workflow Examples](../workflows/examples/)
 
 ---
 
