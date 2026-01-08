@@ -2,16 +2,19 @@ package workflow
 
 import (
 	"context"
-	"strings"
+	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 
-	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 )
 
 // Orchestrator orchestrates workflow execution with dependency resolution
 type Orchestrator struct {
 	workflow         *config.WorkflowV2
+	workflowKey      string // Full workflow key (e.g., "iterative_dev/dev_cycle" or "simple")
 	executor         *Executor
 	consensusExec    *ConsensusExecutor
 	interpolator     *Interpolator
@@ -20,10 +23,16 @@ type Orchestrator struct {
 	consensusResults map[string]*config.ConsensusResult
 	appConfig        *config.ApplicationConfig
 	loopExecutor     *LoopExecutor
+	embeddingService domain.EmbeddingService
 }
 
 // NewOrchestrator creates a new workflow orchestrator
 func NewOrchestrator(workflow *config.WorkflowV2, logger *Logger) *Orchestrator {
+	return NewOrchestratorWithKey(workflow, "", logger)
+}
+
+// NewOrchestratorWithKey creates a new workflow orchestrator with a workflow key for directory context
+func NewOrchestratorWithKey(workflow *config.WorkflowV2, workflowKey string, logger *Logger) *Orchestrator {
 	executor := NewExecutor(workflow, logger)
 	consensusExec := NewConsensusExecutor(executor)
 	interpolator := NewInterpolator()
@@ -33,6 +42,7 @@ func NewOrchestrator(workflow *config.WorkflowV2, logger *Logger) *Orchestrator 
 
 	return &Orchestrator{
 		workflow:         workflow,
+		workflowKey:      workflowKey,
 		executor:         executor,
 		consensusExec:    consensusExec,
 		interpolator:     interpolator,
@@ -156,7 +166,7 @@ func (o *Orchestrator) executeStep(ctx context.Context, step *config.StepV2) err
 	} else if step.Run != "" {
 		return o.executeRegularStep(ctx, step)
 	} else if step.Embeddings != nil {
-		return fmt.Errorf("embeddings mode not yet implemented")
+		return o.executeEmbeddingsStep(ctx, step)
 	} else if step.Template != nil {
 		return o.executeWorkflowStep(ctx, step)
 	}
@@ -200,7 +210,15 @@ func (o *Orchestrator) executeConsensusStep(ctx context.Context, step *config.St
 	tempStep.Consensus = &tempConsensus
 
 	// Execute consensus
-	result, _ := o.consensusExec.ExecuteConsensus(ctx, &tempStep)
+	result, err := o.consensusExec.ExecuteConsensus(ctx, &tempStep)
+	if err != nil {
+		return fmt.Errorf("consensus execution failed: %w", err)
+	}
+	
+	// Check if result is nil (shouldn't happen if no error, but defensive)
+	if result == nil {
+		return fmt.Errorf("consensus returned nil result")
+	}
 
 	// Store results
 	o.consensusResults[step.Name] = result
@@ -214,6 +232,190 @@ func (o *Orchestrator) executeConsensusStep(ctx context.Context, step *config.St
 	if !result.Success {
 		return fmt.Errorf("consensus failed to reach agreement")
 	}
+
+	return nil
+}
+
+// executeEmbeddingsStep executes an embeddings generation step
+func (o *Orchestrator) executeEmbeddingsStep(ctx context.Context, step *config.StepV2) error {
+	emb := step.Embeddings
+	if emb == nil {
+		return fmt.Errorf("embeddings configuration is nil")
+	}
+
+	// Check if embeddings service is available
+	if o.embeddingService == nil {
+		return fmt.Errorf("embeddings service not initialized")
+	}
+
+	// Determine input
+	var inputText string
+	if emb.InputFile != "" {
+		// Read from file
+		interpolatedPath, _ := o.interpolator.Interpolate(emb.InputFile)
+		data, err := os.ReadFile(interpolatedPath)
+		if err != nil {
+			return fmt.Errorf("failed to read input file: %w", err)
+		}
+		inputText = string(data)
+		o.logger.Info("Read %d characters from file: %s", len(inputText), interpolatedPath)
+	} else if emb.Input != nil {
+		// Interpolate and join inputs
+		var inputs []string
+		switch v := emb.Input.(type) {
+		case string:
+			interpolated, _ := o.interpolator.Interpolate(v)
+			inputs = []string{interpolated}
+		case []interface{}:
+			for _, item := range v {
+				if str, ok := item.(string); ok {
+					interpolated, _ := o.interpolator.Interpolate(str)
+					inputs = append(inputs, interpolated)
+				}
+			}
+		case []string:
+			for _, str := range v {
+				interpolated, _ := o.interpolator.Interpolate(str)
+				inputs = append(inputs, interpolated)
+			}
+		default:
+			return fmt.Errorf("invalid input type for embeddings: %T", v)
+		}
+		// Join multiple inputs with newlines
+		inputText = strings.Join(inputs, "\n\n")
+	} else {
+		return fmt.Errorf("either input or input_file required for embeddings")
+	}
+
+	if strings.TrimSpace(inputText) == "" {
+		return fmt.Errorf("input text is empty")
+	}
+
+	// Get provider (inherit from step/execution or use override)
+	provider := emb.Provider
+	if provider == "" {
+		provider = step.Provider
+	}
+	if provider == "" {
+		provider = o.workflow.Execution.Provider
+	}
+
+	// Get model (inherit from step/execution or use override)
+	model := emb.Model
+	if model == "" {
+		model = step.Model
+	}
+	if model == "" {
+		model = o.workflow.Execution.Model
+	}
+
+	if provider == "" || model == "" {
+		return fmt.Errorf("provider and model required for embeddings")
+	}
+
+	// Set defaults for optional parameters
+	chunkStrategy := emb.ChunkStrategy
+	if chunkStrategy == "" {
+		chunkStrategy = "sentence"
+	}
+
+	maxChunkSize := emb.MaxChunkSize
+	if maxChunkSize == 0 {
+		maxChunkSize = 512
+	}
+
+	encodingFormat := emb.EncodingFormat
+	if encodingFormat == "" {
+		encodingFormat = "float"
+	}
+
+	outputFormat := emb.OutputFormat
+	if outputFormat == "" {
+		outputFormat = "json"
+	}
+
+	includeMetadata := true
+	if emb.IncludeMetadata != nil {
+		includeMetadata = *emb.IncludeMetadata
+	}
+
+	o.logger.Info("Generating embeddings with %s/%s (strategy: %s, chunk size: %d)", 
+		provider, model, chunkStrategy, maxChunkSize)
+
+	// Create embedding request
+	req := &domain.EmbeddingJobRequest{
+		Input:          inputText,
+		Provider:       provider,
+		Model:          model,
+		ChunkStrategy:  domain.ChunkingType(chunkStrategy),
+		MaxChunkSize:   maxChunkSize,
+		ChunkOverlap:   emb.Overlap,
+		EncodingFormat: encodingFormat,
+		Dimensions:     emb.Dimensions,
+		Metadata: map[string]interface{}{
+			"workflow": o.workflow.Name,
+			"step":     step.Name,
+		},
+	}
+
+	// Generate embeddings
+	job, err := o.embeddingService.GenerateEmbeddings(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to generate embeddings: %w", err)
+	}
+
+	o.logger.Info("Generated embeddings: %d chunks, %d vectors", 
+		len(job.Chunks), len(job.Embeddings))
+
+	// Format output
+	var outputData []byte
+	var result string
+
+	if includeMetadata {
+		// Full job with metadata
+		outputData, err = json.MarshalIndent(job, "", "  ")
+		if err != nil {
+			return fmt.Errorf("failed to marshal embeddings: %w", err)
+		}
+		result = string(outputData)
+	} else {
+		// Minimal format - just vectors
+		vectors := make([][]float32, len(job.Embeddings))
+		for i, embedding := range job.Embeddings {
+			vectors[i] = embedding.Vector
+		}
+		
+		minimal := map[string]interface{}{
+			"model":   job.Model,
+			"vectors": vectors,
+			"count":   len(vectors),
+		}
+		
+		outputData, err = json.MarshalIndent(minimal, "", "  ")
+		if err != nil {
+			return fmt.Errorf("failed to marshal embeddings: %w", err)
+		}
+		result = string(outputData)
+	}
+
+	// Write to output file if specified
+	if emb.OutputFile != "" {
+		interpolatedPath, _ := o.interpolator.Interpolate(emb.OutputFile)
+		err = os.WriteFile(interpolatedPath, outputData, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to write output file: %w", err)
+		}
+		o.logger.Info("Embeddings written to: %s", interpolatedPath)
+		
+		// Store file path in results
+		result = fmt.Sprintf("Embeddings saved to: %s (%d vectors)", interpolatedPath, len(job.Embeddings))
+	}
+	
+	// Store result for interpolation
+	o.stepResults[step.Name] = result
+	o.interpolator.SetStepResult(step.Name, result)
+
+	o.logger.Output("Step %s result: Generated %d embeddings", step.Name, len(job.Embeddings))
 
 	return nil
 }
@@ -286,6 +488,11 @@ func (o *Orchestrator) SetAppConfig(appConfig *config.ApplicationConfig) {
 	o.executor.SetAppConfig(appConfig)
 }
 
+// SetEmbeddingService sets the embedding service for embeddings steps
+func (o *Orchestrator) SetEmbeddingService(service domain.EmbeddingService) {
+	o.embeddingService = service
+}
+
 // SetProvider is deprecated - kept for compatibility
 func (o *Orchestrator) SetProvider(provider domain.LLMProvider) {
 	// No-op - we create providers dynamically now
@@ -307,10 +514,31 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 	
 	o.logger.Info("Calling workflow: %s", workflowName)
 	
-	// Get the sub-workflow
-	subWorkflow, exists := o.appConfig.GetWorkflow(workflowName)
+	// Extract directory from current workflow key for directory-aware resolution
+	var contextDir string
+	if o.workflowKey != "" {
+		if idx := strings.LastIndex(o.workflowKey, "/"); idx != -1 {
+			contextDir = o.workflowKey[:idx]
+		}
+	}
+	
+	// Get the sub-workflow with directory-aware resolution
+	subWorkflow, exists := o.appConfig.GetWorkflowWithContext(workflowName, contextDir)
 	if !exists {
+		// Try to provide helpful error message
+		if contextDir != "" {
+			return fmt.Errorf("workflow '%s' not found (searched in '%s' directory and root)", workflowName, contextDir)
+		}
 		return fmt.Errorf("workflow '%s' not found", workflowName)
+	}
+	
+	// Determine the full key of the resolved workflow for sub-workflow context
+	var subWorkflowKey string
+	for key, wf := range o.appConfig.Workflows {
+		if wf == subWorkflow {
+			subWorkflowKey = key
+			break
+		}
 	}
 	
 	// Prepare input for sub-workflow
@@ -325,15 +553,18 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 		inputData = interpolated
 	}
 	
-	// Create a new orchestrator for the sub-workflow
+	// Create a new orchestrator for the sub-workflow with its key for directory context
 	subLogger := NewLogger(subWorkflow.Execution.Logging)
-	subOrchestrator := NewOrchestrator(subWorkflow, subLogger)
+	subOrchestrator := NewOrchestratorWithKey(subWorkflow, subWorkflowKey, subLogger)
 	
 	// Pass through app config and server manager
 	subOrchestrator.executor.SetAppConfig(o.executor.appConfig)
 	if o.executor.serverManager != nil {
 		subOrchestrator.executor.SetServerManager(o.executor.serverManager)
 	}
+	
+	// Pass app config to sub-orchestrator for nested workflow calls
+	subOrchestrator.SetAppConfigForWorkflows(o.appConfig)
 	
 	// Execute the sub-workflow
 	err := subOrchestrator.Execute(ctx, inputData)
@@ -386,7 +617,7 @@ func (o *Orchestrator) executeStepElement(ctx context.Context, step *config.Step
 	if step.Consensus != nil {
 		return o.executeConsensusStep(ctx, step)
 	} else if step.Embeddings != nil {
-		return fmt.Errorf("embeddings mode not yet implemented")
+		return o.executeEmbeddingsStep(ctx, step)
 	} else if step.Template != nil {
 		return o.executeWorkflowStep(ctx, step)
 	} else if step.Loop != nil {

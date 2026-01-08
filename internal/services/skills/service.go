@@ -18,12 +18,14 @@ import (
 
 // Service implements the SkillService interface
 type Service struct {
-	skillsDir     string
-	skills        map[string]*skills.Skill
-	executor      sandbox.Executor
-	executionMode skills.ExecutionMode
-	imageMapping  *SkillImageMapping
-	appConfig     *domainConfig.ApplicationConfig
+	skillsDir               string
+	skills                  map[string]*skills.Skill
+	enabledSkills           map[string]bool // Track which skills are enabled (nil = all enabled)
+	executor                sandbox.Executor
+	executionMode           skills.ExecutionMode
+	imageMapping            *SkillImageMapping
+	appConfig               *domainConfig.ApplicationConfig
+	attemptedInitialization bool // Track if we tried to initialize executor
 }
 
 // NewService creates a new skill service
@@ -61,6 +63,7 @@ func (s *Service) Initialize(skillsDir string, executionMode skills.ExecutionMod
 	
 	// Initialize executor if needed
 	if executionMode == skills.ExecutionModeActive || executionMode == skills.ExecutionModeAuto {
+		s.attemptedInitialization = true
 		if err := s.initializeExecutor(); err != nil {
 			if executionMode == skills.ExecutionModeActive {
 				return fmt.Errorf("active mode requires Docker/Podman: %w", err)
@@ -140,6 +143,13 @@ func (s *Service) logExecutionStatus() {
 	
 	if scriptsCount == 0 {
 		return // No skills with scripts
+	}
+	
+	// Only show warning if we actually attempted to initialize executor and failed
+	// Don't show warning for explicit passive mode (like --list-skills)
+	if s.executor == nil && !s.attemptedInitialization {
+		logging.Debug("Skills in passive mode: %d skills with scripts available", scriptsCount)
+		return
 	}
 	
 	if s.executor == nil {
@@ -317,6 +327,31 @@ func (s *Service) detectSkillResources(skill *skills.Skill) error {
 					if strings.HasSuffix(name, ".py") || 
 					   strings.HasSuffix(name, ".sh") || 
 					   strings.HasSuffix(name, ".bash") {
+						skill.ScriptFiles = append(skill.ScriptFiles, name)
+						skill.Scripts = append(skill.Scripts, name)
+					}
+				}
+			}
+		}
+	}
+	
+	// Also check for scripts in root directory (some Anthropic skills have this structure)
+	if !skill.HasScripts {
+		entries, err := os.ReadDir(skill.DirectoryPath)
+		if err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() {
+					name := entry.Name()
+					// Skip non-script files
+					if name == "SKILL.md" || name == "LICENSE.txt" || name == "README.md" {
+						continue
+					}
+					// Check for script extensions
+					if strings.HasSuffix(name, ".py") || 
+					   strings.HasSuffix(name, ".sh") || 
+					   strings.HasSuffix(name, ".bash") {
+						skill.HasScripts = true
+						skill.ScriptsDir = skill.DirectoryPath
 						skill.ScriptFiles = append(skill.ScriptFiles, name)
 						skill.Scripts = append(skill.Scripts, name)
 					}
@@ -812,12 +847,68 @@ func (s *Service) LoadSkillByRequest(request *skills.SkillLoadRequest) (*skills.
 	}
 }
 
+// SetEnabledSkills sets which skills should be enabled
+// Pass nil or empty slice to enable all skills (default behavior)
+// Pass a list of skill names to enable only those skills
+func (s *Service) SetEnabledSkills(skillNames []string) {
+	if len(skillNames) == 0 {
+		s.enabledSkills = nil
+		logging.Debug("All skills enabled (no filter)")
+		return
+	}
+	
+	s.enabledSkills = make(map[string]bool)
+	for _, name := range skillNames {
+		s.enabledSkills[name] = true
+	}
+	
+	logging.Info("Enabled skills filter: %v", skillNames)
+}
+
+// IsSkillEnabled checks if a skill is enabled based on the current filter
+func (s *Service) IsSkillEnabled(skillName string) bool {
+	// If no filter is set, all skills are enabled
+	if s.enabledSkills == nil {
+		return true
+	}
+	
+	// Check if skill is in the enabled list
+	return s.enabledSkills[skillName]
+}
+
+// GetEnabledSkills returns a list of currently enabled skill names
+func (s *Service) GetEnabledSkills() []string {
+	// If no filter, return all skills
+	if s.enabledSkills == nil {
+		names := make([]string, 0, len(s.skills))
+		for name := range s.skills {
+			names = append(names, name)
+		}
+		return names
+	}
+	
+	// Return only enabled skills that exist
+	names := make([]string, 0, len(s.enabledSkills))
+	for name := range s.enabledSkills {
+		if _, exists := s.skills[name]; exists {
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
 // GenerateRunAsTools generates MCP tool definitions for all skills
 func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 	tools := make([]map[string]interface{}, 0, len(s.skills)+1)
 	
-	// Add passive mode tools for each skill
+	// Add passive mode tools for each enabled skill
 	for _, skill := range s.skills {
+		// Skip if skill is not enabled
+		if !s.IsSkillEnabled(skill.Name) {
+			logging.Debug("Skipping disabled skill: %s", skill.Name)
+			continue
+		}
+		
 		tool := map[string]interface{}{
 			"name":         skill.GetMCPToolName(),
 			"description":  skill.GetToolDescription(),
@@ -831,6 +922,8 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 		
 		tools = append(tools, tool)
 	}
+	
+	logging.Info("Generated %d skill tools", len(tools))
 	
 	// Add execute_skill_code tool for dynamic code execution
 	executeCodeTool := map[string]interface{}{

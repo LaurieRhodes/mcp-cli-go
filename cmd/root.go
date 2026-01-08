@@ -93,6 +93,7 @@ var (
 	serverName        string
 	providerName      string
 	modelName         string
+	skillNames        string
 	disableFilesystem bool
 	verbose           bool
 	noColor           bool
@@ -101,6 +102,9 @@ var (
 	workflowName      string
 	inputData         string
 	listWorkflows     bool
+	
+	// Skills flags
+	listSkills        bool
 
 	// RootCmd represents the base command when called without any subcommands
 	RootCmd = &cobra.Command{
@@ -160,10 +164,19 @@ var (
 		},
 		// If no subcommand is provided, check for template mode or run chat command
 		Run: func(cmd *cobra.Command, args []string) {
-			// Check for list templates flag
+			// Check for list workflows flag
 			if listWorkflows {
 				if err := executeListWorkflows(); err != nil {
-					logging.Error("Failed to list templates: %v", err)
+					logging.Error("Failed to list workflows: %v", err)
+					os.Exit(1)
+				}
+				return
+			}
+			
+			// Check for list skills flag
+			if listSkills {
+				if err := executeListSkills(); err != nil {
+					logging.Error("Failed to list skills: %v", err)
 					os.Exit(1)
 				}
 				return
@@ -195,6 +208,7 @@ func init() {
 	// Global flags
 	RootCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml", "Path to configuration file (YAML/JSON)")
 	RootCmd.PersistentFlags().StringVarP(&serverName, "server", "s", "", "MCP server(s) to use (comma-separated, e.g., 'filesystem,brave-search')")
+	RootCmd.PersistentFlags().StringVar(&skillNames, "skills", "", "Skill(s) to expose (comma-separated, e.g., 'docx,pdf,xlsx')")
 	RootCmd.PersistentFlags().StringVarP(&providerName, "provider", "p", "", "AI provider (openai, anthropic, ollama, deepseek, gemini, openrouter)")
 	RootCmd.PersistentFlags().StringVarP(&modelName, "model", "m", "", "Model to use (e.g., gpt-4o, claude-sonnet-4, qwen2.5:32b)")
 	RootCmd.PersistentFlags().BoolVar(&disableFilesystem, "disable-filesystem", false, "Disable filesystem server (prevents file access)")
@@ -205,6 +219,9 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&workflowName, "workflow", "", "Execute workflow by name")
 	RootCmd.PersistentFlags().StringVar(&inputData, "input-data", "", "Input data for template (JSON or plain text)")
 	RootCmd.PersistentFlags().BoolVar(&listWorkflows, "list-workflows", false, "List all available workflows")
+	
+	// Skills flags
+	RootCmd.PersistentFlags().BoolVar(&listSkills, "list-skills", false, "List all available skills")
 
 	// Add subcommands
 	RootCmd.AddCommand(ChatCmd)

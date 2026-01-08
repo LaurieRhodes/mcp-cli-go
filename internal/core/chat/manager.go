@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
 	"time"
@@ -26,6 +27,9 @@ type ChatManager struct {
 	
 	// Server connections for tool execution
 	Connections []*host.ServerConnection
+	
+	// Enabled skills
+	EnabledSkills []string
 	
 	// Chat context
 	Context *ChatContext
@@ -692,6 +696,51 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 	return nil, lastErr
 }
 
+// discoverAvailableSkills discovers which skill tools are available from connected servers
+func (m *ChatManager) discoverAvailableSkills() []string {
+	var skillNames []string
+	skillsFound := make(map[string]bool) // Track unique skills
+	
+	// Known skill tool names from Anthropic Skills
+	knownSkills := map[string]bool{
+		"docx": true,
+		"pdf": true,
+		"pptx": true,
+		"xlsx": true,
+		"bash_preference": true,
+	}
+	
+	// Check each connected server
+	for _, conn := range m.Connections {
+		// Get tools from this server (may be cached)
+		tools, err := m.getServerTools(conn)
+		if err != nil {
+			logging.Debug("Could not get tools from server %s: %v", conn.Name, err)
+			continue
+		}
+		
+		// Look for skill tools
+		for _, tool := range tools {
+			toolName := tool.Name
+			// Check if this is a known skill tool
+			if knownSkills[toolName] && !skillsFound[toolName] {
+				skillsFound[toolName] = true
+				// Convert tool name to display name
+				displayName := toolName
+				if toolName == "bash_preference" {
+					displayName = "bash-preference"
+				}
+				skillNames = append(skillNames, displayName)
+			}
+		}
+	}
+	
+	// Sort for consistent display
+	sort.Strings(skillNames)
+	
+	return skillNames
+}
+
 // StartChat starts the chat loop
 
 // SetSessionLogger sets the session logger for this chat manager
@@ -734,6 +783,12 @@ func (m *ChatManager) StartChat() error {
 		serverNames = append(serverNames, conn.Name)
 	}
 	m.UI.PrintConnectedServers(serverNames)
+	
+	// Discover and print available skills
+	availableSkills := m.discoverAvailableSkills()
+	if len(availableSkills) > 0 {
+		m.UI.PrintEnabledSkills(availableSkills)
+	}
 	
 	// Main chat loop
 	for {

@@ -540,3 +540,33 @@ func (u *UI) PrintConnectedServers(connections []string) {
 	}
 	fmt.Println()
 }
+
+// PrintEnabledSkills prints information about enabled skills
+func (u *UI) PrintEnabledSkills(skills []string) {
+	if len(skills) == 0 {
+		return // Don't print if no skills enabled
+	}
+	
+	if u.noColor {
+		fmt.Println("Skills enabled:")
+		for _, skill := range skills {
+			fmt.Printf("  - %s\n", skill)
+		}
+		fmt.Println()
+		return
+	}
+	
+	// Styled skills list
+	headerStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("226")) // Yellow
+	
+	skillStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("141")) // Purple
+	
+	fmt.Println(headerStyle.Render("Skills enabled:"))
+	for _, skill := range skills {
+		fmt.Printf("  %s %s\n", skillStyle.Render("•"), skill)
+	}
+	fmt.Println()
+}

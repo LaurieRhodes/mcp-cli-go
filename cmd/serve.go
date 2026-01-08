@@ -223,6 +223,24 @@ Claude Desktop Configuration:
 			discoveredSkills := skillService.ListSkills()
 			logging.Info("Discovered %d skills from %s", len(discoveredSkills), skillsDir)
 			
+			// Override with command-line flag if provided
+			if skillNames != "" {
+				// Parse comma-separated skill names
+				requestedSkills := strings.Split(skillNames, ",")
+				for i := range requestedSkills {
+					requestedSkills[i] = strings.TrimSpace(requestedSkills[i])
+				}
+				
+				// Create temporary SkillsConfig to override
+				if runasConfig.SkillsConfig == nil {
+					runasConfig.SkillsConfig = &runas.SkillsConfig{}
+				}
+				runasConfig.SkillsConfig.IncludeSkills = requestedSkills
+				runasConfig.SkillsConfig.ExcludeSkills = nil // Clear excludes when using explicit include
+				
+				logging.Info("Using skills from command-line flag: %v", requestedSkills)
+			}
+			
 			// Filter skills based on include/exclude lists
 			var filteredSkills []string
 			for _, skillName := range discoveredSkills {

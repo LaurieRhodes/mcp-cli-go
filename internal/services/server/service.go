@@ -252,7 +252,7 @@ func (s *Service) executeTemplate(toolExposure *runas.ToolExposure, arguments ma
 	if tmpl, exists := s.appConfig.Workflows[toolExposure.Template]; exists {
 		isV2 = true
 		workflowV2 = tmpl
-		logging.Debug("Using template v2: %s", toolExposure.Template)
+		logging.Debug("Using workflow v2: %s", toolExposure.Template)
 	} else if _, exists := s.appConfig.Workflows[toolExposure.Template]; !exists {
 		return "", fmt.Errorf("template not found: %s", toolExposure.Template)
 	}
@@ -310,9 +310,9 @@ func (s *Service) executeTemplateV1(templateName string, inputData string, toolE
 	return fmt.Sprintf("V1 template execution not yet implemented for: %s", templateName), nil
 }
 
-// executeTemplateV2 executes a v2 template
+// executeWorkflowV2 executes a v2 workflow
 func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, toolExposure *runas.ToolExposure) (string, error) {
-	logging.Info("Executing template v2: %s", tmpl.Name)
+	logging.Info("Executing workflow v2: %s", tmpl.Name)
 	
 	// Get provider configuration
 	var providerName string
@@ -343,11 +343,11 @@ func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, t
 	logging.Info("Using provider: %s (model: %s)", providerName, providerConfig.DefaultModel)
 	
 	// Import the provider factory and domain types to create the actual provider
-	// This implementation mirrors the CLI's executeTemplateV2 function
+	// This implementation mirrors the CLI's executeWorkflowV2 function
 	return s.executeWorkflowV2WithProvider(tmpl, inputData, providerName, providerConfig)
 }
 
-// executeTemplateV2WithProvider executes a template with the actual provider
+// executeWorkflowV2WithProvider executes a workflow with the actual provider
 func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputData string, providerName string, providerConfig *config.ProviderConfig) (string, error) {
 	// Convert provider name to ProviderType (configuration-driven)
 	providerType := domain.ProviderType(providerName)

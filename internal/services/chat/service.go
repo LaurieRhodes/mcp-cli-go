@@ -29,6 +29,7 @@ type Config struct {
 	DisableFilesystem bool
 	ServerNames       []string
 	UserSpecified     map[string]bool
+	SkillNames        []string // Filtered list of skills to expose
 }
 
 // NewService creates a new chat service
@@ -103,7 +104,7 @@ func (s *Service) StartChat(cfg *Config) error {
 
 	// Execute chat with server connections
 	return host.RunCommand(func(conns []*host.ServerConnection) error {
-		return s.runChat(conns, provider, providerConfig, modelName, ui, appConfig)
+		return s.runChat(conns, provider, providerConfig, modelName, ui, appConfig, cfg.SkillNames)
 	}, cfg.ConfigFile, cfg.ServerNames, cfg.UserSpecified)
 }
 
@@ -150,8 +151,7 @@ func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 }
 
 // runChat executes the chat session with server connections
-// runChat executes the chat session with server connections
-func (s *Service) runChat(connections []*host.ServerConnection, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string, ui *chat.UI, appConfig *config.ApplicationConfig) error {
+func (s *Service) runChat(connections []*host.ServerConnection, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string, ui *chat.UI, appConfig *config.ApplicationConfig, skillNames []string) error {
 	// Get chat configuration from loaded app config
 	var chatConfig *config.ChatConfig
 	if appConfig != nil && appConfig.Chat != nil {
@@ -189,6 +189,9 @@ func (s *Service) runChat(connections []*host.ServerConnection, provider domain.
 		chatManager = chat.NewChatManagerWithUI(provider, connections, ui)
 		logging.Info("Created chat manager with fallback token management")
 	}
+	
+	// Set enabled skills
+	chatManager.EnabledSkills = skillNames
 	
 	// Configure session logging if enabled
 	if sessionLogger != nil && sessionLogger.IsEnabled() {

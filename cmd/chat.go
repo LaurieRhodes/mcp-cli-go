@@ -48,6 +48,14 @@ func parseChatConfig(cmd *cobra.Command, args []string) *chat.Config {
 	// Process server configuration options - pass configFile
 	serverNames, userSpecified := host.ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
 	
+	// Parse skill names if provided
+	var skillNamesSlice []string
+	if skillNames != "" {
+		for _, s := range strings.Split(skillNames, ",") {
+			skillNamesSlice = append(skillNamesSlice, strings.TrimSpace(s))
+		}
+	}
+	
 	return &chat.Config{
 		ConfigFile:        configFile,
 		ServerName:        serverName,
@@ -56,6 +64,7 @@ func parseChatConfig(cmd *cobra.Command, args []string) *chat.Config {
 		DisableFilesystem: disableFilesystem,
 		ServerNames:       serverNames,
 		UserSpecified:     userSpecified,
+		SkillNames:        skillNamesSlice,
 	}
 }
 

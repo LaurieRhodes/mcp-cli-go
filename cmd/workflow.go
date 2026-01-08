@@ -16,6 +16,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
 	workflow "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
 )
 
@@ -61,11 +62,24 @@ func executeWorkflow() error {
 	// 4. Collect servers needed from workflow steps
 	servers := collectServersFromWorkflow(wf)
 	
-	// 5. Execute workflow (with or without servers)
-	if len(servers) == 0 {
-		return executeWorkflowWithoutServers(wf, inputData, appConfig)
+	// 5. Collect skills needed from workflow steps
+	skills := collectSkillsFromWorkflow(wf)
+	
+	// Override with command-line flag if provided
+	if skillNames != "" {
+		skills = strings.Split(skillNames, ",")
+		// Trim whitespace from each skill name
+		for i := range skills {
+			skills[i] = strings.TrimSpace(skills[i])
+		}
+		logging.Info("Using skills from command-line flag: %v", skills)
 	}
-	return executeWorkflowWithServers(wf, inputData, appConfig, servers)
+	
+	// 6. Execute workflow (with or without servers)
+	if len(servers) == 0 {
+		return executeWorkflowWithoutServers(wf, workflowName, inputData, appConfig, skills)
+	}
+	return executeWorkflowWithServers(wf, workflowName, inputData, appConfig, servers, skills)
 }
 
 // initializeProvider creates the LLM provider for the workflow
@@ -166,19 +180,56 @@ func collectServersFromWorkflow(wf *config.WorkflowV2) []string {
 	return servers
 }
 
+// collectSkillsFromWorkflow extracts all unique skill names from workflow steps
+func collectSkillsFromWorkflow(wf *config.WorkflowV2) []string {
+	skillSet := make(map[string]bool)
+	
+	// Collect from execution level
+	for _, skill := range wf.Execution.Skills {
+		skillSet[skill] = true
+	}
+	
+	// Collect from steps
+	for _, step := range wf.Steps {
+		for _, skill := range step.Skills {
+			skillSet[skill] = true
+		}
+	}
+	
+	// Convert to slice
+	skills := make([]string, 0, len(skillSet))
+	for skill := range skillSet {
+		skills = append(skills, skill)
+	}
+	
+	return skills
+}
+
 // executeWorkflowWithoutServers executes a workflow that doesn't need MCP servers
-func executeWorkflowWithoutServers(wf *config.WorkflowV2, inputData string, appConfig *config.ApplicationConfig) error {
+func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, skills []string) error {
 	logging.Debug("Executing workflow without MCP servers")
+	
+	// Note: Skills are typically exposed through MCP servers, so this path wouldn't use skills
+	// But we keep the parameter for consistency
+	if len(skills) > 0 {
+		logging.Debug("Skills specified but not used (no MCP server mode): %v", skills)
+	}
+	
+	// Create services
+	configService := infraConfig.NewService()
+	providerFactory := ai.NewProviderFactory()
+	embeddingService := embeddings.NewService(configService, providerFactory)
 	
 	// Create logger
 	logger := workflow.NewLogger(wf.Execution.Logging)
 	
-	// Create orchestrator
-	orchestrator := workflow.NewOrchestrator(wf, logger)
+	// Create orchestrator with workflow key for directory-aware resolution
+	orchestrator := workflow.NewOrchestratorWithKey(wf, workflowKey, logger)
 	
 	// Set provider on executor
 	orchestrator.SetAppConfig(appConfig)
 	orchestrator.SetAppConfigForWorkflows(appConfig)
+	orchestrator.SetEmbeddingService(embeddingService)
 	
 	// Execute
 	ctx := context.Background()
@@ -191,8 +242,11 @@ func executeWorkflowWithoutServers(wf *config.WorkflowV2, inputData string, appC
 }
 
 // executeWorkflowWithServers executes a workflow that needs MCP servers
-func executeWorkflowWithServers(wf *config.WorkflowV2, inputData string, appConfig *config.ApplicationConfig, servers []string) error {
+func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, servers []string, skills []string) error {
 	logging.Debug("Executing workflow with MCP servers: %v", servers)
+	if len(skills) > 0 {
+		logging.Info("Skills filter enabled: %v", skills)
+	}
 	
 	// Mark all servers as user-specified
 	userSpecified := make(map[string]bool)
@@ -203,19 +257,25 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, inputData string, appConf
 	// Execute with server connections
 	var execErr error
 	err := host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
+		// Create services
+		configService := infraConfig.NewService()
+		providerFactory := ai.NewProviderFactory()
+		embeddingService := embeddings.NewService(configService, providerFactory)
+		
 		// Create server manager
 		serverManager := NewHostServerManager(conns)
 		
 		// Create logger
 		logger := workflow.NewLogger(wf.Execution.Logging)
 		
-		// Create orchestrator
-		orchestrator := workflow.NewOrchestrator(wf, logger)
+		// Create orchestrator with workflow key for directory-aware resolution
+		orchestrator := workflow.NewOrchestratorWithKey(wf, workflowKey, logger)
 		
 		// Set provider and server manager
 		orchestrator.SetAppConfig(appConfig)
-	orchestrator.SetAppConfigForWorkflows(appConfig)
+		orchestrator.SetAppConfigForWorkflows(appConfig)
 		orchestrator.SetServerManager(serverManager)
+		orchestrator.SetEmbeddingService(embeddingService)
 		
 		// Execute
 		ctx := context.Background()

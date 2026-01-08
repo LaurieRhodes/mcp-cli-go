@@ -29,7 +29,7 @@ type AppConfig struct {
 	Servers    map[string]ServerConfig       `json:"servers"`
 	Providers  map[string]ProviderConfig     `json:"providers"`
 	Embeddings *EmbeddingsConfig             `json:"embeddings,omitempty"`
-	Workflows  map[string]*WorkflowTemplate  `json:"workflows,omitempty"`
+	// Workflows removed - use actual config.ApplicationConfig.Workflows (WorkflowV2)
 }
 
 // EmbeddingsConfig contains embedding-specific configuration
@@ -47,23 +47,4 @@ type EmbeddingProviderConfig struct {
 	APIEndpoint  string   `json:"api_endpoint,omitempty"`
 	DefaultModel string   `json:"default_model"`
 	Models       []string `json:"models,omitempty"`
-}
-
-// WorkflowTemplate represents a workflow template (simplified for now)
-type WorkflowTemplate struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Steps       []WorkflowStep         `json:"steps"`
-	Variables   map[string]string      `json:"variables,omitempty"`
-}
-
-// WorkflowStep represents a single step in a workflow
-type WorkflowStep struct {
-	Step         int      `json:"step"`
-	Name         string   `json:"name"`
-	BasePrompt   string   `json:"base_prompt"`
-	SystemPrompt string   `json:"system_prompt,omitempty"`
-	Provider     string   `json:"provider,omitempty"`
-	Model        string   `json:"model,omitempty"`
-	Servers      []string `json:"servers,omitempty"`
 }

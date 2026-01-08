@@ -396,7 +396,19 @@ func (u *UI) PrintWelcome() {
 func (u *UI) PrintConnectedServers(connections []string) {
 	u.systemColor.Println("Connected to servers:")
 	for _, conn := range connections {
-		fmt.Printf("  - %s\n", conn)
+		fmt.Printf("  • %s\n", conn)
+	}
+	fmt.Println()
+}
+
+// PrintEnabledSkills prints information about enabled skills
+func (u *UI) PrintEnabledSkills(skills []string) {
+	if len(skills) == 0 {
+		return // Don't print if no skills enabled
+	}
+	u.systemColor.Println("Skills enabled:")
+	for _, skill := range skills {
+		fmt.Printf("  • %s\n", skill)
 	}
 	fmt.Println()
 }

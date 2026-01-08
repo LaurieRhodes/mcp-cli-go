@@ -1,5 +1,8 @@
 package config
 
+import (
+	"strings"
+)
 
 // ApplicationConfig represents the complete application configuration
 type ApplicationConfig struct {
@@ -23,6 +26,8 @@ func (c *ApplicationConfig) ValidateWorkflows() error {
 }
 
 // GetWorkflow retrieves a workflow v2 by name
+// GetWorkflow retrieves a workflow by name with directory-aware resolution
+// If contextDir is provided, it will try to resolve relative to that directory first
 func (c *ApplicationConfig) GetWorkflow(name string) (*WorkflowV2, bool) {
 	if c.Workflows == nil {
 		return nil, false
@@ -30,6 +35,33 @@ func (c *ApplicationConfig) GetWorkflow(name string) (*WorkflowV2, bool) {
 
 	workflow, exists := c.Workflows[name]
 	return workflow, exists
+}
+
+// GetWorkflowWithContext retrieves a workflow by name with directory context
+// It tries to resolve in this order:
+// 1. Exact match (supports directory notation like "dir/workflow")
+// 2. Same directory as caller (if contextDir provided)
+// 3. Root directory (workflow name only)
+func (c *ApplicationConfig) GetWorkflowWithContext(name string, contextDir string) (*WorkflowV2, bool) {
+	if c.Workflows == nil {
+		return nil, false
+	}
+
+	// Try 1: Exact match first (supports explicit directory notation)
+	if workflow, exists := c.Workflows[name]; exists {
+		return workflow, true
+	}
+
+	// Try 2: If we have a context directory and name has no directory, try same directory
+	if contextDir != "" && !strings.Contains(name, "/") {
+		contextualName := contextDir + "/" + name
+		if workflow, exists := c.Workflows[contextualName]; exists {
+			return workflow, true
+		}
+	}
+
+	// Try 3: Already tried root in step 1, so not found
+	return nil, false
 }
 
 // ListWorkflows returns all available workflow v2 names

@@ -23,6 +23,9 @@ type ExecutionContext struct {
 
 	// MCP servers
 	Servers []string `yaml:"servers,omitempty"`
+	
+	// Anthropic Skills
+	Skills []string `yaml:"skills,omitempty"`
 
 	// Model parameters
 	Temperature float64 `yaml:"temperature,omitempty"`
@@ -58,6 +61,7 @@ type StepV2 struct {
 
 	// Override execution context
 	Servers     []string       `yaml:"servers,omitempty"`
+	Skills      []string       `yaml:"skills,omitempty"`
 	Temperature *float64       `yaml:"temperature,omitempty"` // Pointer to detect override
 	MaxTokens   *int           `yaml:"max_tokens,omitempty"`
 	Timeout     *time.Duration `yaml:"timeout,omitempty"`
@@ -73,14 +77,6 @@ type StepV2 struct {
 	// Control flow
 	If       string   `yaml:"if,omitempty"`
 	Needs    []string `yaml:"needs,omitempty"`
-	ForEach  string   `yaml:"for_each,omitempty"`
-	ItemName string   `yaml:"item_name,omitempty"`
-
-	// Error handling
-	OnError *ErrorHandling `yaml:"on_error,omitempty"`
-
-	// Outputs
-	Outputs *StepOutputs `yaml:"outputs,omitempty"`
 }
 
 // LoopV2 represents an iterative execution block
@@ -109,8 +105,27 @@ type LoopMode struct {
 
 // EmbeddingsMode represents embeddings generation
 type EmbeddingsMode struct {
-	Model string      `yaml:"model"`
-	Input interface{} `yaml:"input"` // string or array
+	// Provider override (inherits from step/execution if not specified)
+	Provider string `yaml:"provider,omitempty"`
+	Model    string `yaml:"model,omitempty"`
+
+	// Input source (one required)
+	Input     interface{} `yaml:"input,omitempty"`      // string or array
+	InputFile string      `yaml:"input_file,omitempty"` // alternative to Input
+
+	// Chunking configuration
+	ChunkStrategy  string `yaml:"chunk_strategy,omitempty"`   // sentence, paragraph, fixed
+	MaxChunkSize   int    `yaml:"max_chunk_size,omitempty"`   // default: 512
+	Overlap        int    `yaml:"overlap,omitempty"`          // overlap between chunks in tokens
+	
+	// Model configuration
+	Dimensions int `yaml:"dimensions,omitempty"` // for supported models
+
+	// Output configuration
+	EncodingFormat  string `yaml:"encoding_format,omitempty"`  // float, base64
+	IncludeMetadata *bool  `yaml:"include_metadata,omitempty"` // default: true
+	OutputFormat    string `yaml:"output_format,omitempty"`    // json, csv, compact
+	OutputFile      string `yaml:"output_file,omitempty"`      // output file path
 }
 
 // TemplateMode represents template execution
@@ -135,19 +150,6 @@ type ConsensusExec struct {
 	Temperature *float64       `yaml:"temperature,omitempty"`
 	MaxTokens   *int           `yaml:"max_tokens,omitempty"`
 	Timeout     *time.Duration `yaml:"timeout,omitempty"`
-}
-
-// ErrorHandling defines step error handling
-type ErrorHandling struct {
-	Retry    int    `yaml:"retry,omitempty"`
-	Backoff  string `yaml:"backoff,omitempty"` // exponential, linear
-	Fallback string `yaml:"fallback,omitempty"` // Step name
-}
-
-// StepOutputs defines step outputs
-type StepOutputs struct {
-	Name      string `yaml:"name,omitempty"`
-	Transform string `yaml:"transform,omitempty"`
 }
 
 // ConsensusResult represents the result of a consensus execution

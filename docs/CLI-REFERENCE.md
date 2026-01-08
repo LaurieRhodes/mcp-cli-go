@@ -21,19 +21,20 @@ Complete reference for all mcp-cli commands, flags, and usage patterns.
 
 These flags work with all commands:
 
-| Flag | Short | Default | Description |
-|------|-------|---------|-------------|
-| `--config` | - | `config.yaml` | Path to configuration file (YAML/JSON) |
-| `--server` | `-s` | All configured | MCP server(s) to use (comma-separated) |
-| `--provider` | `-p` | From config | AI provider to use |
-| `--model` | `-m` | From config | Model to use |
-| `--disable-filesystem` | - | `false` | Disable filesystem server |
-| `--verbose` | `-v` | `false` | Enable verbose logging |
-| `--no-color` | - | `false` | Disable colored output |
+| Flag                   | Short | Default        | Description                            |
+| ---------------------- | ----- | -------------- | -------------------------------------- |
+| `--config`             | -     | `config.yaml`  | Path to configuration file (YAML/JSON) |
+| `--server`             | `-s`  | All configured | MCP server(s) to use (comma-separated) |
+| `--provider`           | `-p`  | From config    | AI provider to use                     |
+| `--model`              | `-m`  | From config    | Model to use                           |
+| `--disable-filesystem` | -     | `false`        | Disable filesystem server              |
+| `--verbose`            | `-v`  | `false`        | Enable verbose logging                 |
+| `--no-color`           | -     | `false`        | Disable colored output                 |
 
 ### Provider Options
 
 Supported providers (set with `--provider` or `-p`):
+
 - `openai` - OpenAI API
 - `anthropic` - Anthropic Claude API
 - `ollama` - Local Ollama instance
@@ -68,6 +69,7 @@ mcp-cli chat --disable-filesystem
 ```
 
 **Features:**
+
 - Multi-turn conversation
 - Automatic tool execution
 - Conversation history
@@ -85,6 +87,7 @@ mcp-cli query [flags] "question"
 ```
 
 **Flags:**
+
 - `--json`, `-j` - Output response in JSON format
 - `--context`, `-c` - File containing additional context
 - `--system-prompt` - Custom system prompt
@@ -121,6 +124,7 @@ mcp-cli query --server filesystem,brave-search \
 ```
 
 **Exit Codes:**
+
 - `0` - Success
 - `1` - General error
 - `2` - Configuration not found
@@ -144,6 +148,7 @@ mcp-cli interactive
 ```
 
 **Slash Commands:**
+
 - `/help` - Show help
 - `/exit` or `/quit` - Exit interactive mode
 - `/clear` - Clear conversation history
@@ -153,6 +158,7 @@ mcp-cli interactive
 - `/config` - Show current configuration
 
 **Example:**
+
 ```bash
 $ mcp-cli interactive
 > /tools
@@ -183,6 +189,7 @@ echo "data" | mcp-cli --template <name>
 ```
 
 **Template Flags:**
+
 - `--template` - Template name to execute
 - `--input-data` - Input data (JSON or plain text)
 - `--list-templates` - List all available templates
@@ -233,6 +240,7 @@ mcp-cli serve [runas-config]
 ```
 
 **Flags:**
+
 - `--serve` - Path to runas config file
 
 **Examples:**
@@ -299,6 +307,7 @@ mcp-cli embeddings [text]
 ```
 
 **Flags:**
+
 - `--provider` - Embedding provider
 - `--model` - Embedding model
 - `--input-file` - Input file path
@@ -355,6 +364,7 @@ mcp-cli config [command]
 ```
 
 **Commands:**
+
 - `validate` - Validate configuration file
 - `check` - Check configuration (alias for validate)
 
@@ -382,6 +392,7 @@ mcp-cli init [flags]
 ```
 
 **Flags:**
+
 - `--quick` - Quick setup (30 seconds)
 - `--full` - Complete setup with all options
 
@@ -399,6 +410,7 @@ mcp-cli init --full
 ```
 
 **What Gets Created:**
+
 - `config.yaml` - Main configuration
 - `config/providers/*.yaml` - Provider configurations
 - `config/servers/*.yaml` - MCP server configurations

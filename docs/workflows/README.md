@@ -15,6 +15,7 @@ Workflows are YAML-based definitions that enable iterative, agentic AI workflows
 - **Provider Fallback:** Automatic failover across multiple providers
 - **Workflow Composition:** Call workflows from workflows
 - **Consensus Validation:** Multi-provider agreement on critical decisions
+- **Directory Organization:** Organize workflows in subdirectories with intelligent resolution
 
 🔄 **Breaking Changes:**
 
@@ -42,7 +43,7 @@ execution:
 steps:
   - name: review
     run: "Review this code: {{input}}"
-  
+
   - name: report
     needs: [review]
     run: "Format as markdown: {{review}}"
@@ -107,11 +108,11 @@ execution:
 steps:
   - name: step1
     run: "..."              # Uses: anthropic, temp=0.7
-  
+
   - name: step2
     run: "..."
     temperature: 0.3        # Override: anthropic, temp=0.3
-  
+
   - name: step3
     run: "..."
     provider: openai        # Override: openai, temp=0.7
@@ -134,6 +135,7 @@ loops:
 ```
 
 **Loop variables:**
+
 - `{{loop.iteration}}` - Current iteration number
 - `{{loop.last.output}}` - Previous iteration result
 - `{{loop.history}}` - All results concatenated
@@ -183,7 +185,7 @@ steps:
       name: code_analyzer
       with:
         code: "{{input}}"
-  
+
   - name: review
     needs: [analyze]
     template:
@@ -216,26 +218,26 @@ steps:
       name: planner
       with:
         input: "{{input}}"
-  
+
   - name: test_criteria
     needs: [requirements]
     template:
       name: test_designer
       with:
         input: "{{requirements}}"
-  
+
   - name: final_report
     needs: [develop_until_pass]
     run: |
       Development Summary:
-      
+
       Original request: {{input}}
-      
+
       Iterations completed: {{loop.iteration}}
-      
+
       Final code:
       {{develop_until_pass}}
-      
+
       Provide a brief 2-3 sentence summary of what was built and how many iterations it took.
 
 loops:
@@ -250,7 +252,6 @@ loops:
     until: "The review says PASS"
     on_failure: continue
     accumulate: development_history
-
 ```
 
 **What this does:**
@@ -369,7 +370,21 @@ steps:
 ### Execute Workflow
 
 ```bash
+# Root-level workflow
 ./mcp-cli --workflow my_workflow --input-data "task description"
+
+# Workflow in subdirectory
+./mcp-cli --workflow iterative_dev/dev_cycle --input-data "task"
+```
+
+### List Available Workflows
+
+```bash
+# See all workflows (including nested ones)
+./mcp-cli --list-workflows
+
+# Filter by directory
+./mcp-cli --list-workflows | jq -r '.workflows[] | select(startswith("iterative_dev/"))'
 ```
 
 ### With Specific Provider
@@ -413,6 +428,7 @@ Expose workflows as MCP tools that any LLM can discover and use.
 ### Workflow as MCP Tool
 
 **1. Create workflow:**
+
 ```yaml
 # config/workflows/code_reviewer.yaml
 $schema: "workflow/v2.0"
@@ -423,6 +439,7 @@ description: Reviews code for security and quality issues
 ```
 
 **2. Create MCP server config:**
+
 ```yaml
 # config/servers/code_tools.yaml
 server_name: code_tools
@@ -432,6 +449,7 @@ config:
 ```
 
 **3. Define tool exposure:**
+
 ```yaml
 # config/runasMCP/code_tools.yaml
 runas_type: mcp-server
@@ -448,6 +466,7 @@ tools:
 ```
 
 **4. Use in Claude Desktop:**
+
 ```json
 {
   "mcpServers": {
@@ -540,6 +559,7 @@ Return final result
 **Problem:** Loop never exits early
 
 **Solution:** Check exit condition clarity
+
 ```bash
 ./mcp-cli --workflow my_workflow --input-data "test" --verbose
 # Look for: Condition evaluation: 'Your condition' -> YES/NO
@@ -548,6 +568,7 @@ Return final result
 **Problem:** Provider failover not working
 
 **Solution:** Verify provider configuration
+
 ```yaml
 execution:
   providers:  # Note: plural
@@ -558,11 +579,12 @@ execution:
 **Problem:** Variables not interpolating
 
 **Solution:** Check variable names and scope
+
 ```yaml
 steps:
   - name: step1
     run: "Use {{step1}}"  # ❌ Can't reference self
-  
+
   - name: step2
     needs: [step1]
     run: "Use {{step1}}"  # ✅ Can reference previous step

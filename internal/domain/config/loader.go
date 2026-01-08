@@ -321,6 +321,13 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 		return err
 	}
 
+	// Get the base workflow directory for calculating relative paths
+	basePattern := pattern
+	if idx := strings.Index(pattern, "*"); idx != -1 {
+		basePattern = pattern[:idx]
+	}
+	baseWorkflowDir := filepath.Clean(basePattern)
+
 	// Use workflow loader for validation
 	workflowLoader := NewWorkflowLoader()
 
@@ -350,8 +357,27 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 			return fmt.Errorf("failed to load workflow from %s: %w", file, err)
 		}
 
-		// Use workflow name as key
-		result.Workflows[workflow.Name] = workflow
+		// Calculate relative path from base workflow directory
+		relPath, err := filepath.Rel(baseWorkflowDir, file)
+		if err != nil {
+			// If we can't get relative path, just use workflow name
+			result.Workflows[workflow.Name] = workflow
+		} else {
+			// Remove .yaml extension
+			relPath = strings.TrimSuffix(relPath, ".yaml")
+			relPath = strings.TrimSuffix(relPath, ".yml")
+			
+			// If the file is in a subdirectory, use subdirectory/workflowname format
+			dir := filepath.Dir(relPath)
+			if dir != "." {
+				// Use forward slashes for consistency across platforms
+				workflowKey := filepath.ToSlash(filepath.Join(dir, workflow.Name))
+				result.Workflows[workflowKey] = workflow
+			} else {
+				// File is in root workflow directory, use just the name
+				result.Workflows[workflow.Name] = workflow
+			}
+		}
 	}
 
 	return nil

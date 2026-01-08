@@ -814,23 +814,340 @@ steps:
 
 ### Directory Structure
 
+Workflows can be organized in subdirectories for better project organization. All `.yaml` files in `config/workflows/` and its subdirectories are automatically discovered.
+
 ```
 config/workflows/
 ├── README.md
+├── analyzer.yaml              # Root-level workflow
+├── simple_greeting.yaml       # Root-level workflow
 ├── basic/
+│   ├── analyzer.yaml          # basic/analyzer
+│   └── reporter.yaml          # basic/reporter
+├── iterative_dev/
+│   ├── README.md
+│   ├── planner.yaml           # iterative_dev/planner
+│   ├── code_writer.yaml       # iterative_dev/code_writer
+│   ├── code_reviewer.yaml     # iterative_dev/code_reviewer
+│   └── dev_cycle.yaml         # iterative_dev/dev_cycle
+└── operations/
+    ├── deployer.yaml          # operations/deployer
+    └── validator.yaml         # operations/validator
+```
+
+### Listing Workflows
+
+```bash
+# View all workflows with directory paths
+mcp-cli --list-workflows
+```
+
+**Output:**
+```json
+{
+  "workflows": [
+    "analyzer",
+    "simple_greeting",
+    "basic/analyzer",
+    "basic/reporter",
+    "iterative_dev/planner",
+    "iterative_dev/code_writer",
+    "iterative_dev/code_reviewer",
+    "iterative_dev/dev_cycle",
+    "operations/deployer",
+    "operations/validator"
+  ]
+}
+```
+
+---
+
+### Running Workflows
+
+**Root workflows:**
+```bash
+mcp-cli --workflow analyzer --input-data "code"
+```
+
+**Nested workflows:**
+```bash
+mcp-cli --workflow iterative_dev/dev_cycle --input-data "task"
+```
+
+---
+
+### Calling Workflows from Workflows
+
+Workflows can call other workflows using the `template` step mode. The system uses **directory-aware resolution** with intelligent priority.
+
+#### Resolution Priority
+
+When a workflow calls another workflow by name, the system searches in this order:
+
+1. **Exact match** - If you specify a path like `operations/deployer`, it looks for exactly that
+2. **Same directory** - If the calling workflow is in `iterative_dev/` and references `code_reviewer`, it looks for `iterative_dev/code_reviewer` first
+3. **Root directory** - Falls back to root-level workflows
+
+**This means:** Workflows in the same directory can reference each other by name only!
+
+#### Example: Same-Directory References
+
+```yaml
+# File: config/workflows/iterative_dev/dev_cycle.yaml
+$schema: "workflow/v2.0"
+name: dev_cycle
+version: 1.0.0
+description: Development cycle
+
+steps:
+  - name: plan
+    template:
+      name: planner              # Finds iterative_dev/planner (same directory)
+      with:
+        input: "{{input}}"
+  
+  - name: write
+    needs: [plan]
+    template:
+      name: code_writer          # Finds iterative_dev/code_writer (same directory)
+      with:
+        spec: "{{plan}}"
+  
+  - name: review
+    needs: [write]
+    template:
+      name: code_reviewer        # Finds iterative_dev/code_reviewer (same directory)
+      with:
+        code: "{{write}}"
+```
+
+✅ **Benefits:**
+- Workflows in a project can reference each other simply
+- No need to remember full paths for local workflows
+- Easy to move entire directories without updating references
+
+#### Example: Cross-Directory References
+
+```yaml
+# File: config/workflows/iterative_dev/dev_cycle.yaml
+steps:
+  # Reference workflow in same directory (simple name)
+  - name: local_review
+    template:
+      name: code_reviewer        # Finds iterative_dev/code_reviewer
+      
+  # Reference workflow in different directory (full path)
+  - name: deploy
+    needs: [local_review]
+    template:
+      name: operations/deployer  # Explicit path to operations/deployer
+      
+  # Reference root-level workflow (simple name)
+  - name: notify
+    needs: [deploy]
+    template:
+      name: simple_greeting      # Falls back to root simple_greeting
+```
+
+#### Example: Avoiding Conflicts
+
+If you have workflows with the same name in different directories:
+
+```
+config/workflows/
+├── code_reviewer.yaml              # Root code_reviewer
+└── iterative_dev/
+    └── code_reviewer.yaml          # iterative_dev/code_reviewer
+```
+
+**From `iterative_dev/dev_cycle.yaml`:**
+```yaml
+steps:
+  - name: review
+    template:
+      name: code_reviewer            # Finds iterative_dev/code_reviewer (local)
+      
+  - name: external_review
+    template:
+      name: ../code_reviewer         # ❌ Doesn't work - use explicit path
+      
+  - name: external_review_correct
+    template:
+      name: code_reviewer            # Still finds local version
+```
+
+**To force root workflow:**
+- Move root workflow to a subdirectory (e.g., `root/code_reviewer.yaml`)
+- Reference as `root/code_reviewer`
+
+**Best Practice:** Use unique names or organize by purpose to avoid conflicts.
+
+---
+
+### Best Practices
+
+#### 1. Group Related Workflows
+
+```
+config/workflows/
+├── data_processing/
+│   ├── cleaner.yaml
+│   ├── validator.yaml
+│   └── transformer.yaml
+├── deployment/
+│   ├── test.yaml
+│   ├── deploy.yaml
+│   └── rollback.yaml
+└── monitoring/
+    ├── health_check.yaml
+    └── alert.yaml
+```
+
+#### 2. Use README Files
+
+```
+config/workflows/iterative_dev/
+├── README.md          # Explains the workflow suite
+├── planner.yaml
+├── code_writer.yaml
+├── code_reviewer.yaml
+└── dev_cycle.yaml     # Main entry point
+```
+
+**README.md:**
+```markdown
+# Iterative Development Workflows
+
+Main workflow: `dev_cycle` - Orchestrates the entire development process
+
+Components:
+- `planner` - Creates implementation plan
+- `code_writer` - Writes code from plan
+- `code_reviewer` - Reviews and validates code
+
+Usage:
+    mcp-cli --workflow iterative_dev/dev_cycle --input-data "feature description"
+```
+
+#### 3. Single Entry Point
+
+For complex workflow suites, create one main workflow that orchestrates the others:
+
+```yaml
+# config/workflows/iterative_dev/dev_cycle.yaml (main entry point)
+$schema: "workflow/v2.0"
+name: dev_cycle
+description: Main orchestrator for iterative development
+
+steps:
+  - name: plan
+    template:
+      name: planner          # Local reference
+      
+  - name: implement
+    template:
+      name: code_writer      # Local reference
+      
+  - name: review
+    template:
+      name: code_reviewer    # Local reference
+```
+
+#### 4. Naming Conventions
+
+- **Files:** `snake_case.yaml`
+- **Workflow names:** `snake_case` (should match filename)
+- **Directories:** `snake_case` or `kebab-case`
+- **Step names:** `snake_case`
+- **Variables:** `snake_case`
+
+**Example:**
+```
+config/workflows/
+└── iterative_dev/           # Directory: snake_case
+    ├── code_writer.yaml     # File: snake_case.yaml
+    └── (name: code_writer)  # Workflow name matches file
+```
+
+---
+
+### Migration from Flat Structure
+
+If you have all workflows in the root:
+
+**Before:**
+```
+config/workflows/
+├── analyzer.yaml
+├── reporter.yaml
+├── planner.yaml
+├── code_writer.yaml
+├── code_reviewer.yaml
+├── dev_cycle.yaml
+└── ... (50 more files)
+```
+
+**After:**
+```
+config/workflows/
+├── analysis/
 │   ├── analyzer.yaml
 │   └── reporter.yaml
-├── development/
-│   ├── code_reviewer.yaml
-│   ├── test_generator.yaml
-│   └── iterative_dev/
-│       ├── planner.yaml
-│       ├── dev_cycle.yaml
-│       └── iterative_developer.yaml
-└── operations/
-    ├── deployer.yaml
-    └── validator.yaml
+└── iterative_dev/
+    ├── planner.yaml
+    ├── code_writer.yaml
+    ├── code_reviewer.yaml
+    └── dev_cycle.yaml
 ```
+
+**Migration Steps:**
+
+1. **Create subdirectories:**
+   ```bash
+   mkdir -p config/workflows/{analysis,iterative_dev}
+   ```
+
+2. **Move workflows:**
+   ```bash
+   mv config/workflows/planner.yaml config/workflows/iterative_dev/
+   mv config/workflows/code_writer.yaml config/workflows/iterative_dev/
+   # ... etc
+   ```
+
+3. **No code changes needed!** 
+   - Workflows in same directory still reference each other by name
+   - Cross-directory references may need explicit paths
+
+4. **Test:**
+   ```bash
+   mcp-cli --list-workflows
+   mcp-cli --workflow iterative_dev/dev_cycle --input-data "test"
+   ```
+
+---
+
+### Troubleshooting
+
+**Workflow not found:**
+```bash
+Error: workflow 'code_reviewer' not found (searched in 'iterative_dev' directory and root)
+```
+
+**Solutions:**
+1. Check workflow name spelling
+2. List all workflows: `mcp-cli --list-workflows`
+3. Use explicit path: `iterative_dev/code_reviewer`
+4. Verify file exists: `ls config/workflows/iterative_dev/code_reviewer.yaml`
+
+**Calling wrong workflow:**
+
+If `iterative_dev/dev_cycle` is calling root `code_reviewer` instead of local:
+
+1. Check both exist: `mcp-cli --list-workflows | grep code_reviewer`
+2. Verify local workflow is valid: `cat config/workflows/iterative_dev/code_reviewer.yaml`
+3. Use explicit path in template step if needed
+
+---
 
 ### Naming Conventions
 
