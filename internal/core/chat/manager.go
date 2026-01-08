@@ -60,7 +60,28 @@ func NewChatManager(provider domain.LLMProvider, connections []*host.ServerConne
 
 // NewChatManagerWithConfig creates a new chat manager with provider configuration
 func NewChatManagerWithConfig(provider domain.LLMProvider, connections []*host.ServerConnection, providerConfig *config.ProviderConfig, model string) *ChatManager {
-	systemPrompt := "You are a helpful assistant with access to tools. Use the tools when necessary to fulfill user requests."
+	systemPrompt := `You are a helpful assistant with access to tools. Use the tools when necessary to fulfill user requests.
+
+IMPORTANT - Using Skills:
+Skills provide specialized capabilities through code execution. There are two ways to use skills:
+
+1. PASSIVE MODE - Load documentation and reference materials:
+   Call the skill tool directly (e.g., 'docx', 'pdf', 'pptx', 'xlsx')
+   Use this to learn about a skill's capabilities before using it.
+
+2. ACTIVE MODE - Execute code to perform tasks:
+   Call 'execute_skill_code' with skill_name parameter
+   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything.
+
+✅ CORRECT examples:
+   - Create a document: execute_skill_code with skill_name='docx'
+   - Generate a PDF: execute_skill_code with skill_name='pdf'
+   - Process data: execute_skill_code with appropriate skill
+   - Run analysis: execute_skill_code with appropriate skill
+
+When writing code, save output files to /outputs/ directory:
+   output.save('/outputs/result.docx')  ✅ CORRECT
+   output.save('/home/result.docx')     ❌ WRONG - will be lost`
 	return &ChatManager{
 		LLMProvider:     provider,
 		Connections:     connections,

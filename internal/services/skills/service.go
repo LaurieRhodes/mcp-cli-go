@@ -1066,13 +1066,24 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 	// Add execute_skill_code tool for dynamic code execution
 	executeCodeTool := map[string]interface{}{
 		"name": "execute_skill_code",
-		"description": "[SKILL CODE EXECUTION] Execute code with access to a skill's helper libraries. " +
-			"**CRITICAL: All output files MUST be saved to /outputs/ directory.** " +
-			"Use this to: (1) Create documents dynamically, (2) Process files with custom logic, " +
-			"(3) Use skill helper libraries (e.g., Document class from docx skill). " +
-			"The code executes in a sandboxed Docker container. The /outputs/ directory is the ONLY writable location " +
-			"that persists to the host filesystem (/tmp/mcp-outputs/). Any other paths will fail. " +
-			"Example: doc.save('/outputs/myfile.docx') NOT doc.save('/home/user/myfile.docx')",
+		"description": "[SKILL CODE EXECUTION] Execute Python code with access to a skill's helper libraries and specialized capabilities. " +
+			"**USE THIS TOOL for any task requiring code execution, processing, generation, or manipulation.** " +
+			"The code executes in a sandboxed Docker container with the skill's helper scripts and dependencies available. " +
+			"\n\n**CRITICAL FILE PATHS:** All output files MUST be saved to /outputs/ directory (e.g., result.save('/outputs/file.ext')). " +
+			"This is the ONLY writable location that persists to the host. Files saved elsewhere will be lost. " +
+			"\n\n**Common use cases:** " +
+			"(1) Creating/modifying documents, spreadsheets, PDFs, presentations, " +
+			"(2) Processing data with custom logic, " +
+			"(3) Generating content (text, reports, visualizations), " +
+			"(4) File manipulation and analysis, " +
+			"(5) Using skill-specific helper libraries and functions. " +
+			"\n\n**Available skills and their Python libraries:** " +
+			"- docx: Use 'from docx import Document' (python-docx library) to create/edit Word documents. " +
+			"- pdf: Use reportlab, pypdf, pdfplumber for PDF generation and processing. " +
+			"- xlsx: Use openpyxl for Excel spreadsheet creation and manipulation. " +
+			"- pptx: Use python-pptx for PowerPoint presentation creation. " +
+			"\n\n**Container environment:** Python 3.11 with skill-specific packages pre-installed. " +
+			"Use skill name without 'mcp-skills-' prefix (e.g., skill_name='docx' not 'mcp-skills-docx').",
 		"template": "execute_skill_code", // Special marker for this tool
 		"input_schema": map[string]interface{}{
 			"type": "object",

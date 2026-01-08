@@ -73,8 +73,13 @@ func (s *Skill) Validate() error {
 // GetToolDescription generates an MCP tool description from this skill
 // Following the pattern observed in Anthropic skills
 // Prepends "[SKILL]" marker to help LLMs recognize these as skills
+// Clarifies this tool loads documentation, NOT executes code
 func (s *Skill) GetToolDescription() string {
-	return fmt.Sprintf("[SKILL] %s", s.Description)
+	return fmt.Sprintf("[SKILL] %s\n\n"+
+		"⚠️  This tool loads the skill's documentation and reference materials into context. "+
+		"To actually execute code, create files, process data, or perform any active task, "+
+		"use the 'execute_skill_code' tool instead with skill_name='%s'.", 
+		s.Description, s.Name)
 }
 
 // GetMCPToolName returns the MCP tool name for this skill
