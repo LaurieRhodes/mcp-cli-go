@@ -37,7 +37,30 @@ func (l *Loader) LoadFromBytes(data []byte) (*config.WorkflowV2, error) {
 	decoder.KnownFields(true) // Enable strict mode
 	
 	if err := decoder.Decode(&workflow); err != nil {
-		return nil, fmt.Errorf("failed to parse workflow YAML: %w", err)
+		// Provide helpful error message for common YAML issues
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "cannot unmarshal !!map into string") {
+			// Extract line number if available
+			lineInfo := ""
+			if strings.Contains(errMsg, "line ") {
+				parts := strings.Split(errMsg, "line ")
+				if len(parts) > 1 {
+					lineInfo = "line " + strings.Split(parts[1], ":")[0]
+				}
+			}
+			
+			return nil, fmt.Errorf("workflow YAML structure error at %s:\n"+
+				"  Found a map/object where a string was expected.\n"+
+				"  Common causes:\n"+
+				"    • loop.items should be a template string like \"{{array}}\"\n"+
+				"      NOT a map with 'source' and 'path'\n"+
+				"    • Check for incorrect indentation\n"+
+				"    • Ensure all fields match the v2.0 schema\n"+
+				"  Original error: %v", lineInfo, err)
+		}
+		
+		return nil, fmt.Errorf("failed to parse workflow YAML: %w\n"+
+			"  Hint: Check YAML syntax, indentation, and field types", err)
 	}
 
 	// Validate

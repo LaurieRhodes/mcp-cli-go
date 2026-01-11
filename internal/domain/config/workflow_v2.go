@@ -85,11 +85,30 @@ type StepV2 struct {
 // LoopV2 represents an iterative execution block
 type LoopV2 struct {
 	Name          string                 `yaml:"name"`
+	
+	// Core execution
 	Workflow      string                 `yaml:"workflow"`            // Required: workflow to call
+	Mode          string                 `yaml:"mode,omitempty"`      // "iterate" | "refine" (default: refine)
+	Items         string                 `yaml:"items,omitempty"`     // Array source for iterate mode (template)
 	With          map[string]interface{} `yaml:"with,omitempty"`      // Input parameters
+	
+	// Iteration control
 	MaxIterations int                    `yaml:"max_iterations"`      // Safety limit
-	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates)
+	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates, refine mode)
+	
+	// Error handling
 	OnFailure     string                 `yaml:"on_failure,omitempty"` // halt|continue|retry
+	MaxRetries    int                    `yaml:"max_retries,omitempty"` // Retries per item (for on_failure: retry)
+	RetryDelay    string                 `yaml:"retry_delay,omitempty"` // Backoff duration (e.g. "5s")
+	
+	// Success criteria
+	MinSuccessRate float64               `yaml:"min_success_rate,omitempty"` // Minimum success rate 0.0-1.0
+	
+	// Timeouts
+	TimeoutPerItem string                `yaml:"timeout_per_item,omitempty"` // Per-iteration timeout (e.g. "30s")
+	TotalTimeout   string                `yaml:"total_timeout,omitempty"`    // Total loop timeout (e.g. "1h")
+	
+	// Legacy/existing fields
 	Accumulate    string                 `yaml:"accumulate,omitempty"` // Store iteration results
 	Parallel      bool                   `yaml:"parallel,omitempty"`   // Enable parallel execution
 	MaxWorkers    int                    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)
@@ -97,11 +116,29 @@ type LoopV2 struct {
 
 // LoopMode defines loop execution within a step
 type LoopMode struct {
+	// Core execution
 	Workflow      string                 `yaml:"workflow"`            // Required workflow to call
+	Mode          string                 `yaml:"mode,omitempty"`      // "iterate" | "refine" (default: refine)
+	Items         string                 `yaml:"items,omitempty"`     // Array source for iterate mode (template)
 	With          map[string]interface{} `yaml:"with,omitempty"`      // Input parameters
+	
+	// Iteration control
 	MaxIterations int                    `yaml:"max_iterations"`      // Safety limit (required)
-	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates)
+	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates, refine mode)
+	
+	// Error handling
 	OnFailure     string                 `yaml:"on_failure,omitempty"` // halt|continue|retry
+	MaxRetries    int                    `yaml:"max_retries,omitempty"` // Retries per item (for on_failure: retry)
+	RetryDelay    string                 `yaml:"retry_delay,omitempty"` // Backoff duration (e.g. "5s")
+	
+	// Success criteria
+	MinSuccessRate float64               `yaml:"min_success_rate,omitempty"` // Minimum success rate 0.0-1.0
+	
+	// Timeouts
+	TimeoutPerItem string                `yaml:"timeout_per_item,omitempty"` // Per-iteration timeout (e.g. "30s")
+	TotalTimeout   string                `yaml:"total_timeout,omitempty"`    // Total loop timeout (e.g. "1h")
+	
+	// Legacy/existing fields
 	Accumulate    string                 `yaml:"accumulate,omitempty"` // Store iteration results
 	Parallel      bool                   `yaml:"parallel,omitempty"`   // Enable parallel execution
 	MaxWorkers    int                    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)

@@ -183,6 +183,8 @@ func (o *Orchestrator) executeStep(ctx context.Context, step *config.StepV2) err
 	var err error
 	if step.Consensus != nil {
 		err = o.executeConsensusStep(ctx, step)
+	} else if step.Loop != nil {
+		err = o.executeLoopStep(ctx, step)
 	} else if step.Run != "" {
 		err = o.executeRegularStep(ctx, step)
 	} else if step.Embeddings != nil {
@@ -666,22 +668,51 @@ func (o *Orchestrator) executeLoopStep(ctx context.Context, step *config.StepV2)
 		return fmt.Errorf("loop executor not initialized (appConfig missing)")
 	}
 	
+	// Initialize loop executor if not already done
+	if o.loopExecutor == nil {
+		o.loopExecutor = NewLoopExecutor(
+			o.appConfig,
+			o.logger,
+			o.interpolator,
+			o.executor,
+			o.executor.serverManager,
+		)
+	}
+	
 	o.logger.Info("Starting loop: %s", step.Name)
 	
-	// Execute the loop
-	result, _ := o.executeLoopInternal(
-		ctx,
-		step.Name,
-		step.Loop.Workflow,
-		step.Loop.With,
-		step.Loop.MaxIterations,
-		step.Loop.Until,
-		step.Loop.OnFailure,
-		step.Loop.Accumulate,
-	)
+	// Convert step.Loop to LoopV2 config
+	loopConfig := &config.LoopV2{
+		Name:           step.Name,
+		Workflow:       step.Loop.Workflow,
+		Mode:           step.Loop.Mode,
+		Items:          step.Loop.Items,
+		With:           step.Loop.With,
+		MaxIterations:  step.Loop.MaxIterations,
+		Until:          step.Loop.Until,
+		OnFailure:      step.Loop.OnFailure,
+		MaxRetries:     step.Loop.MaxRetries,
+		RetryDelay:     step.Loop.RetryDelay,
+		MinSuccessRate: step.Loop.MinSuccessRate,
+		TimeoutPerItem: step.Loop.TimeoutPerItem,
+		TotalTimeout:   step.Loop.TotalTimeout,
+		Accumulate:     step.Loop.Accumulate,
+		Parallel:       step.Loop.Parallel,
+		MaxWorkers:     step.Loop.MaxWorkers,
+	}
+	
+	// Execute the loop using LoopExecutor
+	result, err := o.loopExecutor.ExecuteLoop(ctx, loopConfig)
+	if err != nil {
+		o.logger.Warn("Loop %s failed: %v", step.Name, err)
+		return err
+	}
 	
 	o.logger.Info("Loop %s completed: %d iterations, exit: %s", 
 		step.Name, result.Iterations, result.ExitReason)
+	
+	// Store result for access by subsequent steps
+	o.interpolator.SetStepResult(step.Name, result.FinalOutput)
 	
 	return nil
 }

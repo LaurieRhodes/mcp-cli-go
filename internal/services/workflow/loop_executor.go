@@ -52,7 +52,28 @@ func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*
 		return nil, fmt.Errorf("max_iterations must be > 0, got %d", loop.MaxIterations)
 	}
 	
-	// Get the workflow to execute
+	// Validate loop configuration
+	if err := loop.Validate(); err != nil {
+		return nil, fmt.Errorf("loop validation failed: %w", err)
+	}
+	
+	// Check mode and dispatch to appropriate handler
+	if loop.Mode == "iterate" {
+		// Execute iterate mode
+		result, err := le.ExecuteIterateLoop(ctx, loop)
+		if err != nil {
+			return nil, err
+		}
+		// Convert to LoopResult for backward compatibility
+		return &LoopResult{
+			Iterations:  result.Iterations,
+			FinalOutput: result.FinalOutput,
+			AllOutputs:  result.AllOutputs,
+			ExitReason:  result.ExitReason,
+		}, nil
+	}
+	
+	// Get the workflow to execute (for refine mode)
 	workflow, exists := le.appConfig.GetWorkflow(loop.Workflow)
 	if !exists {
 		return nil, fmt.Errorf("loop workflow '%s' not found", loop.Workflow)
@@ -63,7 +84,7 @@ func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*
 		return le.ExecuteLoopParallel(ctx, loop, workflow)
 	}
 	
-	// Sequential execution (existing logic)
+	// Sequential execution (existing refine mode logic)
 	result := &LoopResult{
 		AllOutputs: make([]string, 0),
 	}

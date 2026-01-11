@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -118,6 +119,30 @@ func (i *Interpolator) CopyLoopVars(dest *Interpolator) {
 	for key, value := range i.variables {
 		if strings.HasPrefix(key, "loop.") {
 			dest.variables[key] = value
+		}
+	}
+}
+
+// SetIterateLoopVars sets variables for iterate mode loops
+func (i *Interpolator) SetIterateLoopVars(index int, item interface{}, totalItems, succeeded, failed int) {
+	// Set iterate-specific variables
+	i.variables["loop.index"] = fmt.Sprintf("%d", index)
+	i.variables["loop.count"] = fmt.Sprintf("%d", totalItems)
+	i.variables["loop.stats.succeeded"] = fmt.Sprintf("%d", succeeded)
+	i.variables["loop.stats.failed"] = fmt.Sprintf("%d", failed)
+	
+	// Set current item as JSON
+	if item != nil {
+		if itemStr, ok := item.(string); ok {
+			i.variables["loop.current"] = itemStr
+		} else {
+			// Marshal item to JSON
+			itemJSON, err := json.Marshal(item)
+			if err == nil {
+				i.variables["loop.current"] = string(itemJSON)
+			} else {
+				i.variables["loop.current"] = fmt.Sprintf("%v", item)
+			}
 		}
 	}
 }

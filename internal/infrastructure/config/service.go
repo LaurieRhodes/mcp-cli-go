@@ -180,13 +180,21 @@ func (s *Service) LoadConfig(filePath string) (*domainConfig.ApplicationConfig, 
 
 // LoadConfigOrCreateExample loads config or creates an example if it doesn't exist
 func (s *Service) LoadConfigOrCreateExample(filePath string) (*domainConfig.ApplicationConfig, bool, error) {
-	config, err := s.LoadConfig(filePath)
-	if err != nil {
-	} else {
+	// First, check if the file actually exists
+	if _, err := os.Stat(filePath); err == nil {
+		// File exists, try to load it
+		config, err := s.LoadConfig(filePath)
+		if err != nil {
+			// File exists but has errors - report the error, don't overwrite
+			return nil, false, fmt.Errorf("config file exists but has errors: %w", err)
+		}
 		return config, false, nil
+	} else if !os.IsNotExist(err) {
+		// Some other error checking file
+		return nil, false, fmt.Errorf("error checking config file: %w", err)
 	}
-
-	// Create a basic example config
+	
+	// File doesn't exist - create example
 	exampleConfig := &domainConfig.ApplicationConfig{
 		Servers: make(map[string]domainConfig.ServerConfig),
 		AI: &domainConfig.AIConfig{
@@ -213,7 +221,7 @@ func (s *Service) LoadConfigOrCreateExample(filePath string) (*domainConfig.Appl
 		return nil, false, fmt.Errorf("failed to create example config: %w", err)
 	}
 
-	config, err = s.LoadConfig(filePath)
+	config, err := s.LoadConfig(filePath)
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to load created example config: %w", err)
 	}
