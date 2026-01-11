@@ -88,7 +88,7 @@ func (h *ToolHandler) executeTemplate(vars map[string]string) (string, error) {
 	}
 
 	// Create logger
-	logger := workflowservice.NewLogger(workflow.Execution.Logging)
+	logger := workflowservice.NewLogger(workflow.Execution.Logging, false)
 	
 	// Create orchestrator
 	orchestrator := workflowservice.NewOrchestrator(workflow, logger)

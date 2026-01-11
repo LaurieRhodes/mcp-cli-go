@@ -2,6 +2,7 @@ package workflow
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -103,36 +104,141 @@ func (e *Executor) executeWithProvider(
 		}
 	}
 
-	// Resolve temperature
+	// Resolve configuration
 	temperature := e.resolver.ResolveTemperature(step)
-	
-	// Resolve timeout
+	maxIterations := e.resolver.ResolveMaxIterations(step)
 	timeout := e.resolver.ResolveTimeout(step)
+	
 	execCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	// Build the request
-	request := &domain.CompletionRequest{
-		Messages: []domain.Message{
-			{
-				Role:    "user",
-				Content: step.Run,
-			},
-		},
-		Temperature: temperature,
-	}
-
-	// Add tools if server manager is available
+	// Get available tools from servers specified in step configuration
+	var tools []domain.Tool
 	if e.serverManager != nil {
-		tools, err := e.serverManager.GetAvailableTools()
-		if err == nil && len(tools) > 0 {
-			request.Tools = tools
+		serverNames := e.resolver.ResolveServers(step)
+		e.logger.Info("Step '%s' using servers: %v", step.Name, serverNames)
+		
+		for _, serverName := range serverNames {
+			server, exists := e.serverManager.GetServer(serverName)
+			if !exists {
+				e.logger.Warn("Server %s not found, skipping", serverName)
+				continue
+			}
+			
+			serverTools, err := server.GetTools()
+			if err != nil {
+				e.logger.Warn("Failed to get tools from server %s: %v", serverName, err)
+				continue
+			}
+			
+			e.logger.Info("Got %d tools from server '%s'", len(serverTools), serverName)
+			tools = append(tools, serverTools...)
+		}
+		
+		// Filter tools by skill names if specified
+		if len(step.Skills) > 0 {
+			e.logger.Info("Filtering to skills: %v", step.Skills)
+			
+			// Create a map of allowed skill names
+			allowedSkills := make(map[string]bool)
+			for _, skillName := range step.Skills {
+				allowedSkills[skillName] = true
+			}
+			
+			// Always allow execute_skill_code when skills are specified
+			allowedSkills["execute_skill_code"] = true
+			
+			e.logger.Info("Allowed skills map: %v", allowedSkills)
+			
+			// Filter tools
+			filteredTools := make([]domain.Tool, 0)
+			for _, tool := range tools {
+				toolName := tool.Function.Name
+				
+				// Strip server prefix (format is "servername_toolname")
+				// Use Index (first underscore) not LastIndex to handle tool names with underscores
+				unprefixedName := toolName
+				if idx := strings.Index(toolName, "_"); idx > 0 {
+					unprefixedName = toolName[idx+1:]
+				}
+				
+				// Check if this tool is an allowed skill or execute_skill_code
+				if allowedSkills[unprefixedName] {
+					filteredTools = append(filteredTools, tool)
+					e.logger.Info("  ✓ MATCHED: '%s' (unprefixed: '%s')", toolName, unprefixedName)
+				} else {
+					e.logger.Debug("  ✗ SKIPPED: '%s' (unprefixed: '%s')", toolName, unprefixedName)
+				}
+			}
+			
+			e.logger.Info("Filtered to %d tools (was %d)", len(filteredTools), len(tools))
+			tools = filteredTools
 		}
 	}
 
-	e.logger.Debug("Calling %s/%s with temp=%.2f", pc.Provider, pc.Model, temperature)
+	// Determine if we need skills-aware system prompt
+	hasSkills := false
+	for _, tool := range tools {
+		// Check if any skill tools are loaded
+		toolName := tool.Function.Name
+		if strings.Contains(toolName, "skill") || 
+		   toolName == "execute_skill_code" ||
+		   toolName == "docx" || toolName == "pdf" || 
+		   toolName == "pptx" || toolName == "xlsx" {
+			hasSkills = true
+			break
+		}
+	}
 
-	// Make the actual LLM call
+	// Build initial message history with system prompt
+	messages := []domain.Message{}
+	
+	// Add system message if we have skills
+	if hasSkills {
+		systemPrompt := `You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question.
+
+IMPORTANT - Using Skills:
+Skills provide specialized capabilities through code execution. There are two ways to use skills:
+
+1. PASSIVE MODE - Load documentation and reference materials:
+   Call the skill tool directly (e.g., 'docx', 'pdf', 'pptx', 'xlsx')
+   Use this to learn about a skill's capabilities before using it.
+
+2. ACTIVE MODE - Execute code to perform tasks:
+   Call 'execute_skill_code' with skill_name parameter
+   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything.
+
+CRITICAL - File Paths:
+When writing code, ALL output files MUST be saved to /outputs/ directory:
+   doc.save('/outputs/result.docx')  ✅ CORRECT - File persists to host
+   doc.save('/workspace/result.docx') ❌ WRONG - File deleted when container exits
+   doc.save('result.docx') ❌ WRONG - Defaults to /workspace/
+
+The /outputs/ directory is the ONLY location where files persist after execution.`
+
+		messages = append(messages, domain.Message{
+			Role:    "system",
+			Content: systemPrompt,
+		})
+		e.logger.Debug("Added skills-aware system prompt")
+	}
+	
+	// Add user message
+	messages = append(messages, domain.Message{
+		Role:    "user",
+		Content: step.Run,
+	})
+
+	e.logger.Debug("Calling %s/%s with temp=%.2f, max_iterations=%d", 
+		pc.Provider, pc.Model, temperature, maxIterations)
+
+	// Make initial LLM call
+	request := &domain.CompletionRequest{
+		Messages:    messages,
+		Tools:       tools,
+		Temperature: temperature,
+	}
+
 	response, err := provider.CreateCompletion(execCtx, request)
 	if err != nil {
 		return nil, &ProviderError{
@@ -142,7 +248,108 @@ func (e *Executor) executeWithProvider(
 		}
 	}
 
-	// Extract response
+	e.logger.Debug("Initial response: %s", response.Response)
+
+	// Agentic loop - handle tool calls
+	iteration := 0
+	for iteration < maxIterations {
+		// Check if we have tool calls
+		if len(response.ToolCalls) == 0 {
+			// No tool calls - we're done
+			e.logger.Debug("No tool calls, execution complete after %d iterations", iteration)
+			break
+		}
+
+		e.logger.Info("Query resulted in %d tool calls (iteration #%d)", 
+			len(response.ToolCalls), iteration+1)
+
+		// Add assistant message with tool calls to history
+		assistantMessage := domain.Message{
+			Role:      "assistant",
+			Content:   response.Response,
+			ToolCalls: response.ToolCalls,
+		}
+		messages = append(messages, assistantMessage)
+
+		// Execute each tool call
+		for _, toolCall := range response.ToolCalls {
+			e.logger.Debug("Executing tool: %s", toolCall.Function.Name)
+
+			// Parse arguments
+			var args map[string]interface{}
+			if err := json.Unmarshal(toolCall.Function.Arguments, &args); err != nil {
+				e.logger.Warn("Failed to parse tool arguments: %v", err)
+				// Add error as tool result
+				messages = append(messages, domain.Message{
+					Role:       "tool",
+					Content:    fmt.Sprintf("Error: failed to parse arguments: %v", err),
+					ToolCallID: toolCall.ID,
+				})
+				continue
+			}
+
+			// Execute tool via server manager
+			result, err := e.serverManager.ExecuteTool(execCtx, toolCall.Function.Name, args)
+			if err != nil {
+				e.logger.Warn("Tool execution failed: %v", err)
+				result = fmt.Sprintf("Error: %v", err)
+			}
+
+			// Add tool result to message history
+			messages = append(messages, domain.Message{
+				Role:       "tool",
+				Content:    result,
+				ToolCallID: toolCall.ID,
+			})
+		}
+
+		// Get follow-up response
+		e.logger.Info("Getting follow-up response #%d after tool execution", iteration+1)
+
+		// Check if we have enough time left in the context
+		if deadline, ok := execCtx.Deadline(); ok {
+			remaining := time.Until(deadline)
+			if remaining < 30*time.Second {
+				e.logger.Warn("Insufficient time remaining (%v) for follow-up request, stopping iterations", remaining)
+				response.Response += fmt.Sprintf("\n\n[Note: Stopped after %d iterations due to timeout constraints. The result may be incomplete.]", iteration)
+				break
+			}
+			e.logger.Debug("Time remaining for follow-up: %v", remaining)
+		}
+
+		followUpReq := &domain.CompletionRequest{
+			Messages:    messages,
+			Tools:       tools,
+			Temperature: temperature,
+		}
+
+		response, err = provider.CreateCompletion(execCtx, followUpReq)
+		if err != nil {
+			// Check if it's a timeout error
+			if execCtx.Err() == context.DeadlineExceeded {
+				e.logger.Warn("Context deadline exceeded during follow-up, stopping iterations")
+				response.Response += fmt.Sprintf("\n\n[Note: Stopped after %d iterations due to timeout. The result may be incomplete.]", iteration)
+				break
+			}
+			return nil, &ProviderError{
+				Provider: pc.Provider,
+				Model:    pc.Model,
+				Err:      fmt.Errorf("follow-up request failed: %w", err),
+			}
+		}
+
+		e.logger.Debug("Received follow-up response #%d: %s", iteration+1, response.Response)
+
+		iteration++
+	}
+
+	// Check if we hit max iterations with tool calls still pending
+	if iteration >= maxIterations && len(response.ToolCalls) > 0 {
+		e.logger.Warn("Reached maximum iterations (%d) but still have tool calls", maxIterations)
+		response.Response += fmt.Sprintf("\n\n[Note: The maximum number of tool call iterations (%d) was reached. The result may be incomplete.]", maxIterations)
+	}
+
+	// Extract final response
 	output := strings.TrimSpace(response.Response)
 
 	return &StepResult{

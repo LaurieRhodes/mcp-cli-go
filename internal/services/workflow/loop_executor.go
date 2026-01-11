@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
@@ -57,6 +58,12 @@ func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*
 		return nil, fmt.Errorf("loop workflow '%s' not found", loop.Workflow)
 	}
 	
+	// Check if parallel execution is enabled
+	if loop.Parallel {
+		return le.ExecuteLoopParallel(ctx, loop, workflow)
+	}
+	
+	// Sequential execution (existing logic)
 	result := &LoopResult{
 		AllOutputs: make([]string, 0),
 	}
@@ -165,7 +172,7 @@ func (le *LoopExecutor) prepareLoopInput(loop *config.LoopV2, iteration int, las
 // executeWorkflow executes a workflow and returns its final output
 func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.WorkflowV2, inputData string) (string, error) {
 	// Create sub-orchestrator
-	subLogger := NewLogger(workflow.Execution.Logging)
+	subLogger := NewLogger(workflow.Execution.Logging, false)
 	subOrchestrator := NewOrchestrator(workflow, subLogger)
 	
 	// Pass through dependencies
@@ -260,6 +267,121 @@ func (le *LoopExecutor) storeLoopResult(loop *config.LoopV2, result *LoopResult)
 	
 	// Store loop name result
 	le.interpolator.SetStepResult(loop.Name, result.FinalOutput)
+}
+
+// ExecuteLoopParallel executes loop iterations in parallel with worker pool
+func (le *LoopExecutor) ExecuteLoopParallel(ctx context.Context, loop *config.LoopV2, workflow *config.WorkflowV2) (*LoopResult, error) {
+	maxWorkers := loop.MaxWorkers
+	if maxWorkers <= 0 {
+		maxWorkers = 3 // Default: 3 concurrent workers
+	}
+	
+	le.logger.Info("Starting parallel loop: %s (max %d iterations, %d workers)", 
+		loop.Name, loop.MaxIterations, maxWorkers)
+	
+	result := &LoopResult{
+		AllOutputs: make([]string, loop.MaxIterations),
+	}
+	
+	// Channel for results
+	type iterationResult struct {
+		iteration int
+		output    string
+		err       error
+	}
+	results := make(chan iterationResult, loop.MaxIterations)
+	
+	// Semaphore for worker pool
+	sem := make(chan struct{}, maxWorkers)
+	
+	// WaitGroup to track all iterations
+	var wg sync.WaitGroup
+	
+	// Launch all iterations as goroutines
+	for iteration := 1; iteration <= loop.MaxIterations; iteration++ {
+		wg.Add(1)
+		
+		go func(iter int) {
+			defer wg.Done()
+			
+			// Acquire worker slot
+			sem <- struct{}{}
+			defer func() { <-sem }() // Release slot when done
+			
+			le.logger.Debug("Starting parallel iteration %d", iter)
+			
+			// Set loop variables for this iteration
+			le.interpolator.SetLoopVars(iter, "", nil)
+			
+			// Prepare input
+			inputData, err := le.prepareLoopInput(loop, iter, "")
+			if err != nil {
+				le.logger.Warn("Iteration %d input preparation failed: %v", iter, err)
+				if loop.OnFailure == "halt" {
+					results <- iterationResult{iteration: iter, err: err}
+					return
+				}
+				results <- iterationResult{iteration: iter, output: "", err: nil}
+				return
+			}
+			
+			// Execute workflow
+			output, err := le.executeWorkflow(ctx, workflow, inputData)
+			if err != nil {
+				le.logger.Warn("Iteration %d failed: %v", iter, err)
+				if loop.OnFailure == "halt" {
+					results <- iterationResult{iteration: iter, err: err}
+					return
+				}
+				results <- iterationResult{iteration: iter, output: "", err: nil}
+				return
+			}
+			
+			le.logger.Info("Parallel iteration %d completed", iter)
+			results <- iterationResult{iteration: iter, output: output, err: nil}
+		}(iteration)
+	}
+	
+	// Close results channel when all goroutines complete
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+	
+	// Collect results
+	successCount := 0
+	var firstError error
+	
+	for res := range results {
+		if res.err != nil && firstError == nil {
+			firstError = res.err
+			if loop.OnFailure == "halt" {
+				result.ExitReason = "failure"
+				return result, fmt.Errorf("parallel iteration %d failed: %w", res.iteration, res.err)
+			}
+		}
+		
+		if res.err == nil && res.output != "" {
+			result.AllOutputs[res.iteration-1] = res.output
+			result.FinalOutput = res.output // Last successful output
+			successCount++
+		}
+	}
+	
+	result.Iterations = successCount
+	result.ExitReason = "max_iterations"
+	
+	le.logger.Info("Parallel loop completed: %d/%d iterations successful", 
+		successCount, loop.MaxIterations)
+	
+	// Store result
+	le.storeLoopResult(loop, result)
+	
+	if firstError != nil && loop.OnFailure == "halt" {
+		return result, firstError
+	}
+	
+	return result, nil
 }
 
 // truncate truncates a string to maxLen

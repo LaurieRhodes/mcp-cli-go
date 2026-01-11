@@ -96,6 +96,7 @@ var (
 	skillNames        string
 	disableFilesystem bool
 	verbose           bool
+	logLevel          string
 	noColor           bool
 	
 	// Template-based workflow flags
@@ -212,7 +213,8 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&providerName, "provider", "p", "", "AI provider (openai, anthropic, ollama, deepseek, gemini, openrouter)")
 	RootCmd.PersistentFlags().StringVarP(&modelName, "model", "m", "", "Model to use (e.g., gpt-4o, claude-sonnet-4, qwen2.5:32b)")
 	RootCmd.PersistentFlags().BoolVar(&disableFilesystem, "disable-filesystem", false, "Disable filesystem server (prevents file access)")
-	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging (shows all internal operations)")
+	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging (shortcut for --log-level verbose)")
+	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "", "Set log level: error, warn, info, steps, debug, verbose (workflows only, default: info)")
 	RootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colored output (for piping or logging)")
 	
 	// Template-based workflow flags
@@ -229,6 +231,7 @@ func init() {
 	RootCmd.AddCommand(QueryCmd)
 	RootCmd.AddCommand(ServersCmd)
 	RootCmd.AddCommand(EmbeddingsCmd)
+	RootCmd.AddCommand(RagCmd)  // RAG operations
 	RootCmd.AddCommand(ConfigCmd)
 	RootCmd.AddCommand(InitCmd)  // Setup wizard
 	// Note: ServeCmd is added in serve.go's init() function

@@ -204,20 +204,9 @@ Examples:
 			contextContent = string(content)
 		}
 
-		// Load the configuration file to get various settings including max follow-up attempts
-		var maxToolFollowUp int
+		// Load the configuration to check for system prompt and other settings
 		oldCfg, err := config.LoadConfig(configFile)
 		if err == nil {
-			// Get the maximum tool follow-up attempts from configuration
-			// Determine the primary server name for configuration lookup
-			var primaryServerName string
-			if len(serverNames) == 1 {
-				primaryServerName = serverNames[0]
-			}
-			
-			maxToolFollowUp = oldCfg.GetMaxToolFollowUp(primaryServerName)
-			logging.Debug("Using max tool follow-up attempts from config: %d", maxToolFollowUp)
-			
 			// If system prompt is not provided through command line, check config
 			if systemPrompt == "" {
 				// First try to get a server-specific prompt if a single server is specified
@@ -237,10 +226,6 @@ Examples:
 					}
 				}
 			}
-		} else {
-			// Use default if config loading fails
-			maxToolFollowUp = 2
-			logging.Debug("Config loading failed, using default max tool follow-up attempts: %d", maxToolFollowUp)
 		}
 
 		// Check for raw data output setting in config file
@@ -295,9 +280,6 @@ Examples:
 				}
 				return fmt.Errorf("failed to initialize query: %w", err)
 			}
-
-			// Set the maximum follow-up attempts from configuration
-			handler.SetMaxFollowUpAttempts(maxToolFollowUp)
 
 			// Set context if provided
 			if contextContent != "" {

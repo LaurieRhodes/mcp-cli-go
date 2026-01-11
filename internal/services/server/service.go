@@ -357,7 +357,7 @@ func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputDa
 	// Get interface type from configuration
 	
 	// Create logger for workflow
-	logger := workflowservice.NewLogger(tmpl.Execution.Logging)
+	logger := workflowservice.NewLogger(tmpl.Execution.Logging, false)
 	
 	// Create orchestrator with workflow
 	orchestrator := workflowservice.NewOrchestrator(tmpl, logger)

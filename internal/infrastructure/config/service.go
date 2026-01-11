@@ -9,6 +9,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	domainConfig "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v3"
 )
 
 // Service implements the ConfigurationService interface
@@ -439,5 +440,40 @@ func (s *Service) MigrateConfig(legacyConfigPath string) (*domainConfig.Applicat
 		s.loader = domainConfig.NewLoader()
 	}
 	return s.loader.Load(legacyConfigPath)
+}
+
+// LoadYAMLFile loads a YAML file into the provided config structure
+func (s *Service) LoadYAMLFile(filePath string, config interface{}) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	
+	return yaml.Unmarshal(data, config)
+}
+
+// GetRagConfig returns the RAG configuration with defaults
+// RAG config is loaded via includes in the main config
+func (s *Service) GetRagConfig() *domainConfig.RagConfig {
+	// If already loaded in application config, return it
+	if s.config != nil && s.config.RAG != nil {
+		return s.config.RAG
+	}
+	
+	// Return defaults if not configured
+	return &domainConfig.RagConfig{
+		DefaultFusion: "rrf",
+		DefaultTopK:   5,
+		QueryExpansion: domainConfig.QueryExpansionSettings{
+			Enabled:       true,
+			MaxExpansions: 5,
+			CaseSensitive: false,
+		},
+		Fusion: domainConfig.FusionSettings{
+			RRF: domainConfig.RRFSettings{K: 60},
+			Weighted: domainConfig.WeightedSettings{Normalize: true},
+		},
+		Servers: make(map[string]domainConfig.RagServerConfig),
+	}
 }
 

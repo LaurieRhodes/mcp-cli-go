@@ -9,10 +9,11 @@ import (
 
 // SkillImageMapping represents the skill-to-container-image mapping configuration
 type SkillImageMapping struct {
-	DefaultImage    string                 `yaml:"default_image"`
-	Skills          map[string]string      `yaml:"skills"`
-	ContainerConfig ContainerConfig        `yaml:"container_config"`
-	ImageInfo       map[string]interface{} `yaml:"image_info,omitempty"`
+	DefaultImage       string                 `yaml:"default_image"`
+	Skills             map[string]string      `yaml:"skills"`
+	SkillNetworkModes  map[string]string      `yaml:"skill_network_modes,omitempty"`
+	ContainerConfig    ContainerConfig        `yaml:"container_config"`
+	ImageInfo          map[string]interface{} `yaml:"image_info,omitempty"`
 }
 
 // ContainerConfig holds container runtime configuration
@@ -31,8 +32,9 @@ func LoadSkillImageMapping(path string) (*SkillImageMapping, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		// Return default mapping if file doesn't exist
 		return &SkillImageMapping{
-			DefaultImage: "python:3.11-slim",
-			Skills:       make(map[string]string),
+			DefaultImage:      "python:3.11-slim",
+			Skills:            make(map[string]string),
+			SkillNetworkModes: make(map[string]string),
 			ContainerConfig: ContainerConfig{
 				MemoryLimit: "256m",
 				CPULimit:    "0.5",
@@ -61,6 +63,9 @@ func LoadSkillImageMapping(path string) (*SkillImageMapping, error) {
 	}
 	if mapping.Skills == nil {
 		mapping.Skills = make(map[string]string)
+	}
+	if mapping.SkillNetworkModes == nil {
+		mapping.SkillNetworkModes = make(map[string]string)
 	}
 	if mapping.ContainerConfig.MemoryLimit == "" {
 		mapping.ContainerConfig.MemoryLimit = "256m"
@@ -106,4 +111,13 @@ func LoadSkillImageMappingFromSkillsDir(configFilePath string) (*SkillImageMappi
 // Tries: ./config/skills/skill-images.yaml
 func LoadSkillImageMappingDefault() (*SkillImageMapping, error) {
 	return LoadSkillImageMapping("config/skills/skill-images.yaml")
+}
+
+// GetNetworkModeForSkill returns the network mode for a given skill
+// Returns skill-specific mode if defined, otherwise the default from container_config
+func (m *SkillImageMapping) GetNetworkModeForSkill(skillName string) string {
+	if mode, exists := m.SkillNetworkModes[skillName]; exists && mode != "" {
+		return mode
+	}
+	return m.ContainerConfig.Network
 }

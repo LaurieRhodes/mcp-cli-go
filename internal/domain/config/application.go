@@ -11,6 +11,7 @@ type ApplicationConfig struct {
 	Embeddings  *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
 	Chat        *ChatConfig                  `yaml:"chat,omitempty"`
 	Skills      *SkillsConfig                `yaml:"skills,omitempty"`
+	RAG         *RagConfig                   `yaml:"rag,omitempty"`
 	Workflows   map[string]*WorkflowV2       `yaml:"-"` // Loaded separately from config/workflows/
 }
 

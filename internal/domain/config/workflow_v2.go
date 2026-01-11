@@ -32,7 +32,8 @@ type ExecutionContext struct {
 	MaxTokens   int     `yaml:"max_tokens,omitempty"`
 
 	// Execution control
-	Timeout time.Duration `yaml:"timeout,omitempty"`
+	Timeout       time.Duration `yaml:"timeout,omitempty"`
+	MaxIterations int           `yaml:"max_iterations,omitempty"`
 
 	// Logging
 	Logging string `yaml:"logging,omitempty"` // normal, verbose, noisy
@@ -60,19 +61,21 @@ type StepV2 struct {
 	Providers []ProviderFallback `yaml:"providers,omitempty"`
 
 	// Override execution context
-	Servers     []string       `yaml:"servers,omitempty"`
-	Skills      []string       `yaml:"skills,omitempty"`
-	Temperature *float64       `yaml:"temperature,omitempty"` // Pointer to detect override
-	MaxTokens   *int           `yaml:"max_tokens,omitempty"`
-	Timeout     *time.Duration `yaml:"timeout,omitempty"`
-	Logging     string         `yaml:"logging,omitempty"`
-	NoColor     *bool          `yaml:"no_color,omitempty"`
-	Input       interface{}    `yaml:"input,omitempty"`
+	Servers       []string       `yaml:"servers,omitempty"`
+	Skills        []string       `yaml:"skills,omitempty"`
+	Temperature   *float64       `yaml:"temperature,omitempty"` // Pointer to detect override
+	MaxTokens     *int           `yaml:"max_tokens,omitempty"`
+	Timeout       *time.Duration `yaml:"timeout,omitempty"`
+	MaxIterations *int           `yaml:"max_iterations,omitempty"`
+	Logging       string         `yaml:"logging,omitempty"`
+	NoColor       *bool          `yaml:"no_color,omitempty"`
+	Input         interface{}    `yaml:"input,omitempty"`
 
 	// Special modes
 	Embeddings *EmbeddingsMode `yaml:"embeddings,omitempty"`
 	Template   *TemplateMode   `yaml:"template,omitempty"`
 	Consensus  *ConsensusMode  `yaml:"consensus,omitempty"`
+	Rag        *RagMode        `yaml:"rag,omitempty"`  // RAG retrieval
 
 	// Control flow
 	If       string   `yaml:"if,omitempty"`
@@ -88,6 +91,8 @@ type LoopV2 struct {
 	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates)
 	OnFailure     string                 `yaml:"on_failure,omitempty"` // halt|continue|retry
 	Accumulate    string                 `yaml:"accumulate,omitempty"` // Store iteration results
+	Parallel      bool                   `yaml:"parallel,omitempty"`   // Enable parallel execution
+	MaxWorkers    int                    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)
 }
 
 // LoopMode defines loop execution within a step
@@ -98,6 +103,8 @@ type LoopMode struct {
 	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates)
 	OnFailure     string                 `yaml:"on_failure,omitempty"` // halt|continue|retry
 	Accumulate    string                 `yaml:"accumulate,omitempty"` // Store iteration results
+	Parallel      bool                   `yaml:"parallel,omitempty"`   // Enable parallel execution
+	MaxWorkers    int                    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)
 }
 
 
@@ -159,4 +166,29 @@ type ConsensusResult struct {
 	Agreement  float64           `json:"agreement"`
 	Votes      map[string]string `json:"votes"`
 	Confidence string            `json:"confidence"` // high, good, medium, low
+}
+
+// RagMode represents RAG retrieval execution
+type RagMode struct {
+	// Query configuration
+	Query       string    `yaml:"query"`              // Search query (supports templating)
+	QueryVector []float32 `yaml:"query_vector,omitempty"` // Pre-computed vector (optional)
+	
+	// Server configuration
+	Server  string   `yaml:"server,omitempty"`   // Single server (default: from rag config)
+	Servers []string `yaml:"servers,omitempty"`  // Multiple servers for fusion
+	
+	// Strategy configuration
+	Strategies []string `yaml:"strategies,omitempty"` // Vector strategies to use
+	TopK       int      `yaml:"top_k,omitempty"`      // Number of results (default: from config)
+	
+	// Fusion configuration
+	Fusion string `yaml:"fusion,omitempty"` // rrf, weighted, max, avg (default: from config)
+	
+	// Query expansion
+	ExpandQuery   bool `yaml:"expand_query,omitempty"`    // Enable query expansion
+	QueryVariants int  `yaml:"query_variants,omitempty"`  // Number of variants to generate
+	
+	// Output configuration
+	OutputFormat string `yaml:"output_format,omitempty"` // json, text, compact
 }

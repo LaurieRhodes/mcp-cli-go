@@ -1,0 +1,31 @@
+# RAG Search Example
+# Simple semantic search using a single strategy
+
+name: Simple RAG Search
+version: 1.0.0
+description: Search vector database using RAG with a single strategy
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
+steps:
+  - name: retrieve
+    rag:
+      query: "{{user_query}}"
+      server: pgvector
+      strategies:
+        - default
+      top_k: 5
+      expand_query: false
+      
+  - name: generate
+    llm:
+      prompt: |
+        Based on these retrieved documents:
+        
+        {{step.retrieve.results}}
+        
+        Please answer this question: {{user_query}}
+        
+        Provide a comprehensive answer based on the retrieved information.

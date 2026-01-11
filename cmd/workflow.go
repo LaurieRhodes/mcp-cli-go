@@ -20,6 +20,28 @@ import (
 	workflow "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
 )
 
+// resolveLogLevel determines the effective log level from CLI flags and workflow config
+// Priority: 1) --log-level flag, 2) --verbose flag, 3) workflow config, 4) default
+func resolveLogLevel(workflowConfigLevel string) string {
+	// Highest priority: --log-level flag
+	if logLevel != "" {
+		return logLevel
+	}
+	
+	// Second priority: --verbose flag (convert to "verbose")
+	if verbose {
+		return "verbose"
+	}
+	
+	// Third priority: workflow configuration
+	if workflowConfigLevel != "" {
+		return workflowConfigLevel
+	}
+	
+	// Default: info
+	return "info"
+}
+
 // executeWorkflow executes a workflow by name using the new v2.0 system
 func executeWorkflow() error {
 	logging.Info("Executing workflow: %s", workflowName)
@@ -53,6 +75,12 @@ func executeWorkflow() error {
 		return fmt.Errorf("workflow '%s' not found. Available workflows: %v", workflowName, available)
 	}
 	
+	// 2.5. Validate workflow structure BEFORE execution
+	if err := workflow.ValidateWorkflow(wf); err != nil {
+		return fmt.Errorf("workflow validation failed:\n%w", err)
+	}
+	logging.Debug("Workflow validation passed")
+	
 	// 3. Get input data
 	inputData, err := getInputData()
 	if err != nil {
@@ -60,7 +88,7 @@ func executeWorkflow() error {
 	}
 	
 	// 4. Collect servers needed from workflow steps
-	servers := collectServersFromWorkflow(wf)
+	servers := collectServersFromWorkflow(wf, appConfig)
 	
 	// 5. Collect skills needed from workflow steps
 	skills := collectSkillsFromWorkflow(wf)
@@ -156,8 +184,14 @@ func getInputData() (string, error) {
 }
 
 // collectServersFromWorkflow extracts all unique server names from workflow steps
-func collectServersFromWorkflow(wf *config.WorkflowV2) []string {
+func collectServersFromWorkflow(wf *config.WorkflowV2, appConfig *config.ApplicationConfig) []string {
 	serverSet := make(map[string]bool)
+	
+	// Get RAG config from already-loaded app config
+	var ragConfig *config.RagConfig
+	if appConfig != nil && appConfig.RAG != nil {
+		ragConfig = appConfig.RAG
+	}
 	
 	// Collect from execution level
 	for _, server := range wf.Execution.Servers {
@@ -166,8 +200,38 @@ func collectServersFromWorkflow(wf *config.WorkflowV2) []string {
 	
 	// Collect from steps
 	for _, step := range wf.Steps {
+		// Regular server references
 		for _, server := range step.Servers {
 			serverSet[server] = true
+		}
+		
+		// RAG step servers - need to resolve to actual MCP server names
+		if step.Rag != nil && ragConfig != nil {
+			// Helper function to resolve RAG server name to MCP server name
+			resolveRagServer := func(ragServerName string) string {
+				if ragServerConfig, exists := ragConfig.Servers[ragServerName]; exists {
+					logging.Debug("Resolved RAG server '%s' to MCP server '%s'", ragServerName, ragServerConfig.MCPServer)
+					return ragServerConfig.MCPServer
+				}
+				// If not found in RAG config, assume it's an MCP server name directly
+				logging.Debug("RAG server '%s' not in config, using as-is", ragServerName)
+				return ragServerName
+			}
+			
+			if step.Rag.Server != "" {
+				// Single server mode
+				mcpServer := resolveRagServer(step.Rag.Server)
+				if mcpServer != "" {
+					serverSet[mcpServer] = true
+				}
+			}
+			// Multi-server mode
+			for _, ragServer := range step.Rag.Servers {
+				mcpServer := resolveRagServer(ragServer)
+				if mcpServer != "" {
+					serverSet[mcpServer] = true
+				}
+			}
 		}
 	}
 	
@@ -217,11 +281,20 @@ func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, in
 	
 	// Create services
 	configService := infraConfig.NewService()
+	
+	// Load AI provider configurations (needed for embedding service)
+	// Always load config.yaml so configService has provider configs
+	_, err := configService.LoadConfig("config.yaml")
+	if err != nil {
+		return fmt.Errorf("failed to load AI provider config: %w", err)
+	}
+	
 	providerFactory := ai.NewProviderFactory()
 	embeddingService := embeddings.NewService(configService, providerFactory)
 	
-	// Create logger
-	logger := workflow.NewLogger(wf.Execution.Logging)
+	// Create logger with resolved log level
+	effectiveLogLevel := resolveLogLevel(wf.Execution.Logging)
+	logger := workflow.NewLogger(effectiveLogLevel, false) // verbose handled by resolveLogLevel
 	
 	// Create orchestrator with workflow key for directory-aware resolution
 	orchestrator := workflow.NewOrchestratorWithKey(wf, workflowKey, logger)
@@ -257,16 +330,23 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, input
 	// Execute with server connections
 	var execErr error
 	err := host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
-		// Create services
+		// Create config service and load AI provider configurations
+		// This is needed for the embedding service to work
 		configService := infraConfig.NewService()
+		_, err := configService.LoadConfig("config.yaml")
+		if err != nil {
+			return fmt.Errorf("failed to load AI provider config: %w", err)
+		}
+		
 		providerFactory := ai.NewProviderFactory()
 		embeddingService := embeddings.NewService(configService, providerFactory)
 		
 		// Create server manager
 		serverManager := NewHostServerManager(conns)
 		
-		// Create logger
-		logger := workflow.NewLogger(wf.Execution.Logging)
+		// Create logger with resolved log level
+		effectiveLogLevel := resolveLogLevel(wf.Execution.Logging)
+		logger := workflow.NewLogger(effectiveLogLevel, false) // verbose handled by resolveLogLevel
 		
 		// Create orchestrator with workflow key for directory-aware resolution
 		orchestrator := workflow.NewOrchestratorWithKey(wf, workflowKey, logger)
@@ -487,8 +567,21 @@ func (hsm *HostServerManager) ExecuteTool(ctx context.Context, toolName string, 
 			continue
 		}
 		
+		// Check both prefixed and unprefixed tool names
+		serverPrefix := conn.Name + "_"
+		serverPrefixUnderscore := strings.ReplaceAll(conn.Name, "-", "_") + "_"
+		
 		for _, tool := range toolsList {
-			if tool.Function.Name == toolName {
+			// Extract original tool name (strip server prefix if present)
+			originalName := tool.Function.Name
+			if strings.HasPrefix(originalName, serverPrefix) {
+				originalName = strings.TrimPrefix(originalName, serverPrefix)
+			} else if strings.HasPrefix(originalName, serverPrefixUnderscore) {
+				originalName = strings.TrimPrefix(originalName, serverPrefixUnderscore)
+			}
+			
+			// Match against both original name and prefixed name
+			if tool.Function.Name == toolName || originalName == toolName {
 				return adapter.ExecuteTool(ctx, toolName, arguments)
 			}
 		}
@@ -585,11 +678,35 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 		return "", fmt.Errorf("tool execution failed: %s", result.Error)
 	}
 
+	// Extract text from content blocks
 	var resultStr string
 	switch content := result.Content.(type) {
 	case string:
+		// Direct string response
 		resultStr = content
+	case []interface{}:
+		// Content blocks array (standard MCP format)
+		// Extract text from the first text-type content block
+		for _, item := range content {
+			if block, ok := item.(map[string]interface{}); ok {
+				if blockType, hasType := block["type"].(string); hasType && blockType == "text" {
+					if text, hasText := block["text"].(string); hasText {
+						resultStr = text
+						break
+					}
+				}
+			}
+		}
+		if resultStr == "" {
+			// No text content found, marshal the whole thing as fallback
+			resultBytes, err := json.Marshal(content)
+			if err != nil {
+				return "", fmt.Errorf("failed to marshal tool result: %w", err)
+			}
+			resultStr = string(resultBytes)
+		}
 	default:
+		// Unknown format, marshal it
 		resultBytes, err := json.Marshal(content)
 		if err != nil {
 			return "", fmt.Errorf("failed to marshal tool result: %w", err)

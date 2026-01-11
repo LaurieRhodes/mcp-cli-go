@@ -726,13 +726,22 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 	var skillNames []string
 	skillsFound := make(map[string]bool) // Track unique skills
 	
-	// Known skill tool names from Anthropic Skills
-	knownSkills := map[string]bool{
-		"docx": true,
-		"pdf": true,
-		"pptx": true,
-		"xlsx": true,
-		"bash_preference": true,
+	// If EnabledSkills is set, use that as the filter
+	var enabledSkillsMap map[string]bool
+	if len(m.EnabledSkills) > 0 {
+		fmt.Printf("[DEBUG] EnabledSkills filter: %v\n", m.EnabledSkills)
+		enabledSkillsMap = make(map[string]bool)
+		for _, skillName := range m.EnabledSkills {
+			// Support both hyphenated skill names and underscored tool names
+			enabledSkillsMap[skillName] = true
+			// Also add the converted form
+			if strings.Contains(skillName, "-") {
+				enabledSkillsMap[strings.ReplaceAll(skillName, "-", "_")] = true
+			} else if strings.Contains(skillName, "_") {
+				enabledSkillsMap[strings.ReplaceAll(skillName, "_", "-")] = true
+			}
+		}
+		fmt.Printf("[DEBUG] EnabledSkills map after conversion: %v\n", enabledSkillsMap)
 	}
 	
 	// Check each connected server
@@ -747,15 +756,30 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 		// Look for skill tools
 		for _, tool := range tools {
 			toolName := tool.Name
-			// Check if this is a known skill tool
-			if knownSkills[toolName] && !skillsFound[toolName] {
-				skillsFound[toolName] = true
-				// Convert tool name to display name
-				displayName := toolName
-				if toolName == "bash_preference" {
-					displayName = "bash-preference"
+			
+			logging.Debug("Checking tool '%s' from server '%s'", toolName, conn.Name)
+			
+			// If EnabledSkills is set, only include tools in that list
+			if enabledSkillsMap != nil {
+				if !enabledSkillsMap[toolName] {
+					logging.Debug("  Tool '%s' NOT in enabled skills map, skipping", toolName)
+					continue
 				}
+				logging.Debug("  Tool '%s' IS in enabled skills map", toolName)
+			}
+			
+			// Skip execute_skill_code (it's not a skill itself)
+			if toolName == "execute_skill_code" {
+				continue
+			}
+			
+			// Check if this tool is from the skills server
+			if conn.Name == "skills" && !skillsFound[toolName] {
+				skillsFound[toolName] = true
+				// Convert tool name to display name (underscore to hyphen)
+				displayName := strings.ReplaceAll(toolName, "_", "-")
 				skillNames = append(skillNames, displayName)
+				logging.Debug("  Added skill: %s (display name: %s)", toolName, displayName)
 			}
 		}
 	}

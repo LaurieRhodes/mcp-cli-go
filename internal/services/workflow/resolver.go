@@ -208,3 +208,19 @@ func (r *PropertyResolver) ResolveConsensusTimeout(
 	// Default
 	return 30 * time.Second
 }
+
+// ResolveMaxIterations resolves max iterations for agentic execution
+func (r *PropertyResolver) ResolveMaxIterations(step *config.StepV2) int {
+	// Step override
+	if step.MaxIterations != nil {
+		return *step.MaxIterations
+	}
+
+	// Execution default
+	if r.execution.MaxIterations != 0 {
+		return r.execution.MaxIterations
+	}
+
+	// Default for workflows (higher than query mode's default of 2)
+	return 10
+}

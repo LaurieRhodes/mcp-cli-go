@@ -43,7 +43,7 @@ func (n *NativeExecutor) ExecutePython(ctx context.Context, skillDir, scriptPath
 		"run",
 		"--rm",                                    // Remove container after execution
 		"--read-only",                             // Read-only root filesystem
-		"--network=none",                          // No network access
+		"--network=" + n.config.NetworkMode,       // Network mode from config
 		"--memory=" + n.config.MemoryLimit,       // Memory limit
 		"--cpus=" + n.config.CPULimit,            // CPU limit
 		"--pids-limit=100",                        // Process limit
@@ -78,7 +78,7 @@ func (n *NativeExecutor) ExecuteBash(ctx context.Context, skillDir, scriptPath s
 		"run",
 		"--rm",
 		"--read-only",
-		"--network=none",
+		"--network=" + n.config.NetworkMode,
 		"--memory=" + n.config.MemoryLimit,
 		"--cpus=" + n.config.CPULimit,
 		"--pids-limit=100",
@@ -120,16 +120,17 @@ func (n *NativeExecutor) GetInfo() string {
 // workspaceDir: read-write workspace for files and code execution
 // skillLibsDir: read-only skill directory for importing helper libraries
 func (n *NativeExecutor) ExecutePythonCode(ctx context.Context, workspaceDir, skillLibsDir, scriptPath string, args []string) (string, error) {
-	// Get the appropriate image for this skill
+	// Get the appropriate image and network mode for this skill
 	image := n.config.GetImageForSkill(skillLibsDir)
-	logging.Info("🐳 Executing skill from '%s' with image '%s'", skillLibsDir, image)
+	networkMode := n.config.GetNetworkModeForSkill(skillLibsDir)
+	logging.Info("🐳 Executing skill from '%s' with image '%s' (network: %s)", skillLibsDir, image, networkMode)
 	
 	// Build docker/podman run command with dual mounts
 	cmdArgs := []string{
 		"run",
 		"--rm",                                      // Remove container after execution
 		"--read-only",                               // Read-only root filesystem
-		"--network=none",                            // No network access
+		"--network=" + networkMode,                  // Network mode for this skill
 		"--memory=" + n.config.MemoryLimit,         // Memory limit
 		"--cpus=" + n.config.CPULimit,              // CPU limit
 		"--pids-limit=100",                          // Process limit

@@ -3,6 +3,7 @@ package workflow
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"gopkg.in/yaml.v3"
@@ -31,8 +32,11 @@ func (l *Loader) LoadFromFile(path string) (*config.WorkflowV2, error) {
 func (l *Loader) LoadFromBytes(data []byte) (*config.WorkflowV2, error) {
 	var workflow config.WorkflowV2
 
-	// Parse YAML
-	if err := yaml.Unmarshal(data, &workflow); err != nil {
+	// Parse YAML with strict mode (errors on unknown fields)
+	decoder := yaml.NewDecoder(strings.NewReader(string(data)))
+	decoder.KnownFields(true) // Enable strict mode
+	
+	if err := decoder.Decode(&workflow); err != nil {
 		return nil, fmt.Errorf("failed to parse workflow YAML: %w", err)
 	}
 

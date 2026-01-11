@@ -16,7 +16,8 @@ import (
 )
 
 // Default maximum number of follow-up attempts to avoid infinite loops
-const defaultMaxFollowUpAttempts = 2
+// Set high enough that users never hit this limit in normal usage
+const defaultMaxFollowUpAttempts = 50
 
 // QueryHandler handles query execution
 type QueryHandler struct {
@@ -64,7 +65,38 @@ func NewQueryHandler(connections []*host.ServerConnection, aiOptions *host.AIOpt
 	
 	// Use default system prompt if not provided
 	if systemPrompt == "" {
-		systemPrompt = "You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question."
+		// Check if we have skills server
+		hasSkills := false
+		for _, conn := range connections {
+			if conn.Name == "skills" || strings.Contains(conn.Name, "skill") {
+				hasSkills = true
+				break
+			}
+		}
+		
+		if hasSkills {
+			// Use skills-aware system prompt with /outputs/ directory guidance
+			systemPrompt = `You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question.
+
+IMPORTANT - Using Skills:
+Skills provide specialized capabilities through code execution. There are two ways to use skills:
+
+1. PASSIVE MODE - Load documentation and reference materials:
+   Call the skill tool directly (e.g., 'docx', 'pdf', 'pptx', 'xlsx')
+   Use this to learn about a skill's capabilities before using it.
+
+2. ACTIVE MODE - Execute code to perform tasks:
+   Call 'execute_skill_code' with skill_name parameter
+   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything.
+
+When writing code, save output files to /outputs/ directory:
+   output.save('/outputs/result.docx')  ✅ CORRECT - File persists to host
+   output.save('/workspace/result.docx') ❌ WRONG - File deleted when container exits
+   output.save('result.docx') ❌ WRONG - Defaults to /workspace/`
+		} else {
+			// Use simple system prompt for non-skills queries
+			systemPrompt = "You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question."
+		}
 	}
 	
 	// DEBUGGING: Log the exact system prompt being used
@@ -134,7 +166,38 @@ func NewQueryHandlerWithProvider(connections []*host.ServerConnection, llmProvid
 	
 	// Use default system prompt if not provided
 	if systemPrompt == "" {
-		systemPrompt = "You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question."
+		// Check if we have skills server
+		hasSkills := false
+		for _, conn := range connections {
+			if conn.Name == "skills" || strings.Contains(conn.Name, "skill") {
+				hasSkills = true
+				break
+			}
+		}
+		
+		if hasSkills {
+			// Use skills-aware system prompt with /outputs/ directory guidance
+			systemPrompt = `You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question.
+
+IMPORTANT - Using Skills:
+Skills provide specialized capabilities through code execution. There are two ways to use skills:
+
+1. PASSIVE MODE - Load documentation and reference materials:
+   Call the skill tool directly (e.g., 'docx', 'pdf', 'pptx', 'xlsx')
+   Use this to learn about a skill's capabilities before using it.
+
+2. ACTIVE MODE - Execute code to perform tasks:
+   Call 'execute_skill_code' with skill_name parameter
+   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything.
+
+When writing code, save output files to /outputs/ directory:
+   output.save('/outputs/result.docx')  ✅ CORRECT - File persists to host
+   output.save('/workspace/result.docx') ❌ WRONG - File deleted when container exits
+   output.save('result.docx') ❌ WRONG - Defaults to /workspace/`
+		} else {
+			// Use simple system prompt for non-skills queries
+			systemPrompt = "You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question."
+		}
 	}
 	
 	// DEBUGGING: Log the exact system prompt being used
@@ -164,7 +227,38 @@ func NewQueryHandlerWithInterface(connections []*host.ServerConnection, aiOption
 	
 	// Use default system prompt if not provided
 	if systemPrompt == "" {
-		systemPrompt = "You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question."
+		// Check if we have skills server
+		hasSkills := false
+		for _, conn := range connections {
+			if conn.Name == "skills" || strings.Contains(conn.Name, "skill") {
+				hasSkills = true
+				break
+			}
+		}
+		
+		if hasSkills {
+			// Use skills-aware system prompt with /outputs/ directory guidance
+			systemPrompt = `You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question.
+
+IMPORTANT - Using Skills:
+Skills provide specialized capabilities through code execution. There are two ways to use skills:
+
+1. PASSIVE MODE - Load documentation and reference materials:
+   Call the skill tool directly (e.g., 'docx', 'pdf', 'pptx', 'xlsx')
+   Use this to learn about a skill's capabilities before using it.
+
+2. ACTIVE MODE - Execute code to perform tasks:
+   Call 'execute_skill_code' with skill_name parameter
+   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything.
+
+When writing code, save output files to /outputs/ directory:
+   output.save('/outputs/result.docx')  ✅ CORRECT - File persists to host
+   output.save('/workspace/result.docx') ❌ WRONG - File deleted when container exits
+   output.save('result.docx') ❌ WRONG - Defaults to /workspace/`
+		} else {
+			// Use simple system prompt for non-skills queries
+			systemPrompt = "You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question."
+		}
 	}
 	
 	// DEBUGGING: Log the exact system prompt being used

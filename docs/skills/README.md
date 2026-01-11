@@ -65,6 +65,52 @@ Container Execution
 File persists on host
 ```
 
+## System Prompt Guidance
+
+When skills are enabled, mcp-cli automatically enhances the system prompt to guide the LLM on proper usage.
+
+### Automatic Enhancement
+
+In **chat mode** and **query mode**, when the skills server is detected, the system prompt includes:
+
+1. **Mode explanation:**
+   - **PASSIVE MODE**: Load documentation by calling skill tool directly (`docx`, `pdf`, `pptx`, `xlsx`)
+   - **ACTIVE MODE**: Execute code via `execute_skill_code` tool
+
+2. **File persistence guidance:**
+   ```
+   When writing code, save output files to /outputs/ directory:
+      output.save('/outputs/result.docx')  ✅ CORRECT - File persists to host
+      output.save('/workspace/result.docx') ❌ WRONG - File deleted when container exits
+      output.save('result.docx') ❌ WRONG - Defaults to /workspace/
+   ```
+
+### Why This Matters
+
+**Without guidance** (old behavior):
+```python
+# LLM would write:
+output_path = 'document.docx'  # Defaults to /workspace/
+prs.save(output_path)
+# ❌ File lost when container exits!
+```
+
+**With guidance** (current behavior):
+```python
+# LLM writes:
+output_path = '/outputs/document.docx'
+prs.save(output_path)
+# ✅ File persists to configured outputs directory
+```
+
+### Implementation
+
+The system prompt enhancement is implemented in:
+- Chat mode: `internal/core/chat/manager.go` (lines 71-83)
+- Query mode: `internal/services/query/handler.go` (constructor functions)
+
+Both modes detect the skills server presence and automatically inject the guidance. No configuration needed!
+
 ## Usage
 
 Skills are accessed via MCP tools:
@@ -148,4 +194,4 @@ Skills work with any MCP-compatible LLM:
 
 ---
 
-Last updated: January 6, 2026
+Last updated: January 9, 2026

@@ -2,6 +2,7 @@ package rag
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"sort"
@@ -18,6 +19,16 @@ type VectorColumnConfig struct {
 	SimilarityThreshold float64             `json:"similarity_threshold,omitempty"`
 	MaxResults       int                    `json:"max_results,omitempty"`
 	Filters          map[string]interface{} `json:"filters,omitempty"`
+}
+
+// VectorSearchConfig defines configuration for a single vector search operation
+type VectorSearchConfig struct {
+	Table               string                 `json:"table"`
+	VectorColumn        string                 `json:"vector_column"`
+	TextColumns         []string               `json:"text_columns"`
+	SimilarityThreshold float64                `json:"similarity_threshold"`
+	MaxResults          int                    `json:"max_results"`
+	Filters             map[string]interface{} `json:"filters,omitempty"`
 }
 
 // MultiVectorSearchConfig defines configuration for multi-vector search
@@ -133,7 +144,7 @@ func (mvr *MultiVectorRetriever) searchSingleVectorColumn(ctx context.Context, q
 	}
 	
 	// Create vector search configuration
-	searchConfig := &domain.VectorSearchConfig{
+	searchConfig := &VectorSearchConfig{
 		Table:               globalConfig.Table,
 		VectorColumn:        vectorCol.Name,
 		TextColumns:         globalConfig.TextColumns,
@@ -428,7 +439,7 @@ func (mvr *MultiVectorRetriever) findBestSearchTool(availableTools []domain.Tool
 	return nil, fmt.Errorf("no suitable search tool found")
 }
 
-func (mvr *MultiVectorRetriever) prepareSearchParameters(queryVector []float32, config *domain.VectorSearchConfig, tool *domain.Tool) map[string]interface{} {
+func (mvr *MultiVectorRetriever) prepareSearchParameters(queryVector []float32, config *VectorSearchConfig, tool *domain.Tool) map[string]interface{} {
 	// Convert vector to string format for database
 	vectorStr := mvr.vectorToString(queryVector)
 	
@@ -458,7 +469,7 @@ func (mvr *MultiVectorRetriever) prepareSearchParameters(queryVector []float32, 
 	return params
 }
 
-func (mvr *MultiVectorRetriever) buildVectorSearchSQL(queryVector []float32, config *domain.VectorSearchConfig) string {
+func (mvr *MultiVectorRetriever) buildVectorSearchSQL(queryVector []float32, config *VectorSearchConfig) string {
 	vectorStr := mvr.vectorToString(queryVector)
 	
 	selectColumns := strings.Join(config.TextColumns, ", ")
@@ -512,23 +523,84 @@ func (mvr *MultiVectorRetriever) parseSearchResults(rawResult, source string, te
 		return []SearchResult{}, nil
 	}
 	
-	// Simple parsing for demonstration - would need more sophisticated parsing for production
-	lines := strings.Split(strings.TrimSpace(rawResult), "\n")
+	// Parse JSON response from vector search tool
+	var searchResponse struct {
+		Success      bool                     `json:"success"`
+		Results      []map[string]interface{} `json:"results"`
+		TotalResults int                      `json:"total_results"`
+	}
+	
+	if err := json.Unmarshal([]byte(rawResult), &searchResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse search results JSON: %w", err)
+	}
+	
+	if !searchResponse.Success {
+		return nil, fmt.Errorf("search was not successful")
+	}
+	
 	var results []SearchResult
 	
-	for i, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "-") || strings.Contains(line, "identifier") {
-			continue
+	for i, item := range searchResponse.Results {
+		// Extract ID (try different field names)
+		id := fmt.Sprintf("%s_%d", source, i)
+		if itemID, ok := item["id"]; ok {
+			id = fmt.Sprintf("%v", itemID)
+		} else if identifier, ok := item["identifier"]; ok {
+			id = fmt.Sprintf("%v", identifier)
 		}
 		
-		// Create basic result structure
+		// Extract similarity/distance score
+		score := 0.5 // default
+		if similarity, ok := item["similarity"].(float64); ok {
+			score = similarity
+		} else if distance, ok := item["distance"].(float64); ok {
+			// Convert distance to similarity (smaller distance = higher similarity)
+			score = 1.0 - distance
+			if score < 0 {
+				score = 0
+			}
+		}
+		
+		// Build text content from specified text columns
+		textContent := make(map[string]interface{})
+		for _, col := range textColumns {
+			if val, ok := item[col]; ok {
+				textContent[col] = val
+			}
+		}
+		
+		// If no text columns specified or found, use all non-metadata fields
+		if len(textContent) == 0 {
+			for key, val := range item {
+				if key != "distance" && key != "similarity" && key != "id" {
+					textContent[key] = val
+				}
+			}
+		}
+		
+		// Build metadata from specified metadata columns
+		metadata := map[string]interface{}{
+			"source": source,
+			"index":  i,
+		}
+		for _, col := range metadataColumns {
+			if val, ok := item[col]; ok {
+				metadata[col] = val
+			}
+		}
+		// Also add any fields not in text columns as metadata
+		for key, val := range item {
+			if _, inText := textContent[key]; !inText && key != "distance" && key != "similarity" {
+				metadata[key] = val
+			}
+		}
+		
 		result := SearchResult{
-			ID:              fmt.Sprintf("%s_%d", source, i),
-			Text:            map[string]interface{}{"content": line},
-			Metadata:        map[string]interface{}{"source": source, "line_number": i},
-			CombinedScore:   0.8, // Placeholder - would extract from actual result
-			ComponentScores: make(map[string]float64),
+			ID:              id,
+			Text:            textContent,
+			Metadata:        metadata,
+			CombinedScore:   score,
+			ComponentScores: map[string]float64{source: score},
 			Source:          source,
 		}
 		

@@ -38,17 +38,19 @@ type ExecutorConfig struct {
 	MemoryLimit  string
 	CPULimit     string
 	OutputsDir   string      // Persistent directory for skill outputs
+	NetworkMode  string      // Network mode: "none" (default), "bridge", "host"
 	ImageMapping interface{} // Holds *skills.SkillImageMapping to avoid circular dependency
 }
 
 // DefaultConfig returns default executor configuration
 func DefaultConfig() ExecutorConfig {
 	return ExecutorConfig{
-		PythonImage: "python:3.11-alpine",
-		Timeout:     30 * time.Second,
-		MemoryLimit: "256m",
-		CPULimit:    "0.5",
-		OutputsDir:   "/media/laurie/Data/outputs",
+		PythonImage:  "python:3.11-alpine",
+		Timeout:      30 * time.Second,
+		MemoryLimit:  "256m",
+		CPULimit:     "0.5",
+		OutputsDir:   "/tmp/mcp-outputs", // Default matches settings.yaml
+		NetworkMode:  "none",              // Default: no network for security
 	}
 }
 
@@ -116,4 +118,31 @@ func isRunningInContainer() bool {
 	}
 
 	return false
+}
+
+// GetNetworkModeForSkill returns the network mode for a specific skill
+func (c *ExecutorConfig) GetNetworkModeForSkill(skillLibsDir string) string {
+	// Extract skill name from path
+	skillName := filepath.Base(skillLibsDir)
+	
+	// If no mapping, use default network mode
+	if c.ImageMapping == nil {
+		return c.NetworkMode
+	}
+	
+	// Type assert the mapping to access network mode settings
+	type networkMapper interface {
+		GetNetworkModeForSkill(string) string
+	}
+	
+	if mapper, ok := c.ImageMapping.(networkMapper); ok {
+		mode := mapper.GetNetworkModeForSkill(skillName)
+		if mode != "" {
+			logging.Debug("Skill '%s' -> NetworkMode '%s' (from mapping)", skillName, mode)
+			return mode
+		}
+	}
+	
+	logging.Debug("Skill '%s' -> NetworkMode '%s' (default)", skillName, c.NetworkMode)
+	return c.NetworkMode
 }

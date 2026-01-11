@@ -15,7 +15,7 @@ func TestCountVotes(t *testing.T) {
 		},
 	}
 
-	logger := NewLogger("normal")
+	logger := NewLogger("normal", false)
 	executor := NewExecutor(workflow, logger)
 	ce := NewConsensusExecutor(executor)
 
@@ -141,7 +141,7 @@ func TestCountVotesErrors(t *testing.T) {
 		},
 	}
 
-	logger := NewLogger("normal")
+	logger := NewLogger("normal", false)
 	executor := NewExecutor(workflow, logger)
 	ce := NewConsensusExecutor(executor)
 
@@ -233,7 +233,7 @@ func TestConsensusConfidence(t *testing.T) {
 		},
 	}
 
-	logger := NewLogger("normal")
+	logger := NewLogger("normal", false)
 	executor := NewExecutor(workflow, logger)
 	ce := NewConsensusExecutor(executor)
 
@@ -299,7 +299,7 @@ func TestConsensusExecutorCreation(t *testing.T) {
 		},
 	}
 
-	logger := NewLogger("normal")
+	logger := NewLogger("normal", false)
 	executor := NewExecutor(workflow, logger)
 	ce := NewConsensusExecutor(executor)
 
@@ -316,7 +316,7 @@ func TestProviderResultWithError(t *testing.T) {
 		},
 	}
 
-	logger := NewLogger("normal")
+	logger := NewLogger("normal", false)
 	executor := NewExecutor(workflow, logger)
 	ce := NewConsensusExecutor(executor)
 

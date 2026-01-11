@@ -5,19 +5,20 @@ import (
 	"testing"
 )
 
+// testMapper is a test implementation of the ImageMapper interface
+type testMapper struct {
+	skills       map[string]string
+	defaultImage string
+}
+
+func (tm testMapper) GetImageForSkill(skillName string) string {
+	if img, ok := tm.skills[skillName]; ok {
+		return img
+	}
+	return tm.defaultImage
+}
+
 func TestGetImageForSkill(t *testing.T) {
-	// Create a test mapper that implements the interface
-	type testMapper struct {
-		skills       map[string]string
-		defaultImage string
-	}
-	
-	func (tm testMapper) GetImageForSkill(skillName string) string {
-		if img, ok := tm.skills[skillName]; ok {
-			return img
-		}
-		return tm.defaultImage
-	}
 	
 	mapping := testMapper{
 		skills: map[string]string{

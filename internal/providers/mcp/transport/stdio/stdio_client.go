@@ -128,6 +128,21 @@ func isRealError(line string) bool {
 		return false
 	}
 	
+	// Ignore agentic loop intermediate errors (auto-corrected by follow-up iterations)
+	// These are expected during multi-turn tool execution and shouldn't alarm users
+	if strings.Contains(lowerLine, "code execution failed") ||
+	   strings.Contains(lowerLine, "invalid file paths detected") ||
+	   strings.Contains(lowerLine, "nameerror:") ||
+	   strings.Contains(lowerLine, "syntaxerror:") ||
+	   strings.Contains(lowerLine, "typeerror:") ||
+	   strings.Contains(lowerLine, "valueerror:") ||
+	   strings.Contains(lowerLine, "attributeerror:") ||
+	   strings.Contains(lowerLine, "importerror:") ||
+	   strings.Contains(lowerLine, "keyerror:") ||
+	   strings.Contains(lowerLine, "indexerror:") {
+		return false
+	}
+	
 	// These indicate actual problems (but not timeout configs)
 	return strings.Contains(lowerLine, "error:") ||
 	       strings.Contains(lowerLine, "failed:") ||

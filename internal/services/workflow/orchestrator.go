@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
@@ -58,6 +59,7 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	o.interpolator.Set("input", input)
 
 	o.logger.Info("Starting workflow: %s v%s", o.workflow.Name, o.workflow.Version)
+	o.logger.Step("\n[WORKFLOW] %s v%s", o.workflow.Name, o.workflow.Version)
 
 	// Initialize loop executor if we have appConfig and loops
 	if o.appConfig != nil && len(o.workflow.Loops) > 0 {
@@ -135,6 +137,7 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	}
 
 	o.logger.Info("Workflow completed successfully")
+	o.logger.Step("\n[SUCCESS] Workflow completed")
 	return nil
 }
 
@@ -151,27 +154,56 @@ func (o *Orchestrator) checkDependencies(step *config.StepV2, completed map[stri
 // executeStep executes a single step
 func (o *Orchestrator) executeStep(ctx context.Context, step *config.StepV2) error {
 	o.logger.Info("Executing step: %s", step.Name)
+	
+	// Track step timing for steps level logging
+	stepStart := time.Now()
+	
+	// Find step index for steps level logging
+	stepIndex := 0
+	totalSteps := len(o.workflow.Steps)
+	for i, s := range o.workflow.Steps {
+		if s.Name == step.Name {
+			stepIndex = i + 1
+			break
+		}
+	}
+	
+	o.logger.Step("\n[STEP %d/%d] %s", stepIndex, totalSteps, step.Name)
 
 	// Check condition
 	if step.If != "" {
 		if !o.evaluateIfCondition(step.If) {
 			o.logger.Info("Step skipped (condition not met)")
+			o.logger.Step("  ⊘ Skipped (condition not met)")
 			return nil
 		}
 	}
 
 	// Determine step type and execute
+	var err error
 	if step.Consensus != nil {
-		return o.executeConsensusStep(ctx, step)
+		err = o.executeConsensusStep(ctx, step)
 	} else if step.Run != "" {
-		return o.executeRegularStep(ctx, step)
+		err = o.executeRegularStep(ctx, step)
 	} else if step.Embeddings != nil {
-		return o.executeEmbeddingsStep(ctx, step)
+		err = o.executeEmbeddingsStep(ctx, step)
+	} else if step.Rag != nil {
+		err = o.executeRagStep(ctx, step)
 	} else if step.Template != nil {
-		return o.executeWorkflowStep(ctx, step)
+		err = o.executeWorkflowStep(ctx, step)
+	} else {
+		err = fmt.Errorf("no execution mode specified")
 	}
-
-	return fmt.Errorf("no execution mode specified")
+	
+	// Log step completion with timing
+	duration := time.Since(stepStart)
+	if err != nil {
+		o.logger.Step("  ✗ Failed (%.1fs): %v", duration.Seconds(), err)
+		return err
+	}
+	
+	o.logger.Step("  ✓ Completed (%.1fs)", duration.Seconds())
+	return nil
 }
 
 // executeRegularStep executes a regular (non-consensus) step
@@ -554,7 +586,7 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 	}
 	
 	// Create a new orchestrator for the sub-workflow with its key for directory context
-	subLogger := NewLogger(subWorkflow.Execution.Logging)
+	subLogger := NewLogger(subWorkflow.Execution.Logging, false)
 	subOrchestrator := NewOrchestratorWithKey(subWorkflow, subWorkflowKey, subLogger)
 	
 	// Pass through app config and server manager
@@ -618,6 +650,8 @@ func (o *Orchestrator) executeStepElement(ctx context.Context, step *config.Step
 		return o.executeConsensusStep(ctx, step)
 	} else if step.Embeddings != nil {
 		return o.executeEmbeddingsStep(ctx, step)
+	} else if step.Rag != nil {
+		return o.executeRagStep(ctx, step)
 	} else if step.Template != nil {
 		return o.executeWorkflowStep(ctx, step)
 	} else if step.Loop != nil {
@@ -756,7 +790,7 @@ func (o *Orchestrator) prepareLoopInput(with map[string]interface{}, lastOutput 
 }
 
 func (o *Orchestrator) executeLoopWorkflow(ctx context.Context, workflow *config.WorkflowV2, inputData string) (string, error) {
-	subLogger := NewLogger(workflow.Execution.Logging)
+	subLogger := NewLogger(workflow.Execution.Logging, false)
 	subOrchestrator := NewOrchestrator(workflow, subLogger)
 	
 	subOrchestrator.executor.SetAppConfig(o.executor.appConfig)
