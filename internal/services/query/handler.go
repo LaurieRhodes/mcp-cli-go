@@ -740,7 +740,7 @@ func (h *QueryHandler) executeToolCall(toolCall domain.ToolCall) (string, error)
 	logging.Debug("Calling tool %s on server %s with args: %s", toolName, serverName, string(argsJSON))
 	
 	// Execute the tool call using the tools package
-	result, err := tools.SendToolsCall(serverConn.Client, toolName, args)
+	result, err := tools.SendToolsCall(serverConn.Client, serverConn.Client.GetDispatcher(), toolName, args)
 	if err != nil {
 		return "", fmt.Errorf("tool execution error: %w", err)
 	}

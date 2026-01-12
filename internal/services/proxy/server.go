@@ -304,7 +304,7 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 	}
 	
 	// Send initialize request
-	initResult, err := initialize.SendInitialize(client)
+	initResult, err := initialize.SendInitialize(client, client.GetDispatcher())
 	if err != nil {
 		client.Stop()
 		return fmt.Errorf("failed to initialize MCP server %s: %w", serverName, err)

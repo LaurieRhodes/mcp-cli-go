@@ -383,13 +383,12 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 	
 	fmt.Printf("Calling tool '%s' on server '%s'...\n", toolName, serverName)
 	
-	result, err := tools.SendToolsCall(targetConn.Client, toolName, args)
+	result, err := tools.SendToolsCall(targetConn.Client, targetConn.Client.GetDispatcher(), toolName, args)
 	if err != nil {
 		logging.Error("Error calling tool: %v", err)
 		color.Red("Error calling tool: %v\n", err)
 		return
 	}
-	
 	// Check for errors in the result
 	if result.IsError {
 		logging.Error("Tool execution failed: %s", result.Error)

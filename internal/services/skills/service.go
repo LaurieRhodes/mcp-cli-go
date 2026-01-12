@@ -728,8 +728,15 @@ func validateCodePaths(code string) error {
 					
 					path := line[start : start+end]
 					
-					// Check if it's an absolute path not starting with /outputs/
-					if strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "/outputs/") {
+					// Check if it's an absolute path not starting with /outputs or /workspace
+					// Allow:
+					// - /outputs/ or /outputs (for writing results)
+					// - /workspace/ or /workspace (for reading inputs)
+					if strings.HasPrefix(path, "/") && 
+					   !strings.HasPrefix(path, "/outputs/") && 
+					   path != "/outputs" &&
+					   !strings.HasPrefix(path, "/workspace/") &&
+					   path != "/workspace" {
 						invalidPaths = append(invalidPaths, fmt.Sprintf("Line %d: %s", i+1, trimmed))
 					}
 				}
@@ -747,11 +754,14 @@ func validateCodePaths(code string) error {
 		}
 		errorMsg += "\n"
 		errorMsg += "✅ Correct usage:\n"
-		errorMsg += "  doc.save('/outputs/myfile.docx')  ← Saves to host /tmp/mcp-outputs/\n"
-		errorMsg += "  open('/outputs/data.txt', 'w')    ← Accessible on host\n\n"
+		errorMsg += "  Path('/outputs/mydir/file.docx')      ← Shared workflow directory\n"
+		errorMsg += "  Path('/workspace/uploaded_file.pdf')  ← Only for files uploaded in chat\n"
+		errorMsg += "  open('/outputs/data.txt', 'w')        ← Write results\n\n"
+		errorMsg += "💡 Most workflows use /outputs/ for both reading and writing.\n"
+		errorMsg += "   Only use /workspace/ for files uploaded during a conversation.\n\n"
 		errorMsg += "❌ Invalid usage:\n"
-		errorMsg += "  doc.save('/media/laurie/file.docx')  ← Not accessible in container\n"
-		errorMsg += "  doc.save('/home/user/file.docx')     ← Not accessible in container\n"
+		errorMsg += "  Path('/media/laurie/file.docx')       ← Not accessible in container\n"
+		errorMsg += "  Path('/home/user/file.docx')          ← Not accessible in container\n"
 		return fmt.Errorf(errorMsg)
 	}
 	

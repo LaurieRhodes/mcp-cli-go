@@ -21,7 +21,7 @@ const (
 	// Default timeout for tools requests
 	// This is the timeout between progress updates, not total execution time
 	// If server sends progress notifications, timeout resets on each update
-	defaultToolsTimeout = 30 * time.Second
+	defaultToolsTimeout = 120 * time.Second  // Increased from 30s for skill execution
 	
 	// Maximum total time for a single tool call (safety limit)
 	maxTotalToolCallTime = 30 * time.Minute
@@ -29,62 +29,28 @@ const (
 
 // SendToolsList sends a tools/list request to the server and returns the result
 func SendToolsList(client *stdio.StdioClient, names []string) (*ToolsListResult, error) {
-	logging.Debug("Sending tools/list request with names: %v", names)
+	logging.Debug("Sending tools/list request")
 	
-	// Create the parameters
-	params := ToolsListParams{
-		Names: names,
-	}
-
-	// Create the request message
-	requestID := fmt.Sprintf("tools_list_%d", time.Now().UnixNano())
-	request, err := messages.NewRequest(requestID, toolsListMethod, params)
+	// Create request
+	requestID := fmt.Sprintf("tools-list-%d", time.Now().UnixNano())
+	request, err := messages.NewRequest(requestID, toolsListMethod, map[string]interface{}{})
 	if err != nil {
 		logging.Error("Failed to create tools/list request: %v", err)
 		return nil, fmt.Errorf("failed to create tools/list request: %w", err)
 	}
-
-	// Send the request and wait for a response with a timeout
-	responseCh := make(chan *messages.JSONRPCMessage, 1)
-	errorCh := make(chan error, 1)
-	doneCh := make(chan struct{})
 	
-	// Set up a goroutine to read responses
-	go func() {
-		defer close(doneCh)
-		logging.Debug("Starting goroutine to listen for tools/list response")
-		
-		readCount := 0
-		for msg := range client.Read() {
-			readCount++
-			logging.Debug("Received message #%d with ID: %s", readCount, msg.ID)
-			if msg.ID.EqualsString(requestID) {
-				logging.Debug("Found matching response for request ID: %s", requestID)
-				select {
-				case responseCh <- msg:
-					// Successfully sent the response
-					return
-				default:
-					// This should never happen, but just in case
-					logging.Error("Failed to send response to channel, it might be closed")
-					return
-				}
-			} else {
-				logging.Debug("Ignoring message with non-matching ID: %s (expected: %s)", msg.ID, requestID)
-			}
-		}
-		logging.Error("Stdio client closed while waiting for tools/list response")
-		select {
-		case errorCh <- fmt.Errorf("stdio client closed while waiting for tools/list response"):
-			// Successfully sent the error
-		default:
-			// Channel might be closed or full
-			logging.Error("Failed to send error to channel, it might be closed")
-		}
-	}()
-
+	// Get dispatcher
+	dispatcher := client.GetDispatcher()
+	if dispatcher == nil {
+		return nil, fmt.Errorf("client dispatcher not initialized")
+	}
+	
+	// Register for response BEFORE sending request
+	responseCh := dispatcher.RegisterRequest(requestID)
+	defer dispatcher.UnregisterRequest(requestID) // Clean up on timeout or error
+	
 	// Send the request
-	logging.Debug("Sending tools/list request")
+	logging.Debug("Sending tools/list request with ID: %s", requestID)
 	if err := client.Write(request); err != nil {
 		logging.Error("Failed to send tools/list request: %v", err)
 		return nil, fmt.Errorf("failed to send tools/list request: %w", err)
@@ -113,18 +79,14 @@ func SendToolsList(client *stdio.StdioClient, names []string) (*ToolsListResult,
 		logging.Debug("Successfully received tools list with %d tools", len(result.Tools))
 		return &result, nil
 
-	case err := <-errorCh:
-		logging.Error("Error during tools/list: %v", err)
-		return nil, err
-
 	case <-time.After(defaultToolsTimeout):
-		logging.Error("Timed out waiting for tools/list response")
+		logging.Error("Timed out waiting for tools/list response for request %s", requestID)
+		logging.Debug("Pending requests in dispatcher: %d", dispatcher.GetPendingCount())
 		return nil, fmt.Errorf("timed out waiting for tools/list response")
 	}
 }
 
-// SendToolsCall sends a tools/call request to the server and returns the result
-func SendToolsCall(client *stdio.StdioClient, name string, arguments map[string]interface{}) (*ToolsCallResult, error) {
+func SendToolsCall(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatcher, name string, arguments map[string]interface{}) (*ToolsCallResult, error) {
 	logging.Debug("Sending tools/call request for tool: %s", name)
 	logging.Debug("Tool arguments: %+v", arguments)
 	
@@ -155,54 +117,8 @@ func SendToolsCall(client *stdio.StdioClient, name string, arguments map[string]
 		logging.Debug("Sending tools/call JSON: %s", string(requestJSON))
 	}
 
-	// Send the request and wait for a response with timeout
-	responseCh := make(chan *messages.JSONRPCMessage, 1)
-	progressCh := make(chan *messages.JSONRPCMessage, 10) // Buffer for progress notifications
-	errorCh := make(chan error, 1)
-	doneCh := make(chan struct{})
-
-	// Set up a goroutine to read responses and progress notifications
-	go func() {
-		defer close(doneCh)
-		logging.Debug("Starting goroutine to listen for tools/call response and progress")
-		
-		readCount := 0
-		for msg := range client.Read() {
-			readCount++
-			logging.Debug("Received message #%d with ID: %s, Method: %s", readCount, msg.ID, msg.Method)
-			
-			// Check if it's the final response
-			if msg.ID.EqualsString(requestID) {
-				logging.Debug("Found matching response for request ID: %s", requestID)
-				select {
-				case responseCh <- msg:
-					return
-				default:
-					logging.Error("Failed to send response to channel, it might be closed")
-					return
-				}
-			}
-			
-			// Check if it's a progress notification
-			if msg.Method == progressNotificationMethod {
-				logging.Debug("Received progress notification")
-				select {
-				case progressCh <- msg:
-					// Sent progress notification
-				default:
-					logging.Warn("Progress notification channel full, dropping notification")
-				}
-			} else {
-				logging.Debug("Ignoring message with non-matching ID: %s (expected: %s)", msg.ID, requestID)
-			}
-		}
-		logging.Error("Stdio client closed while waiting for tools/call response")
-		select {
-		case errorCh <- fmt.Errorf("stdio client closed while waiting for tools/call response"):
-		default:
-			logging.Error("Failed to send error to channel, it might be closed")
-		}
-	}()
+	// Register with dispatcher BEFORE sending request
+	responseCh := dispatcher.RegisterRequest(requestID)
 
 	// Send the request
 	logging.Debug("Sending tools/call request")
@@ -225,7 +141,6 @@ func SendToolsCall(client *stdio.StdioClient, name string, arguments map[string]
 	defer maxTimer.Stop()
 	
 	startTime := time.Now()
-	lastProgressTime := startTime
 	
 	for {
 		select {
@@ -254,48 +169,10 @@ func SendToolsCall(client *stdio.StdioClient, name string, arguments map[string]
 
 			return &result, nil
 
-		case progress := <-progressCh:
-			// Reset timeout on progress notification
-			if !timeoutTimer.Stop() {
-				select {
-				case <-timeoutTimer.C:
-				default:
-				}
-			}
-			timeoutTimer.Reset(defaultToolsTimeout)
-			
-			// Log progress information
-			if len(progress.Params) > 0 {
-				var paramsMap map[string]interface{}
-				if err := json.Unmarshal(progress.Params, &paramsMap); err == nil {
-					progressValue, hasProgress := paramsMap["progress"]
-					message, hasMessage := paramsMap["message"]
-					timeSinceLastProgress := time.Since(lastProgressTime)
-					lastProgressTime = time.Now()
-					
-					if hasProgress && hasMessage {
-						logging.Info("Progress update: %.0f%% - %v (last update: %v ago)", 
-							progressValue.(float64)*100, message, timeSinceLastProgress)
-					} else if hasProgress {
-						logging.Info("Progress update: %.0f%% (last update: %v ago)", 
-							progressValue.(float64)*100, timeSinceLastProgress)
-					} else {
-						logging.Debug("Progress notification received (last update: %v ago)", timeSinceLastProgress)
-					}
-				}
-			}
-
-		case err := <-errorCh:
-			logging.Error("Error during tools/call: %v", err)
-			return nil, err
-
 		case <-timeoutTimer.C:
 			elapsed := time.Since(startTime)
-			timeSinceProgress := time.Since(lastProgressTime)
-			logging.Error("Timed out waiting for tools/call response (no progress for %v, total time: %v)", 
-				timeSinceProgress, elapsed)
-			return nil, fmt.Errorf("timed out waiting for tools/call response after %v with no progress for %v", 
-				elapsed, timeSinceProgress)
+			logging.Error("Timed out waiting for tools/call response (total time: %v)", elapsed)
+			return nil, fmt.Errorf("timed out waiting for tools/call response after %v", elapsed)
 		
 		case <-maxTimer.C:
 			elapsed := time.Since(startTime)

@@ -27,6 +27,8 @@ type IncludeDirectives struct {
 	Embeddings string `yaml:"embeddings,omitempty"` // e.g., "config/embeddings/*.yaml"
 	Workflows  string `yaml:"workflows,omitempty"`  // e.g., "config/workflows/*.yaml"
 	Settings   string `yaml:"settings,omitempty"`   // e.g., "config/settings.yaml"
+	RAG        string `yaml:"rag,omitempty"`        // e.g., "config/rag/*.yaml"
+	Skills     string `yaml:"skills,omitempty"`     // e.g., "config/skills/*.yaml"
 }
 
 // MainConfigFile represents the main config file with optional includes
@@ -167,6 +169,13 @@ func (l *Loader) loadIncludes(includes *IncludeDirectives, result *ApplicationCo
 	if includes.Servers != "" {
 		if err := l.loadServers(includes.Servers, result); err != nil {
 			return fmt.Errorf("failed to load servers: %w", err)
+		}
+	}
+
+	// Load RAG configurations
+	if includes.RAG != "" {
+		if err := l.loadRAG(includes.RAG, result); err != nil {
+			return fmt.Errorf("failed to load RAG: %w", err)
 		}
 	}
 
@@ -488,4 +497,48 @@ func (wl *WorkflowLoader) LoadFromBytes(data []byte) (*WorkflowV2, error) {
 	}
 
 	return &workflow, nil
+}
+
+// loadRAG loads RAG server configurations from pattern
+func (l *Loader) loadRAG(pattern string, result *ApplicationConfig) error {
+	files, err := l.glob(pattern)
+	if err != nil {
+		return err
+	}
+
+	if len(files) == 0 {
+		return nil // No RAG configs found, not an error
+	}
+
+	// Initialize RAG config if nil
+	if result.RAG == nil {
+		result.RAG = &RagConfig{
+			Servers: make(map[string]RagServerConfig),
+		}
+	}
+	if result.RAG.Servers == nil {
+		result.RAG.Servers = make(map[string]RagServerConfig)
+	}
+
+	for _, file := range files {
+		data, err := os.ReadFile(file)
+		if err != nil {
+			return fmt.Errorf("failed to read RAG file %s: %w", file, err)
+		}
+
+		var ragServer struct {
+			ServerName string          `yaml:"server_name"`
+			Config     RagServerConfig `yaml:"config"`
+		}
+
+		if err := yaml.Unmarshal(data, &ragServer); err != nil {
+			return fmt.Errorf("failed to parse RAG file %s: %w", file, err)
+		}
+
+		// Merge the config fields into the server config
+		ragServer.Config.ServerName = ragServer.ServerName
+		result.RAG.Servers[ragServer.ServerName] = ragServer.Config
+	}
+
+	return nil
 }

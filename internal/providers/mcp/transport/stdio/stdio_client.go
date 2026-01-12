@@ -41,6 +41,7 @@ type StdioClient struct {
 	stderrBuffer     *bytes.Buffer  // Captures server stderr for error analysis
 	stderrMutex      sync.Mutex     // Protects stderr buffer access
 	hasRealErrors    bool           // Indicates if server reported ACTUAL errors (not just info/debug logs)
+	dispatcher       *ResponseDispatcher // Routes responses to waiting requests
 }
 
 // NewStdioClient creates a new stdio client with the given parameters
@@ -210,6 +211,10 @@ func (c *StdioClient) Start() error {
 	go c.readLoop()
 	go c.writeLoop()
 	go c.stderrLoop()
+
+	// Initialize and start the response dispatcher
+	c.dispatcher = NewResponseDispatcher(c)
+	c.dispatcher.Start()
 
 	c.initialized = true
 	return nil
@@ -521,3 +526,9 @@ func (c *StdioClient) GetSuppressStderr() bool {
 	logging.Warn("GetSuppressStderr is deprecated - stderr is now always captured")
 	return false // We always capture stderr now
 }
+
+// GetDispatcher returns the response dispatcher (for concurrent request handling)
+func (c *StdioClient) GetDispatcher() *ResponseDispatcher {
+	return c.dispatcher
+}
+

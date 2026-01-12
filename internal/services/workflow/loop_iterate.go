@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -23,6 +24,18 @@ func (le *LoopExecutor) ExecuteIterateLoop(ctx context.Context, loop *config.Loo
 	itemsSource, err := le.interpolator.Interpolate(loop.Items)
 	if err != nil {
 		return nil, fmt.Errorf("failed to interpolate items source '%s': %w", loop.Items, err)
+	}
+	
+	// Check if itemsSource is a file path (starts with file://)
+	if strings.HasPrefix(itemsSource, "file://") {
+		filePath := strings.TrimPrefix(itemsSource, "file://")
+		le.logger.Info("Loading items from file: %s", filePath)
+		fileContent, err := os.ReadFile(filePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read items file '%s': %w", filePath, err)
+		}
+		itemsSource = string(fileContent)
+		le.logger.Info("Loaded %d bytes from file", len(itemsSource))
 	}
 	
 	// Parse array from source
@@ -69,6 +82,12 @@ func (le *LoopExecutor) ExecuteIterateLoop(ctx context.Context, loop *config.Loo
 	
 	startTime := time.Now()
 	
+	// Check if parallel execution is enabled
+	if loop.Parallel {
+		return le.executeIterateLoopParallel(ctx, loop, workflow, items, result, startTime)
+	}
+	
+	// Sequential execution (existing logic)
 	// Process each item
 	for index, item := range items {
 		itemResult := le.processIterationItem(ctx, loop, workflow, index, item, result)
@@ -289,21 +308,30 @@ func (le *LoopExecutor) parseArrayInput(data string) ([]interface{}, error) {
 		return nil, fmt.Errorf("empty array input")
 	}
 	
+	le.logger.Debug("Parsing array input (length: %d, first 100 chars: %s)", len(data), truncate(data, 100))
+	
 	// Try JSON array format first (starts with '[')
 	if strings.HasPrefix(data, "[") {
+		le.logger.Debug("Attempting JSON array parse (starts with '[')")
 		if items, err := le.parseJSONArray(data); err == nil && len(items) > 0 {
 			le.logger.Debug("Parsed %d items from JSON array format", len(items))
 			return items, nil
+		} else {
+			le.logger.Debug("JSON array parse failed: %v", err)
 		}
 	}
 	
 	// Try JSONL format (one JSON object per line)
+	le.logger.Debug("Attempting JSONL parse")
 	if items, err := le.parseJSONL(data); err == nil && len(items) > 0 {
 		le.logger.Debug("Parsed %d items from JSONL format", len(items))
 		return items, nil
+	} else {
+		le.logger.Debug("JSONL parse failed: %v", err)
 	}
 	
 	// Fallback to text lines
+	le.logger.Debug("Falling back to text lines parse")
 	items := le.parseTextLines(data)
 	le.logger.Debug("Parsed %d items from text lines format", len(items))
 	return items, nil
@@ -361,4 +389,138 @@ func (le *LoopExecutor) parseTextLines(data string) []interface{} {
 	}
 	
 	return items
+}
+
+// executeIterateLoopParallel executes iterate loop with parallel processing
+func (le *LoopExecutor) executeIterateLoopParallel(
+	ctx context.Context,
+	loop *config.LoopV2,
+	workflow *config.WorkflowV2,
+	items []interface{},
+	result *config.LoopExecutionResult,
+	startTime time.Time,
+) (*config.LoopExecutionResult, error) {
+	maxWorkers := loop.MaxWorkers
+	if maxWorkers <= 0 {
+		maxWorkers = 3 // Default: 3 concurrent workers
+	}
+
+	totalItems := len(items)
+	le.logger.Info("Starting parallel iterate loop: %s (%d items, %d workers)", 
+		loop.Name, totalItems, maxWorkers)
+
+	// Result channel for collecting outputs
+	type itemResult struct {
+		index   int
+		output  string
+		success bool
+		error   string
+	}
+	results := make(chan itemResult, totalItems)
+	
+	// Semaphore to limit concurrent workers
+	sem := make(chan struct{}, maxWorkers)
+	
+	// Launch goroutines for each item
+	for index, item := range items {
+		go func(idx int, itm interface{}) {
+			// Acquire semaphore slot
+			sem <- struct{}{}
+			defer func() { <-sem }() // Release slot when done
+			
+			le.logger.Debug("Starting parallel iteration %d/%d", idx+1, totalItems)
+			
+			// Create isolated interpolator for this goroutine (avoid race conditions)
+			isolatedInterpolator := le.interpolator.Clone()
+			
+			// Create isolated loop executor with cloned interpolator
+			isolatedLE := &LoopExecutor{
+				interpolator:  isolatedInterpolator,
+				executor:      le.executor,
+				appConfig:     le.appConfig,
+				serverManager: le.serverManager,
+				logger:        le.logger,
+			}
+			
+			// Create a temporary result for this iteration (avoid race conditions)
+			tempResult := &config.LoopExecutionResult{
+				TotalItems: totalItems,
+				Succeeded:  result.Succeeded,
+				Failed:     result.Failed,
+			}
+			
+			// Process the item with isolated executor
+			itemRes := isolatedLE.processIterationItem(ctx, loop, workflow, idx, itm, tempResult)
+			
+			// Send result
+			results <- itemResult{
+				index:   idx,
+				output:  itemRes.Output,
+				success: itemRes.Success,
+				error:   itemRes.Error,
+			}
+		}(index, item)
+	}
+	
+	// Collect results (maintain order)
+	collectedResults := make([]itemResult, totalItems)
+	for i := 0; i < totalItems; i++ {
+		res := <-results
+		collectedResults[res.index] = res
+		le.logger.Debug("Collected result %d/%d (success: %v)", i+1, totalItems, res.success)
+	}
+	close(results)
+	
+	// Process collected results in order
+	for idx, res := range collectedResults {
+		if res.success {
+			result.Succeeded++
+			result.AllOutputs = append(result.AllOutputs, res.output)
+		} else {
+			result.Failed++
+			result.FailedItems = append(result.FailedItems, idx)
+			
+			// Check if we should halt on failure
+			if loop.OnFailure == "halt" {
+				result.ExitReason = "failure"
+				result.Duration = time.Since(startTime)
+				result.Success = false
+				return result, fmt.Errorf("iteration %d failed, halting: %s", idx, res.error)
+			}
+		}
+	}
+	
+	// Calculate final result
+	result.Duration = time.Since(startTime)
+	result.Iterations = result.Succeeded + result.Failed + result.Skipped
+	
+	// Set final output
+	if len(result.AllOutputs) > 0 {
+		result.FinalOutput = result.AllOutputs[len(result.AllOutputs)-1]
+	} else {
+		result.FinalOutput = ""
+	}
+	
+	// Check success rate
+	if loop.MinSuccessRate > 0 {
+		result.Success = result.CheckSuccessRate(loop.MinSuccessRate)
+		if !result.Success {
+			result.ExitReason = "success_rate_not_met"
+			actualRate := float64(result.Succeeded) / float64(result.TotalItems)
+			le.logger.Warn("Parallel loop failed: success rate %.2f%% < required %.2f%%", 
+				actualRate*100, loop.MinSuccessRate*100)
+		} else {
+			result.ExitReason = "completed"
+		}
+	} else {
+		result.Success = true
+		result.ExitReason = "completed"
+	}
+	
+	le.logger.Info("Loop completed: %d/%d succeeded (%.1f%%), %d failed, duration: %v",
+		result.Succeeded, result.TotalItems, 
+		float64(result.Succeeded)/float64(result.TotalItems)*100,
+		result.Failed, result.Duration)
+	
+	return result, nil
 }

@@ -146,3 +146,5 @@ func (i *Interpolator) SetIterateLoopVars(index int, item interface{}, totalItem
 		}
 	}
 }
+
+// Clone creates a deep copy of the interpolator

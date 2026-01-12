@@ -139,7 +139,7 @@ func (h *ToolHandler) executeMCPTool(vars map[string]string) (string, error) {
 	}
 
 	// Call the MCP tool
-	result, err := tools.SendToolsCall(server.Client, h.tool.MCPTool, args)
+	result, err := tools.SendToolsCall(server.Client, server.Client.GetDispatcher(), h.tool.MCPTool, args)
 	if err != nil {
 		return "", fmt.Errorf("MCP tool call failed: %w", err)
 	}

@@ -132,47 +132,49 @@ func (e *Executor) executeWithProvider(
 			}
 			
 			e.logger.Info("Got %d tools from server '%s'", len(serverTools), serverName)
-			tools = append(tools, serverTools...)
-		}
-		
-		// Filter tools by skill names if specified
-		if len(step.Skills) > 0 {
-			e.logger.Info("Filtering to skills: %v", step.Skills)
 			
-			// Create a map of allowed skill names
-			allowedSkills := make(map[string]bool)
-			for _, skillName := range step.Skills {
-				allowedSkills[skillName] = true
-			}
-			
-			// Always allow execute_skill_code when skills are specified
-			allowedSkills["execute_skill_code"] = true
-			
-			e.logger.Info("Allowed skills map: %v", allowedSkills)
-			
-			// Filter tools
-			filteredTools := make([]domain.Tool, 0)
-			for _, tool := range tools {
-				toolName := tool.Function.Name
+			// Apply skill filtering ONLY to tools from 'skills' server
+			if serverName == "skills" && len(step.Skills) > 0 {
+				e.logger.Info("Filtering skills server tools to: %v", step.Skills)
 				
-				// Strip server prefix (format is "servername_toolname")
-				// Use Index (first underscore) not LastIndex to handle tool names with underscores
-				unprefixedName := toolName
-				if idx := strings.Index(toolName, "_"); idx > 0 {
-					unprefixedName = toolName[idx+1:]
+				// Create a map of allowed skill names
+				allowedSkills := make(map[string]bool)
+				for _, skillName := range step.Skills {
+					allowedSkills[skillName] = true
 				}
 				
-				// Check if this tool is an allowed skill or execute_skill_code
-				if allowedSkills[unprefixedName] {
-					filteredTools = append(filteredTools, tool)
-					e.logger.Info("  ✓ MATCHED: '%s' (unprefixed: '%s')", toolName, unprefixedName)
-				} else {
-					e.logger.Debug("  ✗ SKIPPED: '%s' (unprefixed: '%s')", toolName, unprefixedName)
+				// Always allow execute_skill_code when skills are specified
+				allowedSkills["execute_skill_code"] = true
+				
+				e.logger.Info("Allowed skills map: %v", allowedSkills)
+				
+				// Filter ONLY skills server tools
+				filteredTools := make([]domain.Tool, 0)
+				for _, tool := range serverTools {
+					toolName := tool.Function.Name
+					
+					// Strip server prefix (format is "servername_toolname")
+					unprefixedName := toolName
+					if idx := strings.Index(toolName, "_"); idx > 0 {
+						unprefixedName = toolName[idx+1:]
+					}
+					
+					// Check if this tool is an allowed skill or execute_skill_code
+					if allowedSkills[unprefixedName] {
+						filteredTools = append(filteredTools, tool)
+						e.logger.Info("  ✓ MATCHED: '%s' (unprefixed: '%s')", toolName, unprefixedName)
+					} else {
+						e.logger.Debug("  ✗ SKIPPED: '%s' (unprefixed: '%s')", toolName, unprefixedName)
+					}
 				}
+				
+				e.logger.Info("Filtered skills server to %d tools (was %d)", len(filteredTools), len(serverTools))
+				tools = append(tools, filteredTools...)
+			} else {
+				// For non-skills servers (pgvector, etc.), add ALL tools
+				e.logger.Info("Adding all %d tools from non-skills server '%s'", len(serverTools), serverName)
+				tools = append(tools, serverTools...)
 			}
-			
-			e.logger.Info("Filtered to %d tools (was %d)", len(filteredTools), len(tools))
-			tools = filteredTools
 		}
 	}
 
@@ -252,6 +254,7 @@ The /outputs/ directory is the ONLY location where files persist after execution
 
 	// Agentic loop - handle tool calls
 	iteration := 0
+	var lastValidResponse *domain.CompletionResponse = response  // Keep track of last valid response
 	for iteration < maxIterations {
 		// Check if we have tool calls
 		if len(response.ToolCalls) == 0 {
@@ -311,7 +314,7 @@ The /outputs/ directory is the ONLY location where files persist after execution
 			remaining := time.Until(deadline)
 			if remaining < 30*time.Second {
 				e.logger.Warn("Insufficient time remaining (%v) for follow-up request, stopping iterations", remaining)
-				response.Response += fmt.Sprintf("\n\n[Note: Stopped after %d iterations due to timeout constraints. The result may be incomplete.]", iteration)
+				// Return the current response without modification since we're breaking
 				break
 			}
 			e.logger.Debug("Time remaining for follow-up: %v", remaining)
@@ -328,7 +331,8 @@ The /outputs/ directory is the ONLY location where files persist after execution
 			// Check if it's a timeout error
 			if execCtx.Err() == context.DeadlineExceeded {
 				e.logger.Warn("Context deadline exceeded during follow-up, stopping iterations")
-				response.Response += fmt.Sprintf("\n\n[Note: Stopped after %d iterations due to timeout. The result may be incomplete.]", iteration)
+				// Use last valid response
+				response = lastValidResponse
 				break
 			}
 			return nil, &ProviderError{
@@ -337,6 +341,9 @@ The /outputs/ directory is the ONLY location where files persist after execution
 				Err:      fmt.Errorf("follow-up request failed: %w", err),
 			}
 		}
+
+		// Update last valid response
+		lastValidResponse = response
 
 		e.logger.Debug("Received follow-up response #%d: %s", iteration+1, response.Response)
 

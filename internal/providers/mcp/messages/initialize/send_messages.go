@@ -28,7 +28,7 @@ var DefaultClientInfo = ClientInfo{
 }
 
 // SendInitialize sends an initialize request to the server and returns the result
-func SendInitialize(client *stdio.StdioClient) (*InitializeResult, error) {
+func SendInitialize(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatcher) (*InitializeResult, error) {
 	logging.Info("Initializing MCP server connection")
 	
 	// Create initialize parameters
@@ -55,24 +55,8 @@ func SendInitialize(client *stdio.StdioClient) (*InitializeResult, error) {
 	
 	logging.Debug("Created initialize request with ID: %s", requestID)
 
-	// Send the request and wait for a response with a timeout
-	responseCh := make(chan *messages.JSONRPCMessage, 1)
-	errorCh := make(chan error, 1)
-
-	// Set up a goroutine to read responses
-	go func() {
-		logging.Debug("Starting goroutine to listen for initialize response")
-		for msg := range client.Read() {
-			logging.Debug("Received message with ID: %s", msg.ID)
-			if msg.ID.EqualsString(requestID) {
-				logging.Debug("Found matching response for request ID: %s", requestID)
-				responseCh <- msg
-				return
-			}
-		}
-		logging.Error("Stdio client closed while waiting for initialize response")
-		errorCh <- fmt.Errorf("stdio client closed while waiting for initialize response")
-	}()
+	// Register with dispatcher BEFORE sending request
+	responseCh := dispatcher.RegisterRequest(requestID)
 
 	// Send the request
 	logging.Debug("Sending initialize request")
@@ -108,10 +92,6 @@ func SendInitialize(client *stdio.StdioClient) (*InitializeResult, error) {
 			result.Capabilities.ProvidesResources)
 
 		return &result, nil
-
-	case err := <-errorCh:
-		logging.Error("Error during initialize: %v", err)
-		return nil, err
 
 	case <-time.After(defaultInitializeTimeout):
 		logging.Error("Timed out waiting for initialize response")

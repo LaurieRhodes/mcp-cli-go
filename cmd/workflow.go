@@ -3,10 +3,13 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
@@ -321,6 +324,21 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, input
 		logging.Info("Skills filter enabled: %v", skills)
 	}
 	
+	// Create context with cancellation for clean shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	
+	// Setup signal handler for Ctrl+C / SIGTERM
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	
+	// Goroutine to handle signals
+	go func() {
+		sig := <-sigChan
+		logging.Info("Received signal %v - shutting down gracefully...", sig)
+		cancel() // Cancel context to trigger cleanup
+	}()
+	
 	// Mark all servers as user-specified
 	userSpecified := make(map[string]bool)
 	for _, server := range servers {
@@ -357,9 +375,13 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, input
 		orchestrator.SetServerManager(serverManager)
 		orchestrator.SetEmbeddingService(embeddingService)
 		
-		// Execute
-		ctx := context.Background()
+		// Execute with cancellable context
 		if err := orchestrator.Execute(ctx, inputData); err != nil {
+			// Check if error is due to cancellation
+			if errors.Is(err, context.Canceled) {
+				logging.Info("Workflow execution cancelled by user")
+				return fmt.Errorf("workflow cancelled")
+			}
 			execErr = handleWorkflowError(wf.Name, err)
 			return execErr
 		}
@@ -669,7 +691,7 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 
 	logging.Debug("Executing tool %s (actual: %s) on server %s", toolName, actualToolName, hsa.connection.Name)
 
-	result, err := tools.SendToolsCall(hsa.connection.Client, actualToolName, arguments)
+	result, err := tools.SendToolsCall(hsa.connection.Client, hsa.connection.Client.GetDispatcher(), actualToolName, arguments)
 	if err != nil {
 		return "", fmt.Errorf("MCP tool execution failed for %s: %w", actualToolName, err)
 	}

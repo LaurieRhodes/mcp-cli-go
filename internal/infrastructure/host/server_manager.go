@@ -89,7 +89,7 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig config.S
 
 	// Send initialize request
 	logging.Debug("Sending initialize request to server: %s", serverName)
-	initResult, err := initialize.SendInitialize(client)
+	initResult, err := initialize.SendInitialize(client, client.GetDispatcher())
 	if err != nil {
 		logging.Error("Failed to initialize server %s: %v", serverName, err)
 		client.Stop()

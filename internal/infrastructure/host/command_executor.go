@@ -51,8 +51,8 @@ func RunCommand(commandFunc func([]*ServerConnection) error, configFile string, 
 func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFile string, serverNames []string, userSpecified map[string]bool, options *CommandOptions) error {
 	logging.Info("Running command with servers: %v", serverNames)
 	
-	// Create a context that can be cancelled - use a longer timeout for chat mode
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	// Create a context that can be cancelled - use 30 minute timeout for workflow execution
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 
 	// Create the server manager with appropriate options
