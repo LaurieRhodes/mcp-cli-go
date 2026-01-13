@@ -222,6 +222,14 @@ func (d *DooDockerExecutor) ExecutePythonCode(ctx context.Context, workspaceDir,
 	return d.executeCodeInContainer(ctx, workspaceDir, skillLibsDir, image, "python", scriptPath, args)
 }
 
+// ExecuteBashCode runs Bash code with dual mount support
+// workspaceDir: read-write workspace for files and code execution
+// skillLibsDir: read-only skill directory (for future bash libraries)
+func (d *DooDockerExecutor) ExecuteBashCode(ctx context.Context, workspaceDir, skillLibsDir, scriptPath string, args []string) (string, error) {
+	image := d.config.GetImageForSkill(skillLibsDir)
+	return d.executeCodeInContainer(ctx, workspaceDir, skillLibsDir, image, "bash", scriptPath, args)
+}
+
 // executeCodeInContainer handles container execution with dual mounts
 func (d *DooDockerExecutor) executeCodeInContainer(
 	ctx context.Context,

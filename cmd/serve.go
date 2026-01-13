@@ -296,13 +296,13 @@ Claude Desktop Configuration:
 						},
 						"language": map[string]interface{}{
 							"type":        "string",
-							"enum":        []string{"python"},
-							"description": "Programming language (currently only 'python' supported)",
+							"enum":        []string{"python", "bash"},
+							"description": "Programming language ('python' or 'bash')",
 							"default":     "python",
 						},
 						"code": map[string]interface{}{
 							"type":        "string",
-							"description": "Python code to execute. Can import from 'scripts' module to use skill helper libraries.",
+							"description": "Code to execute (Python or Bash). Can import from 'scripts' module to use skill helper libraries.",
 						},
 						"files": map[string]interface{}{
 							"type":        "object",

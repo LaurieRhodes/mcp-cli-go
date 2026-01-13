@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -208,6 +209,9 @@ func (ce *ConsensusExecutor) countVotes(
 			normalized := normalizeOutput(r.Output)
 			votes[r.Provider+"/"+r.Model] = r.Output // Store original
 			counts[normalized]++
+			
+			// Log what each provider voted (for debugging)
+			ce.logger.Info("Provider %s/%s normalized vote: %s", r.Provider, r.Model, normalized)
 		}
 	}
 
@@ -281,14 +285,27 @@ func (ce *ConsensusExecutor) countVotes(
 }
 
 // normalizeOutput normalizes output for comparison
+// For validation steps, extracts SUCCESS or FAIL keywords
 func normalizeOutput(output string) string {
 	// Trim whitespace
-	normalized := output
-	
-	// Remove common whitespace
-	normalized = removeExtraWhitespace(normalized)
+	output = strings.TrimSpace(output)
 	
 	// Convert to uppercase for case-insensitive comparison
+	outputUpper := strings.ToUpper(output)
+	
+	// For validation outputs, extract SUCCESS or FAIL
+	// Check for SUCCESS (but not if FAIL is also present, which would indicate FAIL)
+	if strings.Contains(outputUpper, "SUCCESS") && !strings.Contains(outputUpper, "FAIL") {
+		return "SUCCESS"
+	}
+	
+	// Check for FAIL
+	if strings.Contains(outputUpper, "FAIL") {
+		return "FAIL"
+	}
+	
+	// For other consensus outputs, normalize the entire string
+	normalized := removeExtraWhitespace(output)
 	normalized = toUpperCase(normalized)
 	
 	return normalized

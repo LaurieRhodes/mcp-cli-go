@@ -857,9 +857,9 @@ func (s *Service) ExecuteCode(request *skills.CodeExecutionRequest) (*skills.Exe
 		return nil, fmt.Errorf("code execution not available (Docker/Podman not found)")
 	}
 	
-	// Only Python supported for now
-	if request.Language != "python" {
-		return nil, fmt.Errorf("language '%s' not supported (only 'python' currently)", request.Language)
+	// Validate language
+	if request.Language != "python" && request.Language != "bash" {
+		return nil, fmt.Errorf("language '%s' not supported (supported: 'python', 'bash')", request.Language)
 	}
 	
 	// Create temporary workspace
@@ -891,6 +891,10 @@ func (s *Service) ExecuteCode(request *skills.CodeExecutionRequest) (*skills.Exe
 	var scriptPath string
 	if request.Language == "python" {
 		scriptPath = "script.py"
+	} else if request.Language == "bash" {
+		scriptPath = "script.sh"
+	} else {
+		return nil, fmt.Errorf("unsupported language: %s", request.Language)
 	}
 	
 	codeFilePath := filepath.Join(workspaceDir, scriptPath)
@@ -925,6 +929,16 @@ func (s *Service) ExecuteCode(request *skills.CodeExecutionRequest) (*skills.Exe
 			scriptPath,            // script path relative to workspace
 			nil,                   // no args
 		)
+	} else if request.Language == "bash" {
+		output, err = s.executor.ExecuteBashCode(
+			ctx,
+			workspaceDir,          // workspace (read-write)
+			skill.DirectoryPath,   // skill libs (read-only)
+			scriptPath,            // script path relative to workspace
+			nil,                   // no args
+		)
+	} else {
+		return nil, fmt.Errorf("unsupported language: %s", request.Language)
 	}
 	
 	duration := time.Since(startTime).Milliseconds()
@@ -1076,12 +1090,16 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 	// Add execute_skill_code tool for dynamic code execution
 	executeCodeTool := map[string]interface{}{
 		"name": "execute_skill_code",
-		"description": "[SKILL CODE EXECUTION] Execute code with access to a skill's helper libraries and specialized capabilities. " +
-			"The code executes in a sandboxed container with the skill's scripts and dependencies available. " +
-			"\n\n**CRITICAL FILE PATHS:** All output files MUST be saved to /outputs/ directory (e.g., result.save('/outputs/file.ext')). " +
-			"This is the ONLY writable location that persists to the host. Files saved elsewhere will be lost. " +
-			"\n\n**Usage:** Load the skill first (passive mode) to see its documentation, capabilities, and available libraries. " +
-			"The skill documentation explains what language, libraries, and helper scripts are available.",
+		"description": "[SKILL CODE EXECUTION] Execute code with access to a skill's helper libraries. " +
+			"Code executes in a sandboxed container with the skill's scripts and dependencies. " +
+			"\n\n**CRITICAL FILE PATHS - READ THIS CAREFULLY:**" +
+			"\n• INPUT files: Read from /outputs/ directory (e.g., /outputs/document_parsing_test/policy.xml)" +
+			"\n• OUTPUT files: Write to /outputs/ directory (e.g., /outputs/ism_assessment_full_v2/results.json)" +
+			"\n• /outputs/ is the ONLY directory that persists between workflow steps" +
+			"\n• NEVER use /workspace/ - it's temporary and gets deleted after execution" +
+			"\n• Files in /workspace/ will NOT be accessible to other workflow steps" +
+			"\n\n**Usage:** Load the skill first (passive mode) to see documentation and available libraries. " +
+			"The skill documentation explains language, libraries, and helper scripts available.",
 		"template": "execute_skill_code", // Special marker for this tool
 		"input_schema": map[string]interface{}{
 			"type": "object",
@@ -1092,13 +1110,13 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 				},
 				"language": map[string]interface{}{
 					"type":        "string",
-					"enum":        []string{"python"},
-					"description": "Programming language (currently only 'python' supported)",
+					"enum":        []string{"python", "bash"},
+					"description": "Programming language ('python' or 'bash')",
 					"default":     "python",
 				},
 				"code": map[string]interface{}{
 					"type":        "string",
-					"description": "Python code to execute. IMPORTANT: Save all files to /outputs/ directory only. Example: doc.save('/outputs/file.docx')",
+					"description": "Code to execute (Python or Bash). IMPORTANT: Save all files to /outputs/ directory only. Example: doc.save('/outputs/file.docx')",
 				},
 				"files": map[string]interface{}{
 					"type":        "object",

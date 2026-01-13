@@ -26,6 +26,11 @@ type Executor interface {
 	// workspaceDir: read-write workspace for files and code execution
 	// skillLibsDir: read-only skill directory for importing helper libraries
 	ExecutePythonCode(ctx context.Context, workspaceDir, skillLibsDir, scriptPath string, args []string) (string, error)
+	
+	// ExecuteBashCode runs Bash code with dual mount support
+	// workspaceDir: read-write workspace for files and code execution
+	// skillLibsDir: read-only skill directory (for future bash libraries)
+	ExecuteBashCode(ctx context.Context, workspaceDir, skillLibsDir, scriptPath string, args []string) (string, error)
 
 	// GetInfo returns executor information
 	GetInfo() string

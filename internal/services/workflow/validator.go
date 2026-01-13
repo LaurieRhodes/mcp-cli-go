@@ -138,6 +138,12 @@ func (v *WorkflowValidator) validateLoopMode(step *config.StepV2) {
 		v.addError(step.Name, "loop.max_workers", "max_workers must be > 0 when parallel is true",
 			"Set max_workers to control concurrency (e.g., max_workers: 3)")
 	}
+	
+	// Validate variable syntax in items
+	if step.Loop.Items != "" {
+		v.validateVariableSyntax(step, "loop.items", step.Loop.Items)
+		v.validateLoopVariables(step)
+	}
 }
 
 // validateConsensusMode validates consensus execution mode
@@ -164,6 +170,10 @@ func (v *WorkflowValidator) validateRagMode(step *config.StepV2) {
 		v.addError(step.Name, "rag.query", "RAG query is required",
 			"Specify the search query for RAG retrieval")
 	}
+	
+	// Validate variable syntax in query
+	v.validateVariableSyntax(step, "rag.query", step.Rag.Query)
+	v.validateRagVariables(step)
 }
 
 // validateDependencies validates step dependencies exist

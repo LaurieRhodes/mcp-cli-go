@@ -259,12 +259,35 @@ func (o *Orchestrator) executeConsensusStep(ctx context.Context, step *config.St
 	o.stepResults[step.Name] = result.Result
 	o.interpolator.SetStepResult(step.Name, result.Result)
 
-	// Output consensus details
+	// Output consensus details with individual votes
 	o.logger.Output("Step %s consensus result: %s", step.Name, result.Result)
 	o.logger.Output("  Agreement: %.0f%%, Confidence: %s", result.Agreement*100, result.Confidence)
+	
+	// Show individual provider votes for transparency
+	if len(result.Votes) > 0 {
+		o.logger.Output("  Provider votes:")
+		for provider, vote := range result.Votes {
+			o.logger.Output("    - %s: %s", provider, vote)
+		}
+	}
 
 	if !result.Success {
 		return fmt.Errorf("consensus failed to reach agreement")
+	}
+
+	// Check validation result (for validation steps using SUCCESS/FAIL)
+	// If the step name contains "validate", check if the result is SUCCESS
+	if strings.Contains(step.Name, "validate") {
+		// Strip markdown formatting and normalize
+		cleaned := strings.TrimSpace(result.Result)
+		cleaned = strings.ReplaceAll(cleaned, "**", "")  // Remove bold
+		cleaned = strings.ReplaceAll(cleaned, "*", "")   // Remove italic
+		cleaned = strings.ReplaceAll(cleaned, "`", "")   // Remove code
+		resultUpper := strings.ToUpper(cleaned)
+		
+		if resultUpper != "SUCCESS" {
+			return fmt.Errorf("validation failed: %s", result.Result)
+		}
 	}
 
 	return nil
