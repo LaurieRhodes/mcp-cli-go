@@ -8,7 +8,7 @@ import (
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	domainConfig "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
-	"github.com/joho/godotenv"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/env"
 	"gopkg.in/yaml.v3"
 )
 
@@ -33,16 +33,17 @@ func getExecutableDir() string {
 	return filepath.Dir(exe)
 }
 
-// loadEnvFile loads .env file from the config directory
+// loadEnvFile loads .env file from the config directory or executable directory
+// This is called during config loading to ensure env vars are available
 func (s *Service) loadEnvFile(configPath string) error {
-	// Determine directory to search for .env
-	configDir := filepath.Dir(configPath)
+	store := env.GetStore()
 	
-	// Try .env in config directory
+	// Try .env in config directory first
+	configDir := filepath.Dir(configPath)
 	envPath := filepath.Join(configDir, ".env")
 	if _, err := os.Stat(envPath); err == nil {
-		if err := godotenv.Load(envPath); err != nil {
-			return fmt.Errorf("failed to load .env file: %w", err)
+		if _, err := store.LoadFromFile(envPath); err != nil {
+			return fmt.Errorf("failed to load .env file from config dir: %w", err)
 		}
 		return nil
 	}
@@ -51,8 +52,8 @@ func (s *Service) loadEnvFile(configPath string) error {
 	execDir := getExecutableDir()
 	envPath = filepath.Join(execDir, ".env")
 	if _, err := os.Stat(envPath); err == nil {
-		if err := godotenv.Load(envPath); err != nil {
-			return fmt.Errorf("failed to load .env file: %w", err)
+		if _, err := store.LoadFromFile(envPath); err != nil {
+			return fmt.Errorf("failed to load .env file from executable dir: %w", err)
 		}
 		return nil
 	}
@@ -64,6 +65,7 @@ func (s *Service) loadEnvFile(configPath string) error {
 // expandEnvVars expands environment variables in a string
 // Supports ${VAR_NAME} and $VAR_NAME formats
 // Only expands if the string looks like an environment variable reference
+// Uses secure env store first, then falls back to system environment
 func expandEnvVars(s string) string {
 	// Don't expand if empty
 	if s == "" {
@@ -79,7 +81,8 @@ func expandEnvVars(s string) string {
 		return s
 	}
 	
-	return os.ExpandEnv(s)
+	// Use our secure env expansion which checks .env store first
+	return env.ExpandEnv(s)
 }
 
 // expandEnvVarsInConfig recursively expands environment variables in the config

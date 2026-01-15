@@ -11,6 +11,7 @@ The workflow schema documentation has been reorganized for better clarity:
 ### 📚 Start Here
 
 **[Quick Reference →](QUICK_REFERENCE.md)**
+
 - One-page cheatsheet
 - Complete object schemas
 - Common patterns
@@ -21,24 +22,28 @@ The workflow schema documentation has been reorganized for better clarity:
 ### 📖 Detailed References
 
 **[Object Model →](OBJECT_MODEL.md)**
+
 - TypeScript-style interfaces
 - Type hierarchy
 - Validation rules
 - Best for: Understanding the type system
 
 **[Inheritance Guide →](INHERITANCE_GUIDE.md)**
+
 - Visual property flow diagrams
 - Override precedence
 - Provider failover
 - Best for: Understanding configuration inheritance
 
 **[Steps Reference →](STEPS_REFERENCE.md)**
+
 - All execution modes (run, template, embeddings, consensus)
 - Variable interpolation
 - Dependencies and conditions
 - Best for: Learning step capabilities
 
 **[CLI Mapping →](CLI_MAPPING.md)**
+
 - Property → CLI argument mapping
 - Execution mode equivalents
 - Best for: Understanding YAML ↔ CLI relationship

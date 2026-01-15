@@ -1,16 +1,28 @@
 package cmd
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/services/rag"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 )
 
 // RAG command flags
 var (
-	ragShowConfig bool
+	ragShowConfig  bool
+	ragServer      string
+	ragStrategies  []string
+	ragTopK        int
+	ragFusion      string
+	ragExpandQuery bool
 )
 
 // RagCmd represents the rag command
@@ -22,14 +34,12 @@ var RagCmd = &cobra.Command{
 RAG enables semantic search across vector databases connected via MCP.
 Supports multi-strategy search, query expansion, and result fusion.
 
-Primary usage is through workflows. See examples/rag/ for workflow examples.
-
 Examples:
   # Show RAG configuration
   mcp-cli rag config
   
-  # Use RAG in workflows
-  mcp-cli workflow run examples/rag/search.yaml`,
+  # Search directly
+  mcp-cli rag search "What are the MFA requirements?"`,
 }
 
 // RagConfigCmd shows RAG configuration
@@ -40,41 +50,48 @@ var RagConfigCmd = &cobra.Command{
 	RunE:  executeRagConfig,
 }
 
-// RagSearchCmd shows how to use RAG search
+// RagSearchCmd performs RAG search
 var RagSearchCmd = &cobra.Command{
-	Use:   "search",
-	Short: "Show how to use RAG search (via workflows)",
-	Long: `RAG search is primarily used through workflows for maximum flexibility.
+	Use:   "search [query]",
+	Short: "Search using RAG",
+	Long: `Perform a RAG search against configured vector databases.
 
-Direct search support will be added in a future release.
+RAG (Retrieval-Augmented Generation) uses semantic similarity to find
+relevant documents from vector databases. Results are ranked by relevance.
 
-Example workflow (examples/rag/search.yaml):
+Examples:
+  # Basic search
+  mcp-cli rag search "authentication requirements"
+  
+  # Search with more results
+  mcp-cli rag search "access control policies" --top-k 10
+  
+  # Use specific server
+  mcp-cli rag search "encryption" --server pgvector
+  
+  # Multi-strategy search with fusion
+  mcp-cli rag search "security controls" --strategies default,context --fusion rrf
+  
+  # Enable query expansion
+  mcp-cli rag search "MFA" --expand
 
-  steps:
-    - name: retrieve
-      rag:
-        query: "{{user_query}}"
-        server: pgvector
-        strategies: [default, technical]
-        fusion: rrf
-        top_k: 5
-        expand_query: true
-        
-    - name: generate
-      llm:
-        provider: anthropic
-        model: claude-sonnet-4
-        prompt: |
-          Context: {{step.retrieve.results}}
-          Question: {{user_query}}
-
-Run workflow:
-  mcp-cli workflow run examples/rag/search.yaml --var user_query="MFA requirements"`,
-	RunE: executeRagSearchInfo,
+Output:
+  Returns JSON with query, results, and metadata including:
+  - Matched document identifiers and text
+  - Similarity scores (higher = more relevant)
+  - Total results and execution time`,
+	Args:  cobra.ExactArgs(1),
+	RunE:  executeRagSearch,
 }
 
 func init() {
 	RagConfigCmd.Flags().BoolVar(&ragShowConfig, "verbose", false, "Show detailed configuration")
+	
+	RagSearchCmd.Flags().StringVar(&ragServer, "server", "", "RAG server to use (default from config)")
+	RagSearchCmd.Flags().StringSliceVar(&ragStrategies, "strategies", []string{"default"}, "Strategies to use")
+	RagSearchCmd.Flags().IntVar(&ragTopK, "top-k", 5, "Number of results")
+	RagSearchCmd.Flags().StringVar(&ragFusion, "fusion", "", "Fusion method (rrf, weighted, max, avg)")
+	RagSearchCmd.Flags().BoolVar(&ragExpandQuery, "expand", false, "Enable query expansion")
 	
 	RagCmd.AddCommand(RagConfigCmd)
 	RagCmd.AddCommand(RagSearchCmd)
@@ -107,17 +124,17 @@ func executeRagConfig(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 	
-	for name, server := range ragConfig.Servers {
+	for name, srv := range ragConfig.Servers {
 		fmt.Printf("\n%s:\n", name)
-		fmt.Printf("  MCP Server: %s\n", server.MCPServer)
-		if server.SearchTool != "" {
-			fmt.Printf("  Search Tool: %s\n", server.SearchTool)
+		fmt.Printf("  MCP Server: %s\n", srv.MCPServer)
+		if srv.SearchTool != "" {
+			fmt.Printf("  Search Tool: %s\n", srv.SearchTool)
 		}
-		fmt.Printf("  Table: %s\n", server.Table)
-		fmt.Printf("  Strategies: %d configured\n", len(server.Strategies))
+		fmt.Printf("  Table: %s\n", srv.Table)
+		fmt.Printf("  Strategies: %d configured\n", len(srv.Strategies))
 		
 		if ragShowConfig {
-			for _, strategy := range server.Strategies {
+			for _, strategy := range srv.Strategies {
 				fmt.Printf("    - %s (column: %s, weight: %.2f, threshold: %.2f)\n",
 					strategy.Name, strategy.VectorColumn, strategy.Weight, strategy.Threshold)
 			}
@@ -138,63 +155,109 @@ func executeRagConfig(cmd *cobra.Command, args []string) error {
 	}
 	
 	fmt.Println()
-	fmt.Println("=== Usage ===")
-	fmt.Println("RAG is primarily used through workflows.")
-	fmt.Println("Example workflow step:")
-	fmt.Println()
-	fmt.Println("  steps:")
-	fmt.Println("    - name: retrieve")
-	fmt.Println("      rag:")
-	fmt.Println("        query: \"{{user_query}}\"")
-	fmt.Println("        server: pgvector")
-	fmt.Println("        strategies: [default, technical]")
-	fmt.Println("        fusion: rrf")
-	fmt.Println("        top_k: 5")
-	fmt.Println()
-	
 	logging.Info("✓ RAG configuration loaded successfully")
 	
 	return nil
 }
 
-func executeRagSearchInfo(cmd *cobra.Command, args []string) error {
-	fmt.Println("RAG Search is used through workflows for maximum flexibility.")
-	fmt.Println()
-	fmt.Println("Example workflow file (save as rag-search.yaml):")
-	fmt.Println()
-	fmt.Println("---")
-	fmt.Println("name: RAG Search Example")
-	fmt.Println("version: 1.0.0")
-	fmt.Println()
-	fmt.Println("execution:")
-	fmt.Println("  provider: anthropic")
-	fmt.Println("  model: claude-sonnet-4")
-	fmt.Println()
-	fmt.Println("steps:")
-	fmt.Println("  - name: retrieve")
-	fmt.Println("    rag:")
-	fmt.Println("      query: \"{{user_query}}\"")
-	fmt.Println("      server: pgvector")
-	fmt.Println("      strategies:")
-	fmt.Println("        - default")
-	fmt.Println("        - technical")
-	fmt.Println("      fusion: rrf")
-	fmt.Println("      top_k: 5")
-	fmt.Println("      expand_query: true")
-	fmt.Println()
-	fmt.Println("  - name: generate")
-	fmt.Println("    llm:")
-	fmt.Println("      prompt: |")
-	fmt.Println("        Based on these retrieved documents:")
-	fmt.Println("        {{step.retrieve.results}}")
-	fmt.Println()
-	fmt.Println("        Answer this question: {{user_query}}")
-	fmt.Println()
-	fmt.Println("Run with:")
-	fmt.Println("  mcp-cli workflow run rag-search.yaml --var user_query=\"What are the MFA requirements?\"")
-	fmt.Println()
-	fmt.Println("See examples/rag/ directory for more examples.")
-	fmt.Println()
+func executeRagSearch(cmd *cobra.Command, args []string) error {
+	query := args[0]
+	
+	// Load config
+	configService := config.NewService()
+	_, err := configService.LoadConfig(configFile)
+	if err != nil {
+		return fmt.Errorf("failed to load configuration: %w", err)
+	}
+	
+	// Get RAG configuration
+	ragConfig := configService.GetRagConfig()
+	if ragConfig == nil {
+		return fmt.Errorf("no RAG configuration found")
+	}
+	
+	// Determine server
+	serverName := ragServer
+	if serverName == "" {
+		serverName = ragConfig.DefaultServer
+	}
+	if serverName == "" {
+		return fmt.Errorf("no server specified and no default server in config")
+	}
+	
+	var searchErr error
+	
+	// Determine which servers to connect
+	servers := []string{serverName}
+	userSpecifiedServers := make(map[string]bool)
+	userSpecifiedServers[serverName] = true
+	
+	// Run with host server connections
+	err = host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
+		// Create server manager
+		serverManager := NewHostServerManager(conns)
+		
+		// Create embedding service
+		providerFactory := ai.NewProviderFactory()
+		embeddingService := embeddings.NewService(configService, providerFactory)
+		
+		// Create RAG service with embedding service
+		ragService := rag.NewServiceWithConfig(ragConfig, serverManager, embeddingService)
+		
+		// Create search request
+		req := rag.SearchRequest{
+			Query:       query,
+			Server:      serverName,
+			Strategies:  ragStrategies,
+			TopK:        ragTopK,
+			Fusion:      ragFusion,
+			ExpandQuery: ragExpandQuery,
+		}
+		
+		// Execute search
+		logging.Info("🔍 Searching: %s", query)
+		startTime := time.Now()
+		
+		ctx := context.Background()
+		response, err := ragService.Search(ctx, req)
+		if err != nil {
+			searchErr = fmt.Errorf("search failed: %w", err)
+			return searchErr
+		}
+		
+		elapsed := time.Since(startTime)
+		
+		// Display results
+		fmt.Println()
+		fmt.Printf("Found %d results in %v\n", response.TotalResults, elapsed)
+		fmt.Println()
+		
+		if response.TotalResults == 0 {
+			fmt.Println("No results found.")
+			return nil
+		}
+		
+		// Format as JSON
+		output, err := json.MarshalIndent(response, "", "  ")
+		if err != nil {
+			searchErr = fmt.Errorf("failed to format results: %w", err)
+			return searchErr
+		}
+		
+		fmt.Println(string(output))
+		
+		return nil
+	}, configFile, servers, userSpecifiedServers, &host.CommandOptions{
+		
+		SuppressConsole: false,
+	})
+	
+	if err != nil {
+		return err
+	}
+	if searchErr != nil {
+		return searchErr
+	}
 	
 	return nil
 }

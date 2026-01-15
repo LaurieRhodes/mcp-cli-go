@@ -7,12 +7,14 @@
 
 ## Overview
 
-Steps are the building blocks of workflows. Each step is one of four execution modes:
+Steps are the building blocks of workflows. Each step is one of six execution modes:
 
 1. **run:** LLM query with variable interpolation
 2. **template:** Call another workflow
 3. **embeddings:** Generate vector embeddings
 4. **consensus:** Multi-provider validation
+5. **rag:** Retrieve from vector database (NEW)
+6. **loop:** Iterate over items with child workflow (NEW)
 
 All steps inherit properties from `workflow.execution` and can override them.
 
@@ -26,22 +28,290 @@ Every step has these properties:
 
 ```yaml
 - name: string                  # Required: Unique identifier
+  execution_order: number       # Optional: Manual execution order
   needs: [string]               # Optional: Step dependencies
   if: string                    # Optional: Skip condition
+  input: any                    # Optional: Direct input data
   
   # Inheritable properties (from workflow.execution)
   provider: string              # Optional: Override provider
   model: string                 # Optional: Override model
+  providers: [...]              # Optional: Override provider failover chain
   temperature: number           # Optional: Override temperature
   max_tokens: number            # Optional: Override max_tokens
   servers: [string]             # Optional: Override servers
+  skills: [string]              # Optional: Override skills
   timeout: duration             # Optional: Override timeout
+  max_iterations: number        # Optional: Override max_iterations
+  logging: string               # Optional: Override logging level
+  no_color: boolean             # Optional: Override color output
   
   # Execution mode (choose ONE)
   run: string
   template: {...}
   embeddings: {...}
   consensus: {...}
+  rag: {...}
+  loop: {...}
+```
+
+---
+
+## Advanced Step Properties
+
+### Execution Order Control (`execution_order:`)
+
+**Purpose:** Manually control the order in which steps execute, overriding the default dependency-based ordering.
+
+**Syntax:**
+```yaml
+- name: step_name
+  execution_order: number      # Lower numbers execute first
+```
+
+### When to Use
+
+- When you need precise control over execution order
+- When steps don't have explicit dependencies but order matters
+- For debugging or testing specific execution sequences
+
+### Examples
+
+**Basic ordering:**
+```yaml
+steps:
+  - name: cleanup
+    execution_order: 99        # Runs last
+    run: "Clean up temporary files"
+  
+  - name: initialize
+    execution_order: 1         # Runs first
+    run: "Initialize system"
+  
+  - name: process
+    execution_order: 50        # Runs in middle
+    run: "Process data"
+```
+
+**Mixed with dependencies:**
+```yaml
+steps:
+  - name: step_a
+    execution_order: 1
+    run: "First"
+  
+  - name: step_b
+    execution_order: 2
+    needs: [step_a]            # Both ordering and dependency
+    run: "Second (after step_a)"
+  
+  - name: step_c
+    execution_order: 3
+    run: "Third"
+```
+
+**Note:** When both `execution_order` and `needs` are specified, the system ensures both constraints are satisfied.
+
+---
+
+### Direct Input Data (`input:`)
+
+**Purpose:** Pass structured data directly to a step without relying solely on variable interpolation.
+
+**Syntax:**
+```yaml
+- name: step_name
+  input: any                   # Can be string, number, object, array
+  run: string                  # Access via {{input.key}}
+```
+
+### When to Use
+
+- When you have complex structured configuration data
+- When you want to separate data from prompts
+- When you need to pass computed values between workflows
+
+### Examples
+
+**Simple configuration:**
+```yaml
+steps:
+  - name: configure_service
+    input:
+      database: postgres
+      max_connections: 100
+      timeout: 30
+    run: |
+      Configure the service:
+      - Database: {{input.database}}
+      - Max connections: {{input.max_connections}}
+      - Timeout: {{input.timeout}}s
+```
+
+**Complex structured data:**
+```yaml
+steps:
+  - name: process_users
+    input:
+      users:
+        - name: Alice
+          role: admin
+          permissions: [read, write, delete]
+        - name: Bob
+          role: user
+          permissions: [read]
+      config:
+        strict_mode: true
+        audit_enabled: true
+    run: |
+      Process users with configuration:
+      {{input}}
+```
+
+**Combining with variable interpolation:**
+```yaml
+steps:
+  - name: analyze
+    run: "Extract metadata from: {{input}}"
+  
+  - name: report
+    needs: [analyze]
+    input:
+      source_data: "{{input}}"
+      analysis: "{{analyze}}"
+      report_type: detailed
+    run: |
+      Generate {{input.report_type}} report combining:
+      - Source: {{input.source_data}}
+      - Analysis: {{input.analysis}}
+```
+
+---
+
+### Step-Level Provider Failover (`providers:`)
+
+**Purpose:** Define a provider failover chain specific to a single step, independent of the workflow-level configuration.
+
+**Syntax:**
+```yaml
+- name: step_name
+  providers:
+    - provider: string
+      model: string
+      temperature: number       # Optional per-provider override
+      max_tokens: number        # Optional per-provider override
+    - provider: string
+      model: string
+```
+
+### When to Use
+
+- When a specific step requires higher reliability than others
+- When a step needs a specific provider that differs from the workflow default
+- When you want to try expensive models first and fall back to cheaper ones for specific tasks
+
+### Examples
+
+**Critical step with failover:**
+```yaml
+execution:
+  provider: anthropic
+  model: claude-sonnet-4       # Default for most steps
+
+steps:
+  - name: critical_analysis
+    providers:
+      - provider: anthropic
+        model: claude-opus-4   # Try best model first
+      - provider: openai
+        model: gpt-4o          # Fall back to OpenAI
+      - provider: anthropic
+        model: claude-sonnet-4 # Final fallback
+    run: "Perform critical analysis on: {{input}}"
+  
+  - name: simple_task
+    run: "Simple processing"   # Uses default claude-sonnet-4
+```
+
+**Different providers for different tasks:**
+```yaml
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
+steps:
+  - name: code_analysis
+    providers:
+      - provider: deepseek
+        model: deepseek-coder  # Specialized for code
+      - provider: anthropic
+        model: claude-sonnet-4
+    run: "Analyze this code: {{input}}"
+  
+  - name: creative_writing
+    providers:
+      - provider: anthropic
+        model: claude-opus-4   # Best for creativity
+      - provider: openai
+        model: gpt-4o
+    run: "Write a creative story about: {{input}}"
+```
+
+**Cost optimization with fallback:**
+```yaml
+steps:
+  - name: expensive_task
+    providers:
+      - provider: ollama
+        model: qwen2.5:32b     # Try local first (free)
+        timeout: "30s"
+      - provider: anthropic
+        model: claude-sonnet-4 # Fall back to cloud if local fails/slow
+    run: "Process: {{input}}"
+```
+
+---
+
+### Step-Level Logging (`logging:`)
+
+**Purpose:** Override the logging level for a specific step without affecting other steps.
+
+**Syntax:**
+```yaml
+- name: step_name
+  logging: "normal" | "verbose" | "noisy"
+```
+
+### Examples
+
+**Debug specific step:**
+```yaml
+execution:
+  logging: normal              # Quiet by default
+
+steps:
+  - name: simple_task
+    run: "Simple processing"   # Uses normal logging
+  
+  - name: debug_step
+    logging: verbose           # Detailed logging for this step only
+    run: "Complex analysis requiring debugging"
+  
+  - name: very_verbose_step
+    logging: noisy             # Maximum detail for troubleshooting
+    run: "Problematic operation"
+```
+
+---
+
+### Step-Level Color Control (`no_color:`)
+
+**Purpose:** Override color output for a specific step (rarely needed).
+
+**Syntax:**
+```yaml
+- name: step_name
+  no_color: true | false
 ```
 
 ---
@@ -66,7 +336,6 @@ Available variables in `run:` prompts:
 | `{{step_name}}` | Output from another step | `{{analyze}}` |
 | `{{env.VAR}}` | Environment variable | `{{env.API_KEY}}` |
 | `{{workflow.name}}` | Workflow identifier | `{{workflow.name}}` |
-| `{{execution.timestamp}}` | Workflow start time | `{{execution.timestamp}}` |
 
 ### Examples
 
@@ -104,30 +373,6 @@ steps:
       Provide detailed feedback.
 ```
 
-**With temperature override:**
-```yaml
-steps:
-  - name: creative
-    temperature: 1.5
-    run: "Generate 10 creative names for: {{input}}"
-```
-
-**With model override:**
-```yaml
-execution:
-  provider: anthropic
-  model: claude-sonnet-4
-
-steps:
-  - name: fast_task
-    model: claude-haiku-4      # Use faster model
-    run: "Quick summary: {{input}}"
-  
-  - name: complex_task
-    model: claude-opus-4       # Use more capable model
-    run: "Deep analysis: {{input}}"
-```
-
 ---
 
 ## Mode 2: Workflow Call (`template:`)
@@ -142,12 +387,6 @@ steps:
     with: {key: value}         # Input data (optional)
 ```
 
-### Important Notes
-
-1. **No property inheritance:** Template calls don't inherit properties from parent
-2. **Each workflow independent:** Called workflow uses its own `execution` config
-3. **Input passing:** Use `with:` to pass data to called workflow
-
 ### Examples
 
 **Basic template call:**
@@ -158,22 +397,6 @@ steps:
       name: code_reviewer
       with:
         code: "{{input}}"
-```
-
-**Passing multiple inputs:**
-```yaml
-steps:
-  - name: analyze
-    run: "Analyze: {{input}}"
-  
-  - name: generate_report
-    needs: [analyze]
-    template:
-      name: report_generator
-      with:
-        analysis: "{{analyze}}"
-        title: "Analysis Report"
-        format: "markdown"
 ```
 
 **Chaining workflows:**
@@ -191,15 +414,6 @@ steps:
       name: results_formatter
       with:
         processed_data: "{{stage1}}"
-```
-
-### Workflow Call Directory Structure
-
-```
-config/workflows/
-├── main_workflow.yaml        # Parent workflow
-├── code_reviewer.yaml        # Called by template
-└── report_generator.yaml     # Called by template
 ```
 
 ---
@@ -246,27 +460,6 @@ steps:
       input: "{{input}}"
 ```
 
-**Multiple texts:**
-```yaml
-steps:
-  - name: embed_batch
-    embeddings:
-      model: text-embedding-3-small
-      input:
-        - "First document"
-        - "Second document"
-        - "Third document"
-```
-
-**From file:**
-```yaml
-steps:
-  - name: embed_file
-    embeddings:
-      model: text-embedding-3-large
-      input_file: "documents.txt"
-```
-
 **With chunking configuration:**
 ```yaml
 steps:
@@ -277,66 +470,6 @@ steps:
       chunk_strategy: sentence
       max_chunk_size: 512
       overlap: 50
-```
-
-**Save to file:**
-```yaml
-steps:
-  - name: embed_and_save
-    embeddings:
-      model: text-embedding-3-small
-      input: ["doc1", "doc2"]
-      output_file: "/tmp/embeddings.json"
-      include_metadata: true
-```
-
-**Provider override:**
-```yaml
-execution:
-  provider: anthropic         # Default for LLM steps
-
-steps:
-  - name: embed
-    embeddings:
-      provider: openai         # Override for embeddings
-      model: text-embedding-3-small
-      input: "{{input}}"
-```
-
-### Output Format
-
-**With metadata (default):**
-```json
-{
-  "model": "text-embedding-3-small",
-  "chunks": [
-    {
-      "index": 0,
-      "text": "First chunk text",
-      "start_pos": 0,
-      "end_pos": 100,
-      "token_count": 50
-    }
-  ],
-  "embeddings": [
-    {
-      "chunk": {...},
-      "vector": [0.123, 0.456, ...]
-    }
-  ]
-}
-```
-
-**Without metadata:**
-```json
-{
-  "model": "text-embedding-3-small",
-  "vectors": [
-    [0.123, 0.456, ...],
-    [0.789, 0.012, ...]
-  ],
-  "count": 2
-}
 ```
 
 ---
@@ -355,9 +488,8 @@ steps:
     timeout: duration          # optional
 ```
 
-**See:** [Consensus Reference](CONSENSUS_REFERENCE.md) for detailed documentation.
+### Example
 
-**Quick example:**
 ```yaml
 steps:
   - name: validate
@@ -375,11 +507,312 @@ steps:
 
 ---
 
+## Mode 5: RAG Retrieval (`rag:`)
+
+**Purpose:** Retrieve relevant documents from a vector database using semantic search
+
+**Syntax:**
+```yaml
+- name: step_name
+  rag:
+    query: string              # Search query (supports {{variables}})
+    server: string             # RAG server name (from config/rag/*.yaml)
+    strategies: [string]       # Vector search strategies
+    top_k: number              # Number of results (default: 5)
+    fusion: string             # Fusion method: rrf, weighted, max, avg
+    expand_query: boolean      # Enable query expansion
+    output_format: string      # json, text, compact
+```
+
+### Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `query` | string | Yes | - | Search query (supports `{{variables}}`) |
+| `server` | string | No | (from config) | RAG server name |
+| `strategies` | string[] | No | `[default]` | Vector search strategies |
+| `top_k` | int | No | 5 | Number of results |
+| `fusion` | string | No | `rrf` | Result fusion: `rrf`, `weighted`, `max`, `avg` |
+| `expand_query` | bool | No | false | Enable query expansion |
+| `output_format` | string | No | `json` | Output format: `json`, `text`, `compact` |
+
+### Examples
+
+**Basic RAG retrieval:**
+```yaml
+steps:
+  - name: retrieve_controls
+    rag:
+      query: "authentication requirements"
+      server: pgvector
+      top_k: 5
+```
+
+**RAG with previous step output:**
+```yaml
+steps:
+  - name: parse_statement
+    run: "Extract the key topic from: {{input}}"
+  
+  - name: retrieve
+    needs: [parse_statement]
+    rag:
+      query: "{{parse_statement}}"
+      server: pgvector
+      strategies: [default]
+      top_k: 5
+      output_format: json
+  
+  - name: assess
+    needs: [retrieve]
+    run: |
+      Based on these controls: {{retrieve}}
+      
+      Assess compliance of: {{input}}
+```
+
+**RAG with query expansion:**
+```yaml
+steps:
+  - name: search
+    rag:
+      query: "MFA requirements"
+      server: pgvector
+      expand_query: true       # Expands "MFA" to include "multi-factor authentication"
+      top_k: 10
+```
+
+### RAG Output Format
+
+The RAG step returns structured results that can be used in subsequent steps:
+
+```json
+{
+  "query": "authentication requirements",
+  "results": [
+    {
+      "id": "ISM-1546",
+      "text": {
+        "identifier": "ISM-1546",
+        "description": "Users are authenticated before being granted access..."
+      },
+      "combined_score": 0.85,
+      "source": "description_vector"
+    }
+  ],
+  "total_results": 5
+}
+```
+
+---
+
+## Mode 6: Loop Execution (`loop:`)
+
+**Purpose:** Iterate over a collection of items, executing a child workflow for each
+
+**Syntax:**
+```yaml
+- name: step_name
+  loop:
+    # Core
+    workflow: string           # Child workflow to execute
+    mode: string               # iterate | refine
+    items: string              # Item source (iterate mode)
+    with: {key: value}         # Input parameters
+    
+    # Iteration control
+    max_iterations: number     # Safety limit (required)
+    until: string              # Exit condition (refine mode)
+    
+    # Error handling
+    on_failure: string         # halt | continue | retry
+    max_retries: number        # Retries per item
+    retry_delay: string        # Backoff duration
+    
+    # Success criteria
+    min_success_rate: number   # 0.0 to 1.0
+    
+    # Timeouts
+    timeout_per_item: string   # Per-iteration timeout
+    total_timeout: string      # Total loop timeout
+    
+    # Parallel execution
+    parallel: boolean          # Enable parallel processing
+    max_workers: number        # Concurrent workers (default: 3)
+    
+    # Output
+    accumulate: string         # Store all results in variable
+```
+
+### Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| **Core** | | | | |
+| `workflow` | string | Yes | - | Child workflow to execute |
+| `mode` | string | No | `refine` | `iterate` (over items) or `refine` (until condition) |
+| `items` | string | No* | - | Item source for iterate mode |
+| `with` | object | No | {} | Input parameters for child workflow |
+| **Iteration Control** | | | | |
+| `max_iterations` | int | Yes | - | Maximum iterations (safety limit) |
+| `until` | string | No* | - | Exit condition for refine mode |
+| **Error Handling** | | | | |
+| `on_failure` | string | No | `halt` | `halt`, `continue`, or `retry` |
+| `max_retries` | int | No | 0 | Retries per item (when `on_failure: retry`) |
+| `retry_delay` | string | No | - | Delay between retries (e.g., `"5s"`) |
+| **Success Criteria** | | | | |
+| `min_success_rate` | float | No | 0.0 | Minimum success rate (0.0-1.0) |
+| **Timeouts** | | | | |
+| `timeout_per_item` | string | No | - | Per-iteration timeout (e.g., `"30s"`) |
+| `total_timeout` | string | No | - | Total loop timeout (e.g., `"1h"`) |
+| **Parallel Execution** | | | | |
+| `parallel` | bool | No | false | Enable parallel processing |
+| `max_workers` | int | No | 3 | Maximum concurrent workers |
+| **Output** | | | | |
+| `accumulate` | string | No | - | Variable to store all iteration results |
+
+\* `items` required for `mode: iterate`, `until` required for `mode: refine`
+
+### Loop Modes
+
+**Iterate Mode:** Process each item in a collection
+```yaml
+steps:
+  - name: process_all
+    loop:
+      workflow: process_single_item
+      mode: iterate
+      items: file:///outputs/items.json
+      max_iterations: 500
+      parallel: true
+      max_workers: 10
+```
+
+**Refine Mode:** Repeat until a condition is met
+```yaml
+steps:
+  - name: fix_code
+    loop:
+      workflow: test_and_fix
+      mode: refine
+      with:
+        code: "{{input}}"
+        feedback: "{{loop.last.output}}"
+      max_iterations: 10
+      until: "All tests pass"
+```
+
+### Loop Variables
+
+| Variable | Mode | Description |
+|----------|------|-------------|
+| `{{loop.index}}` | iterate | Current item index (0-based) |
+| `{{loop.item}}` | iterate | Current item being processed |
+| `{{loop.total}}` | iterate | Total number of items |
+| `{{loop.succeeded}}` | iterate | Count of successful iterations |
+| `{{loop.failed}}` | iterate | Count of failed iterations |
+| `{{loop.iteration}}` | refine | Current iteration number (1-based) |
+| `{{loop.last.output}}` | refine | Previous iteration's output |
+
+### Examples
+
+**Parallel Iterate with Error Handling:**
+```yaml
+steps:
+  - name: assess_statements
+    loop:
+      workflow: ism_assess_statement_v2
+      mode: iterate
+      items: file:///outputs/statements_for_assessment.json
+      parallel: true
+      max_workers: 15
+      max_iterations: 500
+      on_failure: continue
+      min_success_rate: 0.8
+```
+
+**Sequential Refine with Retry:**
+```yaml
+steps:
+  - name: iterative_improvement
+    loop:
+      workflow: improve_code
+      mode: refine
+      with:
+        code: "{{input}}"
+        previous_feedback: "{{loop.last.output}}"
+      max_iterations: 5
+      until: "Code review passes"
+      on_failure: retry
+      max_retries: 2
+      retry_delay: "5s"
+```
+
+**Iterate with Accumulation:**
+```yaml
+steps:
+  - name: batch_process
+    loop:
+      workflow: process_item
+      mode: iterate
+      items: "{{step.extract_items}}"
+      max_iterations: 100
+      on_failure: continue
+      accumulate: all_results
+  
+  - name: summarize
+    needs: [batch_process]
+    run: |
+      Summarize these results:
+      {{all_results}}
+```
+
+### Item Sources for Iterate Mode
+
+The `items` property supports multiple formats:
+
+**File reference:**
+```yaml
+items: file:///outputs/items.json      # JSON array file
+items: file:///outputs/items.jsonl     # JSONL file
+```
+
+**Step output:**
+```yaml
+items: "{{extract_step}}"              # Output from previous step (must be JSON array)
+```
+
+**Inline (via with):**
+```yaml
+loop:
+  workflow: process_item
+  mode: iterate
+  items: "{{env.items_json}}"          # From environment variable
+```
+
+### Parallel Execution Considerations
+
+When using `parallel: true`:
+
+1. **Race conditions:** Each worker writes to separate files (use individual file names)
+2. **Resource limits:** Monitor API rate limits with `max_workers`
+3. **Order independence:** Results may complete out of order
+4. **Error isolation:** One failure doesn't affect other workers (with `on_failure: continue`)
+
+**Best practice for parallel file output:**
+```yaml
+# In child workflow, write to individual files:
+- name: write_result
+  run: |
+    Write result to /outputs/results/{{loop.item.id}}.json
+```
+
+---
+
 ## Step Dependencies (`needs:`)
 
 ### Basic Dependencies
 
-**Wait for one step:**
 ```yaml
 steps:
   - name: step1
@@ -388,20 +821,6 @@ steps:
   - name: step2
     needs: [step1]             # Waits for step1
     run: "Use {{step1}}"
-```
-
-**Wait for multiple steps:**
-```yaml
-steps:
-  - name: step1
-    run: "First"
-  
-  - name: step2
-    run: "Second"
-  
-  - name: step3
-    needs: [step1, step2]      # Waits for both
-    run: "Combine {{step1}} and {{step2}}"
 ```
 
 ### Execution Order
@@ -426,35 +845,9 @@ steps:
     D (runs after both B and C)
 ```
 
-### Rules
-
-- ❌ Cannot reference steps that come later in the file
-- ❌ Cannot create circular dependencies
-- ✅ Can reference multiple steps
-- ✅ Enables parallel execution when no dependencies
-
-**Invalid (forward reference):**
-```yaml
-steps:
-  - name: step1
-    needs: [step2]             # ERROR: step2 not defined yet
-  - name: step2
-```
-
-**Invalid (circular):**
-```yaml
-steps:
-  - name: step1
-    needs: [step2]
-  - name: step2
-    needs: [step1]             # ERROR: circular dependency
-```
-
 ---
 
 ## Conditional Execution (`if:`)
-
-### Basic Condition
 
 ```yaml
 steps:
@@ -467,189 +860,104 @@ steps:
     run: "Process the data"
 ```
 
-**If condition is false, step is skipped.**
-
-### Condition Syntax
-
-```yaml
-if: "${{ step_name == 'value' }}"
-if: "${{ step_name.result == 'value' }}"
-```
-
-### Examples
-
-**Skip if validation fails:**
-```yaml
-steps:
-  - name: validate
-    run: "Validate input: {{input}}"
-  
-  - name: process
-    needs: [validate]
-    if: "${{ validate == 'VALID' }}"
-    run: "Process: {{input}}"
-```
-
-**Multiple conditions:**
-```yaml
-steps:
-  - name: check1
-    run: "Check 1"
-  
-  - name: check2
-    run: "Check 2"
-  
-  - name: proceed
-    needs: [check1, check2]
-    if: "${{ check1 == 'PASS' }}"
-    run: "Proceed with operation"
-```
-
----
-
-## Step Result Storage
-
-### How Results Are Stored
-
-Each step's output is stored and available for interpolation:
-
-```yaml
-steps:
-  - name: step1
-    run: "Analyze"
-    # Output stored as: step1 = "analysis result"
-  
-  - name: step2
-    run: "Use {{step1}}"
-    # Accesses stored result
-```
-
-### Result Variables
-
-| Context | Variable | Value |
-|---------|----------|-------|
-| Step output | `{{step_name}}` | Complete step output |
-| Consensus | `{{step_name}}` | Consensus result |
-| Embeddings | `{{step_name}}` | Summary or file path |
-| Template | `{{step_name}}` | Called workflow output |
-
 ---
 
 ## Common Patterns
 
-### Pattern 1: Sequential Processing
+### Pattern 1: RAG-Augmented Assessment
 
 ```yaml
 steps:
   - name: parse
-    run: "Parse input: {{input}}"
+    run: "Extract key topic: {{input}}"
   
-  - name: validate
+  - name: retrieve
     needs: [parse]
-    run: "Validate: {{parse}}"
+    rag:
+      query: "{{parse}}"
+      server: pgvector
+      top_k: 5
   
-  - name: process
-    needs: [validate]
-    run: "Process: {{validate}}"
-  
-  - name: format
-    needs: [process]
-    run: "Format: {{process}}"
-```
-
----
-
-### Pattern 2: Parallel + Merge
-
-```yaml
-steps:
-  - name: analyze_security
-    run: "Security analysis: {{input}}"
-  
-  - name: analyze_performance
-    run: "Performance analysis: {{input}}"
-  
-  - name: merge_results
-    needs: [analyze_security, analyze_performance]
+  - name: assess
+    needs: [retrieve]
     run: |
-      Merge these analyses:
-      Security: {{analyze_security}}
-      Performance: {{analyze_performance}}
+      Controls: {{retrieve}}
+      Assess: {{input}}
 ```
 
----
-
-### Pattern 3: Progressive Refinement
+### Pattern 2: Batch Processing with Parallel Loop
 
 ```yaml
 steps:
-  - name: draft
-    temperature: 1.0
-    run: "Write draft: {{input}}"
+  - name: extract_items
+    run: "Parse input into JSON array: {{input}}"
   
-  - name: review
-    needs: [draft]
-    temperature: 0.3
-    run: "Review and critique: {{draft}}"
+  - name: process_batch
+    needs: [extract_items]
+    loop:
+      workflow: process_single
+      mode: iterate
+      items: "{{extract_items}}"
+      parallel: true
+      max_workers: 10
+      max_iterations: 1000
+      on_failure: continue
+      min_success_rate: 0.9
   
-  - name: revise
-    needs: [draft, review]
-    temperature: 0.7
-    run: "Revise draft based on: {{review}}"
-  
-  - name: final
-    needs: [revise]
-    temperature: 0.2
-    run: "Polish: {{revise}}"
+  - name: summarize
+    needs: [process_batch]
+    run: "Summarize processing results"
 ```
 
----
-
-### Pattern 4: Validation Gate
+### Pattern 3: Iterative Refinement
 
 ```yaml
 steps:
-  - name: process
-    run: "Process: {{input}}"
+  - name: initial_draft
+    run: "Create initial draft: {{input}}"
+  
+  - name: refine_loop
+    needs: [initial_draft]
+    loop:
+      workflow: review_and_improve
+      mode: refine
+      with:
+        content: "{{initial_draft}}"
+        feedback: "{{loop.last.output}}"
+      max_iterations: 5
+      until: "Review score is 9 or higher"
+```
+
+### Pattern 4: Multi-Stage Pipeline with RAG
+
+```yaml
+steps:
+  - name: classify
+    run: "Classify this document: {{input}}"
+  
+  - name: retrieve_templates
+    needs: [classify]
+    rag:
+      query: "{{classify}} document templates"
+      server: pgvector
+      top_k: 3
+  
+  - name: generate
+    needs: [retrieve_templates]
+    run: |
+      Using templates: {{retrieve_templates}}
+      Generate document for: {{input}}
   
   - name: validate
-    needs: [process]
+    needs: [generate]
     consensus:
-      prompt: "Is this acceptable? {{process}}"
+      prompt: "Is this document complete? {{generate}}"
       executions:
         - provider: anthropic
+          model: claude-sonnet-4
         - provider: openai
+          model: gpt-4o
       require: unanimous
-  
-  - name: finalize
-    needs: [validate]
-    if: "${{ validate == 'YES' }}"
-    run: "Finalize: {{process}}"
-```
-
----
-
-### Pattern 5: Multi-Model Strategy
-
-```yaml
-execution:
-  provider: anthropic
-  model: claude-sonnet-4
-
-steps:
-  - name: quick_check
-    model: claude-haiku-4      # Fast model
-    run: "Quick check: {{input}}"
-  
-  - name: deep_analysis
-    needs: [quick_check]
-    model: claude-opus-4       # Capable model
-    if: "${{ quick_check == 'NEEDS_ANALYSIS' }}"
-    run: "Deep analysis: {{input}}"
-  
-  - name: final
-    needs: [quick_check, deep_analysis]
-    run: "Summary: {{quick_check}} {{deep_analysis}}"
 ```
 
 ---
@@ -657,132 +965,91 @@ steps:
 ## Best Practices
 
 ### 1. Name Steps Descriptively
-
 ```yaml
 # ✅ Good
 steps:
-  - name: parse_user_input
-  - name: validate_schema
-  - name: transform_data
+  - name: retrieve_ism_controls
+  - name: assess_compliance
   - name: generate_report
 
 # ❌ Bad
 steps:
   - name: step1
   - name: step2
-  - name: step3
 ```
 
----
-
-### 2. Use Dependencies Effectively
-
+### 2. Use RAG for Context
 ```yaml
-# ✅ Good - Explicit dependencies
+# ✅ Good - RAG provides relevant context
 steps:
-  - name: fetch_data
-  - name: process_data
-    needs: [fetch_data]
-  - name: save_results
-    needs: [process_data]
-
-# ❌ Bad - No dependencies (may execute in wrong order)
-steps:
-  - name: fetch_data
-  - name: process_data
-  - name: save_results
-```
-
----
-
-### 3. Override Properties Judiciously
-
-```yaml
-# ✅ Good - Override with clear reason
-execution:
-  temperature: 0.7
-
-steps:
-  - name: creative_brainstorm
-    temperature: 1.5           # Higher for creativity
-    run: "Generate ideas"
+  - name: retrieve
+    rag:
+      query: "{{input}}"
+      top_k: 5
   
-  - name: precise_calculation
-    temperature: 0.2           # Lower for accuracy
-    run: "Calculate results"
+  - name: answer
+    needs: [retrieve]
+    run: "Based on: {{retrieve}}, answer: {{input}}"
 
-# ❌ Bad - Unnecessary overrides
+# ❌ Bad - No context, relies only on model knowledge
 steps:
-  - name: step1
-    provider: anthropic        # Already set in execution
-    temperature: 0.7           # Already set in execution
+  - name: answer
+    run: "Answer: {{input}}"
 ```
 
----
-
-### 4. Handle Long Prompts with YAML Multi-line
-
+### 3. Handle Loop Failures Gracefully
 ```yaml
-# ✅ Good - Readable
-steps:
-  - name: review
-    run: |
-      Review this code for:
-      1. Security vulnerabilities
-      2. Performance issues
-      3. Style compliance
-      
-      Code:
-      {{input}}
+# ✅ Good - Continues on failure, checks success rate
+loop:
+  on_failure: continue
+  min_success_rate: 0.8
 
-# ❌ Bad - Hard to read
-steps:
-  - name: review
-    run: "Review this code for: 1. Security vulnerabilities 2. Performance issues 3. Style compliance Code: {{input}}"
+# ❌ Bad - Halts entire loop on first failure
+loop:
+  on_failure: halt  # One bad item stops everything
+```
+
+### 4. Set Appropriate Parallelism
+```yaml
+# ✅ Good - Reasonable worker count
+loop:
+  parallel: true
+  max_workers: 10   # Respects API rate limits
+
+# ❌ Bad - Too many workers
+loop:
+  parallel: true
+  max_workers: 100  # May hit rate limits
 ```
 
 ---
 
 ## Troubleshooting
 
-### Step Not Executing
+### RAG Returns No Results
+- Check RAG server configuration in `config/rag/*.yaml`
+- Verify database has embeddings
+- Try lowering similarity threshold
+- Enable `expand_query: true`
 
-**Check:**
-1. Does `needs:` reference exist?
-2. Is `if:` false?
-3. Did a dependency fail?
-4. Is exactly ONE execution mode specified?
+### Loop Not Processing All Items
+- Check `max_iterations` is high enough
+- Verify items file format (JSON array or JSONL)
+- Check `min_success_rate` if loop exits early
 
----
-
-### Variable Not Interpolating
-
-**Check:**
-1. Is variable name spelled correctly?
-2. Does referenced step exist?
-3. Did referenced step run successfully?
-4. Is syntax correct: `{{var}}` not `{var}` or `${{var}}`
-
----
-
-### Provider/Model Not Working
-
-**Check:**
-1. Is provider spelled correctly?
-2. Is model available for provider?
-3. Are API keys configured?
-4. Is network accessible?
+### Parallel Loop Race Conditions
+- Write to individual files per item, not shared file
+- Merge results in a separate step after loop completes
 
 ---
 
 ## See Also
 
-- **[Object Model](OBJECT_MODEL.md)** - TypeScript interfaces
-- **[Inheritance Guide](INHERITANCE_GUIDE.md)** - Property inheritance
-- **[Consensus Reference](CONSENSUS_REFERENCE.md)** - Multi-provider validation
-- **[Loops Reference](LOOPS_REFERENCE.md)** - Iterative execution
 - **[Quick Reference](QUICK_REFERENCE.md)** - One-page overview
+- **[Object Model](OBJECT_MODEL.md)** - TypeScript interfaces
+- **[RAG Documentation](../../rag/)** - RAG configuration
+- **[Loops Guide](../LOOPS.md)** - Deep dive on loops
 
 ---
 
-**Remember:** Every step is fundamentally an mcp-cli call. The workflow system adds orchestration, dependencies, and composition on top of this foundation.
+**Last Updated:** 2026-01-15

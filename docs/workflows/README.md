@@ -612,6 +612,7 @@ See [MIGRATION.md](MIGRATION.md) for detailed guide.
 ### Documentation
 
 - [Schema Reference](SCHEMA.md) - Complete schema
+- [Variables Reference](VARIABLES.md) - Variable interpolation (code-verified)
 - [Loop Guide](LOOPS.md) - Iterative execution
 - [Authoring Guide](AUTHORING_GUIDE.md) - Writing workflows
 - [Migration Guide](MIGRATION.md) - Upgrade from v1

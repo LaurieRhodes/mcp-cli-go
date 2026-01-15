@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -29,6 +30,10 @@ func (le *LoopExecutor) ExecuteIterateLoop(ctx context.Context, loop *config.Loo
 	// Check if itemsSource is a file path (starts with file://)
 	if strings.HasPrefix(itemsSource, "file://") {
 		filePath := strings.TrimPrefix(itemsSource, "file://")
+		
+		// Resolve /outputs/ to actual outputs directory
+		filePath = le.resolveOutputsPath(filePath)
+		
 		le.logger.Info("Loading items from file: %s", filePath)
 		fileContent, err := os.ReadFile(filePath)
 		if err != nil {
@@ -523,4 +528,28 @@ func (le *LoopExecutor) executeIterateLoopParallel(
 		result.Failed, result.Duration)
 	
 	return result, nil
+}
+
+// resolveOutputsPath resolves /outputs/ to the actual outputs directory path
+func (le *LoopExecutor) resolveOutputsPath(filePath string) string {
+	// Check if path starts with /outputs/
+	if !strings.HasPrefix(filePath, "/outputs/") {
+		return filePath
+	}
+	
+	// Get actual outputs directory from config
+	outputsDir := "/tmp/mcp-outputs" // default fallback
+	if le.appConfig != nil && le.appConfig.Skills != nil {
+		if dir := le.appConfig.Skills.GetOutputsDir(); dir != "" {
+			outputsDir = dir
+		}
+	}
+	
+	// Replace /outputs/ with actual directory
+	relativePath := strings.TrimPrefix(filePath, "/outputs/")
+	resolvedPath := filepath.Join(outputsDir, relativePath)
+	
+	le.logger.Debug("Resolved path: %s -> %s", filePath, resolvedPath)
+	
+	return resolvedPath
 }

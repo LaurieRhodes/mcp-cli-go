@@ -26,6 +26,9 @@ dist/
 release/
 *.sha256
 
+# cLAUDE sUMMARIES
+_SUMMARIES/
+
 # Test files
 architecture_test.go
 phase2_validation.go

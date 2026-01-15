@@ -6,6 +6,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/env"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -44,6 +45,8 @@ func getColorizedHelp() string {
 		blue("| ") + green("mcp-cli chat") + "                 Explicitly start chat mode                   " + blue("|\n") +
 		blue("| ") + green("mcp-cli query \"question\"") + "     Ask a single question                        " + blue("|\n") +
 		blue("| ") + green("mcp-cli interactive") + "          Interactive mode with slash commands         " + blue("|\n") +
+		blue("|                                                                            |\n") +
+		blue("| ") + yellow("For query options: ") + green("mcp-cli query --help") + "                                   " + blue("|\n") +
 		blue("+----------------------------------------------------------------------------+\n\n")
 	
 	templates := cyan("+----------------------------------------------------------------------------+\n") +
@@ -52,10 +55,15 @@ func getColorizedHelp() string {
 		cyan("| ") + white("Templates chain multiple AI requests with different providers and pass    ") + cyan("|\n") +
 		cyan("| ") + white("data between steps for complex, automated workflows.                      ") + cyan("|\n") +
 		cyan("|                                                                            |\n") +
-		cyan("| ") + green("mcp-cli --list-templates") + "                List available templates          " + cyan("|\n") +
-		cyan("| ") + green("mcp-cli --workflow analyze") + "              Run 'analyze' template            " + cyan("|\n") +
+		cyan("| ") + green("mcp-cli workflows") + "                        List available workflows          " + cyan("|\n") +
+		cyan("| ") + green("mcp-cli --workflow analyze") + "              Run 'analyze' workflow            " + cyan("|\n") +
 		cyan("| ") + green("mcp-cli --workflow analyze --input-data \"data\"") + "  With input data           " + cyan("|\n") +
 		cyan("| ") + green("echo \"data\" | mcp-cli --workflow analyze") + "        From stdin                " + cyan("|\n") +
+		cyan("|                                                                            |\n") +
+		cyan("| ") + white("Resume from specific step (skips previous steps, validation still runs):  ") + cyan("|\n") +
+		cyan("| ") + green("mcp-cli --workflow pipeline --start-from process") + "   Resume from 'process'  " + cyan("|\n") +
+		cyan("|                                                                            |\n") +
+		cyan("| ") + yellow("Workflow flags: ") + white("--start-from, --end-at, --log-level                      ") + cyan("|\n") +
 		cyan("+----------------------------------------------------------------------------+\n\n")
 	
 	server := yellow("+----------------------------------------------------------------------------+\n") +
@@ -75,7 +83,19 @@ func getColorizedHelp() string {
 		blue("| ") + green("mcp-cli embeddings --input-file doc.txt") + "      From file                    " + blue("|\n") +
 		blue("| ") + green("mcp-cli embeddings --model text-embedding-3-large") + "  Specific model         " + blue("|\n") +
 		blue("| ") + green("echo \"text\" | mcp-cli embeddings") + "             From stdin                   " + blue("|\n") +
+		blue("|                                                                            |\n") +
+		blue("| ") + yellow("For chunking, output options: ") + green("mcp-cli embeddings --help") + "                   " + blue("|\n") +
 		blue("+----------------------------------------------------------------------------+\n\n")
+	
+	rag := yellow("+----------------------------------------------------------------------------+\n") +
+		yellow("| ") + magenta("RAG Operations") + yellow("                                                             |\n") +
+		yellow("+----------------------------------------------------------------------------+\n") +
+		yellow("| ") + green("mcp-cli rag search \"query\" --server pgvector --top-k 10") + "                   " + yellow("|\n") +
+		yellow("| ") + green("mcp-cli rag search \"query\" --strategies default,hybrid --fusion rrf") + "       " + yellow("|\n") +
+		yellow("| ") + green("mcp-cli rag config") + "                           Show RAG configuration       " + yellow("|\n") +
+		yellow("|                                                                            |\n") +
+		yellow("| ") + yellow("For all RAG options: ") + green("mcp-cli rag --help") + "                                   " + yellow("|\n") +
+		yellow("+----------------------------------------------------------------------------+\n\n")
 	
 	configSection := cyan("+----------------------------------------------------------------------------+\n") +
 		cyan("| ") + magenta("Configuration") + cyan("                                                              |\n") +
@@ -84,7 +104,7 @@ func getColorizedHelp() string {
 		cyan("| ") + green("mcp-cli config --help") + "                        See all config commands      " + cyan("|\n") +
 		cyan("+----------------------------------------------------------------------------+")
 	
-	return header + setup + usage + templates + server + embeddings + configSection
+	return header + setup + usage + templates + server + embeddings + rag + configSection
 }
 
 var (
@@ -101,11 +121,9 @@ var (
 	
 	// Template-based workflow flags
 	workflowName      string
+	startFromStep     string
+	endAtStep         string
 	inputData         string
-	listWorkflows     bool
-	
-	// Skills flags
-	listSkills        bool
 
 	// RootCmd represents the base command when called without any subcommands
 	RootCmd = &cobra.Command{
@@ -165,24 +183,6 @@ var (
 		},
 		// If no subcommand is provided, check for template mode or run chat command
 		Run: func(cmd *cobra.Command, args []string) {
-			// Check for list workflows flag
-			if listWorkflows {
-				if err := executeListWorkflows(); err != nil {
-					logging.Error("Failed to list workflows: %v", err)
-					os.Exit(1)
-				}
-				return
-			}
-			
-			// Check for list skills flag
-			if listSkills {
-				if err := executeListSkills(); err != nil {
-					logging.Error("Failed to list skills: %v", err)
-					os.Exit(1)
-				}
-				return
-			}
-			
 			// Check for template execution
 			if workflowName != "" {
 				if err := executeWorkflow(); err != nil {
@@ -206,6 +206,11 @@ func Execute() error {
 }
 
 func init() {
+	// Load .env file first - before any config loading
+	// This ensures environment variables are available for config substitution
+	// Silently ignores if .env doesn't exist
+	_ = env.LoadDotEnv()
+	
 	// Global flags
 	RootCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml", "Path to configuration file (YAML/JSON)")
 	RootCmd.PersistentFlags().StringVarP(&serverName, "server", "s", "", "MCP server(s) to use (comma-separated, e.g., 'filesystem,brave-search')")
@@ -214,22 +219,22 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&modelName, "model", "m", "", "Model to use (e.g., gpt-4o, claude-sonnet-4, qwen2.5:32b)")
 	RootCmd.PersistentFlags().BoolVar(&disableFilesystem, "disable-filesystem", false, "Disable filesystem server (prevents file access)")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging (shortcut for --log-level verbose)")
-	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "", "Set log level: error, warn, info, steps, debug, verbose (workflows only, default: info)")
+	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "", "Set log level: error, warn, info, step, steps, debug, verbose, noisy (default: info)")
 	RootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colored output (for piping or logging)")
 	
-	// Template-based workflow flags
-	RootCmd.PersistentFlags().StringVar(&workflowName, "workflow", "", "Execute workflow by name")
-	RootCmd.PersistentFlags().StringVar(&inputData, "input-data", "", "Input data for template (JSON or plain text)")
-	RootCmd.PersistentFlags().BoolVar(&listWorkflows, "list-workflows", false, "List all available workflows")
-	
-	// Skills flags
-	RootCmd.PersistentFlags().BoolVar(&listSkills, "list-skills", false, "List all available skills")
+	// Template-based workflow flags (only for root command, not subcommands)
+	RootCmd.Flags().StringVar(&workflowName, "workflow", "", "Execute workflow by name")
+	RootCmd.Flags().StringVar(&startFromStep, "start-from", "", "Start workflow from specific step (skips previous steps)")
+	RootCmd.Flags().StringVar(&endAtStep, "end-at", "", "End workflow at specific step (skips steps after)")
+	RootCmd.Flags().StringVar(&inputData, "input-data", "", "Input data for template (JSON or plain text)")
 
 	// Add subcommands
 	RootCmd.AddCommand(ChatCmd)
 	RootCmd.AddCommand(InteractiveCmd)
 	RootCmd.AddCommand(QueryCmd)
 	RootCmd.AddCommand(ServersCmd)
+	RootCmd.AddCommand(WorkflowsCmd)  // List workflows
+	RootCmd.AddCommand(SkillsCmd)     // List skills
 	RootCmd.AddCommand(EmbeddingsCmd)
 	RootCmd.AddCommand(RagCmd)  // RAG operations
 	RootCmd.AddCommand(ConfigCmd)

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
@@ -57,13 +58,25 @@ type SearchResult struct {
 type MultiVectorRetriever struct {
 	serverManager domain.MCPServerManager
 	serverName    string
+	ragConfig     *config.RagConfig // Full RAG config for looking up search tools
 }
 
-// NewMultiVectorRetriever creates a new multi-vector retriever
+// NewMultiVectorRetriever creates a new multi-vector retriever (legacy constructor)
 func NewMultiVectorRetriever(serverManager domain.MCPServerManager, serverName string) *MultiVectorRetriever {
 	return &MultiVectorRetriever{
 		serverManager: serverManager,
 		serverName:    serverName,
+		ragConfig:     nil,
+	}
+}
+
+// NewMultiVectorRetrieverWithConfig creates a new multi-vector retriever with RAG config
+// This allows the retriever to use configured search tool names instead of pattern matching
+func NewMultiVectorRetrieverWithConfig(serverManager domain.MCPServerManager, ragConfig *config.RagConfig) *MultiVectorRetriever {
+	return &MultiVectorRetriever{
+		serverManager: serverManager,
+		serverName:    ragConfig.DefaultServer,
+		ragConfig:     ragConfig,
 	}
 }
 
@@ -416,12 +429,34 @@ func (mvr *MultiVectorRetriever) validateConfig(config MultiVectorSearchConfig) 
 }
 
 func (mvr *MultiVectorRetriever) findBestSearchTool(availableTools []domain.Tool) (*domain.Tool, error) {
+	// If we have RAG config, use the configured search tool name
+	if mvr.ragConfig != nil {
+		// Get the server config for the current server
+		serverConfig, exists := mvr.ragConfig.Servers[mvr.serverName]
+		if exists && serverConfig.SearchTool != "" {
+			// Look for the specifically configured tool
+			logging.Debug("Looking for configured search tool: %s", serverConfig.SearchTool)
+			for _, tool := range availableTools {
+				if tool.Function.Name == serverConfig.SearchTool {
+					logging.Info("Found configured search tool: %s", serverConfig.SearchTool)
+					return &tool, nil
+				}
+			}
+			logging.Warn("Configured search tool '%s' not found, falling back to pattern matching", serverConfig.SearchTool)
+		}
+	}
+	
+	// Fall back to pattern matching if no RAG config or tool not found
+	logging.Debug("Using pattern matching to find search tool")
+	
 	// Look for vector search tools in order of preference
 	searchPatterns := []string{
+		"search_vectors",     // pgvector-mcp tool
 		"similarity_search",
 		"vector_search", 
 		"knn_search",
 		"range_search",
+		"search",             // generic search tool
 		"execute_query",
 		"query",
 		"sql",
@@ -431,6 +466,7 @@ func (mvr *MultiVectorRetriever) findBestSearchTool(availableTools []domain.Tool
 		for _, tool := range availableTools {
 			toolNameLower := strings.ToLower(tool.Function.Name)
 			if strings.Contains(toolNameLower, pattern) {
+				logging.Debug("Found search tool via pattern '%s': %s", pattern, tool.Function.Name)
 				return &tool, nil
 			}
 		}
@@ -523,24 +559,34 @@ func (mvr *MultiVectorRetriever) parseSearchResults(rawResult, source string, te
 		return []SearchResult{}, nil
 	}
 	
-	// Parse JSON response from vector search tool
+	// Try to parse JSON response - handle multiple formats
+	var items []map[string]interface{}
+	
+	// First, try parsing as a wrapped response with success/results/total_results
 	var searchResponse struct {
 		Success      bool                     `json:"success"`
 		Results      []map[string]interface{} `json:"results"`
 		TotalResults int                      `json:"total_results"`
 	}
 	
-	if err := json.Unmarshal([]byte(rawResult), &searchResponse); err != nil {
-		return nil, fmt.Errorf("failed to parse search results JSON: %w", err)
-	}
-	
-	if !searchResponse.Success {
-		return nil, fmt.Errorf("search was not successful")
+	if err := json.Unmarshal([]byte(rawResult), &searchResponse); err == nil && searchResponse.Results != nil {
+		// Successfully parsed as wrapped response
+		if !searchResponse.Success {
+			return nil, fmt.Errorf("search was not successful")
+		}
+		items = searchResponse.Results
+		logging.Debug("Parsed %d results from wrapped response format", len(items))
+	} else {
+		// Try parsing as a raw array (pgvector MCP server format)
+		if err := json.Unmarshal([]byte(rawResult), &items); err != nil {
+			return nil, fmt.Errorf("failed to parse search results JSON (tried wrapped and array formats): %w", err)
+		}
+		logging.Debug("Parsed %d results from raw array format", len(items))
 	}
 	
 	var results []SearchResult
 	
-	for i, item := range searchResponse.Results {
+	for i, item := range items {
 		// Extract ID (try different field names)
 		id := fmt.Sprintf("%s_%d", source, i)
 		if itemID, ok := item["id"]; ok {

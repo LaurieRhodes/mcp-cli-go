@@ -134,6 +134,7 @@ func (l *Loader) loadSettings(pattern string, result *ApplicationConfig) error {
 		Embeddings *EmbeddingsConfig `yaml:"embeddings,omitempty"`
 		Chat       *ChatConfig       `yaml:"chat,omitempty"`
 		Skills     *SkillsConfig     `yaml:"skills,omitempty"`
+		RAG        *RagConfig        `yaml:"rag,omitempty"`
 	}
 
 	if err := yaml.Unmarshal(data, &settings); err != nil {
@@ -145,6 +146,24 @@ func (l *Loader) loadSettings(pattern string, result *ApplicationConfig) error {
 	result.Embeddings = settings.Embeddings
 	result.Chat = settings.Chat
 	result.Skills = settings.Skills
+	if settings.RAG != nil {
+		if result.RAG == nil {
+			result.RAG = settings.RAG
+		} else {
+			// Merge RAG settings: settings.yaml provides defaults, config/rag/*.yaml provides servers
+			if settings.RAG.DefaultServer != "" {
+				result.RAG.DefaultServer = settings.RAG.DefaultServer
+			}
+			if settings.RAG.DefaultFusion != "" {
+				result.RAG.DefaultFusion = settings.RAG.DefaultFusion
+			}
+			if settings.RAG.DefaultTopK > 0 {
+				result.RAG.DefaultTopK = settings.RAG.DefaultTopK
+			}
+			result.RAG.QueryExpansion = settings.RAG.QueryExpansion
+			result.RAG.Fusion = settings.RAG.Fusion
+		}
+	}
 
 	return nil
 }

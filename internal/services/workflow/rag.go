@@ -24,13 +24,13 @@ func (o *Orchestrator) executeRagStep(ctx context.Context, step *config.StepV2) 
 	}
 	ragConfig := o.appConfig.RAG
 	
-	// Ensure we have a server manager
-	if o.executor.serverManager == nil {
-		return fmt.Errorf("server manager not initialized")
+	// Ensure RAG server manager is initialized
+	if o.ragServerManager == nil {
+		return fmt.Errorf("RAG server manager not initialized (no RAG servers connected)")
 	}
 	
-	// Initialize RAG service with app config's RAG settings and embedding service
-	ragService := rag.NewServiceWithConfig(ragConfig, o.executor.serverManager, o.embeddingService)
+	// Initialize RAG service with dedicated RAG server manager
+	ragService := rag.NewServiceWithConfig(ragConfig, o.ragServerManager, o.embeddingService)
 	
 	// Interpolate query
 	query, err := o.interpolator.Interpolate(ragMode.Query)

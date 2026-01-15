@@ -21,7 +21,21 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
 	workflow "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
+	"github.com/spf13/cobra"
 )
+
+// WorkflowsCmd lists all available workflows
+var WorkflowsCmd = &cobra.Command{
+	Use:   "workflows",
+	Short: "List all available workflows",
+	Long: `List all workflow templates configured in the system.
+
+Workflows are defined in YAML files in config/workflows/ directory.
+Use these workflow names with --workflow flag on the root command.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return executeListWorkflows()
+	},
+}
 
 // resolveLogLevel determines the effective log level from CLI flags and workflow config
 // Priority: 1) --log-level flag, 2) --verbose flag, 3) workflow config, 4) default
@@ -108,9 +122,9 @@ func executeWorkflow() error {
 	
 	// 6. Execute workflow (with or without servers)
 	if len(servers) == 0 {
-		return executeWorkflowWithoutServers(wf, workflowName, inputData, appConfig, skills)
+		return executeWorkflowWithoutServers(wf, workflowName, inputData, appConfig, skills, startFromStep, endAtStep)
 	}
-	return executeWorkflowWithServers(wf, workflowName, inputData, appConfig, servers, skills)
+	return executeWorkflowWithServers(wf, workflowName, inputData, appConfig, servers, skills, startFromStep, endAtStep)
 }
 
 // initializeProvider creates the LLM provider for the workflow
@@ -273,7 +287,7 @@ func collectSkillsFromWorkflow(wf *config.WorkflowV2) []string {
 }
 
 // executeWorkflowWithoutServers executes a workflow that doesn't need MCP servers
-func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, skills []string) error {
+func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, skills []string, startFrom string, endAt string) error {
 	logging.Debug("Executing workflow without MCP servers")
 	
 	// Note: Skills are typically exposed through MCP servers, so this path wouldn't use skills
@@ -306,6 +320,8 @@ func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, in
 	orchestrator.SetAppConfig(appConfig)
 	orchestrator.SetAppConfigForWorkflows(appConfig)
 	orchestrator.SetEmbeddingService(embeddingService)
+	orchestrator.SetStartFrom(startFrom)
+	orchestrator.SetEndAt(endAt)
 	
 	// Execute
 	ctx := context.Background()
@@ -318,7 +334,7 @@ func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, in
 }
 
 // executeWorkflowWithServers executes a workflow that needs MCP servers
-func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, servers []string, skills []string) error {
+func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, servers []string, skills []string, startFrom string, endAt string) error {
 	logging.Debug("Executing workflow with MCP servers: %v", servers)
 	if len(skills) > 0 {
 		logging.Info("Skills filter enabled: %v", skills)
@@ -374,6 +390,8 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, input
 		orchestrator.SetAppConfigForWorkflows(appConfig)
 		orchestrator.SetServerManager(serverManager)
 		orchestrator.SetEmbeddingService(embeddingService)
+		orchestrator.SetStartFrom(startFrom)
+		orchestrator.SetEndAt(endAt)
 		
 		// Execute with cancellable context
 		if err := orchestrator.Execute(ctx, inputData); err != nil {

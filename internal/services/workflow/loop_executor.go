@@ -8,6 +8,9 @@ import (
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
+	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 )
 
 // LoopExecutor handles loop execution
@@ -17,6 +20,7 @@ type LoopExecutor struct {
 	interpolator  *Interpolator
 	executor      *Executor
 	serverManager domain.MCPServerManager
+	embeddingService domain.EmbeddingService
 }
 
 // NewLoopExecutor creates a new loop executor
@@ -26,6 +30,7 @@ func NewLoopExecutor(
 	interpolator *Interpolator,
 	executor *Executor,
 	serverManager domain.MCPServerManager,
+	embeddingService domain.EmbeddingService,
 ) *LoopExecutor {
 	return &LoopExecutor{
 		appConfig:     appConfig,
@@ -33,6 +38,7 @@ func NewLoopExecutor(
 		interpolator:  interpolator,
 		executor:      executor,
 		serverManager: serverManager,
+		embeddingService: embeddingService,
 	}
 }
 
@@ -202,6 +208,19 @@ func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.Wo
 		subOrchestrator.executor.SetServerManager(le.serverManager)
 	}
 	subOrchestrator.SetAppConfigForWorkflows(le.appConfig)
+	
+	// Create fresh embedding service for child workflow (like standalone workflows do)
+	// This makes child workflows fully independent with their own services
+	configService := infraConfig.NewService()
+	
+	// Load configuration so embedding service can access provider configs
+	if _, loadErr := configService.LoadConfig("config.yaml"); loadErr != nil {
+		return "", fmt.Errorf("failed to load config for child workflow: %w", loadErr)
+	}
+	
+	providerFactory := ai.NewProviderFactory()
+	childEmbeddingService := embeddings.NewService(configService, providerFactory)
+	subOrchestrator.SetEmbeddingService(childEmbeddingService)
 	
 	// Copy loop variables to sub-workflow's interpolator
 	le.interpolator.CopyLoopVars(subOrchestrator.interpolator)

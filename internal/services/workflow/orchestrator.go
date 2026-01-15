@@ -10,6 +10,7 @@ import (
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 )
 
 // Orchestrator orchestrates workflow execution with dependency resolution
@@ -25,6 +26,9 @@ type Orchestrator struct {
 	appConfig        *config.ApplicationConfig
 	loopExecutor     *LoopExecutor
 	embeddingService domain.EmbeddingService
+	ragServerManager *host.ServerManager // Dedicated manager for RAG servers (internal, not exposed to LLM)
+	startFrom        string // Step name to start workflow from (skips previous steps)
+	endAt            string // Step name to end workflow at (skips steps after)
 }
 
 // NewOrchestrator creates a new workflow orchestrator
@@ -58,8 +62,31 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	// Set initial input
 	o.interpolator.Set("input", input)
 
+	// Log start-from if specified
+	if o.startFrom != "" {
+		o.logger.Info("Resuming from step: %s", o.startFrom)
+	}
+	
+	// Log end-at if specified
+	if o.endAt != "" {
+		o.logger.Info("Ending at step: %s", o.endAt)
+	}
+
 	o.logger.Info("Starting workflow: %s v%s", o.workflow.Name, o.workflow.Version)
 	o.logger.Step("\n[WORKFLOW] %s v%s", o.workflow.Name, o.workflow.Version)
+
+	// Connect to RAG servers if workflow uses RAG (separate from LLM-exposed servers)
+	if err := o.connectRAGServersIfNeeded(ctx); err != nil {
+		return fmt.Errorf("failed to connect RAG servers: %w", err)
+	}
+	
+	// Ensure RAG server connections are cleaned up
+	if o.ragServerManager != nil {
+		defer func() {
+			o.logger.Debug("Closing RAG server connections")
+			o.ragServerManager.CloseConnections()
+		}()
+	}
 
 	// Initialize loop executor if we have appConfig and loops
 	if o.appConfig != nil && len(o.workflow.Loops) > 0 {
@@ -69,16 +96,32 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 			o.interpolator,
 			o.executor,
 			o.executor.serverManager,
+			o.embeddingService,
 		)
 	}
 
 	// Track completed steps and loops
 	completed := make(map[string]bool)
 
+	// Pre-mark steps as completed if using start-from or end-at
+	if o.startFrom != "" || o.endAt != "" {
+		if err := o.markStepsAsCompleted(completed); err != nil {
+			return err
+		}
+	}
+
 	// Execute steps and loops in dependency order
 	stepsRemaining := make(map[string]*config.StepV2)
 	for i := range o.workflow.Steps {
-		stepsRemaining[o.workflow.Steps[i].Name] = &o.workflow.Steps[i]
+		step := &o.workflow.Steps[i]
+		
+		// Skip steps that were marked completed
+		if completed[step.Name] {
+			o.logger.Debug("Skipping step: %s", step.Name)
+			continue
+		}
+		
+		stepsRemaining[step.Name] = step
 	}
 	
 	loopsRemaining := make(map[string]*config.LoopV2)
@@ -550,6 +593,16 @@ func (o *Orchestrator) SetEmbeddingService(service domain.EmbeddingService) {
 	o.embeddingService = service
 }
 
+// SetStartFrom sets the step to start workflow from, skipping previous steps
+func (o *Orchestrator) SetStartFrom(stepName string) {
+	o.startFrom = stepName
+}
+
+// SetEndAt sets the step to end workflow at, skipping steps after
+func (o *Orchestrator) SetEndAt(stepName string) {
+	o.endAt = stepName
+}
+
 // SetProvider is deprecated - kept for compatibility
 func (o *Orchestrator) SetProvider(provider domain.LLMProvider) {
 	// No-op - we create providers dynamically now
@@ -699,6 +752,7 @@ func (o *Orchestrator) executeLoopStep(ctx context.Context, step *config.StepV2)
 			o.interpolator,
 			o.executor,
 			o.executor.serverManager,
+			o.embeddingService,
 		)
 	}
 	
@@ -958,4 +1012,196 @@ func (o *Orchestrator) executeLoop(ctx context.Context, loop *config.LoopV2) err
 		loop.Name, result.Iterations, result.ExitReason)
 	
 	return nil
+}
+
+// markStepsAsCompleted marks steps before start-from and after end-at as completed
+func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
+	var startStepIndex int = -1
+	var endStepIndex int = -1
+	
+	// Find start-from step index
+	if o.startFrom != "" {
+		startStepExists := false
+		
+		for i, step := range o.workflow.Steps {
+			if step.Name == o.startFrom {
+				startStepExists = true
+				startStepIndex = i
+				break
+			}
+		}
+		
+		// Check loops too for start-from
+		if !startStepExists {
+			for _, loop := range o.workflow.Loops {
+				if loop.Name == o.startFrom {
+					startStepExists = true
+					// For loops, mark all steps as skipped
+					for _, step := range o.workflow.Steps {
+						completed[step.Name] = true
+					}
+					o.logger.Info("Starting from loop: %s (all steps skipped)", o.startFrom)
+					return nil
+				}
+			}
+		}
+		
+		if !startStepExists {
+			availableSteps := make([]string, 0, len(o.workflow.Steps)+len(o.workflow.Loops))
+			for _, step := range o.workflow.Steps {
+				availableSteps = append(availableSteps, step.Name)
+			}
+			for _, loop := range o.workflow.Loops {
+				availableSteps = append(availableSteps, loop.Name)
+			}
+			return fmt.Errorf("start-from step '%s' not found in workflow. Available steps: %v", o.startFrom, availableSteps)
+		}
+		
+		// Mark all steps before start-from as completed
+		for i := 0; i < startStepIndex; i++ {
+			step := o.workflow.Steps[i]
+			completed[step.Name] = true
+			o.logger.Debug("Skipped (before start-from): %s", step.Name)
+		}
+		
+		o.logger.Info("Starting from step %d/%d: %s", startStepIndex+1, len(o.workflow.Steps), o.startFrom)
+	}
+	
+	// Find end-at step index
+	if o.endAt != "" {
+		endStepExists := false
+		
+		for i, step := range o.workflow.Steps {
+			if step.Name == o.endAt {
+				endStepExists = true
+				endStepIndex = i
+				break
+			}
+		}
+		
+		// Check loops too for end-at
+		if !endStepExists {
+			for _, loop := range o.workflow.Loops {
+				if loop.Name == o.endAt {
+					endStepExists = true
+					// For end-at on a loop, we can't really handle it well
+					// So just log a warning
+					o.logger.Warn("End-at specified for loop: %s (loops cannot be partially executed)", o.endAt)
+					return nil
+				}
+			}
+		}
+		
+		if !endStepExists {
+			availableSteps := make([]string, 0, len(o.workflow.Steps)+len(o.workflow.Loops))
+			for _, step := range o.workflow.Steps {
+				availableSteps = append(availableSteps, step.Name)
+			}
+			for _, loop := range o.workflow.Loops {
+				availableSteps = append(availableSteps, loop.Name)
+			}
+			return fmt.Errorf("end-at step '%s' not found in workflow. Available steps: %v", o.endAt, availableSteps)
+		}
+		
+		// Mark all steps after end-at as completed
+		for i := endStepIndex + 1; i < len(o.workflow.Steps); i++ {
+			step := o.workflow.Steps[i]
+			completed[step.Name] = true
+			o.logger.Debug("Skipped (after end-at): %s", step.Name)
+		}
+		
+		o.logger.Info("Ending at step %d/%d: %s", endStepIndex+1, len(o.workflow.Steps), o.endAt)
+	}
+	
+	// Validate that start-from comes before end-at if both are specified
+	if startStepIndex != -1 && endStepIndex != -1 {
+		if startStepIndex > endStepIndex {
+			return fmt.Errorf("start-from step '%s' (index %d) comes after end-at step '%s' (index %d)", 
+				o.startFrom, startStepIndex+1, o.endAt, endStepIndex+1)
+		}
+	}
+	
+	return nil
+}
+
+// connectRAGServersIfNeeded detects RAG steps in workflow and connects required servers
+func (o *Orchestrator) connectRAGServersIfNeeded(ctx context.Context) error {
+	// Check if workflow uses RAG
+	hasRAG := o.workflowUsesRAG()
+	if !hasRAG {
+		o.logger.Debug("No RAG steps detected, skipping RAG server connections")
+		return nil
+	}
+	
+	// Get RAG configuration
+	if o.appConfig == nil || o.appConfig.RAG == nil {
+		return fmt.Errorf("workflow uses RAG but no RAG configuration found")
+	}
+	
+	o.logger.Info("Workflow uses RAG, connecting to RAG servers...")
+	
+	// Create dedicated server manager for RAG (internal connections only)
+	o.ragServerManager = host.NewServerManagerWithOptions(true) // suppress console
+	
+	// Connect to all servers referenced in RAG config
+	connectedServers := make(map[string]bool)
+	for _, ragServerConfig := range o.appConfig.RAG.Servers {
+		mcpServerName := ragServerConfig.MCPServer
+		
+		// Skip if already connected
+		if connectedServers[mcpServerName] {
+			continue
+		}
+		
+		// Get server definition from app config
+		serverDef, exists := o.appConfig.Servers[mcpServerName]
+		if !exists {
+			o.logger.Warn("RAG server '%s' not found in servers config", mcpServerName)
+			continue
+		}
+		
+		o.logger.Info("Connecting RAG server (internal): %s", mcpServerName)
+		
+		// Connect to server (internal, not exposed to LLM)
+		_, err := o.ragServerManager.ConnectToServer(mcpServerName, serverDef, false)
+		if err != nil {
+			o.logger.Warn("Failed to connect RAG server '%s': %v", mcpServerName, err)
+			continue
+		}
+		
+		connectedServers[mcpServerName] = true
+		o.logger.Info("✓ Connected RAG server: %s", mcpServerName)
+	}
+	
+	if len(connectedServers) == 0 {
+		return fmt.Errorf("workflow uses RAG but failed to connect to any RAG servers")
+	}
+	
+	o.logger.Info("✓ Connected %d RAG server(s)", len(connectedServers))
+	return nil
+}
+
+// workflowUsesRAG checks if the workflow or any child workflows use RAG
+func (o *Orchestrator) workflowUsesRAG() bool {
+	// Check steps in current workflow
+	for _, step := range o.workflow.Steps {
+		if step.Rag != nil {
+			return true
+		}
+		
+		// Check if step uses a loop with child workflow
+		if step.Loop != nil && step.Loop.Workflow != "" {
+			childWorkflow, exists := o.appConfig.GetWorkflow(step.Loop.Workflow)
+			if exists {
+				// Check child workflow steps for RAG
+				for _, childStep := range childWorkflow.Steps {
+					if childStep.Rag != nil {
+						return true
+					}
+				}
+			}
+		}
+	}
+	
+	return false
 }

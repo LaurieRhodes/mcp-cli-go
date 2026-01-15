@@ -13,7 +13,21 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	skillsvc "github.com/LaurieRhodes/mcp-cli-go/internal/services/skills"
+	"github.com/spf13/cobra"
 )
+
+// SkillsCmd lists all available skills
+var SkillsCmd = &cobra.Command{
+	Use:   "skills",
+	Short: "List all available skills",
+	Long: `List all skills configured in the system.
+
+Skills are defined in config/skills/ directory and can be used to extend
+Claude's capabilities with specialized knowledge and helper functions.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return executeListSkills()
+	},
+}
 
 // executeListSkills lists all available skills
 func executeListSkills() error {

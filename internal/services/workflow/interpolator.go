@@ -25,8 +25,10 @@ func (i *Interpolator) Set(key, value string) {
 }
 
 // SetStepResult sets a step's result
+// Stores both as "stepName" and "step.stepName" for compatibility
 func (i *Interpolator) SetStepResult(stepName, result string) {
 	i.variables[stepName] = result
+	i.variables["step."+stepName] = result
 }
 
 // SetEnv sets environment variables

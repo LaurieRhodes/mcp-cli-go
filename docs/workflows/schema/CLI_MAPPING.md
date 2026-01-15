@@ -124,12 +124,140 @@ consensus.executions[] (inherits from step, can override)
 | `template`    | `--workflow <name>`   | object   | (choose one) | ❌ No        | Call workflow        |
 | `embeddings`  | `--embeddings`        | object   | (choose one) | ❌ No        | Generate embeddings  |
 | `consensus`   | (parallel calls)      | object   | (choose one) | ❌ No        | Multi-provider       |
+| `rag`         | `mcp-cli rag search`  | object   | (choose one) | ❌ No        | RAG retrieval        |
+| `loop`        | (iterative workflow)  | object   | (choose one) | ❌ No        | Iterate over items   |
+
+**Additional Step Properties:**
+
+| YAML Property | CLI Argument          | Type     | Default      | Inheritable | Description                 |
+| ------------- | --------------------- | -------- | ------------ | ----------- | --------------------------- |
+| `execution_order` | N/A               | int      | (none)       | ❌ No        | Manual execution order      |
+| `input`       | (passed as JSON)      | any      | (none)       | ❌ No        | Direct input data           |
+| `providers`   | (failover sequence)   | array    | (none)       | ✅ Yes       | Step-level provider failover |
+| `logging`     | `--verbose`/`--noisy` | string   | (inherited)  | ✅ Yes       | Step-level logging override  |
+| `no_color`    | `--no-color`          | bool     | (inherited)  | ✅ Yes       | Step-level color override    |
 
 ### Environment Variables
 
 | YAML Property | CLI Argument | Type   | Default | Inheritable | Description                     |
 | ------------- | ------------ | ------ | ------- | ----------- | ------------------------------- |
 | `env`         | N/A          | object | {}      | ✅ Yes       | Key-value environment variables |
+
+---
+
+
+### Example 6: Execution Order Control
+
+**YAML:**
+
+```yaml
+steps:
+  - name: step_c
+    execution_order: 3
+    run: "Third step"
+  
+  - name: step_a
+    execution_order: 1
+    run: "First step"
+  
+  - name: step_b
+    execution_order: 2
+    run: "Second step"
+```
+
+**CLI Execution (respects execution_order):**
+
+```bash
+# Step 1: step_a executes first
+mcp-cli --input-data "First step"
+
+# Step 2: step_b executes second
+mcp-cli --input-data "Second step"
+
+# Step 3: step_c executes third
+mcp-cli --input-data "Third step"
+```
+
+**Key:** Execution order overrides definition order in YAML.
+
+---
+
+### Example 7: Direct Input Data
+
+**YAML:**
+
+```yaml
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
+steps:
+  - name: configure
+    input:
+      database: postgres
+      max_connections: 100
+      timeout: 30
+    run: |
+      Configure database:
+      - Type: {{input.database}}
+      - Connections: {{input.max_connections}}
+      - Timeout: {{input.timeout}}s
+```
+
+**CLI Execution:**
+
+```bash
+mcp-cli --provider anthropic --model claude-sonnet-4 \
+  --input-data '{
+    "database": "postgres",
+    "max_connections": 100,
+    "timeout": 30
+  }' \
+  --prompt "Configure database: ..."
+```
+
+**Key:** Complex input data is passed as JSON, accessible via {{input.key}}.
+
+---
+
+### Example 8: Step-Level Provider Failover
+
+**YAML:**
+
+```yaml
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
+steps:
+  - name: critical
+    providers:
+      - provider: anthropic
+        model: claude-opus-4
+      - provider: openai
+        model: gpt-4o
+    run: "Critical analysis"
+  
+  - name: normal
+    run: "Regular task"
+```
+
+**CLI Execution:**
+
+```bash
+# Critical step: Try Opus first, fall back to OpenAI
+mcp-cli --provider anthropic --model claude-opus-4 \
+  --input-data "Critical analysis"
+# If fails, retry with:
+mcp-cli --provider openai --model gpt-4o \
+  --input-data "Critical analysis"
+
+# Normal step: Uses default provider
+mcp-cli --provider anthropic --model claude-sonnet-4 \
+  --input-data "Regular task"
+```
+
+**Key:** Step-level failover chains override workflow defaults.
 
 ---
 

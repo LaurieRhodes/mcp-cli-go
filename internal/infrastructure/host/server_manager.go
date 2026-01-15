@@ -1,14 +1,19 @@
 package host
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"sync"
 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+	domainConfig "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/initialize"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/stdio"
 )
 
@@ -61,7 +66,7 @@ func NewServerManagerWithOptions(suppressConsole bool) *ServerManager {
 }
 
 // ConnectToServer connects to a server with the given configuration
-func (m *ServerManager) ConnectToServer(serverName string, serverConfig config.ServerConfig, userSpecified bool) (*ServerConnection, error) {
+func (m *ServerManager) ConnectToServer(serverName string, serverConfig domainConfig.ServerConfig, userSpecified bool) (*ServerConnection, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -132,7 +137,7 @@ func (m *ServerManager) ConnectToServers(configFile string, serverNames []string
 		logging.Debug("Processing server: %s", name)
 
 		// Get the server configuration
-		serverConfigDomain, exists := appConfig.Servers[name]
+		serverConfig, exists := appConfig.Servers[name]
 		if !exists {
 			logging.Warn("Server configuration not found for %s", name)
 			if !m.suppressConsole {
@@ -141,15 +146,7 @@ func (m *ServerManager) ConnectToServers(configFile string, serverNames []string
 			continue
 		}
 
-		// Convert domain ServerConfig to infrastructure ServerConfig
-		serverConfig := config.ServerConfig{
-			Command:      serverConfigDomain.Command,
-			Args:         serverConfigDomain.Args,
-			Env:          serverConfigDomain.Env,
-			SystemPrompt: serverConfigDomain.SystemPrompt,
-		}
-
-		// Connect to the server
+		// Connect to the server (now accepts domain config directly)
 		isUserSpecified := userSpecified[name]
 		_, err = m.ConnectToServer(name, serverConfig, isUserSpecified)
 		if err != nil {
@@ -234,4 +231,153 @@ func (m *ServerManager) GetSuppressConsole() bool {
 func (m *ServerManager) SetQuiet(quiet bool) {
 	logging.Warn("SetQuiet is deprecated, use SetSuppressConsole instead")
 	m.SetSuppressConsole(quiet)
+}
+
+// GetAvailableTools returns all tools from all connected servers
+func (m *ServerManager) GetAvailableTools() ([]domain.Tool, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	var allTools []domain.Tool
+	
+	for _, conn := range m.connections {
+		// Get tools from server using MCP protocol
+		result, err := tools.SendToolsList(conn.Client, nil)
+		if err != nil {
+			logging.Warn("Failed to get tools from server %s: %v", conn.Name, err)
+			continue
+		}
+		
+		// Convert MCP tools to domain tools
+		for _, tool := range result.Tools {
+			allTools = append(allTools, domain.Tool{
+				Type: "function",
+				Function: domain.ToolFunction{
+					Name:        tool.Name,
+					Description: tool.Description,
+					Parameters:  tool.InputSchema,
+				},
+			})
+		}
+	}
+	
+	return allTools, nil
+}
+
+// ExecuteTool executes a tool on the appropriate server
+func (m *ServerManager) ExecuteTool(ctx context.Context, toolName string, params map[string]interface{}) (string, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	// Find which server has this tool
+	for _, conn := range m.connections {
+		// Get tools list to check if this server has the tool
+		result, err := tools.SendToolsList(conn.Client, nil)
+		if err != nil {
+			continue
+		}
+		
+		// Check if this server has the tool
+		for _, tool := range result.Tools {
+			if tool.Name == toolName {
+				// Execute the tool on this server
+				logging.Debug("Executing tool %s on server %s", toolName, conn.Name)
+				callResult, err := tools.SendToolsCall(conn.Client, conn.Client.GetDispatcher(), toolName, params)
+				if err != nil {
+					return "", fmt.Errorf("tool execution failed: %w", err)
+				}
+				
+				// Check for error in result
+				if callResult.IsError {
+					return "", fmt.Errorf("tool error: %s", callResult.Error)
+				}
+				
+				// Convert content to string
+				// The content can be various types depending on the tool
+				if callResult.Content == nil {
+					return "", nil
+				}
+				
+				// Try to convert content to a reasonable string representation
+				switch v := callResult.Content.(type) {
+				case string:
+					return v, nil
+				case map[string]interface{}, []interface{}:
+					// Convert to JSON string
+					jsonBytes, err := json.Marshal(v)
+					if err != nil {
+						return "", fmt.Errorf("failed to marshal content: %w", err)
+					}
+					return string(jsonBytes), nil
+				default:
+					// For any other type, try JSON marshaling
+					jsonBytes, err := json.Marshal(v)
+					if err != nil {
+						// Fall back to string conversion
+						return fmt.Sprintf("%v", v), nil
+					}
+					return string(jsonBytes), nil
+				}
+			}
+		}
+	}
+	
+	return "", fmt.Errorf("tool '%s' not found on any connected server", toolName)
+}
+
+// Additional methods to implement domain.MCPServerManager interface
+
+// StartServer - not applicable for ServerManager (connections are established via ConnectToServer)
+func (m *ServerManager) StartServer(ctx context.Context, serverName string, cfg *domainConfig.ServerConfig) (domain.MCPServer, error) {
+	return nil, fmt.Errorf("StartServer not implemented - use ConnectToServer instead")
+}
+
+// StopServer stops a specific server connection
+func (m *ServerManager) StopServer(serverName string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	for i, conn := range m.connections {
+		if conn.Name == serverName {
+			conn.Client.Stop()
+			// Remove from connections slice
+			m.connections = append(m.connections[:i], m.connections[i+1:]...)
+			return nil
+		}
+	}
+	
+	return fmt.Errorf("server '%s' not found", serverName)
+}
+
+// GetServer retrieves a running server (ServerConnection implements MCPServer interface)
+func (m *ServerManager) GetServer(serverName string) (domain.MCPServer, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	for _, conn := range m.connections {
+		if conn.Name == serverName {
+			// ServerConnection can be returned as MCPServer if it implements the interface
+			// For now, return nil as ServerConnection doesn't implement MCPServer interface
+			return nil, true
+		}
+	}
+	
+	return nil, false
+}
+
+// ListServers returns all running servers
+func (m *ServerManager) ListServers() map[string]domain.MCPServer {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	servers := make(map[string]domain.MCPServer)
+	// ServerConnection doesn't implement MCPServer interface
+	// This method is not critical for RAG functionality
+	return servers
+}
+
+// StopAll stops all running servers
+func (m *ServerManager) StopAll() error {
+	m.CloseConnections()
+	return nil
 }
