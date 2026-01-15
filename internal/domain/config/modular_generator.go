@@ -110,7 +110,9 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 			Servers:    filepath.Join(configDirName, "servers/*.yaml"),
 			RunAs:      filepath.Join(configDirName, "runasMCP/*.yaml"),
 			Embeddings: filepath.Join(configDirName, "embeddings/*.yaml"),
+			Templates:  filepath.Join(configDirName, "templates/*.yaml"),
 			Workflows:  filepath.Join(configDirName, "workflows/*.yaml"),
+			RAG:        filepath.Join(configDirName, "rag/*.yaml"),
 			Settings:   filepath.Join(configDirName, "settings.yaml"),
 		},
 	}
@@ -130,37 +132,72 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 
 // createSettings creates the settings.yaml file
 func (g *ModularConfigGenerator) createSettings(config *GeneratorConfig) error {
-	settings := map[string]interface{}{
-		"ai": map[string]interface{}{
-			"default_provider":      config.DefaultProvider,
-			"default_system_prompt": "You are a helpful assistant.",
-		},
-		"embeddings": map[string]interface{}{
-			"default_chunk_strategy": "sentence",
-			"default_max_chunk_size": 512,
-			"default_overlap":        0,
-			"output_precision":       6,
-		},
-		"logging": map[string]interface{}{
-			"level":  "info",
-			"format": "text",
-		},
-		"chat": map[string]interface{}{
-			"default_temperature": 0.7,
-			"max_history_size":    50,
-		},
-		"skills": map[string]interface{}{
-			"outputs_dir": "/tmp/mcp-outputs",
-		},
-	}
+	settingsContent := `# Global Application Settings
+# These settings apply across all commands and operations
 
-	data, err := yaml.Marshal(settings)
-	if err != nil {
-		return fmt.Errorf("failed to marshal settings: %w", err)
-	}
+# Output settings
+output:
+  # Default output format (json, text, yaml)
+  default_format: text
+  
+  # Show timestamps in output
+  show_timestamps: false
+  
+  # Color output (auto, always, never)
+  color: auto
+
+# Logging settings
+logging:
+  # Default log level (error, warn, info, step, steps, debug, verbose, noisy)
+  default_level: info
+  
+  # Log file path (optional)
+  # file: logs/mcp-cli.log
+  
+  # Include timestamps in logs
+  timestamps: true
+
+# Performance settings
+performance:
+  # Maximum concurrent connections to MCP servers
+  max_connections: 5
+  
+  # Request timeout (seconds)
+  timeout: 30
+  
+  # Retry attempts for failed requests
+  max_retries: 3
+
+# Cache settings (optional)
+# cache:
+#   enabled: true
+#   directory: .cache
+#   ttl: 3600  # seconds
+
+# AI settings
+ai:
+  default_provider: ` + config.DefaultProvider + `
+  default_system_prompt: You are a helpful assistant.
+
+# Embeddings settings
+embeddings:
+  default_chunk_strategy: sentence
+  default_max_chunk_size: 512
+  default_overlap: 0
+  output_precision: 6
+
+# Chat settings
+chat:
+  default_temperature: 0.7
+  max_history_size: 50
+
+# Skills settings
+skills:
+  outputs_dir: /tmp/mcp-outputs
+`
 
 	path := filepath.Join(g.baseDir, "settings.yaml")
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := os.WriteFile(path, []byte(settingsContent), 0644); err != nil {
 		return fmt.Errorf("failed to write settings: %w", err)
 	}
 

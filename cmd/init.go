@@ -75,6 +75,21 @@ func runInit(cmd *cobra.Command, args []string) error {
 	
 	var cfg *InitConfig
 	
+	// Check for "all services" mode first (unless using --quick or --full flags)
+	if !quickMode && !fullMode {
+		fmt.Println()
+		fmt.Println("📦 Setup Options:")
+		fmt.Println()
+		fmt.Println("You can create a complete configuration with all services enabled,")
+		fmt.Println("or proceed with interactive setup to customize your installation.")
+		fmt.Println()
+		
+		if askYesNo(reader, "Create default config for all services (DeepSeek, RAG, Skills, all providers)", false) {
+			cfg = createAllServicesConfig()
+			return createModularConfig(execDir, cfg)
+		}
+	}
+	
 	if quickMode {
 		cfg = createQuickConfig()
 	} else if fullMode {
@@ -104,6 +119,7 @@ type InitConfig struct {
 	IncludeVertexAI   bool
 	DefaultProvider   string
 	IncludeSkills     bool
+	IncludeRAG        bool
 }
 
 func printWelcome() {
@@ -113,15 +129,56 @@ func printWelcome() {
 
 func createQuickConfig() *InitConfig {
 	fmt.Println("📦 Quick Setup Mode")
-	fmt.Println("   Creating minimal configuration with ollama (no API keys needed)")
+	fmt.Println("   Creating configuration with DeepSeek (requires API key)")
+	fmt.Println("   Includes: RAG support, Skills system")
 	fmt.Println()
 	
 	return &InitConfig{
-		Providers:       []string{"ollama"},
-		Servers:         []string{}, // Empty - no assumptions about MCP servers
-		IncludeOllama:   true,
-		DefaultProvider: "ollama",
-		IncludeSkills:   true, // Include skills directory by default
+		Providers:       []string{"deepseek"},
+		Servers:         []string{},
+		IncludeDeepSeek: true,
+		DefaultProvider: "deepseek",
+		IncludeSkills:   true,
+		IncludeRAG:      true,
+	}
+}
+
+func createAllServicesConfig() *InitConfig {
+	fmt.Println()
+	color.New(color.FgCyan, color.Bold).Println("📦 All Services Configuration")
+	fmt.Println("   Creating complete configuration with all providers and services")
+	fmt.Println("   Default provider: DeepSeek")
+	fmt.Println()
+	
+	return &InitConfig{
+		Providers: []string{
+			"ollama",
+			"openai",
+			"anthropic",
+			"deepseek",
+			"gemini",
+			"openrouter",
+			"lmstudio",
+			"kimik2",
+			"bedrock",
+			"azure-foundry",
+			"vertex-ai",
+		},
+		Servers:              []string{},
+		IncludeOllama:        true,
+		IncludeOpenAI:        true,
+		IncludeAnthropic:     true,
+		IncludeDeepSeek:      true,
+		IncludeGemini:        true,
+		IncludeOpenRouter:    true,
+		IncludeLMStudio:      true,
+		IncludeMoonshot:      true,
+		IncludeBedrock:       true,
+		IncludeAzureFoundry:  true,
+		IncludeVertexAI:      true,
+		DefaultProvider:      "deepseek",
+		IncludeSkills:        true,
+		IncludeRAG:           true,
 	}
 }
 
@@ -282,6 +339,18 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 		config.IncludeSkills = true
 		fmt.Println("   ✓ Will create skills directory with README")
 		fmt.Println("   💡 Download skills from: https://github.com/anthropics/skills")
+	}
+	
+	// Ask about RAG
+	fmt.Println()
+	fmt.Println("🔍 RAG (Retrieval-Augmented Generation):")
+	fmt.Println("RAG allows workflows to search vector databases and retrieve context.")
+	fmt.Println("This is useful for document search, knowledge bases, and contextual responses.")
+	fmt.Println()
+	
+	if askYesNo(reader, "Set up RAG configuration directory", false) {
+		config.IncludeRAG = true
+		fmt.Println("   ✓ Will create config/rag/ directory")
 	}
 	
 	fmt.Println()
@@ -476,6 +545,13 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 		return fmt.Errorf("failed to generate modular config: %w", err)
 	}
 	
+	// Create RAG directory if requested
+	if initCfg.IncludeRAG {
+		if err := createRAGDirectory(configDir); err != nil {
+			return fmt.Errorf("failed to create RAG directory: %w", err)
+		}
+	}
+	
 	// Create skills if requested
 	if initCfg.IncludeSkills {
 		if err := createSkillsDirectory(configDir, initCfg); err != nil {
@@ -526,12 +602,17 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 		fmt.Printf("       │   ├── %s.yaml\n", provider)
 	}
 	fmt.Println("       ├── embeddings/       # Embedding configs")
-	if cfg.IncludeOpenAI || cfg.IncludeOpenRouter || cfg.IncludeOllama {
+	if cfg.IncludeOpenAI || cfg.IncludeOpenRouter || cfg.IncludeOllama || cfg.IncludeDeepSeek {
 		for _, provider := range cfg.Providers {
-			if provider == "openai" || provider == "openrouter" || provider == "ollama" {
+			if provider == "openai" || provider == "openrouter" || provider == "ollama" || provider == "deepseek" {
 				fmt.Printf("       │   ├── %s.yaml\n", provider)
 			}
 		}
+	}
+	if cfg.IncludeRAG {
+		fmt.Println("       ├── rag/              # RAG configurations")
+		fmt.Println("       │   ├── README.md")
+		fmt.Println("       │   └── expansion/")
 	}
 	if cfg.IncludeSkills {
 		fmt.Println("       ├── skills/           # Anthropic skills")
@@ -584,6 +665,149 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 		fmt.Println("   • Skills support dynamic code execution with helper libraries")
 	}
 	fmt.Println()
+}
+
+// createRAGDirectory creates the RAG configuration directory
+func createRAGDirectory(configDir string) error {
+	ragDir := filepath.Join(configDir, "rag")
+	expansionDir := filepath.Join(ragDir, "expansion")
+	
+	color.New(color.FgCyan).Println("🔍 Creating RAG Configuration...")
+	
+	// Create directories
+	if err := os.MkdirAll(expansionDir, 0755); err != nil {
+		return fmt.Errorf("failed to create RAG directories: %w", err)
+	}
+	
+	// Create README
+	readmeContent := `# RAG Configuration
+
+This directory contains RAG (Retrieval-Augmented Generation) server configurations.
+
+## What is RAG?
+
+RAG enhances LLM responses by retrieving relevant context from vector databases
+before generating answers. This is useful for:
+
+- Answering questions from your documents
+- Searching knowledge bases
+- Contextual code completion
+- Document analysis
+
+## Directory Structure
+
+- **rag/*.yaml** - RAG server configurations
+- **rag/expansion/*.yaml** - Query expansion strategies (optional)
+
+## Example: pgvector.yaml
+
+Create a file at ` + "`config/rag/pgvector.yaml`" + `:
+
+` + "```yaml" + `
+server_name: pgvector
+rag_type: pgvector
+
+connection:
+  host: localhost
+  port: 5432
+  database: vector_db
+  user: postgres
+  password: ${POSTGRES_PASSWORD}
+
+search:
+  default_strategy: semantic
+  top_k: 5
+  
+strategies:
+  - name: semantic
+    distance_function: cosine
+  - name: hybrid
+    distance_function: l2
+` + "```" + `
+
+## Usage in Workflows
+
+` + "```yaml" + `
+steps:
+  - name: search_docs
+    rag:
+      server: pgvector
+      query: "${user_question}"
+      top_k: 10
+      strategies: [semantic, hybrid]
+      fusion: rrf
+      
+  - name: answer
+    prompt: |
+      Based on these search results:
+      ${search_docs.result}
+      
+      Answer: ${user_question}
+` + "```" + `
+
+## RAG Commands
+
+` + "```bash" + `
+# Search vector database
+mcp-cli rag search "query" --server pgvector --top-k 10
+
+# Show RAG configuration
+mcp-cli rag config
+
+# List available strategies
+mcp-cli rag config --strategies
+` + "```" + `
+
+## Setting Up pgvector
+
+1. Install PostgreSQL with pgvector extension:
+   ` + "```bash" + `
+   # Ubuntu/Debian
+   sudo apt install postgresql-15-pgvector
+   
+   # macOS
+   brew install pgvector
+   ` + "```" + `
+
+2. Create database and enable extension:
+   ` + "```sql" + `
+   CREATE DATABASE vector_db;
+   \c vector_db
+   CREATE EXTENSION vector;
+   ` + "```" + `
+
+3. Create embeddings table:
+   ` + "```sql" + `
+   CREATE TABLE documents (
+     id SERIAL PRIMARY KEY,
+     content TEXT,
+     embedding vector(1536)  -- OpenAI embedding size
+   );
+   
+   CREATE INDEX ON documents USING ivfflat (embedding vector_cosine_ops);
+   ` + "```" + `
+
+4. Add connection config to config/rag/pgvector.yaml
+
+5. Use in workflows or via CLI commands
+
+## More Information
+
+- pgvector: https://github.com/pgvector/pgvector
+- RAG patterns: See config/workflows/ examples
+- Query expansion: See config/rag/expansion/ for strategies
+`
+	
+	readmePath := filepath.Join(ragDir, "README.md")
+	if err := os.WriteFile(readmePath, []byte(readmeContent), 0644); err != nil {
+		return fmt.Errorf("failed to create RAG README: %w", err)
+	}
+	
+	fmt.Println("   ✓ Created config/rag/")
+	fmt.Println("   ✓ Created config/rag/expansion/")
+	fmt.Println("   ✓ Created config/rag/README.md")
+	
+	return nil
 }
 
 // createSkillsDirectory creates the skills directory with README pointing to Anthropic skills

@@ -25,6 +25,7 @@ type IncludeDirectives struct {
 	Servers    string `yaml:"servers,omitempty"`    // e.g., "config/servers/*.yaml"
 	RunAs      string `yaml:"runas,omitempty"`      // e.g., "config/runas/*.yaml"
 	Embeddings string `yaml:"embeddings,omitempty"` // e.g., "config/embeddings/*.yaml"
+	Templates  string `yaml:"templates,omitempty"`  // e.g., "config/templates/*.yaml" (legacy, backward compatibility)
 	Workflows  string `yaml:"workflows,omitempty"`  // e.g., "config/workflows/*.yaml"
 	Settings   string `yaml:"settings,omitempty"`   // e.g., "config/settings.yaml"
 	RAG        string `yaml:"rag,omitempty"`        // e.g., "config/rag/*.yaml"
