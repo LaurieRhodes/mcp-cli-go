@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
@@ -22,6 +23,7 @@ type Orchestrator struct {
 	interpolator     *Interpolator
 	logger           *Logger
 	stepResults      map[string]string
+	stepResultsMu    sync.RWMutex // Protects stepResults for parallel execution
 	consensusResults map[string]*config.ConsensusResult
 	appConfig        *config.ApplicationConfig
 	loopExecutor     *LoopExecutor
@@ -59,6 +61,11 @@ func NewOrchestratorWithKey(workflow *config.WorkflowV2, workflowKey string, log
 
 // Execute executes the entire workflow
 func (o *Orchestrator) Execute(ctx context.Context, input string) error {
+	// Validate workflow before execution
+	if err := ValidateWorkflow(o.workflow); err != nil {
+		return fmt.Errorf("workflow validation failed:\n%w", err)
+	}
+	
 	// Set initial input
 	o.interpolator.Set("input", input)
 
@@ -74,6 +81,16 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 
 	o.logger.Info("Starting workflow: %s v%s", o.workflow.Name, o.workflow.Version)
 	o.logger.Step("\n[WORKFLOW] %s v%s", o.workflow.Name, o.workflow.Version)
+
+	// Check if parallel execution is enabled
+	if o.workflow.Execution.Parallel {
+		maxWorkers := o.workflow.Execution.MaxWorkers
+		if maxWorkers <= 0 {
+			maxWorkers = 3 // Default
+		}
+		o.logger.Info("Parallel execution enabled (max_workers: %d, policy: %s)", 
+			maxWorkers, o.getErrorPolicy())
+	}
 
 	// Connect to RAG servers if workflow uses RAG (separate from LLM-exposed servers)
 	if err := o.connectRAGServersIfNeeded(ctx); err != nil {
@@ -100,6 +117,24 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 		)
 	}
 
+	// Choose execution mode
+	if o.workflow.Execution.Parallel {
+		return o.executeParallel(ctx)
+	}
+	
+	return o.executeSequential(ctx)
+}
+
+// getErrorPolicy returns the error policy with fallback to default
+func (o *Orchestrator) getErrorPolicy() string {
+	if o.workflow.Execution.OnError == "" {
+		return "cancel_all"
+	}
+	return o.workflow.Execution.OnError
+}
+
+// executeSequential executes workflow steps sequentially (original behavior)
+func (o *Orchestrator) executeSequential(ctx context.Context) error {
 	// Track completed steps and loops
 	completed := make(map[string]bool)
 
@@ -182,6 +217,201 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	o.logger.Info("Workflow completed successfully")
 	o.logger.Step("\n[SUCCESS] Workflow completed")
 	return nil
+}
+
+// executeParallel executes workflow steps in parallel with dependency awareness
+func (o *Orchestrator) executeParallel(ctx context.Context) error {
+	// Create cancellable context for error handling
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Validate variable references
+	varValidator := NewVariableValidator(o.workflow)
+	if errs := varValidator.ValidateAll(); len(errs) > 0 {
+		for _, err := range errs {
+			o.logger.Error("Variable validation error: %v", err)
+		}
+		return fmt.Errorf("variable validation failed with %d error(s)", len(errs))
+	}
+
+	// Convert steps to pointers for dependency resolver
+	stepPtrs := make([]*config.StepV2, len(o.workflow.Steps))
+	for i := range o.workflow.Steps {
+		stepPtrs[i] = &o.workflow.Steps[i]
+	}
+
+	// Create dependency resolver
+	resolver := NewDependencyResolver(stepPtrs)
+	
+	// Validate dependencies
+	if err := resolver.ValidateDependenciesExist(); err != nil {
+		return fmt.Errorf("dependency validation failed: %w", err)
+	}
+	if err := resolver.ValidateNoCycles(); err != nil {
+		return fmt.Errorf("dependency validation failed: %w", err)
+	}
+
+	// Create worker pool
+	pool := NewWorkerPool(
+		o.workflow.Execution.MaxWorkers,
+		o.getErrorPolicy(),
+		o,
+	)
+	pool.SetCancelFunc(cancel)
+	
+	// Start timeline tracking
+	pool.timeline.Start()
+
+	// Track completion
+	completed := make(map[string]bool)
+	
+	// Pre-mark steps as completed if using start-from or end-at
+	if o.startFrom != "" || o.endAt != "" {
+		if err := o.markStepsAsCompleted(completed); err != nil {
+			return err
+		}
+	}
+
+	// Get initial ready steps (no dependencies)
+	readySteps := resolver.GetReadySteps(completed)
+	
+	o.logger.Debug("Initial ready steps: %d", len(readySteps))
+	for _, step := range readySteps {
+		o.logger.Debug("  - %s", step.Name)
+	}
+
+	// Submit initial ready steps
+	for _, step := range readySteps {
+		if err := pool.SubmitStep(ctx, step); err != nil {
+			return fmt.Errorf("failed to submit step %s: %w", step.Name, err)
+		}
+		completed[step.Name] = true // Mark as submitted
+	}
+
+	// Track remaining steps and loops
+	stepsRemaining := make(map[string]*config.StepV2)
+	for i := range o.workflow.Steps {
+		step := &o.workflow.Steps[i]
+		if !completed[step.Name] {
+			stepsRemaining[step.Name] = step
+		}
+	}
+	
+	// Loops can run independently - submit them all at once
+	loopsRemaining := make(map[string]*config.LoopV2)
+	for i := range o.workflow.Loops {
+		loop := &o.workflow.Loops[i]
+		loopsRemaining[loop.Name] = loop
+		
+		// Submit loop immediately (loops have no dependencies)
+		o.logger.Debug("Submitting loop: %s", loop.Name)
+		if err := pool.SubmitLoop(ctx, loop); err != nil {
+			return fmt.Errorf("failed to submit loop %s: %w", loop.Name, err)
+		}
+		completed[loop.Name] = true // Mark as submitted
+	}
+
+	totalRemaining := len(stepsRemaining) + len(loopsRemaining)
+
+	// Event-driven coordination loop
+	for totalRemaining > 0 {
+		select {
+		case completedName := <-pool.notifyCompletion:
+			// Step or loop completed
+			o.logger.Debug("Element completed: %s", completedName)
+			
+			// Check for error
+			if err, hasError := pool.GetError(completedName); hasError {
+				o.logger.Error("Element %s failed: %v", completedName, err)
+				
+				// Wait for in-flight elements based on error policy
+				pool.Wait()
+				
+				// Copy results to orchestrator
+				o.copyPoolResults(pool)
+				
+				return fmt.Errorf("element %s failed: %w", completedName, err)
+			}
+			
+			// Mark as completed
+			completed[completedName] = true
+			
+			// Remove from remaining (could be step or loop)
+			delete(stepsRemaining, completedName)
+			delete(loopsRemaining, completedName)
+			totalRemaining = len(stepsRemaining) + len(loopsRemaining)
+			
+			// Find newly ready steps
+			newReadySteps := resolver.GetReadySteps(completed)
+			
+			if len(newReadySteps) > 0 {
+				o.logger.Debug("New ready steps: %d", len(newReadySteps))
+				for _, step := range newReadySteps {
+					o.logger.Debug("  - %s", step.Name)
+				}
+			}
+			
+			// Submit newly ready steps
+			for _, step := range newReadySteps {
+				if err := pool.SubmitStep(ctx, step); err != nil {
+					pool.Wait()
+					o.copyPoolResults(pool)
+					return fmt.Errorf("failed to submit step %s: %w", step.Name, err)
+				}
+				completed[step.Name] = true // Mark as submitted
+			}
+
+		case <-ctx.Done():
+			// Context cancelled (error or timeout)
+			pool.Wait()
+			o.copyPoolResults(pool)
+			return ctx.Err()
+		}
+	}
+
+	// Wait for all workers to complete
+	pool.Wait()
+	
+	// End timeline tracking
+	pool.timeline.End()
+	
+	// Copy results from pool to orchestrator
+	o.copyPoolResults(pool)
+	
+	// Check for any errors
+	allErrors := pool.GetAllErrors()
+	if len(allErrors) > 0 {
+		// Return first error
+		for name, err := range allErrors {
+			return fmt.Errorf("element %s failed: %w", name, err)
+		}
+	}
+
+	// Output execution summary and timeline
+	o.logger.Info("\n")
+	o.logger.Info(pool.bufferedLogger.GetExecutionSummary())
+	o.logger.Info(pool.timeline.GenerateGanttChart())
+	
+	// Calculate and display speedup
+	speedup := pool.timeline.GetSpeedup()
+	if speedup > 1.0 {
+		sequential := pool.timeline.GetSequentialEstimate()
+		parallel := pool.timeline.GetTotalDuration()
+		o.logger.Info("Performance: %.2fx speedup (Sequential: %v, Parallel: %v)\n", 
+			speedup, sequential.Round(time.Millisecond), parallel.Round(time.Millisecond))
+	}
+
+	o.logger.Step("\n[SUCCESS] Workflow completed (parallel mode)")
+	return nil
+}
+
+// copyPoolResults copies results from worker pool to orchestrator
+func (o *Orchestrator) copyPoolResults(pool *WorkflowWorkerPool) {
+	results := pool.GetAllResults()
+	for stepName, result := range results {
+		o.stepResults[stepName] = result
+		o.interpolator.Set(stepName, result)
+	}
 }
 
 // checkDependencies checks if all dependencies are met

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   
   - Iterative looping
   - Parrallelism with Loops
+  - Parallelism (eg fan-out_ with workflows)
   - Skills filtering on tasks
   - Bash skill executor support
 

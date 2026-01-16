@@ -3,6 +3,7 @@
 Welcome! This guide will get you from zero to productive with AI workflows in under 30 minutes.
 
 **What is MCP-CLI-Go?** A command-line tool that lets you:
+
 - Run AI queries from your terminal
 - Build multi-step AI workflows (templates)
 - Mix different AI providers (Claude + GPT-4 + local models)
@@ -10,6 +11,7 @@ Welcome! This guide will get you from zero to productive with AI workflows in un
 - Automate AI tasks in scripts and pipelines
 
 **Why use it?**
+
 - 🚀 **50-87% token savings** through smart context isolation
 - 🔧 **Composable workflows** - build complex AI pipelines from simple parts
 - 🎯 **Multi-provider** - use best AI for each task
@@ -28,14 +30,16 @@ Welcome! This guide will get you from zero to productive with AI workflows in un
 **Quick install commands:**
 
 **Linux:**
+
 ```bash
 wget https://github.com/LaurieRhodes/mcp-cli-go/releases/latest/download/mcp-cli-linux-amd64
 chmod +x mcp-cli-linux-amd64
-sudo mv mcp-cli-linux-amd64 /usr/local/bin/mcp-cli
+sudo mv mcp-cli-linux-amd64 mcp-cli
 mcp-cli --version
 ```
 
 **macOS:**
+
 ```bash
 # Intel Mac
 wget https://github.com/LaurieRhodes/mcp-cli-go/releases/latest/download/mcp-cli-darwin-amd64
@@ -44,11 +48,12 @@ wget https://github.com/LaurieRhodes/mcp-cli-go/releases/latest/download/mcp-cli
 
 chmod +x mcp-cli-darwin-*
 xattr -d com.apple.quarantine mcp-cli-darwin-*
-sudo mv mcp-cli-darwin-* /usr/local/bin/mcp-cli
+sudo mv mcp-cli-darwin-* mcp-cli
 mcp-cli --version
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 Invoke-WebRequest -Uri "https://github.com/LaurieRhodes/mcp-cli-go/releases/latest/download/mcp-cli-windows-amd64.exe" -OutFile "mcp-cli.exe"
 New-Item -ItemType Directory -Force -Path $env:USERPROFILE\bin
@@ -62,11 +67,13 @@ mcp-cli --version
 ### 2. Initialize Configuration (2 minutes)
 
 **Option A: Quick setup (free local AI, no API keys):**
+
 ```bash
 mcp-cli init --quick
 ```
 
 **Option B: Full setup (cloud AI providers):**
+
 ```bash
 mcp-cli init
 # Follow interactive prompts
@@ -74,6 +81,7 @@ mcp-cli init
 ```
 
 **What this creates:**
+
 - `config/` directory with settings
 - `.env` file for API keys
 - Example templates to get started
@@ -83,11 +91,13 @@ mcp-cli init
 ### 3. Your First Query (1 minute)
 
 **Simple question:**
+
 ```bash
 mcp-cli query "What are the top 3 programming languages in 2024?"
 ```
 
 **Expected output:**
+
 ```
 Based on current trends and usage:
 
@@ -99,6 +109,7 @@ All three show strong job demand and active communities.
 ```
 
 **What just happened:**
+
 - MCP-CLI sent your question to default AI provider
 - AI generated response
 - Result printed to terminal
@@ -108,6 +119,7 @@ All three show strong job demand and active communities.
 ### 4. Your First Template (5 minutes)
 
 **Create a template:**
+
 ```bash
 # Create templates directory if needed
 mkdir -p config/templates
@@ -122,18 +134,20 @@ steps:
   - name: analyze
     prompt: "Analyze this text: {{stdin}}"
     output: analysis
-  
+
   - name: summarize
     prompt: "Create 3-bullet summary: {{analysis}}"
 EOF
 ```
 
 **Use your template:**
+
 ```bash
 echo "Sales were up 15% in Q4..." | mcp-cli --template analyze
 ```
 
 **Expected output:**
+
 ```
 • Revenue growth strong at 15% in Q4
 • Customer acquisition exceeded targets
@@ -141,6 +155,7 @@ echo "Sales were up 15% in Q4..." | mcp-cli --template analyze
 ```
 
 **What just happened:**
+
 1. Template received input via stdin
 2. Step 1 analyzed the text
 3. Step 2 summarized analysis into bullets
@@ -157,26 +172,31 @@ echo "Sales were up 15% in Q4..." | mcp-cli --template analyze
 **Key concepts to understand:**
 
 **MCP (Model Context Protocol):**
+
 - Standard for connecting AI to tools
 - Like USB for AI integrations
 - AI can read files, search web, query databases
 
 **Templates:**
+
 - Multi-step AI workflows in YAML
 - Reusable and version-controlled
 - 50-87% token savings vs manual
 
 **Template Composition:**
+
 - Templates can call other templates
 - Build complex workflows from simple parts
 - Each sub-template isolated (saves tokens)
 
 **Multi-Provider:**
+
 - Use Claude for research, GPT-4 for code, Ollama for formatting
 - Best model for each task
 - Mix free local + paid cloud
 
 **Variables:**
+
 - `{{stdin}}` - input from pipe or flag
 - `{{step_name}}` - output from previous step
 - Pass data between steps automatically
@@ -186,11 +206,13 @@ echo "Sales were up 15% in Q4..." | mcp-cli --template analyze
 ### 6. Try More Templates (5 minutes)
 
 **List available templates:**
+
 ```bash
 mcp-cli --list-templates
 ```
 
 **Try example templates:**
+
 ```bash
 # Sentiment analysis
 echo "I love this product!" | mcp-cli --template sentiment
@@ -208,24 +230,28 @@ mcp-cli --template research --input-data "impact of AI on healthcare"
 
 **For scripters and automators:**
 → [Query Mode Guide](../guides/query-mode.md)
+
 - Use in bash scripts
 - CI/CD integration
 - Automation patterns
 
 **For template creators:**
 → [Workflow Authoring Guide](../workflows/authoring-guide.md)
+
 - Advanced template features
 - Conditions, loops, parallel execution
 - Template composition
 
 **For interactive users:**
 → [Chat Mode Guide](../guides/chat-mode.md)
+
 - Conversational AI
 - Tool use (MCP servers)
 - Development and debugging
 
 **For production deployment:**
 → [Deployment Guide](../deployment/)
+
 - Docker containers
 - Kubernetes deployment
 - Systemd services
@@ -235,6 +261,7 @@ mcp-cli --template research --input-data "impact of AI on healthcare"
 ## 🚀 Essential Commands Reference
 
 ### Setup Commands
+
 ```bash
 mcp-cli init                    # Full interactive setup
 mcp-cli init --quick            # Quick setup (Ollama only, no API keys)
@@ -243,6 +270,7 @@ mcp-cli --help                  # Show all commands
 ```
 
 ### Query Mode (One-Shot Questions)
+
 ```bash
 # Basic query
 mcp-cli query "What is 2+2?"
@@ -261,6 +289,7 @@ mcp-cli query "Summarize AI trends" > report.txt
 ```
 
 ### Chat Mode (Interactive Conversation)
+
 ```bash
 # Start chat with default provider
 mcp-cli chat
@@ -279,6 +308,7 @@ mcp-cli chat --server filesystem,brave-search
 ```
 
 ### Workflow Mode (Multi-Step Workflows)
+
 ```bash
 # Run template with piped input
 echo "data" | mcp-cli --template analyze
@@ -297,6 +327,7 @@ mcp-cli --list-templates --verbose
 ```
 
 ### Server Mode (Expose as MCP Server)
+
 ```bash
 # Start as MCP server
 mcp-cli serve config/runas/agent.yaml
@@ -305,6 +336,7 @@ mcp-cli serve config/runas/agent.yaml
 ```
 
 ### Debugging Commands
+
 ```bash
 # Verbose output (see what's happening)
 mcp-cli --verbose query "test"

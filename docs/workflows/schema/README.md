@@ -16,6 +16,11 @@ Every workflow step is fundamentally an `mcp-cli` call. The workflow YAML provid
 3. **Composition** - Call workflows from workflows
 4. **Validation** - Multi-provider consensus
 5. **Iteration** - Loop until conditions met
+6. **Parallelization** - Run independent steps concurrently (v2.1.0+)
+   - Automatic dependency resolution
+   - Worker pool management
+   - Real-time timeline visualization
+   - Performance metrics (1.2-5× speedup)
 
 ---
 
@@ -77,6 +82,34 @@ Every workflow step is fundamentally an `mcp-cli` call. The workflow YAML provid
 ---
 
 ### ⚙️ [Steps Reference](STEPS_REFERENCE.md)
+
+**Execution mode details.** Deep dive into each step mode:
+
+- `run` - LLM prompts
+- `template` - Workflow calls
+- `consensus` - Multi-provider validation
+- `embeddings` - Vector generation
+- `rag` - Semantic search
+- `loop` - Iteration patterns
+
+**Best for:** Understanding step execution modes, advanced features.
+
+---
+
+### ⚡ [Parallel Execution](PARALLEL_EXECUTION.md)
+
+**Parallel workflow execution.** Complete guide to running steps concurrently:
+
+- Configuration (`parallel`, `max_workers`, `on_error`)
+- Dependency declaration with `needs` arrays
+- Variable reference validation
+- Complete examples (data pipelines, fanout-consolidate)
+- Performance considerations
+- Migration from sequential workflows
+
+**Best for:** Optimizing workflow performance, understanding parallelism, writing efficient workflows.
+
+---
 
 **Detailed step modes.** Complete reference for all execution modes:
 
@@ -177,9 +210,13 @@ Each step is **one of these modes**:
 
 ### 4. Add Dependencies
 
-Control execution order:
+Control execution order and enable parallelism:
 
 ```yaml
+execution:
+  parallel: true       # ← Enable parallel execution
+  max_workers: 3       # ← Max concurrent steps
+
 steps:
   - name: step1
     run: "First"
@@ -189,8 +226,22 @@ steps:
     run: "Use {{step1}}"
 
   - name: step3
-    needs: [step1, step2]   # ← Waits for both
-    run: "Use {{step1}} and {{step2}}"
+    needs: [step1]          # ← Also waits for step1
+    run: "Use {{step1}}"    # ← step2 and step3 run in parallel!
+
+  - name: step4
+    needs: [step2, step3]   # ← Waits for both
+    run: "Use {{step2}} and {{step3}}"
+```
+
+**Execution pattern:**
+```
+step1         |████|
+step2         |    ████|    ← Parallel
+step3         |    ████|    ← Parallel  
+step4         |        ████|
+
+Speedup: 1.5x (step2 and step3 overlap)
 ```
 
 ---

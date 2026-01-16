@@ -81,6 +81,7 @@ All properties with restricted values:
 | `output_format` (RAG)        | `"json"` \| `"text"` \| `"compact"`                                                                 | `"json"`     | RAG output format                     |
 | `fusion`                     | `"rrf"` \| `"weighted"` \| `"max"` \| `"avg"`                                                       | `"rrf"`      | RAG fusion method                     |
 | `on_failure`                 | `"halt"` \| `"continue"` \| `"retry"`                                                               | `"halt"`     | Loop error handling                   |
+| `on_error` (parallel)        | `"cancel_all"` \| `"complete_running"` \| `"continue"`                                              | `"cancel_all"` | Parallel execution error policy     |
 | `require`                    | `"unanimous"` \| `"majority"` \| `"2/3"`                                                            | (required)   | Consensus agreement threshold         |
 | `mode` (loop)                | `"iterate"` \| `"refine"`                                                                           | `"refine"`   | Loop execution mode                   |
 
@@ -229,6 +230,10 @@ Provides default configuration inherited by all steps.
 | **Logging**                                     |                                                                                                     |          |          |                                                                                  |
 | `logging`                                       | `"error"` \| `"warn"` \| `"info"` \| `"step"` \| `"steps"` \| `"debug"` \| `"verbose"` \| `"noisy"` | No       | `"info"` | Logging verbosity                                                                |
 | `no_color`                                      | boolean                                                                                             | No       | false    | Disable colored output                                                           |
+| **Parallel Execution (v2.1.0+)**                |                                                                                                     |          |          |                                                                                  |
+| `parallel`                                      | boolean                                                                                             | No       | false    | Enable parallel step execution                                                   |
+| `max_workers`                                   | integer (>0)                                                                                        | No       | 3        | Maximum concurrent steps                                                         |
+| `on_error`                                      | `"cancel_all"` \| `"complete_running"` \| `"continue"`                                              | No       | `"cancel_all"` | Error handling policy for parallel execution                             |
 
 \* Either (`provider` + `model`) OR `providers` is required.
 
@@ -613,6 +618,47 @@ steps:
     needs: [step1, step2]
     run: "Use {{step1}} and {{step2}}"
 ```
+
+### Parallel Execution (v2.1.0+)
+
+Enable parallel execution for workflows with independent steps:
+
+```yaml
+execution:
+  provider: anthropic
+  model: claude-sonnet-4-20250514
+  parallel: true        # Enable parallel execution
+  max_workers: 5        # Max concurrent steps
+  on_error: cancel_all  # Error handling policy
+
+steps:
+  # These three steps have no dependencies - run in parallel
+  - name: fetch_config
+    run: "Fetch configuration"
+  
+  - name: fetch_schema
+    run: "Fetch schema"
+  
+  - name: fetch_metadata
+    run: "Fetch metadata"
+  
+  # This step waits for all three to complete
+  - name: consolidate
+    needs: [fetch_config, fetch_schema, fetch_metadata]
+    run: "Consolidate {{fetch_config}}, {{fetch_schema}}, {{fetch_metadata}}"
+```
+
+**Important:** When using `parallel: true`, all variable references (like `{{step_name}}`) MUST have the referenced step in the `needs` array. This ensures correct execution order.
+
+**Timeline visualization:**
+```
+fetch_config   |████|
+fetch_schema   |████|
+fetch_metadata |████|
+consolidate    |    ████|
+```
+
+See [PARALLEL_EXECUTION.md](./PARALLEL_EXECUTION.md) for complete documentation.
 
 ### Consensus Validation
 

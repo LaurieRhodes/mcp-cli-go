@@ -35,6 +35,11 @@ type ExecutionContext struct {
 	Timeout       time.Duration `yaml:"timeout,omitempty"`
 	MaxIterations int           `yaml:"max_iterations,omitempty"`
 
+	// Parallel execution (workflow-level step orchestration)
+	Parallel   bool   `yaml:"parallel,omitempty"`    // Enable parallel step execution
+	MaxWorkers int    `yaml:"max_workers,omitempty"` // Maximum concurrent steps (default: 3)
+	OnError    string `yaml:"on_error,omitempty"`    // Error policy: cancel_all, complete_running, continue (default: cancel_all)
+
 	// Logging
 	Logging string `yaml:"logging,omitempty"` // normal, verbose, noisy
 	NoColor bool   `yaml:"no_color,omitempty"`
