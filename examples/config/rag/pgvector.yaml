@@ -1,0 +1,38 @@
+server_name: pgvector
+config:
+  mcp_server: pgvector
+  search_tool: search_vectors
+  
+  # Embedding configuration for query vectors
+  # Uses mcp-cli's embedding service (config/embeddings/openai.yaml)
+  query_embedding:
+    type: service
+    provider: openai
+    model: text-embedding-3-small
+  
+  strategies:
+    - name: default
+      vector_column: description_vector
+      weight: 1.0
+      threshold: 0.7
+      
+    - name: context
+      vector_column: combined_context_vector
+      weight: 1.0
+      threshold: 0.7
+  
+  table: ism_controls_vectors
+  text_columns:
+    - identifier
+    - description
+    - guideline
+    - section
+    - topic
+  metadata_columns:
+    - revision
+    - updated
+    - nc
+    - os
+    - p
+    - s
+    - ts

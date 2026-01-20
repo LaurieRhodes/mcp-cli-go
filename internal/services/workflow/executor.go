@@ -138,9 +138,12 @@ func (e *Executor) executeWithProvider(
 				e.logger.Info("Filtering skills server tools to: %v", step.Skills)
 				
 				// Create a map of allowed skill names
+				// IMPORTANT: Normalize to underscores for MCP tool name matching
 				allowedSkills := make(map[string]bool)
 				for _, skillName := range step.Skills {
-					allowedSkills[skillName] = true
+					// Convert hyphens to underscores to match MCP tool naming
+					normalizedName := strings.ReplaceAll(skillName, "-", "_")
+					allowedSkills[normalizedName] = true
 				}
 				
 				// Always allow execute_skill_code when skills are specified
@@ -171,7 +174,6 @@ func (e *Executor) executeWithProvider(
 				e.logger.Info("Filtered skills server to %d tools (was %d)", len(filteredTools), len(serverTools))
 				tools = append(tools, filteredTools...)
 			} else {
-				// For non-skills servers (pgvector, etc.), add ALL tools
 				e.logger.Info("Adding all %d tools from non-skills server '%s'", len(serverTools), serverName)
 				tools = append(tools, serverTools...)
 			}

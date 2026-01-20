@@ -1,0 +1,58 @@
+# Bash Tools Skills Container
+# Ultra-lightweight container for bash-only skills
+# Supports: context-builder, and any skill using only bash + standard text tools
+
+FROM alpine:3.19
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Lightweight container for bash-only skills (xmlstarlet, jq, standard tools)"
+LABEL skills="context-builder"
+LABEL size="~15MB (vs ~300MB for Python containers)"
+
+# Install bash and text processing tools
+RUN apk add --no-cache \
+    # Shell
+    bash \
+    # XML processing
+    xmlstarlet \
+    libxml2-utils \
+    # JSON processing
+    jq \
+    # Text processing
+    grep \
+    sed \
+    gawk \
+    # Utilities
+    coreutils \
+    findutils \
+    bc \
+    curl \
+    # For debugging
+    file \
+    && echo "=== Bash Tools Container ===" \
+    && bash --version | head -1 \
+    && xmlstarlet --version \
+    && jq --version \
+    && echo "Container size: $(du -sh / 2>/dev/null | awk '{print $1}')"
+
+# Create mount point directories
+# /workspace - temporary workspace (read-write)
+# /skill - skill directory with helper scripts (read-only)
+# /outputs - persistent shared storage (read-write, maps to host /tmp/mcp-outputs)
+RUN mkdir -p /workspace /skill /outputs
+
+# Set working directory
+WORKDIR /workspace
+
+# Default shell to bash
+SHELL ["/bin/bash", "-c"]
+
+# Verify critical tools
+RUN bash -c 'echo "Testing bash execution..." && \
+    xmlstarlet --version && \
+    jq --version && \
+    echo "All bash tools verified ✓"'
+
+# Default command
+CMD ["/bin/bash"]

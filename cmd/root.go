@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
@@ -200,6 +202,33 @@ var (
 	}
 )
 
+// setupErrorHandlers configures custom error handling for better UX
+func setupErrorHandlers() {
+	// Custom flag error handler
+	RootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+		errStr := err.Error()
+
+		// Handle unknown flag errors
+		if strings.Contains(errStr, "unknown flag:") || strings.Contains(errStr, "unknown shorthand flag:") {
+			flagName := ExtractFlagName(errStr)
+			if flagName != "" {
+				cliErr := NewUnknownFlagError(flagName, cmd)
+				fmt.Fprintln(os.Stderr, cliErr.Format())
+				os.Exit(1)
+			}
+		}
+
+		// Fall back to default behavior
+		return err
+	})
+
+	// Enable command suggestions with low threshold
+	RootCmd.SuggestionsMinimumDistance = 2
+
+	// NOTE: Removed custom UsageFunc that was causing infinite recursion
+	// The default cobra usage handler works fine
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() error {
 	return RootCmd.Execute()
@@ -227,6 +256,9 @@ func init() {
 	RootCmd.Flags().StringVar(&startFromStep, "start-from", "", "Start workflow from specific step (skips previous steps)")
 	RootCmd.Flags().StringVar(&endAtStep, "end-at", "", "End workflow at specific step (skips steps after)")
 	RootCmd.Flags().StringVar(&inputData, "input-data", "", "Input data for template (JSON or plain text)")
+
+	// Custom error handlers for better UX
+	setupErrorHandlers()
 
 	// Add subcommands
 	RootCmd.AddCommand(ChatCmd)

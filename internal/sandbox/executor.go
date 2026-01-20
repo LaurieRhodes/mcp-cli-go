@@ -50,7 +50,7 @@ type ExecutorConfig struct {
 // DefaultConfig returns default executor configuration
 func DefaultConfig() ExecutorConfig {
 	return ExecutorConfig{
-		PythonImage:  "python:3.11-alpine",
+		PythonImage:  "python:3.11-slim",
 		Timeout:      30 * time.Second,
 		MemoryLimit:  "256m",
 		CPULimit:     "0.5",

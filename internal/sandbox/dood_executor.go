@@ -251,6 +251,7 @@ func (d *DooDockerExecutor) executeCodeInContainer(
 
 	// Create container with dual mounts
 	pidsLimit := int64(100)
+	networkMode := d.config.GetNetworkModeForSkill(skillLibsDir)
 	container, err := d.client.CreateContainer(docker.CreateContainerOptions{
 		Config: &docker.Config{
 			Image:      image,
@@ -270,7 +271,7 @@ func (d *DooDockerExecutor) executeCodeInContainer(
 			PidsLimit:      &pidsLimit,
 			SecurityOpt:    []string{"no-new-privileges"},
 			CapDrop:        []string{"ALL"},
-			NetworkMode:    "none",
+			NetworkMode:    networkMode, // Configurable per skill
 		},
 		Context: ctx,
 	})

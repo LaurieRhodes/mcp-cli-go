@@ -1,0 +1,10 @@
+server_name: skills
+config:
+  command: /media/laurie/Data/Github/mcp-cli-go/mcp-cli
+  args:
+    - serve
+    - config/runasMCP/mcp_skills_stdio.yaml
+    - --verbose
+  env: {}
+  settings:
+    max_tool_follow_up: 10  # Increased for multi-turn skill usage

@@ -12,6 +12,7 @@ type Skill struct {
 	// Parsed from YAML frontmatter
 	Name        string `yaml:"name" json:"name"`
 	Description string `yaml:"description" json:"description"`
+	Language    string `yaml:"-" json:"language,omitempty"`     // Required language (bash, python, etc.)
 	License     string `yaml:"license,omitempty" json:"license,omitempty"`
 	
 	// Skill metadata (not from YAML)
@@ -39,6 +40,7 @@ type Skill struct {
 type SkillFrontmatter struct {
 	Name        string `yaml:"name"`
 	Description string `yaml:"description"`
+	Language    string `yaml:"-" json:"language,omitempty"`     // Required language (bash, python, etc.)
 	License     string `yaml:"license,omitempty"`
 }
 
@@ -71,14 +73,14 @@ func (s *Skill) Validate() error {
 }
 
 // GetToolDescription generates an MCP tool description from this skill
-// Following the pattern observed in Anthropic skills
-// Prepends "[SKILL]" marker to help LLMs recognize these as skills
-// Clarifies this tool loads documentation, NOT executes code
+// Optimized for small LLMs with concrete, action-oriented language
 func (s *Skill) GetToolDescription() string {
 	return fmt.Sprintf("[SKILL] %s\n\n"+
-		"⚠️  This tool loads the skill's documentation and reference materials into context. "+
-		"To actually execute code, create files, process data, or perform any active task, "+
-		"use the 'execute_skill_code' tool instead with skill_name='%s'.", 
+		"CALL THIS FIRST to see:\n"+
+		"• Available scripts and how to use them\n"+
+		"• Example commands with correct file paths\n"+
+		"• Required parameters and output formats\n\n"+
+		"After reading this, use 'execute_skill_code' tool with skill_name='%s' to run the commands.", 
 		s.Description, s.Name)
 }
 

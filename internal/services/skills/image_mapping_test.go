@@ -10,22 +10,23 @@ func TestLoadSkillImageMapping(t *testing.T) {
 	// Create temp directory for test files
 	tmpDir := t.TempDir()
 	
-	// Test 1: Valid mapping file
+	// Test 1: Valid V2 mapping file
 	t.Run("ValidMapping", func(t *testing.T) {
 		mappingFile := filepath.Join(tmpDir, "valid-mapping.yaml")
-		content := `default_image: mcp-skills-office
+		content := `defaults:
+  image: mcp-skills-office
+  network_mode: none
+  memory: 512MB
+  cpu: "1.0"
+  timeout: 120s
 
 skills:
-  docx: mcp-skills-docx
-  pptx: mcp-skills-pptx
-  pdf: mcp-skills-pdf
-
-container_config:
-  memory_limit: "512m"
-  cpu_limit: "1.0"
-  timeout: 120
-  network: "none"
-  pids_limit: 200
+  docx:
+    image: mcp-skills-docx
+  pptx:
+    image: mcp-skills-pptx
+  pdf:
+    image: mcp-skills-pdf
 `
 		if err := os.WriteFile(mappingFile, []byte(content), 0644); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
@@ -34,64 +35,53 @@ container_config:
 		mapping, err := LoadSkillImageMapping(mappingFile)
 		if err != nil {
 			t.Fatalf("LoadSkillImageMapping failed: %v", err)
-		}
-
-		// Check default image
-		if mapping.DefaultImage != "mcp-skills-office" {
-			t.Errorf("Expected default_image 'mcp-skills-office', got '%s'", mapping.DefaultImage)
-		}
-
-		// Check skill mappings
-		if mapping.Skills["docx"] != "mcp-skills-docx" {
-			t.Errorf("Expected docx -> mcp-skills-docx, got '%s'", mapping.Skills["docx"])
-		}
-		if mapping.Skills["pptx"] != "mcp-skills-pptx" {
-			t.Errorf("Expected pptx -> mcp-skills-pptx, got '%s'", mapping.Skills["pptx"])
-		}
-		if mapping.Skills["pdf"] != "mcp-skills-pdf" {
-			t.Errorf("Expected pdf -> mcp-skills-pdf, got '%s'", mapping.Skills["pdf"])
-		}
-
-		// Check container config
-		if mapping.ContainerConfig.MemoryLimit != "512m" {
-			t.Errorf("Expected memory_limit '512m', got '%s'", mapping.ContainerConfig.MemoryLimit)
-		}
-		if mapping.ContainerConfig.CPULimit != "1.0" {
-			t.Errorf("Expected cpu_limit '1.0', got '%s'", mapping.ContainerConfig.CPULimit)
-		}
-		if mapping.ContainerConfig.Timeout != 120 {
-			t.Errorf("Expected timeout 120, got %d", mapping.ContainerConfig.Timeout)
-		}
-	})
-
-	// Test 2: File doesn't exist (should return defaults)
-	t.Run("FileNotExists", func(t *testing.T) {
-		nonExistentFile := filepath.Join(tmpDir, "does-not-exist.yaml")
-		
-		mapping, err := LoadSkillImageMapping(nonExistentFile)
-		if err != nil {
-			t.Fatalf("LoadSkillImageMapping should not fail for missing file: %v", err)
 		}
 
 		// Check defaults
-		if mapping.DefaultImage != "python:3.11-slim" {
-			t.Errorf("Expected default 'python:3.11-slim', got '%s'", mapping.DefaultImage)
+		if mapping.Defaults.Image != "mcp-skills-office" {
+			t.Errorf("Expected default image 'mcp-skills-office', got '%s'", mapping.Defaults.Image)
 		}
-		if mapping.ContainerConfig.MemoryLimit != "256m" {
-			t.Errorf("Expected default memory '256m', got '%s'", mapping.ContainerConfig.MemoryLimit)
+		if mapping.Defaults.NetworkMode != "none" {
+			t.Errorf("Expected network_mode 'none', got '%s'", mapping.Defaults.NetworkMode)
 		}
-		if mapping.ContainerConfig.Timeout != 60 {
-			t.Errorf("Expected default timeout 60, got %d", mapping.ContainerConfig.Timeout)
+		if mapping.Defaults.Memory != "512MB" {
+			t.Errorf("Expected memory '512MB', got '%s'", mapping.Defaults.Memory)
+		}
+
+		// Check skill mappings
+		if mapping.Skills["docx"].Image != "mcp-skills-docx" {
+			t.Errorf("Expected docx -> mcp-skills-docx, got '%s'", mapping.Skills["docx"].Image)
+		}
+		if mapping.Skills["pptx"].Image != "mcp-skills-pptx" {
+			t.Errorf("Expected pptx -> mcp-skills-pptx, got '%s'", mapping.Skills["pptx"].Image)
+		}
+		if mapping.Skills["pdf"].Image != "mcp-skills-pdf" {
+			t.Errorf("Expected pdf -> mcp-skills-pdf, got '%s'", mapping.Skills["pdf"].Image)
 		}
 	})
 
-	// Test 3: Minimal file (defaults should be filled in)
+	// Test 2: File doesn't exist
+	t.Run("FileNotExists", func(t *testing.T) {
+		nonExistentFile := filepath.Join(tmpDir, "does-not-exist.yaml")
+		mapping, err := LoadSkillImageMapping(nonExistentFile)
+		
+		// Should return default mapping, not error
+		if err != nil {
+			t.Fatalf("Expected default mapping, got error: %v", err)
+		}
+		
+		if mapping.Defaults.Image != "python:3.11-alpine" {
+			t.Errorf("Expected default image 'python:3.11-alpine', got '%s'", mapping.Defaults.Image)
+		}
+	})
+
+	// Test 3: Minimal mapping
 	t.Run("MinimalMapping", func(t *testing.T) {
 		mappingFile := filepath.Join(tmpDir, "minimal-mapping.yaml")
-		content := `default_image: test-image
+		content := `defaults:
+  image: python:3.11-alpine
 
-skills:
-  test-skill: test-image-specific
+skills: {}
 `
 		if err := os.WriteFile(mappingFile, []byte(content), 0644); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
@@ -102,61 +92,60 @@ skills:
 			t.Fatalf("LoadSkillImageMapping failed: %v", err)
 		}
 
-		// Check that defaults were filled in
-		if mapping.ContainerConfig.MemoryLimit != "256m" {
-			t.Errorf("Expected default memory '256m', got '%s'", mapping.ContainerConfig.MemoryLimit)
+		// Should have default values filled in
+		if mapping.Defaults.NetworkMode != "none" {
+			t.Errorf("Expected default network_mode 'none', got '%s'", mapping.Defaults.NetworkMode)
 		}
-		if mapping.ContainerConfig.Network != "none" {
-			t.Errorf("Expected default network 'none', got '%s'", mapping.ContainerConfig.Network)
-		}
-		if mapping.ContainerConfig.PidsLimit != 100 {
-			t.Errorf("Expected default pids_limit 100, got %d", mapping.ContainerConfig.PidsLimit)
+		if mapping.Defaults.Memory != "256MB" {
+			t.Errorf("Expected default memory '256MB', got '%s'", mapping.Defaults.Memory)
 		}
 	})
 
 	// Test 4: Invalid YAML
 	t.Run("InvalidYAML", func(t *testing.T) {
-		mappingFile := filepath.Join(tmpDir, "invalid-mapping.yaml")
-		content := `this is not valid yaml: [[[`
+		mappingFile := filepath.Join(tmpDir, "invalid.yaml")
+		content := `this is not: valid: yaml:: syntax`
 		if err := os.WriteFile(mappingFile, []byte(content), 0644); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
 		}
 
 		_, err := LoadSkillImageMapping(mappingFile)
 		if err == nil {
-			t.Error("LoadSkillImageMapping should fail for invalid YAML")
+			t.Fatal("Expected error for invalid YAML, got nil")
 		}
 	})
 }
 
 func TestGetImageForSkill(t *testing.T) {
 	mapping := &SkillImageMapping{
-		DefaultImage: "default-image",
-		Skills: map[string]string{
-			"pptx":      "mcp-skills-pptx",
-			"docx":      "mcp-skills-docx",
-			"xlsx":      "mcp-skills-xlsx",
-			"pdf":       "mcp-skills-pdf",
+		Defaults: SkillDefaults{
+			Image: "python:3.11-alpine",
+		},
+		Skills: map[string]*SkillSpec{
+			"docx": {Image: "mcp-skills-docx"},
+			"pptx": {Image: "mcp-skills-pptx"},
+			"xlsx": {Image: "mcp-skills-xlsx"},
+			"pdf":  {Image: "mcp-skills-pdf"},
 		},
 	}
 
 	tests := []struct {
-		skillName     string
-		expectedImage string
+		skillName string
+		expected  string
 	}{
 		{"pptx", "mcp-skills-pptx"},
 		{"docx", "mcp-skills-docx"},
 		{"xlsx", "mcp-skills-xlsx"},
 		{"pdf", "mcp-skills-pdf"},
-		{"unknown-skill", "default-image"},
-		{"", "default-image"},
+		{"unknown-skill", "python:3.11-alpine"},
+		{"", "python:3.11-alpine"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.skillName, func(t *testing.T) {
-			image := mapping.GetImageForSkill(tt.skillName)
-			if image != tt.expectedImage {
-				t.Errorf("GetImageForSkill(%s) = %s, want %s", tt.skillName, image, tt.expectedImage)
+			result := mapping.GetImageForSkill(tt.skillName)
+			if result != tt.expected {
+				t.Errorf("GetImageForSkill(%s) = %s; want %s", tt.skillName, result, tt.expected)
 			}
 		})
 	}
@@ -167,37 +156,37 @@ func TestLoadSkillImageMappingFromSkillsDir(t *testing.T) {
 	tmpDir := t.TempDir()
 	configDir := filepath.Join(tmpDir, "config")
 	skillsDir := filepath.Join(configDir, "skills")
-	
 	if err := os.MkdirAll(skillsDir, 0755); err != nil {
-		t.Fatalf("Failed to create skills dir: %v", err)
+		t.Fatalf("Failed to create directories: %v", err)
 	}
 
-	// Create mapping file
+	// Create skill-images.yaml
 	mappingFile := filepath.Join(skillsDir, "skill-images.yaml")
-	content := `default_image: test-default
+	content := `defaults:
+  image: python:3.11-alpine
+
 skills:
-  test: test-image
+  docx:
+    image: mcp-skills-docx
 `
 	if err := os.WriteFile(mappingFile, []byte(content), 0644); err != nil {
-		t.Fatalf("Failed to create mapping file: %v", err)
+		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	// Create a fake config file
-	configFile := filepath.Join(configDir, "test-config.yaml")
-	if err := os.WriteFile(configFile, []byte("test: config"), 0644); err != nil {
+	// Create a config file in the config directory
+	configFile := filepath.Join(configDir, "settings.yaml")
+	if err := os.WriteFile(configFile, []byte("test: true"), 0644); err != nil {
 		t.Fatalf("Failed to create config file: %v", err)
 	}
 
-	// Test loading from skills dir
+	// Load mapping from skills directory
 	mapping, err := LoadSkillImageMappingFromSkillsDir(configFile)
 	if err != nil {
 		t.Fatalf("LoadSkillImageMappingFromSkillsDir failed: %v", err)
 	}
 
-	if mapping.DefaultImage != "test-default" {
-		t.Errorf("Expected default_image 'test-default', got '%s'", mapping.DefaultImage)
-	}
-	if mapping.Skills["test"] != "test-image" {
-		t.Errorf("Expected test -> test-image, got '%s'", mapping.Skills["test"])
+	// Verify loaded mapping
+	if mapping.Skills["docx"].Image != "mcp-skills-docx" {
+		t.Errorf("Expected docx -> mcp-skills-docx, got '%s'", mapping.Skills["docx"].Image)
 	}
 }

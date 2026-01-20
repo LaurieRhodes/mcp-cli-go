@@ -65,7 +65,7 @@ func (s *Service) Initialize(skillsDir string, executionMode skills.ExecutionMod
 	} else {
 		s.imageMapping = mapping
 		logging.Info("✅ Loaded skill image mappings: %d skills, default: %s", 
-			len(mapping.Skills), mapping.DefaultImage)
+			len(mapping.Skills), mapping.Defaults.Image)
 	}
 	
 	// Initialize executor if needed
@@ -1090,16 +1090,17 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 	// Add execute_skill_code tool for dynamic code execution
 	executeCodeTool := map[string]interface{}{
 		"name": "execute_skill_code",
-		"description": "[SKILL CODE EXECUTION] Execute code with access to a skill's helper libraries. " +
-			"Code executes in a sandboxed container with the skill's scripts and dependencies. " +
-			"\n\n**CRITICAL FILE PATHS - READ THIS CAREFULLY:**" +
-			"\n• INPUT files: Read from /outputs/ directory (e.g., /outputs/document_parsing_test/policy.xml)" +
-			"\n• OUTPUT files: Write to /outputs/ directory (e.g., /outputs/ism_assessment_full_v2/results.json)" +
-			"\n• /outputs/ is the ONLY directory that persists between workflow steps" +
-			"\n• NEVER use /workspace/ - it's temporary and gets deleted after execution" +
-			"\n• Files in /workspace/ will NOT be accessible to other workflow steps" +
-			"\n\n**Usage:** Load the skill first (passive mode) to see documentation and available libraries. " +
-			"The skill documentation explains language, libraries, and helper scripts available.",
+		"description": "[SKILL CODE EXECUTION] Run bash or Python code using a skill's scripts and libraries.\n\n" +
+			"**PREREQUISITE - DO THIS FIRST:**\n" +
+			"1. Call the skill's tool (e.g., context_builder, docx, pdf) to see available scripts\n" +
+			"2. Read the examples showing how to call the scripts\n" +
+			"3. Then use THIS tool to execute the commands\n\n" +
+			"**FILE PATHS:**\n" +
+			"• INPUT: Read from /outputs/ directory (e.g., /outputs/work/policy.xml)\n" +
+			"• OUTPUT: Write to /outputs/ directory (e.g., /outputs/work/results.json)\n" +
+			"• /outputs/ is the ONLY directory that persists\n\n" +
+			"**LANGUAGE:**\n" +
+			"Auto-populated from skill config (context-builder=bash, docx=python). Don't specify language parameter unless skill supports multiple languages.",
 		"template": "execute_skill_code", // Special marker for this tool
 		"input_schema": map[string]interface{}{
 			"type": "object",
@@ -1110,13 +1111,13 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 				},
 				"language": map[string]interface{}{
 					"type":        "string",
-					"enum":        []string{"python", "bash"},
-					"description": "Programming language ('python' or 'bash')",
-					"default":     "python",
+					"enum":        []string{"bash", "python"},
+					"description": "Programming language: 'bash' for bash skills, 'python' for Python skills. Check skill's SKILL.md for required language.",
+					
 				},
 				"code": map[string]interface{}{
 					"type":        "string",
-					"description": "Code to execute (Python or Bash). IMPORTANT: Save all files to /outputs/ directory only. Example: doc.save('/outputs/file.docx')",
+					"description": "Code to execute in the specified language. IMPORTANT: Save all files to /outputs/ directory only. Bash example: bash /skill/scripts/process.sh /outputs/input.dat /outputs/output.dat | Python example: doc.save('/outputs/file.docx')",
 				},
 				"files": map[string]interface{}{
 					"type":        "object",
@@ -1133,4 +1134,58 @@ func (s *Service) GenerateRunAsTools() ([]map[string]interface{}, error) {
 	logging.Info("Generated %d MCP tool definitions from skills", len(tools))
 	
 	return tools, nil
+}
+
+// GetSkillLanguage returns the configured language for a skill
+// Returns empty string if no language is configured
+func (s *Service) GetSkillLanguage(skillName string) string {
+	if s.imageMapping == nil {
+		return ""
+	}
+	
+	// Check if skill has specific config
+	if skillSpec, exists := s.imageMapping.Skills[skillName]; exists {
+		// Return specific language if set
+		if skillSpec.Language != "" {
+			return skillSpec.Language
+		}
+		// If languages array is set with single entry, return it
+		if len(skillSpec.Languages) == 1 {
+			return skillSpec.Languages[0]
+		}
+		// Multi-language or no language specified
+		if len(skillSpec.Languages) > 1 {
+			return "" // Caller must specify
+		}
+	}
+	
+	// Fall back to default language
+	return s.imageMapping.Defaults.Language
+}
+
+// GetSkillLanguages returns all supported languages for a skill
+// Returns empty slice if no languages configured
+func (s *Service) GetSkillLanguages(skillName string) []string {
+	if s.imageMapping == nil {
+		return nil
+	}
+	
+	// Check if skill has specific config
+	if skillSpec, exists := s.imageMapping.Skills[skillName]; exists {
+		// If languages array is set, return it
+		if len(skillSpec.Languages) > 0 {
+			return skillSpec.Languages
+		}
+		// If single language is set, return as array
+		if skillSpec.Language != "" {
+			return []string{skillSpec.Language}
+		}
+	}
+	
+	// Fall back to default language
+	if s.imageMapping.Defaults.Language != "" {
+		return []string{s.imageMapping.Defaults.Language}
+	}
+	
+	return nil
 }

@@ -25,6 +25,7 @@ var (
 	errorCodeOnly  bool
 	noisy          bool   // Changed to be the opposite of quiet
 	rawDataOutput  bool   // New flag for raw data output
+	queryInputData string // Query-specific input data flag
 )
 
 // QueryCmd represents the query command
@@ -133,20 +134,31 @@ Examples:
 			}
 		}
 		
-		// Get question from either positional args or --input-data flag
+		// Get question from either positional args, query-specific --input-data, or root --input-data flag
 		var question string
 		if len(args) > 0 {
 			// Use positional arguments if provided
 			question = strings.Join(args, " ")
+		} else if queryInputData != "" {
+			// Use query-specific --input-data flag
+			question = queryInputData
 		} else if inputData != "" {
-			// Use --input-data flag if no positional args
+			// Fall back to root-level --input-data flag (for backward compatibility)
 			question = inputData
 		} else {
-			// No question provided
+			// No question provided - show enhanced error
+			cliErr := NewMissingArgumentError("question", "query", []string{
+				`mcp-cli query "What is the capital of France?"`,
+				`mcp-cli query --input-data "What is the capital of France?"`,
+				`echo "What is the capital of France?" | mcp-cli query --input-data -`,
+			})
+			fmt.Fprintln(os.Stderr, cliErr.Format())
+			
+			// Exit immediately with proper code
 			if errorCodeOnly {
 				os.Exit(query.ErrInvalidArgumentCode)
 			}
-			return fmt.Errorf("question required: provide as argument or use --input-data flag")
+			os.Exit(1)
 		}
 
 		// Process server configuration options - use local ProcessOptions with configFile
@@ -537,6 +549,7 @@ func formatJsonObject(obj map[string]interface{}, indent int) string {
 
 func init() {
 	// Add query-specific flags
+	QueryCmd.Flags().StringVar(&queryInputData, "input-data", "", "Question to ask (alternative to positional argument)")
 	QueryCmd.Flags().BoolVarP(&jsonOutput, "json", "j", false, "Output response in JSON format")
 	QueryCmd.Flags().StringVarP(&contextFile, "context", "c", "", "File containing additional context")
 	QueryCmd.Flags().StringVar(&systemPrompt, "system-prompt", "", "Custom system prompt")

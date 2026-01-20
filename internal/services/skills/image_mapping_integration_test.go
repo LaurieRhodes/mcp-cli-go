@@ -35,7 +35,7 @@ func TestImageMappingIntegration(t *testing.T) {
 	}
 
 	t.Log("✅ Image mapping loaded")
-	t.Logf("   Default image: %s", service.imageMapping.DefaultImage)
+	t.Logf("   Default image: %s", service.imageMapping.Defaults.Image)
 	t.Logf("   Skills mapped: %d", len(service.imageMapping.Skills))
 
 	// Test each skill mapping

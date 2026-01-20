@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,106 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+// unmarshalStrict unmarshals YAML with strict field validation
+// Unknown fields will cause an error instead of being silently ignored
+func unmarshalStrict(data []byte, v interface{}) error {
+	decoder := yaml.NewDecoder(bytes.NewReader(data))
+	decoder.KnownFields(true) // Enable strict mode - reject unknown fields
+	err := decoder.Decode(v)
+	
+	if err != nil {
+		// Enhance error message with helpful suggestions
+		return enhanceValidationError(err, v)
+	}
+	
+	return nil
+}
+
+// enhanceValidationError adds helpful context to YAML validation errors
+func enhanceValidationError(err error, v interface{}) error {
+	errMsg := err.Error()
+	
+	// Check if it's an unknown field error
+	if !strings.Contains(errMsg, "field") || !strings.Contains(errMsg, "not found") {
+		return err // Not a field validation error, return as-is
+	}
+	
+	// Common mistakes and suggestions
+	suggestions := map[string]string{
+		"pass_env":     "Use 'with:' to pass parameters to child workflows",
+		"input":        "Use 'items:' for iterate mode or 'with:' for parameters. 'input' is only valid at step level",
+		"inputs":       "Not a valid workflow field. Use 'env:' for environment variables or step-level 'input'",
+		"output":       "Not a valid workflow field. Output is returned automatically from steps",
+		"outputs":      "Not a valid workflow field. Use step names to reference outputs",
+		"output_var":   "Not a valid field. Step outputs are accessible via step names",
+		"execution":    "Cannot be nested inside loop. Set execution at workflow or step level",
+		"workfow":      "Typo: should be 'workflow'",
+		"max_iteration": "Typo: should be 'max_iterations' (plural)",
+	}
+	
+	// Try to extract field name from error
+	var fieldName string
+	if strings.Contains(errMsg, "field ") {
+		parts := strings.Split(errMsg, "field ")
+		if len(parts) > 1 {
+			fieldParts := strings.Split(parts[1], " ")
+			if len(fieldParts) > 0 {
+				fieldName = fieldParts[0]
+			}
+		}
+	}
+	
+	// Build enhanced error message
+	enhanced := fmt.Sprintf("%s\n\n", errMsg)
+	
+	if suggestion, ok := suggestions[fieldName]; ok {
+		enhanced += fmt.Sprintf("💡 Suggestion: %s\n\n", suggestion)
+	}
+	
+	// Add valid fields for common types
+	if strings.Contains(errMsg, "type config.WorkflowV2") {
+		enhanced += "Valid workflow-level fields:\n"
+		enhanced += "  - name (required)\n"
+		enhanced += "  - version (required)\n"
+		enhanced += "  - description\n"
+		enhanced += "  - execution (provider, model, etc.)\n"
+		enhanced += "  - env (environment variables)\n"
+		enhanced += "  - steps (required)\n"
+		enhanced += "  - loops\n"
+	} else if strings.Contains(errMsg, "type config.LoopMode") {
+		enhanced += "Valid loop fields:\n"
+		enhanced += "  - workflow (required)\n"
+		enhanced += "  - mode (iterate | refine)\n"
+		enhanced += "  - items (for iterate mode)\n"
+		enhanced += "  - with (parameters to pass)\n"
+		enhanced += "  - max_iterations (required)\n"
+		enhanced += "  - parallel, max_workers\n"
+		enhanced += "  - on_failure, max_retries, retry_delay\n"
+		enhanced += "  - timeout_per_item, total_timeout\n"
+		enhanced += "\nExample:\n"
+		enhanced += "  loop:\n"
+		enhanced += "    workflow: child_worker\n"
+		enhanced += "    mode: iterate\n"
+		enhanced += "    items: file:///path/to/items.json\n"
+		enhanced += "    with:\n"
+		enhanced += "      config_param: \"{{env.value}}\"\n"
+		enhanced += "    max_iterations: 10\n"
+	} else if strings.Contains(errMsg, "type config.StepV2") {
+		enhanced += "Valid step fields:\n"
+		enhanced += "  - name (required)\n"
+		enhanced += "  - run (for prompts)\n"
+		enhanced += "  - loop (for child workflows)\n"
+		enhanced += "  - rag (for retrieval)\n"
+		enhanced += "  - template, consensus, embeddings\n"
+		enhanced += "  - provider, model (overrides)\n"
+		enhanced += "  - servers, skills\n"
+		enhanced += "  - needs (dependencies)\n"
+		enhanced += "  - if (conditional)\n"
+	}
+	
+	return fmt.Errorf("%s", enhanced)
+}
 
 // Loader handles loading configuration files in both monolithic and modular formats
 type Loader struct {
@@ -54,7 +155,7 @@ func (l *Loader) Load(path string) (*ApplicationConfig, error) {
 
 	// Parse main config
 	var mainConfig MainConfigFile
-	if err := yaml.Unmarshal(data, &mainConfig); err != nil {
+	if err := unmarshalStrict(data, &mainConfig); err != nil {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
 
@@ -138,7 +239,7 @@ func (l *Loader) loadSettings(pattern string, result *ApplicationConfig) error {
 		RAG        *RagConfig        `yaml:"rag,omitempty"`
 	}
 
-	if err := yaml.Unmarshal(data, &settings); err != nil {
+	if err := unmarshalStrict(data, &settings); err != nil {
 		return fmt.Errorf("failed to parse settings: %w", err)
 	}
 
@@ -228,7 +329,7 @@ func (l *Loader) loadProviders(pattern string, result *ApplicationConfig) error 
 			Config        ProviderConfig `yaml:"config"`
 		}
 
-		if err := yaml.Unmarshal(data, &provider); err != nil {
+		if err := unmarshalStrict(data, &provider); err != nil {
 			return fmt.Errorf("failed to parse provider file %s: %w", file, err)
 		}
 
@@ -281,7 +382,7 @@ func (l *Loader) loadEmbeddings(pattern string, result *ApplicationConfig) error
 			Config        EmbeddingProviderConfig `yaml:"config"`
 		}
 
-		if err := yaml.Unmarshal(data, &embedding); err != nil {
+		if err := unmarshalStrict(data, &embedding); err != nil {
 			return fmt.Errorf("failed to parse embedding file %s: %w", file, err)
 		}
 
@@ -333,7 +434,7 @@ func (l *Loader) loadServers(pattern string, result *ApplicationConfig) error {
 			Config     ServerConfig `yaml:"config"`
 		}
 
-		if err := yaml.Unmarshal(data, &server); err != nil {
+		if err := unmarshalStrict(data, &server); err != nil {
 			return fmt.Errorf("failed to parse server file %s: %w", file, err)
 		}
 
@@ -370,6 +471,7 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 		var schemaCheck struct {
 			Schema string `yaml:"$schema"`
 		}
+		// Use non-strict here since we're only checking one field
 		if err := yaml.Unmarshal(data, &schemaCheck); err != nil {
 			return fmt.Errorf("failed to parse workflow file %s: %w", file, err)
 		}
@@ -501,7 +603,7 @@ type WorkflowLoader struct{}
 // LoadFromBytes loads a workflow from bytes
 func (wl *WorkflowLoader) LoadFromBytes(data []byte) (*WorkflowV2, error) {
 	var workflow WorkflowV2
-	if err := yaml.Unmarshal(data, &workflow); err != nil {
+	if err := unmarshalStrict(data, &workflow); err != nil {
 		return nil, fmt.Errorf("failed to parse workflow: %w", err)
 	}
 
@@ -551,7 +653,7 @@ func (l *Loader) loadRAG(pattern string, result *ApplicationConfig) error {
 			Config     RagServerConfig `yaml:"config"`
 		}
 
-		if err := yaml.Unmarshal(data, &ragServer); err != nil {
+		if err := unmarshalStrict(data, &ragServer); err != nil {
 			return fmt.Errorf("failed to parse RAG file %s: %w", file, err)
 		}
 

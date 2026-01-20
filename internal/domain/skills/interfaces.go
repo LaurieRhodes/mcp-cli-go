@@ -63,6 +63,13 @@ type SkillService interface {
 	LoadSkillByRequest(request *SkillLoadRequest) (*SkillLoadResult, error)
 	
 	// GenerateRunAsTools generates MCP tool definitions for all skills
+	
+	// GetSkillLanguage returns the configured language for a skill
+	GetSkillLanguage(skillName string) string
+	
+	// GetSkillLanguages returns all supported languages for a skill
+	GetSkillLanguages(skillName string) []string
 	// Returns tools suitable for inclusion in a RunAsConfig
 	GenerateRunAsTools() ([]map[string]interface{}, error)
+	
 }

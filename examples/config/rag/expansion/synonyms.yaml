@@ -1,0 +1,39 @@
+# Synonyms for Query Expansion
+# Format: term: [synonym1, synonym2, ...]
+
+# Authentication & Access
+authentication: [auth, verification, identity, credential]
+authorization: [access control, permissions, privileges]
+password: [passphrase, credential, secret]
+
+# Multi-Factor Authentication
+mfa: [multi-factor authentication, two-factor, 2fa, multifactor]
+otp: [one-time password, token, passcode]
+biometric: [fingerprint, facial recognition, iris scan]
+
+# Security
+security: [cybersecurity, infosec, information security]
+vulnerability: [weakness, flaw, security hole, exploit]
+threat: [risk, danger, attack vector]
+breach: [compromise, incident, violation]
+
+# Compliance
+compliance: [conformance, adherence, regulatory]
+audit: [review, assessment, examination, inspection]
+control: [safeguard, measure, protection, mechanism]
+
+# Technical
+encryption: [cryptography, cipher, encoding]
+firewall: [network security, packet filter]
+endpoint: [device, workstation, client]
+server: [host, node, system]
+
+# Network
+network: [lan, wan, infrastructure]
+internet: [web, online, cyber]
+connection: [link, session, communication]
+
+# Data
+data: [information, records, files]
+database: [db, datastore, repository]
+backup: [copy, snapshot, archive]

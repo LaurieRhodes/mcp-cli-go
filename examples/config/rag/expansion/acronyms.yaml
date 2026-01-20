@@ -1,0 +1,57 @@
+# Acronyms for Query Expansion
+# Format: acronym: [expansion1, expansion2, ...]
+
+# Common IT/Security Acronyms
+MFA: [Multi-Factor Authentication, Multifactor Authentication]
+2FA: [Two-Factor Authentication]
+OTP: [One-Time Password]
+SSO: [Single Sign-On]
+IAM: [Identity and Access Management]
+RBAC: [Role-Based Access Control]
+
+# Security Standards
+ISM: [Information Security Manual]
+NIST: [National Institute of Standards and Technology]
+ISO: [International Organization for Standardization]
+FISMA: [Federal Information Security Management Act]
+HIPAA: [Health Insurance Portability and Accountability Act]
+PCI: [Payment Card Industry]
+GDPR: [General Data Protection Regulation]
+
+# Technical
+API: [Application Programming Interface]
+REST: [Representational State Transfer]
+HTTPS: [Hypertext Transfer Protocol Secure]
+TLS: [Transport Layer Security]
+SSL: [Secure Sockets Layer]
+VPN: [Virtual Private Network]
+DNS: [Domain Name System]
+DHCP: [Dynamic Host Configuration Protocol]
+
+# Cybersecurity
+IDS: [Intrusion Detection System]
+IPS: [Intrusion Prevention System]
+SIEM: [Security Information and Event Management]
+SOC: [Security Operations Center]
+DLP: [Data Loss Prevention]
+EDR: [Endpoint Detection and Response]
+XDR: [Extended Detection and Response]
+
+# Compliance
+ISMS: [Information Security Management System]
+ITIL: [Information Technology Infrastructure Library]
+COBIT: [Control Objectives for Information and Related Technology]
+
+# Database & Storage
+SQL: [Structured Query Language]
+NoSQL: [Not Only SQL]
+RDBMS: [Relational Database Management System]
+ACID: [Atomicity Consistency Isolation Durability]
+RAID: [Redundant Array of Independent Disks]
+
+# Cloud
+AWS: [Amazon Web Services]
+GCP: [Google Cloud Platform]
+SaaS: [Software as a Service]
+PaaS: [Platform as a Service]
+IaaS: [Infrastructure as a Service]

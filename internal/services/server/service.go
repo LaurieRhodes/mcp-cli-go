@@ -472,10 +472,52 @@ func (s *Service) handleExecuteSkillCode(arguments map[string]interface{}) (map[
 		return s.errorResponse("skill_name parameter is required"), nil
 	}
 	
-	// Extract language (default to python)
-	language := "python"
-	if lang, ok := arguments["language"].(string); ok && lang != "" {
-		language = lang
+	
+	// Get configured language(s) for this skill
+	configLanguage := s.skillService.GetSkillLanguage(skillName)
+	supportedLanguages := s.skillService.GetSkillLanguages(skillName)
+	
+	// Extract language from request (optional)
+	requestLanguage, _ := arguments["language"].(string)
+	
+	// Determine final language to use
+	var language string
+	if requestLanguage != "" {
+		// Language specified by caller - validate it
+		language = requestLanguage
+		
+		// Validate against config if config specifies languages
+		if len(supportedLanguages) > 0 {
+			valid := false
+			for _, supported := range supportedLanguages {
+				if language == supported {
+					valid = true
+					break
+				}
+			}
+			if !valid {
+				return nil, fmt.Errorf("skill '%s' requires language to be one of %v, got '%s'", 
+					skillName, supportedLanguages, language)
+			}
+		}
+	} else {
+		// No language specified - try to auto-populate from config
+		if configLanguage != "" {
+			language = configLanguage
+			logging.Debug("Auto-populated language '%s' for skill '%s' from config", language, skillName)
+		} else {
+			// Multi-language skill or no config - require explicit specification
+			if len(supportedLanguages) > 1 {
+				return nil, fmt.Errorf("skill '%s' supports multiple languages %v - you must specify which one to use", 
+					skillName, supportedLanguages)
+			}
+			return nil, fmt.Errorf("language parameter is required for skill '%s'", skillName)
+		}
+	}
+	
+	// Final validation
+	if language != "bash" && language != "python" {
+		return nil, fmt.Errorf("language must be 'bash' or 'python', got: %s", language)
 	}
 	
 	// Extract code

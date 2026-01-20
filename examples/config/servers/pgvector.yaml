@@ -1,0 +1,5 @@
+server_name: pgvector
+config:
+  command: /path/to/mcp-servers/mcp-pgvector-go/pgvector-mcp
+  args: []
+  env: {}

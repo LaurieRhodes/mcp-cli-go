@@ -7,22 +7,37 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// SkillImageMapping represents the skill-to-container-image mapping configuration
-type SkillImageMapping struct {
-	DefaultImage       string                 `yaml:"default_image"`
-	Skills             map[string]string      `yaml:"skills"`
-	SkillNetworkModes  map[string]string      `yaml:"skill_network_modes,omitempty"`
-	ContainerConfig    ContainerConfig        `yaml:"container_config"`
-	ImageInfo          map[string]interface{} `yaml:"image_info,omitempty"`
+// SkillDefaults contains default values inherited by all skills
+type SkillDefaults struct {
+	Language    string `yaml:"language,omitempty"`
+	Image       string `yaml:"image"`
+	NetworkMode string `yaml:"network_mode"`
+	Memory      string `yaml:"memory"`
+	CPU         string `yaml:"cpu"`
+	Timeout     string `yaml:"timeout"`
+	OutputsDir  string `yaml:"outputs_dir"`
 }
 
-// ContainerConfig holds container runtime configuration
-type ContainerConfig struct {
-	MemoryLimit string `yaml:"memory_limit"`
-	CPULimit    string `yaml:"cpu_limit"`
-	Timeout     int    `yaml:"timeout"`
-	Network     string `yaml:"network"`
-	PidsLimit   int    `yaml:"pids_limit"`
+// SkillSpec contains the complete configuration for a skill
+type SkillSpec struct {
+	Image                string   `yaml:"image"`
+	Language             string   `yaml:"language,omitempty"`
+	Languages            []string `yaml:"languages,omitempty"`
+	Description          string   `yaml:"description,omitempty"`
+	NetworkMode          string   `yaml:"network_mode,omitempty"`
+	Dockerfile           string   `yaml:"dockerfile,omitempty"`
+	Memory               string   `yaml:"memory,omitempty"`
+	CPU                  string   `yaml:"cpu,omitempty"`
+	Timeout              string   `yaml:"timeout,omitempty"`
+	Mounts               []string `yaml:"mounts,omitempty"`
+	Environment          []string `yaml:"environment,omitempty"`
+	NetworkJustification string   `yaml:"network_justification,omitempty"`
+}
+
+// SkillImageMapping maps skill names to their configurations (V2 format)
+type SkillImageMapping struct {
+	Defaults SkillDefaults         `yaml:"defaults"`
+	Skills   map[string]*SkillSpec `yaml:"skills"`
 }
 
 // LoadSkillImageMapping loads the skill-to-image mapping from a YAML file
@@ -32,16 +47,15 @@ func LoadSkillImageMapping(path string) (*SkillImageMapping, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		// Return default mapping if file doesn't exist
 		return &SkillImageMapping{
-			DefaultImage:      "python:3.11-slim",
-			Skills:            make(map[string]string),
-			SkillNetworkModes: make(map[string]string),
-			ContainerConfig: ContainerConfig{
-				MemoryLimit: "256m",
-				CPULimit:    "0.5",
-				Timeout:     60,
-				Network:     "none",
-				PidsLimit:   100,
+			Defaults: SkillDefaults{
+				Image:       "python:3.11-slim",
+				NetworkMode: "none",
+				Memory:      "256MB",
+				CPU:         "0.5",
+				Timeout:     "60s",
+				OutputsDir:  "/tmp/mcp-outputs",
 			},
+			Skills: make(map[string]*SkillSpec),
 		}, nil
 	}
 
@@ -58,29 +72,29 @@ func LoadSkillImageMapping(path string) (*SkillImageMapping, error) {
 	}
 
 	// Set defaults if not specified
-	if mapping.DefaultImage == "" {
-		mapping.DefaultImage = "python:3.11-slim"
+	if mapping.Defaults.Image == "" {
+		mapping.Defaults.Image = "python:3.11-slim"
+	}
+	if mapping.Defaults.Language == "" {
+		mapping.Defaults.Language = "python"
+	}
+	if mapping.Defaults.NetworkMode == "" {
+		mapping.Defaults.NetworkMode = "none"
+	}
+	if mapping.Defaults.Memory == "" {
+		mapping.Defaults.Memory = "256MB"
+	}
+	if mapping.Defaults.CPU == "" {
+		mapping.Defaults.CPU = "0.5"
+	}
+	if mapping.Defaults.Timeout == "" {
+		mapping.Defaults.Timeout = "60s"
+	}
+	if mapping.Defaults.OutputsDir == "" {
+		mapping.Defaults.OutputsDir = "/tmp/mcp-outputs"
 	}
 	if mapping.Skills == nil {
-		mapping.Skills = make(map[string]string)
-	}
-	if mapping.SkillNetworkModes == nil {
-		mapping.SkillNetworkModes = make(map[string]string)
-	}
-	if mapping.ContainerConfig.MemoryLimit == "" {
-		mapping.ContainerConfig.MemoryLimit = "256m"
-	}
-	if mapping.ContainerConfig.CPULimit == "" {
-		mapping.ContainerConfig.CPULimit = "0.5"
-	}
-	if mapping.ContainerConfig.Timeout == 0 {
-		mapping.ContainerConfig.Timeout = 60
-	}
-	if mapping.ContainerConfig.Network == "" {
-		mapping.ContainerConfig.Network = "none"
-	}
-	if mapping.ContainerConfig.PidsLimit == 0 {
-		mapping.ContainerConfig.PidsLimit = 100
+		mapping.Skills = make(map[string]*SkillSpec)
 	}
 
 	return &mapping, nil
@@ -89,10 +103,10 @@ func LoadSkillImageMapping(path string) (*SkillImageMapping, error) {
 // GetImageForSkill returns the container image name for a given skill
 // If no specific mapping exists, returns the default image
 func (m *SkillImageMapping) GetImageForSkill(skillName string) string {
-	if image, exists := m.Skills[skillName]; exists && image != "" {
-		return image
+	if spec, exists := m.Skills[skillName]; exists && spec != nil && spec.Image != "" {
+		return spec.Image
 	}
-	return m.DefaultImage
+	return m.Defaults.Image
 }
 
 // LoadSkillImageMappingFromSkillsDir loads the mapping from the standard skills directory
@@ -114,10 +128,10 @@ func LoadSkillImageMappingDefault() (*SkillImageMapping, error) {
 }
 
 // GetNetworkModeForSkill returns the network mode for a given skill
-// Returns skill-specific mode if defined, otherwise the default from container_config
+// Returns skill-specific mode if defined, otherwise the default
 func (m *SkillImageMapping) GetNetworkModeForSkill(skillName string) string {
-	if mode, exists := m.SkillNetworkModes[skillName]; exists && mode != "" {
-		return mode
+	if spec, exists := m.Skills[skillName]; exists && spec != nil && spec.NetworkMode != "" {
+		return spec.NetworkMode
 	}
-	return m.ContainerConfig.Network
+	return m.Defaults.NetworkMode
 }
