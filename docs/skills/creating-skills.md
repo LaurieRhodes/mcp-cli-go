@@ -1,5 +1,7 @@
 # Creating Skills
 
+**Quick reference for skill creation. For comprehensive guide, see [COMPLETE_GUIDE.md](COMPLETE_GUIDE.md#creating-skills).**
+
 ## Skill Structure
 
 ```
@@ -123,13 +125,32 @@ cd docker/skills
 ./build-skills-images.sh myskill
 ```
 
-**4. Configure mapping:**
+**4. Register in skill-images.yaml:**
 
-Edit `config/skills/skill-images.yaml`:
+⚠️ **CRITICAL:** Add your skill to `config/skills/skill-images.yaml`:
+
 ```yaml
 skills:
-  my-skill: mcp-skills-myskill
+  my-skill:
+    image: python:3.11-slim  # Use default Python
+    language: python         # Advertised via MCP
+    description: "My custom skill"
 ```
+
+Or for a custom container:
+
+```yaml
+skills:
+  my-skill:
+    image: mcp-skills-my-skill
+    language: python
+    dockerfile: docker/skills/Dockerfile.my-skill
+    description: "My custom skill with special packages"
+```
+
+**Without this:** Skill won't work properly!
+
+See [SKILL_IMAGES_YAML.md](SKILL_IMAGES_YAML.md) for complete reference.
 
 ## Best Practices
 
@@ -211,4 +232,4 @@ def write_csv(data, filepath):
 
 ---
 
-Last updated: January 6, 2026
+Last updated: January 20, 2026

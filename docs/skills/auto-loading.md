@@ -11,13 +11,29 @@ Skills in `config/skills/` are automatically discovered and exposed as MCP tools
 
 ## Configuration
 
-**Minimal config** (`config/runasMCP/mcp_skills_stdio.yaml`):
+**Minimal MCP server config** (`config/runasMCP/mcp_skills_stdio.yaml`):
 ```yaml
 runas_type: mcp-skills
 skills_config:
   skills_directory: ../skills
   execution_mode: auto
 ```
+
+**Skill capabilities config** (`config/skills/skill-images.yaml`):
+```yaml
+skills:
+  docx:
+    image: mcp-skills-docx
+    language: python
+    description: "Word document manipulation"
+```
+
+This file is **critical** - it:
+- Maps skills to container images
+- Declares language capabilities (advertised via MCP)
+- Sets resource limits and security
+
+See [SKILL_IMAGES_YAML.md](SKILL_IMAGES_YAML.md) for complete reference.
 
 **Optional filtering:**
 ```yaml
@@ -133,4 +149,4 @@ No configuration changes needed!
 
 ---
 
-Last updated: January 6, 2026
+Last updated: January 20, 2026

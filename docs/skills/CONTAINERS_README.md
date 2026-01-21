@@ -32,12 +32,31 @@ Container mounts:
 
 ## Configuration
 
-**File**: `config/settings.yaml`
+**Outputs directory** (`config/settings.yaml`):
 
 ```yaml
 skills:
   outputs_dir: "/home/user/mcp-outputs"
 ```
+
+**Skill-to-container mapping** (`config/skills/skill-images.yaml`):
+
+```yaml
+skills:
+  pptx:
+    image: mcp-skills-pptx
+    language: python
+    description: "PowerPoint presentations"
+  
+  docx:
+    image: mcp-skills-docx
+    language: python
+    description: "Word documents"
+```
+
+**This file is critical** - it maps skills to containers and declares language capabilities.
+
+See [SKILL_IMAGES_YAML.md](SKILL_IMAGES_YAML.md) for complete reference.
 
 ## Images
 
@@ -60,4 +79,4 @@ Default: `python:3.11-alpine`
 
 ---
 
-Last updated: January 6, 2026
+Last updated: January 20, 2026

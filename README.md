@@ -398,9 +398,9 @@ All code runs in isolated Docker containers with:
 
 ---
 
-## MCP Server Mode
+## MCP Serve Mode
 
-Expose workflows as discoverable tools for Claude Desktop or other MCP clients.
+Expose spcialised workflows as discoverable tools for Claude Desktop or other MCP clients.
 
 ### 1. Create Server Config
 
@@ -620,38 +620,9 @@ loops:
 - Require multi-AI validation
 - Need Skills-based document creation across LLMs
 - Building AI agent systems
+- Building long running Recursive Language Models
 
----
 
-## Command Reference
-
-```bash
-# Initialize
-mcp-cli init
-mcp-cli init --quick
-
-# Query
-mcp-cli query "question"
-mcp-cli query --provider openai --model gpt-4o "question"
-
-# Workflows
-mcp-cli --workflow <name> --input-data "..."
-mcp-cli --list-workflows
-
-# Chat
-mcp-cli chat
-mcp-cli chat --provider anthropic
-
-# Server
-mcp-cli serve config.yaml
-
-# Tools
-mcp-cli tools
-mcp-cli interactive
-
-# Help
-mcp-cli --help
-```
 
 ---
 
@@ -670,55 +641,9 @@ I built this for my own automation needs and shared it as example code. If you f
 
 ---
 
-## Installation
-
-### Pre-Built Binaries
-
-**Linux:**
-
-```bash
-wget https://github.com/LaurieRhodes/mcp-cli-go/releases/latest/download/mcp-cli-linux-amd64
-chmod +x mcp-cli-linux-amd64
-sudo mv mcp-cli-linux-amd64 /usr/local/bin/mcp-cli
-```
-
-**macOS (Intel):**
-
-```bash
-wget https://github.com/LaurieRhodes/mcp-cli-go/releases/latest/download/mcp-cli-darwin-amd64
-chmod +x mcp-cli-darwin-amd64
-sudo mv mcp-cli-darwin-amd64 /usr/local/bin/mcp-cli
-```
-
-**macOS (Apple Silicon):**
-
-```bash
-wget https://github.com/LaurieRhodes/mcp-cli-go/releases/latest/download/mcp-cli-darwin-arm64
-chmod +x mcp-cli-darwin-arm64
-sudo mv mcp-cli-darwin-arm64 /usr/local/bin/mcp-cli
-```
-
-**Windows:** Download from [Releases](https://github.com/LaurieRhodes/mcp-cli-go/releases/latest)
-
-### Build from Source
-
-```bash
-git clone https://github.com/LaurieRhodes/mcp-cli-go.git
-cd mcp-cli-go
-go build -o mcp-cli
-sudo mv mcp-cli /usr/local/bin/
-```
-
----
-
 ## Contributing
 
-This project is shared as example code. Feel free to:
-
-- Fork and modify
-- Open issues for bugs
-- Submit PRs for fixes
-- Share your workflows
+This project is shared as example code.   If you feel you'd like to contrubte, reach out to me at https://laurierhodes.info 
 
 ---
 
@@ -739,7 +664,6 @@ MIT License - see [LICENSE](LICENSE)
 ## Resources
 
 - **[Documentation](docs/README.md)** - Complete guides and references
-- **[Workflow Examples](docs/workflows/examples/)** - 13 working examples
 - **[Source Code](https://github.com/LaurieRhodes/mcp-cli-go)** - GitHub repository
 - **[Releases](https://github.com/LaurieRhodes/mcp-cli-go/releases)** - Download binaries
 - **[MCP Protocol](https://modelcontextprotocol.io)** - Official specification

@@ -29,21 +29,28 @@ Create directory:
 mkdir -p /tmp/mcp-outputs
 ```
 
-## Step 3: Start MCP Server
+## Step 3: Test It
+
+**Option A: Chat Mode (Quickest)**
+
+```bash
+./mcp-cli chat --servers skills
+```
+
+Ask: "Create a simple PowerPoint presentation about Python"
+
+**Option B: As MCP Server (For Claude Desktop, VS Code, etc.)**
 
 ```bash
 ./mcp-cli serve config/runasMCP/mcp_skills_stdio.yaml
 ```
 
 You should see:
-
 ```
 ✅ Initialized skill service with N skills
 ```
 
-## Step 4: Test with LLM
-
-If using Claude Desktop, add to `claude_desktop_config.json`:
+Add to your MCP client config (e.g., `claude_desktop_config.json`):
 
 ```json
 {
@@ -56,28 +63,31 @@ If using Claude Desktop, add to `claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop.
+Restart your MCP client.
 
-## Step 5: Verify
+## Verify
 
-Ask the LLM:
+Files created by skills should appear in `/tmp/mcp-outputs/`
 
-> "Create a simple PowerPoint presentation"
-
-The LLM should use the skills to create a .pptx file in your outputs directory.
+```bash
+ls -la /tmp/mcp-outputs/
+```
 
 ## Troubleshooting
 
 **Files not appearing?**
 - Check `config/settings.yaml` has correct `outputs_dir`
 - Verify directory exists: `ls -ld /tmp/mcp-outputs`
+- Ensure code saves to `/outputs/` path
 
 **Images not built?**
 - Run: `docker images | grep mcp-skills`
 - Rebuild: `cd docker/skills && ./build-skills-images.sh`
 
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for more help.
+**Need more help?**
+- See [COMPLETE_GUIDE.md](COMPLETE_GUIDE.md#troubleshooting)
+- See [INDEX.md](INDEX.md#troubleshooting)
 
 ---
 
-Last updated: January 6, 2026
+Last updated: January 20, 2026

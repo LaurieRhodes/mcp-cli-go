@@ -70,9 +70,18 @@ skills:
 `config/skills/skill-images.yaml`:
 ```yaml
 skills:
-  pptx: mcp-skills-pptx
-  docx: mcp-skills-docx
+  pptx:
+    image: mcp-skills-pptx
+    language: python
+    description: "PowerPoint presentations"
+  
+  docx:
+    image: mcp-skills-docx
+    language: python
+    description: "Word documents"
 ```
+
+See [SKILL_IMAGES_YAML.md](SKILL_IMAGES_YAML.md) for complete reference.
 
 ## Usage
 
@@ -117,4 +126,4 @@ grep outputs_dir config/settings.yaml
 
 ---
 
-Last updated: January 6, 2026
+Last updated: January 20, 2026
