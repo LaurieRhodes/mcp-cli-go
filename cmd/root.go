@@ -240,6 +240,11 @@ func init() {
 	// Silently ignores if .env doesn't exist
 	_ = env.LoadDotEnv()
 	
+	// Ensure standard system paths are in PATH (ALWAYS runs, independent of .env)
+	// Fixes issues when running from non-interactive shells (Claude Desktop, systemd, cron)
+	// that may have minimal PATH set
+	env.EnsureStandardPaths()
+	
 	// Global flags
 	RootCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml", "Path to configuration file (YAML/JSON)")
 	RootCmd.PersistentFlags().StringVarP(&serverName, "server", "s", "", "MCP server(s) to use (comma-separated, e.g., 'filesystem,brave-search')")

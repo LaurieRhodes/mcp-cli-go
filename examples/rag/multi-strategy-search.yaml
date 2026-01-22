@@ -1,0 +1,39 @@
+# Multi-Strategy RAG Search
+# Search across multiple embedding strategies with RRF fusion
+
+name: Multi-Strategy RAG Search
+version: 1.0.0
+description: Search using multiple embedding strategies with Reciprocal Rank Fusion
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
+steps:
+  - name: retrieve
+    rag:
+      query: "{{user_query}}"
+      server: pgvector
+      strategies:
+        - default      # General purpose embeddings
+        - technical    # Technical documentation embeddings
+        - compliance   # Compliance/regulatory embeddings
+      fusion: rrf      # Reciprocal Rank Fusion
+      top_k: 10
+      expand_query: true
+      
+  - name: analyze
+    llm:
+      prompt: |
+        You retrieved {{step.retrieve.total_results}} documents using multi-strategy search.
+        
+        Retrieved Documents:
+        {{step.retrieve.results}}
+        
+        Question: {{user_query}}
+        
+        Instructions:
+        1. Analyze the retrieved documents from multiple perspectives
+        2. Note which strategy (default/technical/compliance) each result came from
+        3. Synthesize a comprehensive answer that incorporates insights from all strategies
+        4. Highlight any contradictions or complementary information across strategies

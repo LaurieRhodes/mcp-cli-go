@@ -1,0 +1,82 @@
+# Advanced RAG with Query Expansion
+# Uses query expansion and iterative refinement
+
+name: Advanced RAG Query
+version: 1.0.0
+description: RAG search with query expansion and iterative refinement
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+  
+variables:
+  user_query: "What are the requirements for multi-factor authentication?"
+  max_iterations: 3
+
+steps:
+  - name: expand_query
+    rag:
+      query: "{{user_query}}"
+      server: pgvector
+      strategies:
+        - default
+      expand_query: true  # Expand with synonyms and acronyms
+      top_k: 0           # Just expand, don't search yet
+      
+  - name: initial_search
+    rag:
+      query: "{{user_query}}"
+      server: pgvector
+      strategies:
+        - default
+        - technical
+        - compliance
+      fusion: rrf
+      top_k: 8
+      expand_query: true
+      
+  - name: evaluate_results
+    llm:
+      prompt: |
+        Initial Query: {{user_query}}
+        
+        Retrieved {{step.initial_search.total_results}} documents.
+        
+        Results:
+        {{step.initial_search.results}}
+        
+        Evaluate:
+        1. Are these results sufficient to answer the question?
+        2. What key information is missing?
+        3. What additional search terms should we use?
+        
+        Respond with:
+        - SUFFICIENT: if results are good enough
+        - REFINE: [suggested refined query] if we need more targeted results
+        
+  - name: refined_search
+    condition: "{{step.evaluate_results.output}} contains 'REFINE'"
+    rag:
+      query: "{{step.evaluate_results.refined_query}}"
+      server: pgvector
+      strategies:
+        - default
+        - technical
+      fusion: weighted
+      top_k: 5
+      
+  - name: final_answer
+    llm:
+      prompt: |
+        Original Question: {{user_query}}
+        
+        Initial Results:
+        {{step.initial_search.results}}
+        
+        {% if step.refined_search.results %}
+        Refined Results:
+        {{step.refined_search.results}}
+        {% endif %}
+        
+        Provide a comprehensive answer to the original question based on all retrieved information.
+        Cite specific documents where appropriate.

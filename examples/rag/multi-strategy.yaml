@@ -1,0 +1,63 @@
+# Multi-Strategy RAG Search
+# Demonstrates RAG with multiple strategies and RRF fusion
+
+name: rag-multi-strategy
+version: "1.0.0"
+description: Multi-strategy RAG search with fusion
+
+execution:
+  provider: anthropic
+  model: claude-sonnet-4
+
+inputs:
+  query:
+    type: string
+    description: Search query
+    required: true
+  domain:
+    type: string
+    description: Domain focus (technical, compliance, executive)
+    default: "technical"
+
+steps:
+  - name: retrieve
+    rag:
+      query: "{{inputs.query}}"
+      server: pgvector
+      strategies:
+        - default
+        - technical
+        - compliance
+      fusion: rrf  # Reciprocal Rank Fusion
+      top_k: 10
+      expand_query: true  # Enable query expansion
+      output_format: json
+  
+  - name: generate_response
+    llm:
+      prompt: |
+        Based on the following search results from multiple perspectives, answer the user's question.
+        
+        The results come from three strategies:
+        - Default: General-purpose search
+        - Technical: Technical implementation details
+        - Compliance: Compliance and regulatory requirements
+        
+        Search Results:
+        {{step.retrieve.results}}
+        
+        User Question: {{inputs.query}}
+        Domain Focus: {{inputs.domain}}
+        
+        Provide a comprehensive answer that addresses {{inputs.domain}} aspects.
+        Mention which perspective (default/technical/compliance) each piece of information comes from.
+      system_prompt: |
+        You are an expert assistant with deep knowledge of cybersecurity and compliance.
+        Synthesize information from multiple sources to provide comprehensive answers.
+        Always cite which strategy/perspective provided each piece of information.
+
+outputs:
+  results: "{{step.retrieve}}"
+  answer: "{{step.generate_response.content}}"
+  fusion_method: "{{step.retrieve.fusion_method}}"
+  total_results: "{{step.retrieve.total_results}}"

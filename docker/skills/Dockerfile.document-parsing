@@ -1,0 +1,67 @@
+# Document Parsing Skills Container
+# Supports: document_converter, odt_parser (policy document analysis)
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="mcp-cli-go"
+LABEL description="Container for document parsing skills (HTML/PDF/DOCX to ODT conversion and structured parsing)"
+LABEL skills="document_converter,odt_parser,policy_fetcher,policy_xml_analyzer"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Pandoc - Universal document converter
+    pandoc \
+    # For pdfplumber (PDF extraction)
+    poppler-utils \
+    # For Pillow (image processing)
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    # For XML processing
+    libxml2 \
+    libxml2-utils \
+    libxslt1.1 \
+    xmlstarlet \
+    # JSON processing (CRITICAL for bash skills)
+    jq \
+    # Utilities
+    zip \
+    unzip \
+    bc \       
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
+    # HTTP client for downloads
+    requests==2.31.0 \
+    # XML parsing and generation
+    lxml==5.1.0 \
+    # PDF text/table extraction
+    pdfplumber==0.11.0 \
+    # Basic PDF operations
+    pypdf==4.0.1 \
+    # Image processing
+    Pillow==10.1.0 \
+    # XML security (for defusedxml if needed)
+    defusedxml==0.7.1
+
+# Create mount point directories
+# /workspace - temporary workspace (read-write)
+# /skill - skill directory with helper scripts (read-only)
+# /outputs - persistent shared storage (read-write, maps to host /tmp/mcp-outputs)
+RUN mkdir -p /workspace /skill /outputs
+
+# Set working directory
+WORKDIR /workspace
+
+# Verify installations
+RUN python3 -c "import requests, lxml.etree, pdfplumber, pypdf, PIL; print('All document parsing packages installed')" && \
+    which pandoc && pandoc --version && \
+    echo "=== Bash Tools ===" && \
+    which jq && jq --version && \
+    which xmlstarlet && xmlstarlet --version && \
+    which xmllint && xmllint --version 2>&1 | head -1
+
+# Default command
+CMD ["python3"]
