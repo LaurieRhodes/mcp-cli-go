@@ -85,6 +85,10 @@ type StepV2 struct {
 	// Control flow
 	If       string   `yaml:"if,omitempty"`
 	Needs    []string `yaml:"needs,omitempty"`
+	
+	// Error handling
+	OnFailure  string `yaml:"on_failure,omitempty"` // halt|continue|retry (inherits from execution.on_error if not specified)
+	MaxRetries int    `yaml:"max_retries,omitempty"` // Number of retries for on_failure: retry
 }
 
 // LoopV2 represents an iterative execution block

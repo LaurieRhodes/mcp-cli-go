@@ -60,6 +60,28 @@ Technical patterns for integrating MCP-CLI server mode with various clients and 
 }
 ```
 
+**With Unix socket support (for nested MCP execution):**
+
+```json
+{
+  "mcpServers": {
+    "skills": {
+      "command": "mcp-cli",
+      "args": ["serve", "/path/to/skills.yaml"],
+      "env": {
+        "MCP_SOCKET_PATH": "/tmp/mcp-sockets/skills.sock"
+      }
+    }
+  }
+}
+```
+
+When `MCP_SOCKET_PATH` is set, the server operates in **dual-mode**:
+- Listens on stdio for Claude Desktop
+- Listens on Unix socket for nested workflow execution
+
+This enables workflows executed via bash tools to connect without stdio conflicts. See [Unix Socket Support](../architecture/unix-sockets.md) for details.
+
 ---
 
 ### Cursor IDE

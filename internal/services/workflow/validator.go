@@ -129,33 +129,30 @@ func (v *WorkflowValidator) validateExecutionContext() {
 	}
 	
 	// Validate on_error (only if set)
+	// Note: on_error serves as default for step-level on_failure in non-parallel workflows
 	if exec.OnError != "" {
 		validPolicies := map[string]bool{
 			"cancel_all":       true,
 			"complete_running": true,
 			"continue":         true,
+			"halt":             true, // Synonym for cancel_all (sequential workflows)
 		}
 		
 		if !validPolicies[exec.OnError] {
 			v.addError("execution", "on_error", 
 				fmt.Sprintf("invalid error policy '%s'", exec.OnError),
-				"Valid values: 'cancel_all', 'complete_running', 'continue'")
+				"Valid values: 'halt', 'cancel_all', 'complete_running', 'continue'")
 		}
 	}
 	
-	// Warn if parallel is disabled but max_workers or on_error are set
+	// Warn if parallel is disabled but max_workers is set
 	if !exec.Parallel {
 		if exec.MaxWorkers > 0 {
 			v.addError("execution", "max_workers", 
 				"max_workers is set but parallel execution is disabled",
 				"Set 'parallel: true' to enable parallel execution")
 		}
-		
-		if exec.OnError != "" {
-			v.addError("execution", "on_error", 
-				"on_error is set but parallel execution is disabled",
-				"Set 'parallel: true' to enable parallel execution")
-		}
+		// Note: on_error is allowed in non-parallel workflows as a default for step-level on_failure
 	}
 	
 	// Validate logging level (only if set)

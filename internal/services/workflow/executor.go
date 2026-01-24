@@ -361,6 +361,15 @@ The /outputs/ directory is the ONLY location where files persist after execution
 	// Extract final response
 	output := strings.TrimSpace(response.Response)
 
+	// Analyze response for failure indicators
+	if e.detectStepFailure(output, messages) {
+		return nil, &ProviderError{
+			Provider: pc.Provider,
+			Model:    pc.Model,
+			Err:      fmt.Errorf("step failed: %s", e.extractFailureReason(output)),
+		}
+	}
+
 	return &StepResult{
 		Output:   output,
 		Provider: pc.Provider,
@@ -431,3 +440,114 @@ func (e *Executor) SetProvider(provider domain.LLMProvider) {
 func (e *Executor) SetServerManager(serverManager domain.MCPServerManager) {
 	e.serverManager = serverManager
 }
+
+// detectStepFailure analyzes LLM output and tool results for failure indicators
+func (e *Executor) detectStepFailure(output string, messages []domain.Message) bool {
+	outputLower := strings.ToLower(output)
+	
+	// Check LLM response for failure keywords
+	failureKeywords := []string{
+		"terminal error",
+		"fatal error",
+		"halt execution",
+		"missing required file",
+		"cannot proceed",
+		"step failed",
+		"required action: halt",
+		"workflow needs to provide",
+	}
+	
+	for _, keyword := range failureKeywords {
+		if strings.Contains(outputLower, keyword) {
+			e.logger.Debug("Detected failure keyword in output: %s", keyword)
+			return true
+		}
+	}
+	
+	// Check tool results in message history for errors
+	for i := len(messages) - 1; i >= 0; i-- {
+		msg := messages[i]
+		if msg.Role == "tool" {
+			// Check for JSON error responses from tools
+			if e.isToolErrorResponse(msg.Content) {
+				e.logger.Debug("Detected tool error in message history")
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
+// isToolErrorResponse checks if tool output indicates a terminal error
+func (e *Executor) isToolErrorResponse(toolOutput string) bool {
+	// Try to parse as JSON
+	var result map[string]interface{}
+	if err := json.Unmarshal([]byte(toolOutput), &result); err == nil {
+		// Check for error status
+		if status, ok := result["status"].(string); ok && status == "error" {
+			if terminal, ok := result["terminal"].(bool); ok && terminal {
+				return true
+			}
+		}
+		
+		// Check for action: HALT_EXECUTION
+		if action, ok := result["action"].(string); ok && action == "HALT_EXECUTION" {
+			return true
+		}
+	}
+	
+	// Check for stderr error markers
+	if strings.Contains(toolOutput, "TERMINAL ERROR") ||
+	   strings.Contains(toolOutput, "DO_NOT_ATTEMPT_FIX") {
+		return true
+	}
+	
+	// Check for command failure with exit code
+	if strings.Contains(toolOutput, "Command failed with exit code") &&
+	   !strings.Contains(toolOutput, "exit code 0") {
+		return true
+	}
+	
+	return false
+}
+
+// extractFailureReason extracts a concise failure reason from the output
+func (e *Executor) extractFailureReason(output string) string {
+	lines := strings.Split(output, "\n")
+	
+	// Look for key phrases
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		lineLower := strings.ToLower(line)
+		
+		// Extract error summary lines
+		if strings.Contains(lineLower, "error summary") ||
+		   strings.Contains(lineLower, "missing file") ||
+		   strings.Contains(lineLower, "required action") {
+			// Return the next few lines as context
+			idx := 0
+			for i, l := range lines {
+				if strings.TrimSpace(l) == line {
+					idx = i
+					break
+				}
+			}
+			
+			reason := []string{line}
+			for i := idx + 1; i < len(lines) && i < idx+3; i++ {
+				if trimmed := strings.TrimSpace(lines[i]); trimmed != "" {
+					reason = append(reason, trimmed)
+				}
+			}
+			return strings.Join(reason, " ")
+		}
+	}
+	
+	// Fallback: return first 200 chars
+	if len(output) > 200 {
+		return output[:200] + "..."
+	}
+	return output
+}
+

@@ -73,6 +73,22 @@ Core types, interfaces, schemas, and API contracts.
 
 ---
 
+### [Unix Socket Support](unix-sockets.md) - Nested MCP Execution
+
+Dual-mode MCP server operation enabling workflows to execute without stdio conflicts.
+
+**Critical sections:**
+
+- Problem: Nested MCP deadlock when using bash tools
+- Solution: Automatic Unix socket detection
+- Server configuration for dual-mode operation
+- Client auto-detection of nested contexts
+- Security model and permissions
+
+**Read this to:** Understand nested MCP execution, configure dual-mode servers, or troubleshoot workflow deadlocks.
+
+---
+
 ## Architectural Principles
 
 ### 1. Modularity with Bounded Contexts
@@ -194,5 +210,6 @@ mcp-cli chat --server filesystem,brave_search
 - **[Components](components.md)** - Component deep-dive
 - **[Data Flow](data-flow.md)** - Request/response flows
 - **[API & Domain](api-domain.md)** - Interfaces and contracts
+- **[Unix Socket Support](unix-sockets.md)** - Nested MCP execution
 
 ---

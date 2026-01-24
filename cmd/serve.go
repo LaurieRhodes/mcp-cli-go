@@ -362,7 +362,20 @@ func startProxyServer(runasConfig *runas.RunAsConfig, appConfig *config.Applicat
 
 // startStdioServer starts a stdio MCP server
 func startStdioServer(runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, configService *infraConfig.Service, skillService *skillsvc.Service) error {
-	logging.Info("Starting MCP server in stdio mode")
+	// Check for Unix socket mode via environment variable
+	socketPath := os.Getenv("MCP_SOCKET_PATH")
+	if socketPath != "" {
+		logging.Info("Detected MCP_SOCKET_PATH environment variable: %s", socketPath)
+		logging.Info("Starting dual-mode server: stdio + Unix socket")
+		
+		// Start Unix socket server in background
+		go startUnixSocketServer(socketPath, runasConfig, appConfig, configService, skillService)
+		
+		// Continue with stdio server in foreground (for Claude Desktop)
+		logging.Info("Starting stdio server (for Claude Desktop)")
+	} else {
+		logging.Info("Starting MCP server in stdio-only mode")
+	}
 	
 	// Create server service
 	service := serverService.NewService(runasConfig, appConfig, configService, skillService)
@@ -377,6 +390,25 @@ func startStdioServer(runasConfig *runas.RunAsConfig, appConfig *config.Applicat
 	logging.Info("MCP server starting...")
 	if err := stdioServer.Start(); err != nil {
 		return fmt.Errorf("server error: %w", err)
+	}
+	
+	return nil
+}
+
+// startUnixSocketServer starts a Unix socket MCP server
+func startUnixSocketServer(socketPath string, runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, configService *infraConfig.Service, skillService *skillsvc.Service) error {
+	logging.Info("Starting Unix socket MCP server on: %s", socketPath)
+	
+	// Create server service (separate instance for socket connections)
+	service := serverService.NewService(runasConfig, appConfig, configService, skillService)
+	
+	// Create Unix socket server
+	socketServer := server.NewUnixSocketServer(service, socketPath)
+	
+	// Start server (blocks until shutdown)
+	if err := socketServer.Start(); err != nil {
+		logging.Error("Unix socket server error: %v", err)
+		return fmt.Errorf("Unix socket server error: %w", err)
 	}
 	
 	return nil

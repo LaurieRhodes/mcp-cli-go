@@ -739,20 +739,45 @@ func (h *QueryHandler) executeToolCall(toolCall domain.ToolCall) (string, error)
 	argsJSON, _ := json.MarshalIndent(args, "", "  ")
 	logging.Debug("Calling tool %s on server %s with args: %s", toolName, serverName, string(argsJSON))
 	
-	// Execute the tool call using the tools package
-	result, err := tools.SendToolsCall(serverConn.Client, serverConn.Client.GetDispatcher(), toolName, args)
-	if err != nil {
-		return "", fmt.Errorf("tool execution error: %w", err)
-	}
+	// Execute tool call - handle both stdio and Unix socket clients
+	var result interface{}
+	var execErr error
 	
-	// Check for errors in the result
-	if result.IsError {
-		return "", fmt.Errorf("tool execution failed: %s", result.Error)
+	if stdioClient := serverConn.GetStdioClient(); stdioClient != nil {
+		// Stdio client
+		logging.Debug("Using stdio client for tool execution")
+		toolResult, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), toolName, args)
+		if err != nil {
+			return "", fmt.Errorf("tool execution error: %w", err)
+		}
+		if toolResult.IsError {
+			return "", fmt.Errorf("tool execution failed: %s", toolResult.Error)
+		}
+		result = toolResult.Content
+	} else if socketClient := serverConn.GetUnixSocketClient(); socketClient != nil {
+		// Unix socket client
+		logging.Debug("Using Unix socket client for tool execution")
+		toolResult, err := socketClient.SendToolsCall(toolName, args)
+		if err != nil {
+			return "", fmt.Errorf("tool execution error: %w", err)
+		}
+		
+		// Check for error in result
+		if isError, ok := toolResult["isError"].(bool); ok && isError {
+			if errMsg, ok := toolResult["error"].(string); ok {
+				return "", fmt.Errorf("tool execution failed: %s", errMsg)
+			}
+			return "", fmt.Errorf("tool execution failed (no error message)")
+		}
+		
+		result = toolResult["content"]
+	} else {
+		return "", fmt.Errorf("server %s has unknown client type", serverName)
 	}
 	
 	// Convert result to string if needed
 	var resultStr string
-	switch content := result.Content.(type) {
+	switch content := result.(type) {
 	case string:
 		resultStr = content
 	default:
@@ -797,7 +822,7 @@ func (h *QueryHandler) executeToolCall(toolCall domain.ToolCall) (string, error)
         }
 	}
 	
-	return resultStr, nil
+	return resultStr, execErr
 }
 
 // formatToolNameForOpenAI formats the tool name to be compatible with OpenAI's requirements
@@ -874,19 +899,66 @@ func (h *QueryHandler) getServerTools(conn *host.ServerConnection) ([]tools.Tool
 		}
 		
 		logging.Info("Getting tools list from server %s", conn.Name)
-		result, err := tools.SendToolsList(conn.Client, nil)
-		if err != nil {
-			lastErr = fmt.Errorf("failed to get tools from server %s: %w", conn.Name, err)
-			logging.Error("%v", lastErr)
-			continue
+		
+		// Handle both stdio and Unix socket clients
+		if stdioClient := conn.GetStdioClient(); stdioClient != nil {
+			// Stdio client
+			result, err := tools.SendToolsList(stdioClient, nil)
+			if err != nil {
+				lastErr = fmt.Errorf("failed to get tools from server %s: %w", conn.Name, err)
+				logging.Error("%v", lastErr)
+				continue
+			}
+			
+			// Cache the tools
+			h.toolsCache[conn.Name] = result.Tools
+			serverTools = result.Tools
+			
+			logging.Info("Successfully got %d tools from server %s", len(serverTools), conn.Name)
+			return serverTools, nil
+			
+		} else if socketClient := conn.GetUnixSocketClient(); socketClient != nil {
+			// Unix socket client
+			result, err := socketClient.SendToolsList(nil)
+			if err != nil {
+				lastErr = fmt.Errorf("failed to get tools from server %s: %w", conn.Name, err)
+				logging.Error("%v", lastErr)
+				continue
+			}
+			
+			// Parse tools from Unix socket response
+			var parsedTools []tools.Tool
+			if toolsArray, ok := result["tools"].([]interface{}); ok {
+				for _, t := range toolsArray {
+					if toolMap, ok := t.(map[string]interface{}); ok {
+						tool := tools.Tool{}
+						
+						if name, ok := toolMap["name"].(string); ok {
+							tool.Name = name
+						}
+						if desc, ok := toolMap["description"].(string); ok {
+							tool.Description = desc
+						}
+						if schema, ok := toolMap["inputSchema"].(map[string]interface{}); ok {
+							tool.InputSchema = schema
+						}
+						
+						parsedTools = append(parsedTools, tool)
+					}
+				}
+			}
+			
+			// Cache the tools
+			h.toolsCache[conn.Name] = parsedTools
+			serverTools = parsedTools
+			
+			logging.Info("Successfully got %d tools from server %s via Unix socket", len(serverTools), conn.Name)
+			return serverTools, nil
+			
+		} else {
+			lastErr = fmt.Errorf("server %s has unknown client type", conn.Name)
+			break
 		}
-		
-		// Cache the tools
-		h.toolsCache[conn.Name] = result.Tools
-		serverTools = result.Tools
-		
-		logging.Info("Successfully got %d tools from server %s", len(serverTools), conn.Name)
-		return serverTools, nil
 	}
 	
 	return nil, lastErr

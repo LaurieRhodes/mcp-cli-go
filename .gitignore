@@ -26,8 +26,8 @@ dist/
 release/
 *.sha256
 
-# cLAUDE sUMMARIES
-_SUMMARIES/
+# CLAUDE_SUMMARIES
+CLAUDE_SUMMARIES/*
 
 # Test files
 architecture_test.go

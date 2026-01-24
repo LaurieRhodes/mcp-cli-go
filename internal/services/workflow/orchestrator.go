@@ -494,8 +494,10 @@ func (o *Orchestrator) executeRegularStep(ctx context.Context, step *config.Step
 	result, err := o.executor.ExecuteStep(ctx, &tempStep)
 
 	if err != nil {
-		return err
+		// Apply error handling policy
+		return o.handleStepError(step, err)
 	}
+	
 	// Store result
 	o.stepResults[step.Name] = result.Output
 	o.interpolator.SetStepResult(step.Name, result.Output)
@@ -503,6 +505,45 @@ func (o *Orchestrator) executeRegularStep(ctx context.Context, step *config.Step
 	o.logger.Output("Step %s result: %s", step.Name, result.Output)
 
 	return nil
+}
+
+// handleStepError applies error handling policy for failed steps
+func (o *Orchestrator) handleStepError(step *config.StepV2, err error) error {
+	// Determine error policy
+	onFailure := step.OnFailure
+	if onFailure == "" {
+		// Use workflow-level default
+		onFailure = o.workflow.Execution.OnError
+	}
+	if onFailure == "" {
+		// Ultimate default: halt
+		onFailure = "halt"
+	}
+	
+	o.logger.Warn("Step '%s' failed: %v", step.Name, err)
+	o.logger.Warn("Error policy: %s", onFailure)
+	
+	switch onFailure {
+	case "continue":
+		// Log warning but continue workflow
+		o.logger.Warn("Continuing workflow despite step failure (policy: continue)")
+		// Store empty result
+		o.stepResults[step.Name] = ""
+		o.interpolator.SetStepResult(step.Name, "")
+		return nil
+		
+	case "retry":
+		// Retry logic would go here (future enhancement)
+		o.logger.Warn("Retry not yet implemented, treating as halt")
+		return fmt.Errorf("step '%s' failed: %w", step.Name, err)
+		
+	case "halt", "cancel_all":
+		fallthrough
+	default:
+		// Halt workflow execution
+		o.logger.Error("Halting workflow due to step failure")
+		return fmt.Errorf("step '%s' failed: %w", step.Name, err)
+	}
 }
 
 // executeConsensusStep executes a consensus step

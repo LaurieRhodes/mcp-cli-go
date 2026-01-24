@@ -481,7 +481,14 @@ func (m *ChatManager) ExecuteToolCall(toolCall domain.ToolCall) (string, error) 
 	
 	// Execute the tool call using the tools package
 	logging.Info("Calling tool %s on server %s", toolName, serverName)
-	result, err := tools.SendToolsCall(serverConn.Client, serverConn.Client.GetDispatcher(), toolName, args)
+	
+	// Type assert to stdio client
+	stdioClient := serverConn.GetStdioClient()
+	if stdioClient == nil {
+		return "", fmt.Errorf("server %s does not support stdio protocol", serverName)
+	}
+	
+	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), toolName, args)
 	if err != nil {
 		return "", fmt.Errorf("tool execution error: %w", err)
 	}
@@ -677,7 +684,15 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 		}
 		
 		logging.Info("Getting tools list from server %s", conn.Name)
-		result, err := tools.SendToolsList(conn.Client, nil)
+		
+		// Type assert to stdio client
+		stdioClient := conn.GetStdioClient()
+		if stdioClient == nil {
+			lastErr = fmt.Errorf("server %s does not support stdio protocol", conn.Name)
+			break
+		}
+		
+		result, err := tools.SendToolsList(stdioClient, nil)
 		if err != nil {
 			lastErr = fmt.Errorf("failed to get tools from server %s: %w", conn.Name, err)
 			logging.Error("%v", lastErr)

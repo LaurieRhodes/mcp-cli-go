@@ -210,7 +210,14 @@ func (p *ExposureParser) autoDiscoverServerTools(serverName string) ([]ToolExpos
 	
 	// Get all tools from the server
 	logging.Debug("Auto-discovering tools from server: %s", serverName)
-	result, err := tools.SendToolsList(serverConn.Client, nil)
+	
+	// Type assert to stdio client
+	stdioClient := serverConn.GetStdioClient()
+	if stdioClient == nil {
+		return nil, fmt.Errorf("server %s does not support stdio protocol", serverName)
+	}
+	
+	result, err := tools.SendToolsList(stdioClient, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tools from server %s: %w", serverName, err)
 	}

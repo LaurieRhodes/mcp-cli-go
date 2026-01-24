@@ -10,6 +10,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/stdio"
 )
 
 // CommandOptions provides configuration for command execution
@@ -87,7 +88,10 @@ func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFi
 	if options != nil && options.SuppressStderr {
 		logging.Warn("Suppressing server stderr - this may hide critical error information")
 		for _, conn := range connections {
-			conn.Client.SetSuppressStderr(true)
+			// Only stdio clients support SetSuppressStderr
+			if stdioClient, ok := conn.Client.(*stdio.StdioClient); ok {
+				stdioClient.SetSuppressStderr(true)
+			}
 		}
 	}
 

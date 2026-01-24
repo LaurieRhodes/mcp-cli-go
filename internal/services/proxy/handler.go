@@ -4,6 +4,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/mcp"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/stdio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -138,8 +139,13 @@ func (h *ToolHandler) executeMCPTool(vars map[string]string) (string, error) {
 		args[k] = v
 	}
 
-	// Call the MCP tool
-	result, err := tools.SendToolsCall(server.Client, server.Client.GetDispatcher(), h.tool.MCPTool, args)
+	// Call the MCP tool - type assert to stdio client
+	stdioClient, ok := server.Client.(*stdio.StdioClient)
+	if !ok {
+		return "", fmt.Errorf("server client is not stdio client type")
+	}
+	
+	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), h.tool.MCPTool, args)
 	if err != nil {
 		return "", fmt.Errorf("MCP tool call failed: %w", err)
 	}

@@ -669,7 +669,13 @@ func (hsa *HostServerAdapter) GetTools() ([]domain.Tool, error) {
 		return hsa.toolsCache, nil
 	}
 
-	result, err := tools.SendToolsList(hsa.connection.Client, nil)
+	// Type assert to stdio client
+	stdioClient := hsa.connection.GetStdioClient()
+	if stdioClient == nil {
+		return nil, fmt.Errorf("server %s does not support stdio protocol", hsa.connection.Name)
+	}
+	
+	result, err := tools.SendToolsList(stdioClient, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tools from MCP server %s: %w", hsa.connection.Name, err)
 	}
@@ -709,7 +715,13 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 
 	logging.Debug("Executing tool %s (actual: %s) on server %s", toolName, actualToolName, hsa.connection.Name)
 
-	result, err := tools.SendToolsCall(hsa.connection.Client, hsa.connection.Client.GetDispatcher(), actualToolName, arguments)
+	// Type assert to stdio client
+	stdioClient := hsa.connection.GetStdioClient()
+	if stdioClient == nil {
+		return "", fmt.Errorf("server %s does not support stdio protocol", hsa.connection.Name)
+	}
+	
+	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), actualToolName, arguments)
 	if err != nil {
 		return "", fmt.Errorf("MCP tool execution failed for %s: %w", actualToolName, err)
 	}

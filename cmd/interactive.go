@@ -240,7 +240,12 @@ func listTools(connections []*host.ServerConnection) {
 		logging.Debug("Listing tools from server: %s", conn.Name)
 		
 		// Get the tools list from the server
-		result, err := tools.SendToolsList(conn.Client, nil)
+		// Type assert to stdio client
+		stdioClient := conn.GetStdioClient()
+		if stdioClient == nil {
+			continue
+		}
+		result, err := tools.SendToolsList(stdioClient, nil)
 		if err != nil {
 			logging.Error("Error getting tools list from %s: %v", conn.Name, err)
 			fmt.Printf("  Error: %v\n", err)
@@ -268,7 +273,12 @@ func listToolsDetailed(connections []*host.ServerConnection) {
 		logging.Debug("Listing detailed tools from server: %s", conn.Name)
 		
 		// Get the tools list from the server
-		result, err := tools.SendToolsList(conn.Client, nil)
+		// Type assert to stdio client
+		stdioClient := conn.GetStdioClient()
+		if stdioClient == nil {
+			continue
+		}
+		result, err := tools.SendToolsList(stdioClient, nil)
 		if err != nil {
 			logging.Error("Error getting detailed tools list from %s: %v", conn.Name, err)
 			fmt.Printf("  Error: %v\n", err)
@@ -312,7 +322,12 @@ func listToolsRaw(connections []*host.ServerConnection) {
 		logging.Debug("Listing raw tools from server: %s", conn.Name)
 		
 		// Get the tools list from the server
-		result, err := tools.SendToolsList(conn.Client, nil)
+		// Type assert to stdio client
+		stdioClient := conn.GetStdioClient()
+		if stdioClient == nil {
+			continue
+		}
+		result, err := tools.SendToolsList(stdioClient, nil)
 		if err != nil {
 			logging.Error("Error getting raw tools list from %s: %v", conn.Name, err)
 			fmt.Printf("  Error: %v\n", err)
@@ -383,7 +398,14 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 	
 	fmt.Printf("Calling tool '%s' on server '%s'...\n", toolName, serverName)
 	
-	result, err := tools.SendToolsCall(targetConn.Client, targetConn.Client.GetDispatcher(), toolName, args)
+	// Type assert to stdio client
+	stdioClient := targetConn.GetStdioClient()
+	if stdioClient == nil {
+		fmt.Printf("Error: Server does not support stdio protocol\n")
+		return
+	}
+	
+	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), toolName, args)
 	if err != nil {
 		logging.Error("Error calling tool: %v", err)
 		color.Red("Error calling tool: %v\n", err)
@@ -410,7 +432,13 @@ func getToolDefinition(conn *host.ServerConnection, toolName string) (*tools.Too
 	logging.Debug("Fetching tool definition for: %s", toolName)
 	
 	// Get the tools list from the server
-	result, err := tools.SendToolsList(conn.Client, []string{toolName})
+	// Type assert to stdio client
+	stdioClient := conn.GetStdioClient()
+	if stdioClient == nil {
+		return nil, fmt.Errorf("server does not support stdio protocol")
+	}
+	
+	result, err := tools.SendToolsList(stdioClient, []string{toolName})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tool definition: %w", err)
 	}

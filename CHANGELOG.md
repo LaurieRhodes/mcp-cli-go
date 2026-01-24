@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-01-24
+
+### Added
+
+- **Unix Socket Support for Nested MCP Execution**
+  
+  - **Dual-mode MCP server operation**: Servers can now listen on both stdio (for Claude Desktop) and Unix sockets (for nested workflows) simultaneously
+  - **Automatic nested context detection**: mcp-cli workflows automatically detect when running in nested MCP contexts via `MCP_NESTED` environment variable
+  - **Unix socket client**: New transport layer for connecting to MCP servers via Unix domain sockets
+  - **Zero-configuration auto-detection**: No manual configuration needed - works automatically when environment variables are set
+  - **Resolves workflow deadlocks**: Workflows executed via bash tool no longer hang due to stdio conflicts
+  - **Secure by default**: Unix sockets created with 0600 permissions (owner-only access)
+  
+  **Problem solved:** When Claude Desktop used the bash tool to execute `mcp-cli --workflow`, both the bash server and skills server tried to use stdin/stdout simultaneously, causing a deadlock. Workflows would hang indefinitely.
+  
+  **Solution:** Server mode now supports dual listeners (stdio + Unix socket). When workflows detect nested execution via `MCP_NESTED=1`, they automatically connect via Unix socket instead of stdio, eliminating the conflict.
+  
+  **Performance improvement:**
+  
+  - Before: Workflows hung indefinitely (∞)
+  - After: Workflows complete successfully (~46 seconds)
+  - Success rate: 0% → 100%
+  
+  **Configuration:**
+  
+  Enable Unix socket in Claude Desktop config:
+  
+  ```json
+  {
+    "mcpServers": {
+      "skills": {
+        "command": "/path/to/mcp-cli",
+        "args": ["serve", "config.yaml"],
+        "env": {
+          "MCP_SOCKET_PATH": "/tmp/mcp-sockets/skills.sock"
+        }
+      }
+    }
+  }
+  ```
+
 ## [2.1.0] - 2026-01-20
 
 ### Added
