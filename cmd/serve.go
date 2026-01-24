@@ -5,12 +5,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 	
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/runas"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/tasks"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/server"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/proxy"
 	serverService "github.com/LaurieRhodes/mcp-cli-go/internal/services/server"
@@ -377,8 +379,15 @@ func startStdioServer(runasConfig *runas.RunAsConfig, appConfig *config.Applicat
 		logging.Info("Starting MCP server in stdio-only mode")
 	}
 	
+	// Create task manager
+	// Default TTL: 30 minutes, Max TTL: 2 hours, Poll interval: 5 seconds
+	taskManager := tasks.NewManager(30*time.Minute, 2*time.Hour, 5000)
+	defer taskManager.Close()
+	logging.Info("Task manager initialized (default TTL: 30m, max TTL: 2h, poll: 5s)")
+	
 	// Create server service
 	service := serverService.NewService(runasConfig, appConfig, configService, skillService)
+	service.SetTaskManager(taskManager)
 	
 	// Create stdio server
 	stdioServer := server.NewStdioServer(service)
@@ -399,8 +408,13 @@ func startStdioServer(runasConfig *runas.RunAsConfig, appConfig *config.Applicat
 func startUnixSocketServer(socketPath string, runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, configService *infraConfig.Service, skillService *skillsvc.Service) error {
 	logging.Info("Starting Unix socket MCP server on: %s", socketPath)
 	
+	// Create task manager
+	taskManager := tasks.NewManager(30*time.Minute, 2*time.Hour, 5000)
+	defer taskManager.Close()
+	
 	// Create server service (separate instance for socket connections)
 	service := serverService.NewService(runasConfig, appConfig, configService, skillService)
+	service.SetTaskManager(taskManager)
 	
 	// Create Unix socket server
 	socketServer := server.NewUnixSocketServer(service, socketPath)

@@ -6,11 +6,13 @@
 🎯 **Multi-AI consensus** - Require unanimous agreement from 3+ providers  
 🎨 **Universal Skills** - GPT-4, DeepSeek, Gemini create PowerPoints, Excel, PDFs (not just Claude)  
 🚀 **Provider mixing** - Chain Claude, GPT-4, Llama, and more in one workflow  
+⏱️ **Tasks SEP-1686** - First-class support for long-running workflows (30+ minutes)  
 📦 **Zero dependencies** - Single Go binary, works offline  
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://go.dev/)
 [![Documentation](https://img.shields.io/badge/docs-comprehensive-blue)](docs/)
+[![Tasks SEP-1686](https://img.shields.io/badge/Tasks%20SEP--1686-Implemented-green)](docs/tasks-sep-1686.md)
 
 ```yaml
 # Workflow that self-improves until LLM says it's perfect

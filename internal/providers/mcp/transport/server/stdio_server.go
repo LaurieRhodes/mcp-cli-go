@@ -18,6 +18,10 @@ type MessageHandler interface {
 	HandleInitialize(params map[string]interface{}) (map[string]interface{}, error)
 	HandleToolsList(params map[string]interface{}) (map[string]interface{}, error)
 	HandleToolsCall(params map[string]interface{}) (map[string]interface{}, error)
+	HandleTasksGet(params map[string]interface{}) (map[string]interface{}, error)
+	HandleTasksResult(params map[string]interface{}) (map[string]interface{}, error)
+	HandleTasksList(params map[string]interface{}) (map[string]interface{}, error)
+	HandleTasksCancel(params map[string]interface{}) (map[string]interface{}, error)
 }
 
 // StdioServer implements an MCP server using stdin/stdout
@@ -127,6 +131,14 @@ func (s *StdioServer) handleMessage(msg *messages.JSONRPCMessage) {
 		s.handleToolsList(msg)
 	case "tools/call":
 		s.handleToolsCall(msg)
+	case "tasks/get":
+		s.handleTasksGet(msg)
+	case "tasks/result":
+		s.handleTasksResult(msg)
+	case "tasks/list":
+		s.handleTasksList(msg)
+	case "tasks/cancel":
+		s.handleTasksCancel(msg)
 	default:
 		logging.Warn("Unknown method: %s", msg.Method)
 		// Only send error response if this is a request (has an ID), not a notification
@@ -260,6 +272,110 @@ func (s *StdioServer) sendResponse(id messages.RequestID, result interface{}) {
 	}
 	
 	s.writeMessage(&response)
+}
+
+// handleTasksGet handles tasks/get requests
+func (s *StdioServer) handleTasksGet(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/get request")
+	
+	// Parse params
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			logging.Error("Invalid tasks/get params: %v", err)
+			s.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	// Call handler
+	result, err := s.handler.HandleTasksGet(params)
+	if err != nil {
+		logging.Error("Tasks/get handler failed: %v", err)
+		s.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	// Send success response
+	s.sendResponse(msg.ID, result)
+}
+
+// handleTasksResult handles tasks/result requests
+func (s *StdioServer) handleTasksResult(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/result request")
+	
+	// Parse params
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			logging.Error("Invalid tasks/result params: %v", err)
+			s.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	// Call handler (this will block until task completes)
+	result, err := s.handler.HandleTasksResult(params)
+	if err != nil {
+		logging.Error("Tasks/result handler failed: %v", err)
+		s.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	// Send success response
+	s.sendResponse(msg.ID, result)
+}
+
+// handleTasksList handles tasks/list requests
+func (s *StdioServer) handleTasksList(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/list request")
+	
+	// Parse params
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			logging.Error("Invalid tasks/list params: %v", err)
+			s.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	// Call handler
+	result, err := s.handler.HandleTasksList(params)
+	if err != nil {
+		logging.Error("Tasks/list handler failed: %v", err)
+		s.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	// Send success response
+	s.sendResponse(msg.ID, result)
+}
+
+// handleTasksCancel handles tasks/cancel requests
+func (s *StdioServer) handleTasksCancel(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/cancel request")
+	
+	// Parse params
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			logging.Error("Invalid tasks/cancel params: %v", err)
+			s.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	// Call handler
+	result, err := s.handler.HandleTasksCancel(params)
+	if err != nil {
+		logging.Error("Tasks/cancel handler failed: %v", err)
+		s.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	// Send success response
+	s.sendResponse(msg.ID, result)
 }
 
 // sendError sends a JSON-RPC error response

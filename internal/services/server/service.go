@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/tasks"
 	workflowservice "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
 )
 
@@ -28,6 +30,7 @@ type Service struct {
 	configService      *infraConfig.Service
 	skillService       skills.SkillService
 	progressNotifier   ProgressNotifier
+	taskManager        *tasks.Manager
 }
 
 // NewService creates a new MCP server service
@@ -38,6 +41,11 @@ func NewService(runasConfig *runas.RunAsConfig, appConfig *config.ApplicationCon
 		configService: configService,
 		skillService:  skillService,
 	}
+}
+
+// SetTaskManager sets the task manager for long-running operations
+func (s *Service) SetTaskManager(taskManager *tasks.Manager) {
+	s.taskManager = taskManager
 }
 
 // SetProgressNotifier sets the progress notifier for sending progress updates
@@ -59,12 +67,27 @@ func (s *Service) HandleInitialize(params map[string]interface{}) (map[string]in
 		}
 	}
 	
+	// Build capabilities
+	capabilities := map[string]interface{}{
+		"tools": map[string]interface{}{},
+	}
+	
+	// Add task capabilities if task manager is available
+	if s.taskManager != nil {
+		capabilities["tasks"] = map[string]interface{}{
+			"requests": map[string]bool{
+				"tools/call": true, // Enable task-augmented tool calls
+			},
+			"list":   true, // Support tasks/list
+			"cancel": true, // Support tasks/cancel
+		}
+		logging.Info("Task support enabled - tasks/list, tasks/cancel, task-augmented tools/call")
+	}
+	
 	// Return server info and capabilities
 	return map[string]interface{}{
 		"protocolVersion": "2024-11-05",
-		"capabilities": map[string]interface{}{
-			"tools": map[string]interface{}{},
-		},
+		"capabilities":    capabilities,
 		"serverInfo": map[string]interface{}{
 			"name":    s.runasConfig.ServerInfo.Name,
 			"version": s.runasConfig.ServerInfo.Version,
@@ -107,6 +130,19 @@ func (s *Service) HandleToolsCall(params map[string]interface{}) (map[string]int
 	
 	logging.Info("Tool call request: %s", toolName)
 	
+	// Check for task augmentation
+	taskRequest, isTaskAugmented := params["task"].(map[string]interface{})
+	if isTaskAugmented && s.taskManager != nil {
+		logging.Info("Detected task-augmented tool call")
+		return s.handleTaskAugmentedToolCall(toolName, params, taskRequest)
+	}
+	
+	// Standard tool call (non-task)
+	return s.handleStandardToolCall(toolName, params)
+}
+
+// handleStandardToolCall handles a standard (non-task-augmented) tool call
+func (s *Service) handleStandardToolCall(toolName string, params map[string]interface{}) (map[string]interface{}, error) {
 	// Extract arguments
 	arguments, ok := params["arguments"].(map[string]interface{})
 	if !ok {
@@ -634,4 +670,200 @@ func (esm *EmptyServerManager) ExecuteTool(ctx context.Context, toolName string,
 
 func (esm *EmptyServerManager) StopAll() error {
 	return nil
+}
+
+// ==================== TASK-AUGMENTED HANDLERS (SEP-1686) ====================
+
+// handleTaskAugmentedToolCall handles a task-augmented tool call
+func (s *Service) handleTaskAugmentedToolCall(toolName string, params map[string]interface{}, taskRequest map[string]interface{}) (map[string]interface{}, error) {
+	if s.taskManager == nil {
+		return nil, fmt.Errorf("task support not enabled on this server")
+	}
+	
+	// Extract requested TTL
+	var requestedTTL int64
+	if ttl, ok := taskRequest["ttl"].(float64); ok {
+		requestedTTL = int64(ttl)
+	}
+	
+	// Serialize request params for storage
+	paramsJSON, err := json.Marshal(params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize request params: %w", err)
+	}
+	
+	// Create task
+	task, err := s.taskManager.CreateTask("tools/call", paramsJSON, requestedTTL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create task: %w", err)
+	}
+	
+	logging.Info("Created task %s for tool %s", task.ID, toolName)
+	
+	// Execute tool in background
+	go s.executeToolInBackground(task, toolName, params)
+	
+	// Return CreateTaskResult immediately
+	return map[string]interface{}{
+		"task": task.GetMetadata(s.taskManager.GetPollInterval()),
+	}, nil
+}
+
+// executeToolInBackground executes a tool in the background and updates the task
+func (s *Service) executeToolInBackground(task *domain.Task, toolName string, params map[string]interface{}) {
+	defer func() {
+		if r := recover(); r != nil {
+			logging.Error("Panic in background tool execution: %v", r)
+			task.SetError(fmt.Errorf("panic: %v", r), false)
+		}
+	}()
+	
+	logging.Info("Starting background execution of tool %s (task %s)", toolName, task.ID)
+	
+	// Execute the standard tool call
+	result, err := s.handleStandardToolCall(toolName, params)
+	
+	// Check for cancellation
+	select {
+	case <-task.Cancel:
+		logging.Info("Task %s was cancelled during execution", task.ID)
+		task.SetCancelled()
+		return
+	default:
+	}
+	
+	// Update task with result
+	if err != nil {
+		logging.Error("Task %s failed: %v", task.ID, err)
+		task.SetError(err, false)
+		return
+	}
+	
+	// Check if result indicates a tool error
+	if isError, ok := result["isError"].(bool); ok && isError {
+		errorMsg := fmt.Sprintf("Tool error: %v", result["error"])
+		logging.Error("Task %s: %s", task.ID, errorMsg)
+		task.SetError(fmt.Errorf("%s", errorMsg), true)
+		return
+	}
+	
+	logging.Info("Task %s completed successfully", task.ID)
+	task.SetResult(result)
+}
+
+// HandleTasksGet handles tasks/get request
+func (s *Service) HandleTasksGet(params map[string]interface{}) (map[string]interface{}, error) {
+	if s.taskManager == nil {
+		return nil, fmt.Errorf("task support not enabled")
+	}
+	
+	taskID, ok := params["taskId"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid taskId parameter")
+	}
+	
+	logging.Info("Tasks/get request for task %s", taskID)
+	
+	metadata, err := s.taskManager.GetTaskMetadata(taskID)
+	if err != nil {
+		return nil, err
+	}
+	
+	return map[string]interface{}{
+		"task": metadata,
+	}, nil
+}
+
+// HandleTasksResult handles tasks/result request
+func (s *Service) HandleTasksResult(params map[string]interface{}) (map[string]interface{}, error) {
+	if s.taskManager == nil {
+		return nil, fmt.Errorf("task support not enabled")
+	}
+	
+	taskID, ok := params["taskId"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid taskId parameter")
+	}
+	
+	logging.Info("Tasks/result request for task %s", taskID)
+	
+	// Wait for result (blocks until task completes)
+	result, err := s.taskManager.WaitForResult(taskID, 30*time.Minute)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Return the result (should be a map from tool execution)
+	if resultMap, ok := result.(map[string]interface{}); ok {
+		return resultMap, nil
+	}
+	
+	// Wrap in standard format if not already
+	return map[string]interface{}{
+		"content": []interface{}{
+			map[string]interface{}{
+				"type": "text",
+				"text": fmt.Sprintf("%v", result),
+			},
+		},
+	}, nil
+}
+
+// HandleTasksList handles tasks/list request
+func (s *Service) HandleTasksList(params map[string]interface{}) (map[string]interface{}, error) {
+	if s.taskManager == nil {
+		return nil, fmt.Errorf("task support not enabled")
+	}
+	
+	cursor := ""
+	if c, ok := params["cursor"].(string); ok {
+		cursor = c
+	}
+	
+	logging.Info("Tasks/list request (cursor: %s)", cursor)
+	
+	// List tasks with pagination
+	tasks, nextCursor, err := s.taskManager.ListTasks(cursor, 20)
+	if err != nil {
+		return nil, err
+	}
+	
+	result := map[string]interface{}{
+		"tasks": tasks,
+	}
+	
+	if nextCursor != "" {
+		result["nextCursor"] = nextCursor
+	}
+	
+	return result, nil
+}
+
+// HandleTasksCancel handles tasks/cancel request
+func (s *Service) HandleTasksCancel(params map[string]interface{}) (map[string]interface{}, error) {
+	if s.taskManager == nil {
+		return nil, fmt.Errorf("task support not enabled")
+	}
+	
+	taskID, ok := params["taskId"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid taskId parameter")
+	}
+	
+	logging.Info("Tasks/cancel request for task %s", taskID)
+	
+	// Cancel the task
+	if err := s.taskManager.CancelTask(taskID); err != nil {
+		return nil, err
+	}
+	
+	// Get updated metadata
+	metadata, err := s.taskManager.GetTaskMetadata(taskID)
+	if err != nil {
+		return nil, err
+	}
+	
+	return map[string]interface{}{
+		"task": metadata,
+	}, nil
 }

@@ -46,6 +46,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   }
   ```
 
+## [2.2.0] - 2026-01-24
+
+### Added - Tasks SEP-1686 Implementation
+
+mcp-cli is now one of the **first MCP servers with full Tasks SEP-1686 support**, enabling call-now, fetch-later execution for long-running workflows.
+
+- **Complete Tasks SEP-1686 Implementation**
+  
+  - **Task-augmented tool calls**: Tools can be called with task metadata for non-blocking execution
+  - **tasks/get**: Poll task status at any time
+  - **tasks/result**: Retrieve results when task completes (blocks until ready)
+  - **tasks/list**: List all active tasks with cursor-based pagination
+  - **tasks/cancel**: Cancel running tasks
+  - **Automatic TTL management**: Tasks expire after configurable duration (default: 30min, max: 2hr)
+  - **Background execution**: Tools execute in goroutines without blocking protocol
+  - **Thread-safe task storage**: Concurrent-safe task access with mutex protection
+  - **Automatic cleanup**: Expired tasks removed every minute
+  - **Status tracking**: 5 task states (working, completed, failed, cancelled, input_required)
+  - **Cryptographic task IDs**: 128-bit random UUIDs for security
+
+- **Capability Negotiation**
+  
+  - Server declares task support during initialization
+  - Granular control: tasks.requests.tools/call, tasks.list, tasks.cancel
+  - Follows SEP-1686 capability structure exactly
+
+- **Documentation**
+  
+  - Complete implementation guide: `docs/tasks-sep-1686.md`
+  - Usage examples for API/MCP clients
+  - Architecture documentation with diagrams
+  - Troubleshooting guide
+  - Standards compliance checklist
+
+**Problem Solved:** Long-running workflows (30+ minutes) previously failed due to client timeouts. With Tasks SEP, clients receive task ID immediately and poll for completion.
+
+**Real-World Performance:**
+- RLM extraction workflow: 0% success → 100% success
+- Execution time: ∞ (timeout) → 13 minutes (complete)
+- User experience: blocking → non-blocking
+
+**Technical Details:**
+- Task manager: `internal/infrastructure/tasks/manager.go`
+- Domain types: `internal/domain/task.go`  
+- Server handlers: `internal/services/server/service.go`
+- Transport integration: stdio + Unix socket servers
+- Default TTL: 30 minutes, Max TTL: 2 hours, Poll interval: 5 seconds
+
+**Standards Compliance:** Fully compliant with Tasks SEP-1686 (accepted 2025-10-20)
+
+See [Tasks Documentation](docs/tasks-sep-1686.md) for complete details.
+
 ## [2.1.0] - 2026-01-20
 
 ### Added

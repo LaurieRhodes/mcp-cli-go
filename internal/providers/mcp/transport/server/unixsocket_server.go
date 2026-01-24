@@ -219,6 +219,14 @@ func (h *connectionHandler) handleMessage(msg *messages.JSONRPCMessage) {
 		h.handleToolsList(msg)
 	case "tools/call":
 		h.handleToolsCall(msg)
+	case "tasks/get":
+		h.handleTasksGet(msg)
+	case "tasks/result":
+		h.handleTasksResult(msg)
+	case "tasks/list":
+		h.handleTasksList(msg)
+	case "tasks/cancel":
+		h.handleTasksCancel(msg)
 	default:
 		logging.Warn("Unknown method: %s", msg.Method)
 		// Only send error response if this is a request (has an ID)
@@ -323,6 +331,90 @@ func (h *connectionHandler) handleToolsCall(msg *messages.JSONRPCMessage) {
 	// Send response
 	h.sendResponse(msg.ID, result)
 	logging.Debug("Tools call request handled successfully")
+}
+
+// handleTasksGet handles tasks/get requests
+func (h *connectionHandler) handleTasksGet(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/get request")
+	
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			h.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	result, err := h.server.handler.HandleTasksGet(params)
+	if err != nil {
+		h.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	h.sendResponse(msg.ID, result)
+}
+
+// handleTasksResult handles tasks/result requests
+func (h *connectionHandler) handleTasksResult(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/result request")
+	
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			h.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	result, err := h.server.handler.HandleTasksResult(params)
+	if err != nil {
+		h.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	h.sendResponse(msg.ID, result)
+}
+
+// handleTasksList handles tasks/list requests
+func (h *connectionHandler) handleTasksList(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/list request")
+	
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			h.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	result, err := h.server.handler.HandleTasksList(params)
+	if err != nil {
+		h.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	h.sendResponse(msg.ID, result)
+}
+
+// handleTasksCancel handles tasks/cancel requests
+func (h *connectionHandler) handleTasksCancel(msg *messages.JSONRPCMessage) {
+	logging.Info("Handling tasks/cancel request")
+	
+	params := make(map[string]interface{})
+	if len(msg.Params) > 0 {
+		if err := json.Unmarshal(msg.Params, &params); err != nil {
+			h.sendError(msg.ID, -32602, "Invalid params", nil)
+			return
+		}
+	}
+	
+	result, err := h.server.handler.HandleTasksCancel(params)
+	if err != nil {
+		h.sendError(msg.ID, -32603, err.Error(), nil)
+		return
+	}
+	
+	h.sendResponse(msg.ID, result)
 }
 
 // sendResponse sends a JSON-RPC response
