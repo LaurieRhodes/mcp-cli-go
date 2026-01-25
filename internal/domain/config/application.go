@@ -81,8 +81,19 @@ func (c *ApplicationConfig) ListWorkflows() []string {
 
 // SkillsConfig represents skills-related configuration
 type SkillsConfig struct {
+	// SkillsDirectory is the directory containing skill definitions
+	SkillsDirectory string `yaml:"skills_directory,omitempty"`
+	
 	// OutputsDir is the directory where skill outputs are persisted
 	OutputsDir string `yaml:"outputs_dir,omitempty"`
+}
+
+// GetSkillsDirectory returns the skills directory with fallback to default
+func (s *SkillsConfig) GetSkillsDirectory() string {
+	if s == nil || s.SkillsDirectory == "" {
+		return "config/skills" // Default location
+	}
+	return s.SkillsDirectory
 }
 
 // GetOutputsDir returns the outputs directory with fallback to default

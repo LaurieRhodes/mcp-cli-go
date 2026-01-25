@@ -936,6 +936,8 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 	
 	// Create a new orchestrator for the sub-workflow with its key for directory context
 	subLogger := NewLogger(subWorkflow.Execution.Logging, false)
+	// CRITICAL: Inherit output from parent logger (stdout in CLI, stderr in MCP serve mode)
+	subLogger.SetOutput(o.logger.GetOutput())
 	subOrchestrator := NewOrchestratorWithKey(subWorkflow, subWorkflowKey, subLogger)
 	
 	// Pass through app config and server manager
@@ -1081,7 +1083,16 @@ func (o *Orchestrator) executeLoopInternal(ctx context.Context, name string, wor
 		return nil, fmt.Errorf("max_iterations must be > 0, got %d", maxIterations)
 	}
 	
-	wf, exists := o.appConfig.GetWorkflow(workflow)
+	// Extract directory from current workflow key for directory-aware resolution
+	var contextDir string
+	if o.workflowKey != "" {
+		if idx := strings.LastIndex(o.workflowKey, "/"); idx != -1 {
+			contextDir = o.workflowKey[:idx]
+		}
+	}
+	
+	// Use contextual lookup to support relative workflow references
+	wf, exists := o.appConfig.GetWorkflowWithContext(workflow, contextDir)
 	if !exists {
 		return nil, fmt.Errorf("loop workflow '%s' not found", workflow)
 	}
@@ -1170,6 +1181,8 @@ func (o *Orchestrator) prepareLoopInput(with map[string]interface{}, lastOutput 
 
 func (o *Orchestrator) executeLoopWorkflow(ctx context.Context, workflow *config.WorkflowV2, inputData string) (string, error) {
 	subLogger := NewLogger(workflow.Execution.Logging, false)
+	// CRITICAL: Inherit output from parent logger (stdout in CLI, stderr in MCP serve mode)
+	subLogger.SetOutput(o.logger.GetOutput())
 	subOrchestrator := NewOrchestrator(workflow, subLogger)
 	
 	subOrchestrator.executor.SetAppConfig(o.executor.appConfig)

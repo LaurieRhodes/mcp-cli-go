@@ -25,8 +25,11 @@ type ChatManager struct {
 	// LLM provider for chat completions (updated to use new domain interface)
 	LLMProvider domain.LLMProvider
 	
-	// Server connections for tool execution
+	// Server connections for tool execution (legacy)
 	Connections []*host.ServerConnection
+	
+	// Server manager for tool execution (new, supports built-in skills)
+	ServerManager domain.MCPServerManager
 	
 	// Enabled skills
 	EnabledSkills []string
@@ -112,6 +115,42 @@ func NewChatManagerWithConfigAndUI(provider domain.LLMProvider, connections []*h
 	}
 }
 
+
+// NewChatManagerWithServerManagerAndUI creates a new chat manager with server manager (supports built-in skills)
+func NewChatManagerWithServerManagerAndUI(provider domain.LLMProvider, serverManager domain.MCPServerManager, providerConfig *config.ProviderConfig, model string, ui *UI) *ChatManager {
+	systemPrompt := `You are a helpful assistant with access to tools. Use the tools when necessary to fulfill user requests.
+
+IMPORTANT - Using Skills:
+Skills provide specialized capabilities through code execution. There are two ways to use skills:
+
+1. PASSIVE MODE - Load documentation and reference materials:
+   Call the skill tool directly (e.g., 'docx', 'pdf', 'pptx', 'xlsx')
+   Use this to learn about a skill's capabilities before using it.
+
+2. ACTIVE MODE - Execute code to perform tasks:
+   Call 'execute_skill_code' with skill_name parameter
+   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything.
+
+✅ CORRECT examples:
+   - Create a document: execute_skill_code with skill_name='docx'
+   - Generate a PDF: execute_skill_code with skill_name='pdf'
+   - Process data: execute_skill_code with appropriate skill
+   - Run analysis: execute_skill_code with appropriate skill
+
+When writing code, save output files to /outputs/ directory:
+   output.save('/outputs/result.docx')  ✅ CORRECT
+   output.save('/home/result.docx')     ❌ WRONG - will be lost`
+	
+	return &ChatManager{
+		LLMProvider:     provider,
+		ServerManager:   serverManager,
+		Context:         NewChatContextWithProvider(systemPrompt, model, providerConfig),
+		UI:              ui,
+		StreamResponses: true,
+		toolsCache:      make(map[string][]tools.Tool),
+		modelName:       model,
+	}
+}
 // ProcessUserMessage processes a user message and returns the response
 func (m *ChatManager) ProcessUserMessage(userInput string) error {
 	// Add user message to context
@@ -403,6 +442,39 @@ func (m *ChatManager) getDefaultToolArguments(toolName string) string {
 
 // ExecuteToolCall executes a single tool call and returns the result
 func (m *ChatManager) ExecuteToolCall(toolCall domain.ToolCall) (string, error) {
+	// ARCHITECTURAL FIX: Use ServerManager if available (supports built-in skills)
+	if m.ServerManager != nil {
+		return m.executeToolCallWithServerManager(toolCall)
+	}
+	
+	// Fall back to legacy Connections-based execution
+	return m.executeToolCallWithConnections(toolCall)
+}
+
+// executeToolCallWithServerManager executes a tool call using the server manager
+func (m *ChatManager) executeToolCallWithServerManager(toolCall domain.ToolCall) (string, error) {
+	// Parse arguments
+	var args map[string]interface{}
+	err := json.Unmarshal(toolCall.Function.Arguments, &args)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse tool arguments: %w", err)
+	}
+	
+	// Show what we're doing
+	m.UI.PrintToolExecution(toolCall.Function.Name, "server-manager")
+	
+	// Execute tool using server manager
+	logging.Debug("Executing tool %s using server manager", toolCall.Function.Name)
+	result, err := m.ServerManager.ExecuteTool(context.Background(), toolCall.Function.Name, args)
+	if err != nil {
+		return "", fmt.Errorf("tool execution error: %w", err)
+	}
+	
+	return result, nil
+}
+
+// executeToolCallWithConnections executes a tool call using legacy connections
+func (m *ChatManager) executeToolCallWithConnections(toolCall domain.ToolCall) (string, error) {
 	// Parse arguments
 	var args map[string]interface{}
 	err := json.Unmarshal(toolCall.Function.Arguments, &args)
@@ -606,6 +678,13 @@ func formatToolNameForOpenAI(serverName, toolName string) string {
 
 // GetAvailableTools returns the tools available for the LLM
 func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
+	// ARCHITECTURAL FIX: Use ServerManager if available (supports built-in skills)
+	if m.ServerManager != nil {
+		logging.Debug("Getting tools from ServerManager (includes built-in skills)")
+		return m.ServerManager.GetAvailableTools()
+	}
+	
+	// Fall back to legacy Connections-based tool retrieval
 	var llmTools []domain.Tool
 	var anyErrors error
 	
@@ -759,6 +838,56 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 		fmt.Printf("[DEBUG] EnabledSkills map after conversion: %v\n", enabledSkillsMap)
 	}
 	
+	// ARCHITECTURAL FIX: Use ServerManager if available
+	if m.ServerManager != nil {
+		// Get all tools from server manager
+		tools, err := m.ServerManager.GetAvailableTools()
+		if err != nil {
+			logging.Debug("Could not get tools from server manager: %v", err)
+			return skillNames
+		}
+		
+		// Look for skill tools (prefixed with "skills_")
+		for _, tool := range tools {
+			toolName := tool.Function.Name
+			
+			// Check if this is a skill tool
+			if strings.HasPrefix(toolName, "skills_") {
+				// Strip the prefix
+				skillTool := strings.TrimPrefix(toolName, "skills_")
+				
+				// Skip execute_skill_code (it's not a skill itself)
+				if skillTool == "execute_skill_code" {
+					continue
+				}
+				
+				logging.Debug("Checking skill tool '%s'", skillTool)
+				
+				// If EnabledSkills is set, only include tools in that list
+				if enabledSkillsMap != nil {
+					if !enabledSkillsMap[skillTool] {
+						logging.Debug("  Skill '%s' NOT in enabled skills map, skipping", skillTool)
+						continue
+					}
+					logging.Debug("  Skill '%s' IS in enabled skills map", skillTool)
+				}
+				
+				if !skillsFound[skillTool] {
+					skillsFound[skillTool] = true
+					// Convert tool name to display name (underscore to hyphen)
+					displayName := strings.ReplaceAll(skillTool, "_", "-")
+					skillNames = append(skillNames, displayName)
+					logging.Debug("  Added skill: %s (display name: %s)", skillTool, displayName)
+				}
+			}
+		}
+		
+		// Sort for consistent display
+		sort.Strings(skillNames)
+		return skillNames
+	}
+	
+	// Fall back to legacy Connections-based discovery
 	// Check each connected server
 	for _, conn := range m.Connections {
 		// Get tools from this server (may be cached)

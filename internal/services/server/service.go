@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 	
@@ -14,7 +15,9 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	infraSkills "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/skills"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/tasks"
+	skillsvc "github.com/LaurieRhodes/mcp-cli-go/internal/services/skills"
 	workflowservice "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
 )
 
@@ -281,15 +284,30 @@ func (s *Service) executeTemplateWithProgress(toolExposure *runas.ToolExposure, 
 func (s *Service) executeTemplate(toolExposure *runas.ToolExposure, arguments map[string]interface{}) (string, error) {
 	logging.Info("Executing template: %s", toolExposure.Template)
 	
-	// Check if template exists (v2 first, then v1)
+	// Check if template exists using contextual lookup (v2 first, then v1)
 	var isV2 bool
 	var workflowV2 *config.WorkflowV2
+	var actualWorkflowKey string
 	
-	if tmpl, exists := s.appConfig.Workflows[toolExposure.Template]; exists {
+	// Try contextual lookup to support short names (e.g., "main_workflow" when file is "dir/main_workflow")
+	if tmpl, exists := s.appConfig.GetWorkflowWithContext(toolExposure.Template, ""); exists {
 		isV2 = true
 		workflowV2 = tmpl
-		logging.Debug("Using workflow v2: %s", toolExposure.Template)
-	} else if _, exists := s.appConfig.Workflows[toolExposure.Template]; !exists {
+		
+		// Find the actual key by searching the Workflows map
+		for key, wf := range s.appConfig.Workflows {
+			if wf == tmpl {
+				actualWorkflowKey = key
+				break
+			}
+		}
+		
+		if actualWorkflowKey == "" {
+			actualWorkflowKey = toolExposure.Template
+		}
+		
+		logging.Debug("Using workflow v2: %s (actual key: %s)", toolExposure.Template, actualWorkflowKey)
+	} else {
 		return "", fmt.Errorf("template not found: %s", toolExposure.Template)
 	}
 	
@@ -303,7 +321,7 @@ func (s *Service) executeTemplate(toolExposure *runas.ToolExposure, arguments ma
 	
 	// Execute template based on version
 	if isV2 {
-		return s.executeWorkflowV2(workflowV2, inputData, toolExposure)
+		return s.executeWorkflowV2(workflowV2, inputData, actualWorkflowKey, toolExposure)
 	}
 	
 	return s.executeTemplateV1(toolExposure.Template, inputData, toolExposure)
@@ -347,7 +365,7 @@ func (s *Service) executeTemplateV1(templateName string, inputData string, toolE
 }
 
 // executeWorkflowV2 executes a v2 workflow
-func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, toolExposure *runas.ToolExposure) (string, error) {
+func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, actualWorkflowKey string, toolExposure *runas.ToolExposure) (string, error) {
 	logging.Info("Executing workflow v2: %s", tmpl.Name)
 	
 	// Get provider configuration
@@ -380,11 +398,11 @@ func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, t
 	
 	// Import the provider factory and domain types to create the actual provider
 	// This implementation mirrors the CLI's executeWorkflowV2 function
-	return s.executeWorkflowV2WithProvider(tmpl, inputData, providerName, providerConfig)
+	return s.executeWorkflowV2WithProvider(tmpl, inputData, providerName, providerConfig, actualWorkflowKey, toolExposure)
 }
 
 // executeWorkflowV2WithProvider executes a workflow with the actual provider
-func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputData string, providerName string, providerConfig *config.ProviderConfig) (string, error) {
+func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputData string, providerName string, providerConfig *config.ProviderConfig, actualWorkflowKey string, toolExposure *runas.ToolExposure) (string, error) {
 	// Convert provider name to ProviderType (configuration-driven)
 	providerType := domain.ProviderType(providerName)
 	
@@ -395,11 +413,27 @@ func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputDa
 	// Create logger for workflow
 	logger := workflowservice.NewLogger(tmpl.Execution.Logging, false)
 	
-	// Create orchestrator with workflow
-	orchestrator := workflowservice.NewOrchestrator(tmpl, logger)
+	// CRITICAL: In MCP serve mode, all logging must go to stderr
+	// stdout is reserved for JSON-RPC messages only
+	logger.SetOutput(os.Stderr)
 	
-	// Set application config for nested workflow calls
+	// Create orchestrator with workflow KEY for contextual nested workflow resolution
+	// This allows loops and nested workflows to resolve relative paths correctly
+	orchestrator := workflowservice.NewOrchestratorWithKey(tmpl, actualWorkflowKey, logger)
+	
+	// Set application config for provider creation and nested workflows
+	orchestrator.SetAppConfig(s.appConfig)
 	orchestrator.SetAppConfigForWorkflows(s.appConfig)
+	
+	// CRITICAL: Set skills service as server manager for built-in skill execution
+	// Use SkillsAwareServerManager to properly expose all skill tools
+	if s.skillService != nil {
+		// Type assert to concrete Service type (SkillsAwareServerManager needs concrete type)
+		if skillSvc, ok := s.skillService.(*skillsvc.Service); ok {
+			serverManager := infraSkills.NewSkillsAwareServerManager(nil, skillSvc)
+			orchestrator.SetServerManager(serverManager)
+		}
+	}
 	
 	// Execute workflow
 	ctx := context.Background()

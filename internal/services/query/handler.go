@@ -21,8 +21,11 @@ const defaultMaxFollowUpAttempts = 50
 
 // QueryHandler handles query execution
 type QueryHandler struct {
-	// Server connections for tool execution
+	// Server connections for tool execution (legacy)
 	Connections []*host.ServerConnection
+	
+	// Server manager for tool execution (new, supports built-in skills)
+	ServerManager domain.MCPServerManager
 	
 	// LLM client for queries
 	LLMClient domain.LLMProvider
@@ -633,6 +636,36 @@ func (h *QueryHandler) handleToolCalls(toolCalls []domain.ToolCall) error {
 
 // executeToolCall executes a single tool call and returns the result
 func (h *QueryHandler) executeToolCall(toolCall domain.ToolCall) (string, error) {
+	// ARCHITECTURAL FIX: Use ServerManager if available (supports built-in skills)
+	if h.ServerManager != nil {
+		return h.executeToolCallWithServerManager(toolCall)
+	}
+	
+	// Fall back to legacy Connections-based execution
+	return h.executeToolCallWithConnections(toolCall)
+}
+
+// executeToolCallWithServerManager executes a tool call using the server manager
+func (h *QueryHandler) executeToolCallWithServerManager(toolCall domain.ToolCall) (string, error) {
+	// Parse arguments
+	var args map[string]interface{}
+	err := json.Unmarshal(toolCall.Function.Arguments, &args)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse tool arguments: %w", err)
+	}
+	
+	// Execute tool using server manager
+	logging.Debug("Executing tool %s using server manager", toolCall.Function.Name)
+	result, err := h.ServerManager.ExecuteTool(context.Background(), toolCall.Function.Name, args)
+	if err != nil {
+		return "", fmt.Errorf("tool execution error: %w", err)
+	}
+	
+	return result, nil
+}
+
+// executeToolCallWithConnections executes a tool call using legacy connections
+func (h *QueryHandler) executeToolCallWithConnections(toolCall domain.ToolCall) (string, error) {
 	// Parse arguments
 	var args map[string]interface{}
 	err := json.Unmarshal(toolCall.Function.Arguments, &args)
@@ -843,6 +876,13 @@ func formatToolNameForOpenAI(serverName, toolName string) string {
 
 // GetAvailableTools returns the tools available for the LLM
 func (h *QueryHandler) GetAvailableTools() ([]domain.Tool, error) {
+	// ARCHITECTURAL FIX: Use ServerManager if available (supports built-in skills)
+	if h.ServerManager != nil {
+		logging.Debug("Getting tools from ServerManager (includes built-in skills)")
+		return h.ServerManager.GetAvailableTools()
+	}
+	
+	// Fall back to legacy Connections-based tool retrieval
 	var llmTools []domain.Tool
 	var anyErrors error
 	
@@ -962,4 +1002,48 @@ func (h *QueryHandler) getServerTools(conn *host.ServerConnection) ([]tools.Tool
 	}
 	
 	return nil, lastErr
+}
+
+// NewQueryHandlerWithServerManager creates a query handler using an MCPServerManager
+// This allows for built-in skills integration without external server connections
+func NewQueryHandlerWithServerManager(serverManager domain.MCPServerManager, llmProvider domain.LLMProvider, aiOptions *host.AIOptions, systemPrompt string) *QueryHandler {
+	// Use default system prompt if not provided
+	if systemPrompt == "" {
+		// Check if we have skills tools by looking at available tools
+		hasSkills := false
+		if tools, err := serverManager.GetAvailableTools(); err == nil {
+			for _, tool := range tools {
+				if strings.HasPrefix(tool.Function.Name, "skills_") {
+					hasSkills = true
+					break
+				}
+			}
+		}
+		
+		if hasSkills {
+			// Use skills-aware system prompt
+			systemPrompt = `You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question.
+
+Skills provide specialized capabilities through code execution. There are two ways to use skills:
+1. Call the skill's named tool directly (e.g., skills_odt_parser)
+2. Use skills_execute_skill_code to run custom code with the skill's helper libraries
+
+All file operations should use paths starting with /outputs/ which is your working directory.`
+		} else {
+			// Use simple system prompt for non-skills queries
+			systemPrompt = `You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question.`
+		}
+	}
+	
+	return &QueryHandler{
+		ServerManager:       serverManager,
+		LLMClient:           llmProvider,
+		SystemPrompt:        systemPrompt,
+		ContextMessages:     []domain.Message{},
+		toolsCache:          make(map[string][]tools.Tool),
+		AIOptions:           aiOptions,
+		InterfaceType:       aiOptions.InterfaceType,
+		toolCalls:           []ToolCallInfo{},
+		MaxFollowUpAttempts: defaultMaxFollowUpAttempts,
+	}
 }

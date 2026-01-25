@@ -11,7 +11,9 @@ import (
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	infraSkills "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/skills"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
+	skillsvc "github.com/LaurieRhodes/mcp-cli-go/internal/services/skills"
 )
 
 // Service handles chat functionality and orchestrates the chat flow
@@ -102,10 +104,40 @@ func (s *Service) StartChat(cfg *Config) error {
 		}
 	}()
 
-	// Execute chat with server connections
+	// ARCHITECTURAL FIX: Separate built-in skills from external servers
+	externalServers, needsSkills := infraSkills.SeparateSkillsFromServers(cfg.ServerNames)
+	logging.Debug("External servers: %v, needs built-in skills: %v", externalServers, needsSkills)
+	
+	// Update userSpecified map to only include external servers
+	externalUserSpecified := make(map[string]bool)
+	for _, server := range externalServers {
+		if cfg.UserSpecified[server] {
+			externalUserSpecified[server] = true
+		}
+	}
+	
+	// Initialize built-in skills service if needed
+	var skillService *skillsvc.Service
+	if needsSkills {
+		var err error
+		skillService, err = infraSkills.InitializeBuiltinSkills(cfg.ConfigFile, appConfig)
+		if err != nil {
+			return fmt.Errorf("failed to initialize built-in skills: %w", err)
+		}
+		logging.Info("Built-in skills service initialized successfully")
+	}
+	
+	// Execute chat with server connections (ONLY external servers)
 	return host.RunCommand(func(conns []*host.ServerConnection) error {
-		return s.runChat(conns, provider, providerConfig, modelName, ui, appConfig, cfg.SkillNames)
-	}, cfg.ConfigFile, cfg.ServerNames, cfg.UserSpecified)
+		// ARCHITECTURAL FIX: Create server manager (with skills if needed)
+		var serverManager domain.MCPServerManager = infraSkills.NewHostServerManager(conns)
+		if skillService != nil {
+			logging.Info("Wrapping chat server manager with built-in skills support")
+			serverManager = infraSkills.NewSkillsAwareServerManager(serverManager, skillService)
+		}
+		
+		return s.runChat(serverManager, provider, providerConfig, modelName, ui, appConfig, cfg.SkillNames)
+	}, cfg.ConfigFile, externalServers, externalUserSpecified)
 }
 
 // getProviderConfiguration retrieves provider config from the modular hierarchy
@@ -151,7 +183,7 @@ func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 }
 
 // runChat executes the chat session with server connections
-func (s *Service) runChat(connections []*host.ServerConnection, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string, ui *chat.UI, appConfig *config.ApplicationConfig, skillNames []string) error {
+func (s *Service) runChat(serverManager domain.MCPServerManager, provider domain.LLMProvider, providerConfig *config.ProviderConfig, model string, ui *chat.UI, appConfig *config.ApplicationConfig, skillNames []string) error {
 	// Get chat configuration from loaded app config
 	var chatConfig *config.ChatConfig
 	if appConfig != nil && appConfig.Chat != nil {
@@ -183,11 +215,13 @@ func (s *Service) runChat(connections []*host.ServerConnection, provider domain.
 	// Initialize and start chat using the enhanced chat manager with provider configuration
 	var chatManager *chat.ChatManager
 	if providerConfig != nil {
-		chatManager = chat.NewChatManagerWithConfigAndUI(provider, connections, providerConfig, model, ui)
-		logging.Info("Created chat manager with provider-aware token management for model: %s", model)
+		// ARCHITECTURAL FIX: Use ServerManager-based constructor if available
+		chatManager = chat.NewChatManagerWithServerManagerAndUI(provider, serverManager, providerConfig, model, ui)
+		logging.Info("Created chat manager with server manager and provider-aware token management for model: %s", model)
 	} else {
-		chatManager = chat.NewChatManagerWithUI(provider, connections, ui)
-		logging.Info("Created chat manager with fallback token management")
+		// Fallback for when providerConfig is nil (shouldn't happen but safe)
+		chatManager = chat.NewChatManagerWithServerManagerAndUI(provider, serverManager, nil, model, ui)
+		logging.Info("Created chat manager with server manager and fallback token management")
 	}
 	
 	// Set enabled skills

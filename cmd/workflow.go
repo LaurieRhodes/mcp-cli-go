@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	infraSkills "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/skills"
 	"context"
 	"encoding/json"
 	"errors"
@@ -20,6 +21,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
+	skillsvc "github.com/LaurieRhodes/mcp-cli-go/internal/services/skills"
 	workflow "github.com/LaurieRhodes/mcp-cli-go/internal/services/workflow"
 	"github.com/spf13/cobra"
 )
@@ -61,6 +63,9 @@ func resolveLogLevel(workflowConfigLevel string) string {
 
 // executeWorkflow executes a workflow by name using the new v2.0 system
 func executeWorkflow() error {
+	// Redirect stdin to prevent blocking when called via MCP tools
+	redirectStdinIfNotTerminal()
+	
 	logging.Info("Executing workflow: %s", workflowName)
 	
 	// 1. Load configuration
@@ -187,14 +192,38 @@ func getInputData() (string, error) {
 		return inputData, nil
 	}
 	
-	// Check stdin
+	// Check if stdin is a pipe (not a terminal)
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		data, err := io.ReadAll(os.Stdin)
-		if err != nil {
+		// Stdin is a pipe - use non-blocking read with timeout
+		// This prevents hanging when called through MCP bash tool where
+		// stdin is connected but no data is being sent
+		
+		dataChan := make(chan []byte, 1)
+		errChan := make(chan error, 1)
+		
+		go func() {
+			data, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			dataChan <- data
+		}()
+		
+		// Wait for data with 100ms timeout
+		// If stdin has data piped, it will be available immediately
+		// If stdin is just a pipe with no data, we'll timeout
+		select {
+		case data := <-dataChan:
+			return string(data), nil
+		case err := <-errChan:
 			return "", fmt.Errorf("failed to read stdin: %w", err)
+		case <-time.After(100 * time.Millisecond):
+			// Timeout - no data available on stdin
+			// This is normal when called through bash MCP tool
+			return "", nil
 		}
-		return string(data), nil
 	}
 	
 	return "", nil // Empty input is OK
@@ -288,12 +317,18 @@ func collectSkillsFromWorkflow(wf *config.WorkflowV2) []string {
 
 // executeWorkflowWithoutServers executes a workflow that doesn't need MCP servers
 func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, skills []string, startFrom string, endAt string) error {
-	logging.Debug("Executing workflow without MCP servers")
+	logging.Debug("Executing workflow without external MCP servers")
 	
-	// Note: Skills are typically exposed through MCP servers, so this path wouldn't use skills
-	// But we keep the parameter for consistency
+	// ARCHITECTURAL FIX: Initialize built-in skills if workflow uses them
+	var skillService *skillsvc.Service
 	if len(skills) > 0 {
-		logging.Debug("Skills specified but not used (no MCP server mode): %v", skills)
+		logging.Info("Initializing built-in skills: %v", skills)
+		var err error
+		skillService, err = infraSkills.InitializeBuiltinSkills(configFile, appConfig)
+		if err != nil {
+			return fmt.Errorf("failed to initialize built-in skills: %w", err)
+		}
+		logging.Info("Built-in skills service initialized successfully")
 	}
 	
 	// Create services
@@ -309,6 +344,13 @@ func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, in
 	providerFactory := ai.NewProviderFactory()
 	embeddingService := embeddings.NewService(configService, providerFactory)
 	
+	// Create server manager with built-in skills (no external servers)
+	var serverManager domain.MCPServerManager
+	if skillService != nil {
+		logging.Info("Creating server manager with built-in skills only (no external servers)")
+		serverManager = infraSkills.NewSkillsAwareServerManager(nil, skillService)
+	}
+	
 	// Create logger with resolved log level
 	effectiveLogLevel := resolveLogLevel(wf.Execution.Logging)
 	logger := workflow.NewLogger(effectiveLogLevel, false) // verbose handled by resolveLogLevel
@@ -320,6 +362,9 @@ func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, in
 	orchestrator.SetAppConfig(appConfig)
 	orchestrator.SetAppConfigForWorkflows(appConfig)
 	orchestrator.SetEmbeddingService(embeddingService)
+	if serverManager != nil {
+		orchestrator.SetServerManager(serverManager)
+	}
 	orchestrator.SetStartFrom(startFrom)
 	orchestrator.SetEndAt(endAt)
 	
@@ -335,9 +380,24 @@ func executeWorkflowWithoutServers(wf *config.WorkflowV2, workflowKey string, in
 
 // executeWorkflowWithServers executes a workflow that needs MCP servers
 func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, inputData string, appConfig *config.ApplicationConfig, servers []string, skills []string, startFrom string, endAt string) error {
-	logging.Debug("Executing workflow with MCP servers: %v", servers)
+	logging.Debug("Executing workflow with servers: %v", servers)
 	if len(skills) > 0 {
 		logging.Info("Skills filter enabled: %v", skills)
+	}
+	
+	// ARCHITECTURAL FIX: Separate built-in skills from external servers
+	externalServers, needsSkills := infraSkills.SeparateSkillsFromServers(servers)
+	logging.Debug("External servers: %v, needs built-in skills: %v", externalServers, needsSkills)
+	
+	// Initialize built-in skills service if needed
+	var skillService *skillsvc.Service
+	if needsSkills {
+		var err error
+		skillService, err = infraSkills.InitializeBuiltinSkills(configFile, appConfig)
+		if err != nil {
+			return fmt.Errorf("failed to initialize built-in skills: %w", err)
+		}
+		logging.Info("Built-in skills service initialized successfully")
 	}
 	
 	// Create context with cancellation for clean shutdown
@@ -355,13 +415,13 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, input
 		cancel() // Cancel context to trigger cleanup
 	}()
 	
-	// Mark all servers as user-specified
+	// Mark all external servers as user-specified
 	userSpecified := make(map[string]bool)
-	for _, server := range servers {
+	for _, server := range externalServers {
 		userSpecified[server] = true
 	}
 	
-	// Execute with server connections
+	// Execute with server connections (ONLY external servers)
 	var execErr error
 	err := host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
 		// Create config service and load AI provider configurations
@@ -375,8 +435,15 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, input
 		providerFactory := ai.NewProviderFactory()
 		embeddingService := embeddings.NewService(configService, providerFactory)
 		
-		// Create server manager
-		serverManager := NewHostServerManager(conns)
+		// Create server manager for external servers
+		var serverManager domain.MCPServerManager
+		serverManager = NewHostServerManager(conns)
+		
+		// ARCHITECTURAL FIX: Wrap with skills-aware manager if skills are needed
+		if skillService != nil {
+			logging.Info("Wrapping server manager with built-in skills support")
+			serverManager = infraSkills.NewSkillsAwareServerManager(serverManager, skillService)
+		}
 		
 		// Create logger with resolved log level
 		effectiveLogLevel := resolveLogLevel(wf.Execution.Logging)
@@ -407,7 +474,7 @@ func executeWorkflowWithServers(wf *config.WorkflowV2, workflowKey string, input
 		// Output results
 		execErr = outputWorkflowResults(orchestrator, wf)
 		return execErr
-	}, configFile, servers, userSpecified, host.QuietCommandOptions())
+	}, configFile, externalServers, userSpecified, host.QuietCommandOptions())
 	
 	if err != nil {
 		return err

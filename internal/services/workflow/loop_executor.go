@@ -200,6 +200,8 @@ func (le *LoopExecutor) prepareLoopInput(loop *config.LoopV2, iteration int, las
 func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.WorkflowV2, inputData string) (string, error) {
 	// Create sub-orchestrator
 	subLogger := NewLogger(workflow.Execution.Logging, false)
+	// CRITICAL: Inherit output from parent logger (stdout in CLI, stderr in MCP serve mode)
+	subLogger.SetOutput(le.logger.GetOutput())
 	subOrchestrator := NewOrchestrator(workflow, subLogger)
 	
 	// Pass through dependencies

@@ -457,11 +457,36 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 		basePattern = pattern[:idx]
 	}
 	baseWorkflowDir := filepath.Clean(basePattern)
-
+	
+	// CRITICAL: If pattern is relative, join with loader's baseDir first
+	// This ensures we resolve relative to the config file's location, not cwd
+	if !filepath.IsAbs(baseWorkflowDir) && l.baseDir != "" {
+		baseWorkflowDir = filepath.Join(l.baseDir, baseWorkflowDir)
+	}
+	
+	// Now convert to absolute (should already be absolute after the join above)
+	if !filepath.IsAbs(baseWorkflowDir) {
+		var err error
+		baseWorkflowDir, err = filepath.Abs(baseWorkflowDir)
+		if err != nil {
+			return fmt.Errorf("failed to get absolute path for workflow directory: %w", err)
+		}
+	}
+	
 	// Use workflow loader for validation
 	workflowLoader := NewWorkflowLoader()
 
 	for _, file := range files {
+		// CRITICAL: Convert file path to absolute if it's relative
+		// This ensures consistency with baseWorkflowDir which is also absolute
+		if !filepath.IsAbs(file) {
+			var err error
+			file, err = filepath.Abs(file)
+			if err != nil {
+				return fmt.Errorf("failed to get absolute path for workflow file %s: %w", file, err)
+			}
+		}
+		
 		data, err := os.ReadFile(file)
 		if err != nil {
 			return fmt.Errorf("failed to read workflow file %s: %w", file, err)
@@ -500,6 +525,7 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 			
 			// If the file is in a subdirectory, use subdirectory/workflowname format
 			dir := filepath.Dir(relPath)
+			
 			if dir != "." {
 				// Use forward slashes for consistency across platforms
 				workflowKey := filepath.ToSlash(filepath.Join(dir, workflow.Name))

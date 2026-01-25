@@ -1,5 +1,11 @@
 package skills
 
+import (
+	"context"
+	
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
+)
+
 // SkillScanner defines the interface for scanning and discovering skills
 type SkillScanner interface {
 	// ScanSkillsDirectory scans a directory for Anthropic-compatible skills
@@ -72,4 +78,9 @@ type SkillService interface {
 	// Returns tools suitable for inclusion in a RunAsConfig
 	GenerateRunAsTools() ([]map[string]interface{}, error)
 	
+	// ListTools returns all available skill tools as domain.Tool
+	ListTools() ([]domain.Tool, error)
+	
+	// ExecuteTool executes a skill tool by name with arguments
+	ExecuteTool(ctx context.Context, toolName string, arguments map[string]interface{}) (string, error)
 }

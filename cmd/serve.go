@@ -9,9 +9,9 @@ import (
 	
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/runas"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	infraSkills "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/skills"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/tasks"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/server"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/proxy"
@@ -111,12 +111,24 @@ Claude Desktop Configuration:
 			logging.Info("Using config file: %s", actualConfigFile)
 		}
 		
+		// CRITICAL: Change working directory to config file's directory
+		// This ensures relative paths in config.yaml (like "config/workflows/**/*.yaml")
+		// are resolved correctly regardless of where Claude Desktop starts the process
+		configDir := filepath.Dir(actualConfigFile)
+		originalWd, _ := os.Getwd()
+		if err := os.Chdir(configDir); err != nil {
+			return fmt.Errorf("failed to change to config directory %s: %w", configDir, err)
+		}
+		logging.Info("Changed working directory to: %s (was: %s)", configDir, originalWd)
+		
 		// Load application config
 		configService := infraConfig.NewService()
 		appConfig, err := configService.LoadConfig(actualConfigFile)
 		if err != nil {
 			return fmt.Errorf("failed to load application config from %s: %w", actualConfigFile, err)
 		}
+		
+		logging.Info("Loaded %d workflows from config", len(appConfig.Workflows))
 		
 		// === Process templates array (convert to tools) ===
 		// For MCP types using the new templates config_source pattern
@@ -183,47 +195,20 @@ Claude Desktop Configuration:
 				len(runasConfig.Templates), len(runasConfig.Tools))
 		}
 		
-		// Initialize skills service
-		skillService := skillsvc.NewService()
-		skillService.SetConfig(appConfig)
-		
+		// CRITICAL FIX: Initialize skills service using the same helper as chat/query
+		// This ensures skills are actually loaded and available for workflow execution
+		skillService, err := infraSkills.InitializeBuiltinSkills(configFile, appConfig)
+		if err != nil {
+			return fmt.Errorf("failed to initialize built-in skills: %w", err)
+		}
+		logging.Info("Built-in skills initialized successfully")
 		// === Handle mcp-skills type: Auto-discover and generate tools ===
 		if runasConfig.RunAsType == runas.RunAsTypeMCPSkills || runasConfig.RunAsType == runas.RunAsTypeProxySkills {
 			logging.Info("Auto-discovering skills for mcp-skills server type")
 			
-			// Determine skills directory
-			var skillsDir string
-			if runasConfig.SkillsConfig != nil && runasConfig.SkillsConfig.SkillsDirectory != "" {
-				skillsDir = runasConfig.SkillsConfig.SkillsDirectory
-				// If it's a relative path, resolve it relative to the config file's directory
-				if !filepath.IsAbs(skillsDir) {
-					skillsDir = filepath.Join(filepath.Dir(runasConfigPath), skillsDir)
-				}
-			} else {
-				// Default: Get directory containing the RunAs config
-				runasDir := filepath.Dir(runasConfigPath)
-				// Go up to config directory (from config/runasMCP to config)
-				configDir := filepath.Dir(runasDir)
-				// Default skills directory is config/skills
-				skillsDir = filepath.Join(configDir, "skills")
-			}
-			
-			// Determine execution mode (default: auto)
-			execMode := skills.ExecutionModeAuto
-			if runasConfig.SkillsConfig != nil && runasConfig.SkillsConfig.ExecutionMode != "" {
-				execMode = skills.ExecutionMode(runasConfig.SkillsConfig.ExecutionMode)
-			}
-			
-			logging.Info("Skills directory: %s", skillsDir)
-			
-			// Initialize skill service (discovers skills)
-			if err := skillService.Initialize(skillsDir, execMode); err != nil {
-				return fmt.Errorf("failed to initialize skills service: %w", err)
-			}
-			
+			logging.Info("Generating MCP tools from already-initialized skills")
 			// Get list of discovered skills
 			discoveredSkills := skillService.ListSkills()
-			logging.Info("Discovered %d skills from %s", len(discoveredSkills), skillsDir)
 			
 			// Override with command-line flag if provided
 			if skillNames != "" {
@@ -327,10 +312,22 @@ Claude Desktop Configuration:
 				continue
 			}
 			
+			logging.Debug("Checking tool %d: name=%s, template=%s", i, tool.Name, tool.Template)
+			logging.Debug("Total workflows loaded: %d", len(appConfig.Workflows))
+			
 			_, existsV1 := appConfig.Workflows[tool.Template]
 			_, existsV2 := appConfig.Workflows[tool.Template]
 			
 			if !existsV1 && !existsV2 {
+				// Debug: Show some workflow keys
+				logging.Error("Template '%s' not found. Loaded workflows:", tool.Template)
+				count := 0
+				for key := range appConfig.Workflows {
+					if count < 10 {
+						logging.Error("  - %s", key)
+						count++
+					}
+				}
 				return fmt.Errorf("tool %d (%s) references unknown template: %s", 
 					i, tool.Name, tool.Template)
 			}

@@ -1,17 +1,20 @@
 package cmd
 
 import (
+	infraSkills "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/skills"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/query"
+	skillsvc "github.com/LaurieRhodes/mcp-cli-go/internal/services/skills"
 	"github.com/spf13/cobra"
 )
 
@@ -82,6 +85,9 @@ Examples:
   mcp-cli query "question" --provider anthropic
   mcp-cli query --provider anthropic --input-data "question"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Redirect stdin to prevent blocking when called via MCP tools
+		redirectStdinIfNotTerminal()
+		
 		// ARCHITECTURAL FIX: Handle noisy flag override for query command
 		// This allows --noisy to override the default quiet behavior of query mode
 		if noisy && !verbose {
@@ -165,6 +171,18 @@ Examples:
 		serverNames, userSpecified := ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
 		logging.Debug("Server names: %v", serverNames)
 		logging.Debug("Using provider from config: %s", providerName)
+
+		// ARCHITECTURAL FIX: Separate built-in skills from external servers
+		externalServers, needsSkills := infraSkills.SeparateSkillsFromServers(serverNames)
+		logging.Debug("External servers: %v, needs built-in skills: %v", externalServers, needsSkills)
+		
+		// Update userSpecified map to only include external servers
+		externalUserSpecified := make(map[string]bool)
+		for _, server := range externalServers {
+			if userSpecified[server] {
+				externalUserSpecified[server] = true
+			}
+		}
 
 		// FIXED: Use enhanced AI options to support interface-based config format
 		enhancedAIOptions, err := host.GetEnhancedAIOptions(configFile, providerName, modelName)
@@ -271,7 +289,30 @@ Examples:
 			commandOptions = host.QuietCommandOptions()
 		}
 
-		// Run the query command with the given options
+		// Initialize built-in skills service if needed
+		var skillService *skillsvc.Service
+		if needsSkills {
+			// Load app config for skills initialization
+			configService := config.NewService()
+			appConfig, err := configService.LoadConfig(configFile)
+			if err != nil {
+				if errorCodeOnly {
+					os.Exit(query.ErrConfigNotFoundCode)
+				}
+				return fmt.Errorf("failed to load config for skills: %w", err)
+			}
+			
+			skillService, err = infraSkills.InitializeBuiltinSkills(configFile, appConfig)
+			if err != nil {
+				if errorCodeOnly {
+					os.Exit(query.ErrInitializationCode)
+				}
+				return fmt.Errorf("failed to initialize built-in skills: %w", err)
+			}
+			logging.Info("Built-in skills service initialized successfully")
+		}
+
+		// Run the query command with the given options (ONLY external servers)
 		var result *query.QueryResult
 		err = host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
 			// Use AI service to create provider with full config
@@ -284,14 +325,15 @@ Examples:
 				return fmt.Errorf("failed to initialize AI provider: %w", err)
 			}
 
-			// Create query handler with pre-created provider
-			handler, err := query.NewQueryHandlerWithProvider(conns, llmProvider, aiOptions, systemPrompt)
-			if err != nil {
-				if errorCodeOnly {
-					os.Exit(query.ErrInitializationCode)
-				}
-				return fmt.Errorf("failed to initialize query: %w", err)
+			// ARCHITECTURAL FIX: Create server manager (with skills if needed)
+			var serverManager domain.MCPServerManager = NewHostServerManager(conns)
+			if skillService != nil {
+				logging.Info("Wrapping query server manager with built-in skills support")
+				serverManager = infraSkills.NewSkillsAwareServerManager(serverManager, skillService)
 			}
+			
+			// Create query handler with server manager instead of connections
+			handler := query.NewQueryHandlerWithServerManager(serverManager, llmProvider, aiOptions, systemPrompt)
 
 			// Set context if provided
 			if contextContent != "" {
@@ -315,7 +357,7 @@ Examples:
 			}
 
 			return nil
-		}, configFile, serverNames, userSpecified, commandOptions)
+		}, configFile, externalServers, externalUserSpecified, commandOptions)
 
 		if err != nil {
 			return err

@@ -115,3 +115,8 @@ func (l *Logger) Output(format string, args ...interface{}) {
 func (l *Logger) SetOutput(w io.Writer) {
 	l.output = w
 }
+
+// GetOutput returns the current output writer (for inheritance by sub-loggers)
+func (l *Logger) GetOutput() io.Writer {
+	return l.output
+}

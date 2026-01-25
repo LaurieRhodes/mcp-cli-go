@@ -3,12 +3,14 @@ package skills
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 	
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	domainConfig "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
@@ -415,8 +417,31 @@ func (s *Service) ListSkills() []string {
 
 // GetSkill retrieves a skill by name
 func (s *Service) GetSkill(name string) (*skills.Skill, bool) {
+	// Try name as-is first
 	skill, exists := s.skills[name]
-	return skill, exists
+	if exists {
+		return skill, true
+	}
+	
+	// Try with underscores replaced by dashes (odt_parser -> odt-parser)
+	denormalizedName := strings.ReplaceAll(name, "_", "-")
+	if denormalizedName != name {
+		skill, exists = s.skills[denormalizedName]
+		if exists {
+			return skill, true
+		}
+	}
+	
+	// Try with dashes replaced by underscores (odt-parser -> odt_parser)
+	normalizedName := strings.ReplaceAll(name, "-", "_")
+	if normalizedName != name {
+		skill, exists = s.skills[normalizedName]
+		if exists {
+			return skill, true
+		}
+	}
+	
+	return nil, false
 }
 
 // LoadMainContent loads the main SKILL.md content (body only, not frontmatter)
@@ -1143,7 +1168,7 @@ func (s *Service) GetSkillLanguage(skillName string) string {
 		return ""
 	}
 	
-	// Check if skill has specific config
+	// Try to find skill with the name as-is first
 	if skillSpec, exists := s.imageMapping.Skills[skillName]; exists {
 		// Return specific language if set
 		if skillSpec.Language != "" {
@@ -1156,6 +1181,38 @@ func (s *Service) GetSkillLanguage(skillName string) string {
 		// Multi-language or no language specified
 		if len(skillSpec.Languages) > 1 {
 			return "" // Caller must specify
+		}
+	}
+	
+	// Try with dashes replaced by underscores (odt-parser -> odt_parser)
+	normalizedName := strings.ReplaceAll(skillName, "-", "_")
+	if normalizedName != skillName {
+		if skillSpec, exists := s.imageMapping.Skills[normalizedName]; exists {
+			if skillSpec.Language != "" {
+				return skillSpec.Language
+			}
+			if len(skillSpec.Languages) == 1 {
+				return skillSpec.Languages[0]
+			}
+			if len(skillSpec.Languages) > 1 {
+				return ""
+			}
+		}
+	}
+	
+	// Try with underscores replaced by dashes (odt_parser -> odt-parser)
+	denormalizedName := strings.ReplaceAll(skillName, "_", "-")
+	if denormalizedName != skillName {
+		if skillSpec, exists := s.imageMapping.Skills[denormalizedName]; exists {
+			if skillSpec.Language != "" {
+				return skillSpec.Language
+			}
+			if len(skillSpec.Languages) == 1 {
+				return skillSpec.Languages[0]
+			}
+			if len(skillSpec.Languages) > 1 {
+				return ""
+			}
 		}
 	}
 	
@@ -1188,4 +1245,127 @@ func (s *Service) GetSkillLanguages(skillName string) []string {
 	}
 	
 	return nil
+}
+
+// ListTools returns all available skill tools as domain.Tool
+// This enables the skill service to act as an MCPServerManager
+func (s *Service) ListTools() ([]domain.Tool, error) {
+	// Generate RunAs tools which are already in the domain.Tool format
+	toolMaps, err := s.GenerateRunAsTools()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate tools: %w", err)
+	}
+	
+	// Convert tool maps to domain.Tool structs
+	tools := make([]domain.Tool, 0, len(toolMaps))
+	for _, toolMap := range toolMaps {
+		tool := domain.Tool{
+			Type: "function",
+			Function: domain.ToolFunction{
+				Name:        toolMap["name"].(string),
+				Description: toolMap["description"].(string),
+			},
+		}
+		
+		// Add input schema if present (stored as parameters)
+		if inputSchema, ok := toolMap["inputSchema"].(map[string]interface{}); ok {
+			tool.Function.Parameters = inputSchema
+		}
+		
+		tools = append(tools, tool)
+	}
+	
+	return tools, nil
+}
+
+// ExecuteTool executes a skill tool by name with arguments
+// This enables the skill service to act as an MCPServerManager
+func (s *Service) ExecuteTool(ctx context.Context, toolName string, arguments map[string]interface{}) (string, error) {
+	// Parse the tool name to get skill name and determine if it's execute_skill_code
+	if toolName == "execute_skill_code" || strings.HasSuffix(toolName, ":execute_skill_code") {
+		// Extract skill name if prefixed
+		skillName := ""
+		if strings.Contains(toolName, ":") {
+			skillName = strings.Split(toolName, ":")[0]
+		} else {
+			// Get from arguments
+			if sn, ok := arguments["skill_name"].(string); ok {
+				skillName = sn
+			}
+		}
+		
+		// Build code execution request
+		request := &skills.CodeExecutionRequest{}
+		
+		// Extract language from arguments, or use skill's configured language
+		// CRITICAL: Look up language BEFORE normalizing skill name (config uses dashes)
+		if lang, ok := arguments["language"].(string); ok {
+			request.Language = lang
+		} else {
+			// Get the skill's configured language from skill-images.yaml
+			request.Language = s.GetSkillLanguage(skillName)
+			if request.Language == "" {
+				return "", fmt.Errorf("language not specified and skill %s has no default language configured", skillName)
+			}
+		}
+		
+		// CRITICAL: Normalize skill name AFTER language lookup (dashes to underscores for internal lookup)
+		// MCP protocol uses dashes, but our internal storage uses underscores
+		skillName = strings.ReplaceAll(skillName, "-", "_")
+		request.SkillName = skillName
+		
+		// Extract code from arguments
+		if code, ok := arguments["code"].(string); ok {
+			request.Code = code
+		}
+		
+		// Note: Files argument would need base64 decoding, skip for now
+		// If needed, implement proper conversion from interface{} to []byte
+		
+		// Execute the code
+		result, err := s.ExecuteCode(request)
+		if err != nil {
+			return "", fmt.Errorf("code execution failed: %w", err)
+		}
+		
+		return result.Output, nil
+	}
+	
+	// For other skill tools, extract skill name from tool name (format: skillname:operation or skillname_operation)
+	var skillName string
+	if strings.Contains(toolName, ":") {
+		skillName = strings.Split(toolName, ":")[0]
+	} else if strings.Contains(toolName, "_") {
+		// Handle underscore format
+		parts := strings.Split(toolName, "_")
+		if len(parts) > 0 {
+			skillName = parts[0]
+		}
+	} else {
+		skillName = toolName
+	}
+	
+	// CRITICAL: Normalize skill name (dashes to underscores for internal lookup)
+	skillName = strings.ReplaceAll(skillName, "-", "_")
+	
+	// Load the skill in active mode
+	request := &skills.SkillLoadRequest{
+		SkillName: skillName,
+		Mode:      "active",
+	}
+	
+	// Convert arguments to input data (JSON string)
+	inputData, err := json.Marshal(arguments)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal arguments: %w", err)
+	}
+	request.InputData = string(inputData)
+	
+	// Load and execute the skill
+	result, err := s.LoadSkillByRequest(request)
+	if err != nil {
+		return "", fmt.Errorf("skill execution failed: %w", err)
+	}
+	
+	return result.Content, nil
 }
