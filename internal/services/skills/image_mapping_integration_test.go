@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	
+
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/skills"
 )
 
@@ -18,10 +18,10 @@ func TestImageMappingIntegration(t *testing.T) {
 
 	// Initialize skill service
 	service := NewService()
-	
+
 	skillsDir := "../../../config/skills"
 	executionMode := skills.ExecutionModeAuto
-	
+
 	err := service.Initialize(skillsDir, executionMode)
 	if err != nil {
 		t.Fatalf("Failed to initialize service: %v", err)
@@ -85,10 +85,10 @@ func TestExecuteCodeWithCorrectImage(t *testing.T) {
 
 	// Initialize skill service
 	service := NewService()
-	
+
 	skillsDir := "../../../config/skills"
 	executionMode := skills.ExecutionModeAuto
-	
+
 	err := service.Initialize(skillsDir, executionMode)
 	if err != nil {
 		t.Fatalf("Failed to initialize service: %v", err)
@@ -156,14 +156,14 @@ except ImportError:
 
 		// Get docx skill directory
 		skill := service.skills["docx"]
-		
+
 		t.Logf("\n🚀 Executing with docx skill image...")
 		t.Logf("   Skill dir: %s", skill.DirectoryPath)
 		t.Logf("   Expected image: mcp-skills-docx")
 
 		// Execute
 		output, err := service.executor.ExecutePythonCode(ctx, workspaceDir, skill.DirectoryPath, scriptPath, nil)
-		
+
 		if err != nil {
 			t.Logf("❌ Execution failed: %v", err)
 			t.Logf("Output: %s", output)
@@ -174,7 +174,7 @@ except ImportError:
 		} else {
 			t.Logf("✅ Execution succeeded!")
 			t.Logf("\nOutput:\n%s", output)
-			
+
 			// Check if defusedxml is available (should be in mcp-skills-docx)
 			if !strings.Contains(output, "defusedxml available") {
 				t.Error("❌ defusedxml not available - wrong image used?")

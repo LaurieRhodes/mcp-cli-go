@@ -86,23 +86,23 @@ func TestDomainErrorWithCause(t *testing.T) {
 
 func TestIsDomainError(t *testing.T) {
 	tests := []struct {
-		name   string
-		err    error
+		name     string
+		err      error
 		isDomain bool
 	}{
 		{
-			name:   "domain error",
-			err:    NewDomainError(ErrCodeInternal, "test"),
+			name:     "domain error",
+			err:      NewDomainError(ErrCodeInternal, "test"),
 			isDomain: true,
 		},
 		{
-			name:   "standard error",
-			err:    errors.New("standard error"),
+			name:     "standard error",
+			err:      errors.New("standard error"),
 			isDomain: false,
 		},
 		{
-			name:   "nil error",
-			err:    nil,
+			name:     "nil error",
+			err:      nil,
 			isDomain: false,
 		},
 	}

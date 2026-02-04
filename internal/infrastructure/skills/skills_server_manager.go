@@ -41,14 +41,14 @@ func (sm *SkillsAwareServerManager) GetAvailableTools() ([]domain.Tool, error) {
 			externalTools = tools
 		}
 	}
-	
+
 	// Generate tools from built-in skills
 	skillTools := sm.generateSkillTools()
-	
+
 	allTools := append(externalTools, skillTools...)
-	logging.Debug("Total tools available: %d (external: %d, skills: %d)", 
+	logging.Debug("Total tools available: %d (external: %d, skills: %d)",
 		len(allTools), len(externalTools), len(skillTools))
-	
+
 	return allTools, nil
 }
 
@@ -59,12 +59,12 @@ func (sm *SkillsAwareServerManager) ExecuteTool(ctx context.Context, toolName st
 		logging.Debug("Routing tool '%s' to built-in skills service", toolName)
 		return sm.executeSkillTool(ctx, toolName, arguments)
 	}
-	
+
 	// Otherwise delegate to external servers
 	if sm.externalServers == nil {
 		return "", fmt.Errorf("tool '%s' not found (no external servers available)", toolName)
 	}
-	
+
 	logging.Debug("Routing tool '%s' to external servers", toolName)
 	return sm.externalServers.ExecuteTool(ctx, toolName, arguments)
 }
@@ -73,14 +73,14 @@ func (sm *SkillsAwareServerManager) ExecuteTool(ctx context.Context, toolName st
 // This matches the logic in cmd/serve.go
 func (sm *SkillsAwareServerManager) generateSkillTools() []domain.Tool {
 	tools := []domain.Tool{}
-	
+
 	// Generate a tool for each skill
 	for _, skillName := range sm.skillService.ListSkills() {
 		skill, exists := sm.skillService.GetSkill(skillName)
 		if !exists {
 			continue
 		}
-		
+
 		tool := domain.Tool{
 			Type: "function",
 			Function: domain.ToolFunction{
@@ -92,7 +92,7 @@ func (sm *SkillsAwareServerManager) generateSkillTools() []domain.Tool {
 		tools = append(tools, tool)
 		logging.Debug("Generated tool '%s' for skill '%s'", tool.Function.Name, skillName)
 	}
-	
+
 	// Add execute_skill_code tool for dynamic code execution
 	executeCodeTool := domain.Tool{
 		Type: "function",
@@ -129,9 +129,9 @@ func (sm *SkillsAwareServerManager) generateSkillTools() []domain.Tool {
 		},
 	}
 	tools = append(tools, executeCodeTool)
-	
+
 	logging.Info("Generated %d tools from built-in skills", len(tools))
-	
+
 	// Add run_helper_script tool for direct script execution
 	runHelperScriptTool := domain.Tool{
 		Type: "function",
@@ -170,30 +170,30 @@ func (sm *SkillsAwareServerManager) generateSkillTools() []domain.Tool {
 func (sm *SkillsAwareServerManager) executeSkillTool(ctx context.Context, toolName string, arguments map[string]interface{}) (string, error) {
 	// Strip "skills_" prefix to get actual tool name
 	actualToolName := strings.TrimPrefix(toolName, "skills_")
-	
+
 	// Special handling for execute_skill_code
 	if actualToolName == "execute_skill_code" {
 		return sm.executeSkillCode(ctx, arguments)
 	}
-	
+
 	// Special handling for run_helper_script
 	if actualToolName == "run_helper_script" {
 		return sm.runHelperScript(ctx, arguments)
 	}
-	
+
 	// Find the skill that matches this tool
 	for _, skillName := range sm.skillService.ListSkills() {
 		skill, exists := sm.skillService.GetSkill(skillName)
 		if !exists {
 			continue
 		}
-		
+
 		if skill.GetMCPToolName() == actualToolName {
 			// This is a skill load request
 			return sm.loadSkill(ctx, skill, arguments)
 		}
 	}
-	
+
 	return "", fmt.Errorf("skill tool '%s' not found", toolName)
 }
 
@@ -204,19 +204,19 @@ func (sm *SkillsAwareServerManager) loadSkill(ctx context.Context, skill *domain
 	if modeArg, ok := arguments["mode"].(string); ok {
 		mode = modeArg
 	}
-	
+
 	// Create skill load request
 	request := &domainSkills.SkillLoadRequest{
 		Mode: domainSkills.SkillLoadMode(mode),
 	}
-	
+
 	// Add include_references if specified
 	if includeRefs, ok := arguments["include_references"]; ok {
 		if refsBool, ok := includeRefs.(bool); ok {
 			request.IncludeReferences = refsBool
 		}
 	}
-	
+
 	// Add reference_files if specified
 	if refFiles, ok := arguments["reference_files"].([]interface{}); ok {
 		refs := []string{}
@@ -227,32 +227,32 @@ func (sm *SkillsAwareServerManager) loadSkill(ctx context.Context, skill *domain
 		}
 		request.ReferenceFiles = refs
 	}
-	
+
 	// Add input_data if specified
 	if inputData, ok := arguments["input_data"].(string); ok {
 		request.InputData = inputData
 	}
-	
+
 	// Load the skill
 	var result *domainSkills.SkillLoadResult
 	var err error
-	
+
 	if mode == "active" {
 		result, err = sm.skillService.LoadAsActive(skill, request)
 	} else {
 		result, err = sm.skillService.LoadAsPassive(skill, request)
 	}
-	
+
 	if err != nil {
 		return "", fmt.Errorf("failed to load skill '%s': %w", skill.Name, err)
 	}
-	
+
 	// Format result as JSON
 	resultJSON, err := json.Marshal(result)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal skill result: %w", err)
 	}
-	
+
 	return string(resultJSON), nil
 }
 
@@ -263,18 +263,18 @@ func (sm *SkillsAwareServerManager) executeSkillCode(ctx context.Context, argume
 	if !ok {
 		return "", fmt.Errorf("skill_name is required - example: execute_skill_code with skill_name=python-context-builder and code=your_python_code")
 	}
-	
+
 	code, ok := arguments["code"].(string)
 	if !ok {
 		return "", fmt.Errorf("code is required")
 	}
-	
+
 	// Extract optional parameters
 	language := "python" // default
 	if lang, ok := arguments["language"].(string); ok {
 		language = lang
 	}
-	
+
 	var files map[string][]byte
 	if filesArg, ok := arguments["files"].(map[string]interface{}); ok {
 		files = make(map[string][]byte)
@@ -284,7 +284,7 @@ func (sm *SkillsAwareServerManager) executeSkillCode(ctx context.Context, argume
 			}
 		}
 	}
-	
+
 	// Create code execution request
 	request := &domainSkills.CodeExecutionRequest{
 		SkillName: skillName,
@@ -292,19 +292,19 @@ func (sm *SkillsAwareServerManager) executeSkillCode(ctx context.Context, argume
 		Language:  language,
 		Files:     files,
 	}
-	
+
 	// Execute the code
 	result, err := sm.skillService.ExecuteCode(request)
 	if err != nil {
 		return "", fmt.Errorf("code execution failed: %w", err)
 	}
-	
+
 	// Format result as JSON
 	resultJSON, err := json.Marshal(result)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal execution result: %w", err)
 	}
-	
+
 	return string(resultJSON), nil
 }
 
@@ -315,12 +315,12 @@ func (sm *SkillsAwareServerManager) runHelperScript(ctx context.Context, argumen
 	if !ok {
 		return "", fmt.Errorf("skill_name is required - example: run_helper_script with skill_name=python-context-builder, script_name=process_chunk.py, args=array")
 	}
-	
+
 	scriptName, ok := arguments["script_name"].(string)
 	if !ok {
 		return "", fmt.Errorf("script_name is required")
 	}
-	
+
 	// Extract optional args
 	var args []string
 	if argsArg, ok := arguments["args"].([]interface{}); ok {
@@ -330,26 +330,26 @@ func (sm *SkillsAwareServerManager) runHelperScript(ctx context.Context, argumen
 			}
 		}
 	}
-	
+
 	// Create script execution request
 	request := &domainSkills.HelperScriptRequest{
 		SkillName:  skillName,
 		ScriptName: scriptName,
 		Args:       args,
 	}
-	
+
 	// Execute the script
 	result, err := sm.skillService.RunHelperScript(request)
 	if err != nil {
 		return "", fmt.Errorf("script execution failed: %w", err)
 	}
-	
+
 	// Format result as JSON
 	resultJSON, err := json.Marshal(result)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal execution result: %w", err)
 	}
-	
+
 	return string(resultJSON), nil
 }
 

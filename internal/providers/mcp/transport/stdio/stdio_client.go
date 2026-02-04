@@ -24,34 +24,34 @@ const (
 
 // StdioClient handles communication with a server process via stdin/stdout
 type StdioClient struct {
-	params           StdioServerParameters
-	cmd              *exec.Cmd
-	stdin            io.WriteCloser
-	stdout           io.ReadCloser
-	stderr           io.ReadCloser
-	readChan         chan *messages.JSONRPCMessage
-	writeChan        chan *messages.JSONRPCMessage
-	done             chan struct{}
-	ctx              context.Context
-	cancel           context.CancelFunc
-	wg               sync.WaitGroup
-	initialized      bool
-	mu               sync.Mutex
-	suppressConsole  bool           // Controls console output visibility
-	stderrBuffer     *bytes.Buffer  // Captures server stderr for error analysis
-	stderrMutex      sync.Mutex     // Protects stderr buffer access
-	hasRealErrors    bool           // Indicates if server reported ACTUAL errors (not just info/debug logs)
-	dispatcher       *ResponseDispatcher // Routes responses to waiting requests
+	params          StdioServerParameters
+	cmd             *exec.Cmd
+	stdin           io.WriteCloser
+	stdout          io.ReadCloser
+	stderr          io.ReadCloser
+	readChan        chan *messages.JSONRPCMessage
+	writeChan       chan *messages.JSONRPCMessage
+	done            chan struct{}
+	ctx             context.Context
+	cancel          context.CancelFunc
+	wg              sync.WaitGroup
+	initialized     bool
+	mu              sync.Mutex
+	suppressConsole bool                // Controls console output visibility
+	stderrBuffer    *bytes.Buffer       // Captures server stderr for error analysis
+	stderrMutex     sync.Mutex          // Protects stderr buffer access
+	hasRealErrors   bool                // Indicates if server reported ACTUAL errors (not just info/debug logs)
+	dispatcher      *ResponseDispatcher // Routes responses to waiting requests
 }
 
 // NewStdioClient creates a new stdio client with the given parameters
 func NewStdioClient(params StdioServerParameters) *StdioClient {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	// Determine console output suppression based on logging level
 	// If logging is ERROR or above, we want clean user output
 	suppressConsole := logging.GetDefaultLevel() >= logging.ERROR
-	
+
 	return &StdioClient{
 		params:          params,
 		readChan:        make(chan *messages.JSONRPCMessage, 10),
@@ -68,7 +68,7 @@ func NewStdioClient(params StdioServerParameters) *StdioClient {
 // NewStdioClientWithOptions creates a new stdio client with custom options
 func NewStdioClientWithOptions(params StdioServerParameters, suppressConsole bool) *StdioClient {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	return &StdioClient{
 		params:          params,
 		readChan:        make(chan *messages.JSONRPCMessage, 10),
@@ -85,7 +85,7 @@ func NewStdioClientWithOptions(params StdioServerParameters, suppressConsole boo
 // NewStdioClientWithStderrOption creates a new stdio client with stderr suppression option
 func NewStdioClientWithStderrOption(params StdioServerParameters, suppressStderr bool) *StdioClient {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	// suppressStderr controls whether to show server debug output
 	return &StdioClient{
 		params:          params,
@@ -103,57 +103,57 @@ func NewStdioClientWithStderrOption(params StdioServerParameters, suppressStderr
 // isRealError determines if a stderr line represents an actual error vs normal logging
 func isRealError(line string) bool {
 	lowerLine := strings.ToLower(line)
-	
+
 	// Ignore normal logging patterns and configuration messages
 	if strings.HasPrefix(lowerLine, "debug:") ||
-	   strings.HasPrefix(lowerLine, "info:") ||
-	   strings.Contains(lowerLine, "loading configuration") ||
-	   strings.Contains(lowerLine, "successfully obtained token") ||
-	   strings.Contains(lowerLine, "api call succeeded") ||
-	   strings.Contains(lowerLine, "configuration loaded") ||
-	   strings.Contains(lowerLine, "server started") ||
-	   strings.Contains(lowerLine, "starting on stdin/stdout") ||
-	   strings.Contains(lowerLine, "registered") ||
-	   strings.Contains(lowerLine, "processing") ||
-	   strings.Contains(lowerLine, "sending:") ||
-	   strings.Contains(lowerLine, "received:") ||
-	   strings.Contains(lowerLine, "response:") ||
-	   strings.Contains(lowerLine, "sending response:") ||
-	   strings.Contains(lowerLine, "received message:") ||
-	   strings.Contains(lowerLine, "parsed message") ||
-	   strings.Contains(lowerLine, "command timeout:") || // Configuration message, not error
-	   strings.Contains(lowerLine, "timeout:") || // Generic timeout config messages
-	   strings.Contains(lowerLine, "looking for config") ||
-	   strings.Contains(lowerLine, "reading config") ||
-	   strings.Contains(lowerLine, "executable directory") {
+		strings.HasPrefix(lowerLine, "info:") ||
+		strings.Contains(lowerLine, "loading configuration") ||
+		strings.Contains(lowerLine, "successfully obtained token") ||
+		strings.Contains(lowerLine, "api call succeeded") ||
+		strings.Contains(lowerLine, "configuration loaded") ||
+		strings.Contains(lowerLine, "server started") ||
+		strings.Contains(lowerLine, "starting on stdin/stdout") ||
+		strings.Contains(lowerLine, "registered") ||
+		strings.Contains(lowerLine, "processing") ||
+		strings.Contains(lowerLine, "sending:") ||
+		strings.Contains(lowerLine, "received:") ||
+		strings.Contains(lowerLine, "response:") ||
+		strings.Contains(lowerLine, "sending response:") ||
+		strings.Contains(lowerLine, "received message:") ||
+		strings.Contains(lowerLine, "parsed message") ||
+		strings.Contains(lowerLine, "command timeout:") || // Configuration message, not error
+		strings.Contains(lowerLine, "timeout:") || // Generic timeout config messages
+		strings.Contains(lowerLine, "looking for config") ||
+		strings.Contains(lowerLine, "reading config") ||
+		strings.Contains(lowerLine, "executable directory") {
 		return false
 	}
-	
+
 	// Ignore agentic loop intermediate errors (auto-corrected by follow-up iterations)
 	// These are expected during multi-turn tool execution and shouldn't alarm users
 	if strings.Contains(lowerLine, "code execution failed") ||
-	   strings.Contains(lowerLine, "invalid file paths detected") ||
-	   strings.Contains(lowerLine, "nameerror:") ||
-	   strings.Contains(lowerLine, "syntaxerror:") ||
-	   strings.Contains(lowerLine, "typeerror:") ||
-	   strings.Contains(lowerLine, "valueerror:") ||
-	   strings.Contains(lowerLine, "attributeerror:") ||
-	   strings.Contains(lowerLine, "importerror:") ||
-	   strings.Contains(lowerLine, "keyerror:") ||
-	   strings.Contains(lowerLine, "indexerror:") {
+		strings.Contains(lowerLine, "invalid file paths detected") ||
+		strings.Contains(lowerLine, "nameerror:") ||
+		strings.Contains(lowerLine, "syntaxerror:") ||
+		strings.Contains(lowerLine, "typeerror:") ||
+		strings.Contains(lowerLine, "valueerror:") ||
+		strings.Contains(lowerLine, "attributeerror:") ||
+		strings.Contains(lowerLine, "importerror:") ||
+		strings.Contains(lowerLine, "keyerror:") ||
+		strings.Contains(lowerLine, "indexerror:") {
 		return false
 	}
-	
+
 	// These indicate actual problems (but not timeout configs)
 	return strings.Contains(lowerLine, "error:") ||
-	       strings.Contains(lowerLine, "failed:") ||
-	       strings.Contains(lowerLine, "panic:") ||
-	       strings.Contains(lowerLine, "fatal:") ||
-	       strings.Contains(lowerLine, "authentication failed") ||
-	       strings.Contains(lowerLine, "connection refused") ||
-	       strings.Contains(lowerLine, "timed out") || // Actual timeout event, not config
-	       strings.Contains(lowerLine, "timeout exceeded") || // Actual timeout event
-	       strings.Contains(lowerLine, "permission denied")
+		strings.Contains(lowerLine, "failed:") ||
+		strings.Contains(lowerLine, "panic:") ||
+		strings.Contains(lowerLine, "fatal:") ||
+		strings.Contains(lowerLine, "authentication failed") ||
+		strings.Contains(lowerLine, "connection refused") ||
+		strings.Contains(lowerLine, "timed out") || // Actual timeout event, not config
+		strings.Contains(lowerLine, "timeout exceeded") || // Actual timeout event
+		strings.Contains(lowerLine, "permission denied")
 }
 
 // Start initiates the connection to the server
@@ -166,7 +166,7 @@ func (c *StdioClient) Start() error {
 	}
 
 	logging.Debug("Starting stdio client with command: %s", c.params.Command)
-	
+
 	// Create the command
 	c.cmd = exec.CommandContext(c.ctx, c.params.Command, c.params.Args...)
 
@@ -227,11 +227,11 @@ func (c *StdioClient) readLoop() {
 
 	logging.Debug("Starting stdout reader loop with %d MB buffer size", MaxBufferSize/(1024*1024))
 	scanner := bufio.NewScanner(c.stdout)
-	
+
 	// Create a custom buffer with increased size to handle large security alert responses
 	buf := make([]byte, MaxBufferSize)
 	scanner.Buffer(buf, MaxBufferSize)
-	
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if len(line) == 0 {
@@ -273,7 +273,7 @@ func (c *StdioClient) stderrLoop() {
 
 	logging.Debug("Starting stderr monitor loop")
 	scanner := bufio.NewScanner(c.stderr)
-	
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if len(line) == 0 {
@@ -283,7 +283,7 @@ func (c *StdioClient) stderrLoop() {
 		// Always capture stderr for potential debugging needs
 		c.stderrMutex.Lock()
 		c.stderrBuffer.WriteString(line + "\n")
-		
+
 		// REFINED: Only flag as error if it's actually an error, not normal logging
 		if isRealError(line) {
 			c.hasRealErrors = true
@@ -387,7 +387,7 @@ func (c *StdioClient) Stop() {
 
 	// Cancel the context to signal goroutines to stop
 	c.cancel()
-	logging.Debug("Context cancelled")
+	logging.Debug("Context canceled")
 
 	// Close the write channel to stop the write loop
 	close(c.writeChan)
@@ -442,12 +442,12 @@ func (c *StdioClient) Stop() {
 func (c *StdioClient) showErrorDiagnostics() {
 	c.stderrMutex.Lock()
 	defer c.stderrMutex.Unlock()
-	
+
 	// REFINED: Only show diagnostics if there were actual errors, not normal logging
 	if c.hasRealErrors && c.stderrBuffer.Len() > 0 {
 		logging.Error("Server reported actual errors. Stderr output:")
 		fmt.Fprintf(os.Stderr, "\n--- Server Error Output ---\n")
-		
+
 		// Filter the buffer to only show actual error lines
 		lines := strings.Split(c.stderrBuffer.String(), "\n")
 		hasErrorsToShow := false
@@ -457,7 +457,7 @@ func (c *StdioClient) showErrorDiagnostics() {
 				hasErrorsToShow = true
 			}
 		}
-		
+
 		if hasErrorsToShow {
 			fmt.Fprintf(os.Stderr, "--- End Server Error Output ---\n\n")
 		} else {
@@ -531,4 +531,3 @@ func (c *StdioClient) GetSuppressStderr() bool {
 func (c *StdioClient) GetDispatcher() *ResponseDispatcher {
 	return c.dispatcher
 }
-

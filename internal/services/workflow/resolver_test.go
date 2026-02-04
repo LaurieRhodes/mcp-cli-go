@@ -106,7 +106,7 @@ func TestResolveTemperature(t *testing.T) {
 			want: 0.9,
 		},
 		{
-			name: "use default",
+			name:      "use default",
 			execution: &config.ExecutionContext{},
 			step:      &config.StepV2{},
 			want:      0.7,

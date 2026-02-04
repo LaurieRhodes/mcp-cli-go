@@ -4,10 +4,10 @@ package config
 type SettingsConfig struct {
 	// RawDataOverride determines if raw data output should override AI responses
 	RawDataOverride bool `yaml:"raw_data_override,omitempty"`
-	
+
 	// MaxToolFollowUp sets the maximum number of follow-up tool calling requests (default: 2)
 	MaxToolFollowUp int `yaml:"max_tool_follow_up,omitempty"`
-	
+
 	// OutputsDir is the directory where skill outputs are persisted
 	OutputsDir string `yaml:"outputs_dir,omitempty"`
 }
@@ -16,7 +16,7 @@ type SettingsConfig struct {
 type ServerSettings struct {
 	// RawDataOverride determines if raw data output should override AI responses for this server
 	RawDataOverride bool `yaml:"raw_data_override,omitempty"`
-	
+
 	// MaxToolFollowUp sets the maximum number of follow-up tool calling requests for this server (default: 2)
 	MaxToolFollowUp int `yaml:"max_tool_follow_up,omitempty"`
 }
@@ -57,6 +57,6 @@ func (c *Config) GetServerSettings(serverName string) (*ServerSettings, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return serverConfig.Settings, nil
 }

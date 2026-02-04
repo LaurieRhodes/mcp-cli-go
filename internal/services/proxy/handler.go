@@ -1,14 +1,15 @@
 package proxy
 
 import (
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/mcp"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/stdio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/mcp"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/stdio"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/runas"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
@@ -57,7 +58,7 @@ func (h *ToolHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"result": result,
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -90,18 +91,18 @@ func (h *ToolHandler) executeTemplate(vars map[string]string) (string, error) {
 
 	// Create logger
 	logger := workflowservice.NewLogger(workflow.Execution.Logging, false)
-	
+
 	// Create orchestrator
 	orchestrator := workflowservice.NewOrchestrator(workflow, logger)
 	orchestrator.SetAppConfigForWorkflows(h.proxyServer.appConfig)
-	
+
 	// Execute workflow
 	ctx := context.Background()
 	err := orchestrator.Execute(ctx, inputData)
 	if err != nil {
 		return "", fmt.Errorf("workflow execution failed: %w", err)
 	}
-	
+
 	// Get result from last step
 	result := ""
 	if len(workflow.Steps) > 0 {
@@ -110,11 +111,11 @@ func (h *ToolHandler) executeTemplate(vars map[string]string) (string, error) {
 			result = output
 		}
 	}
-	
+
 	if result == "" {
 		return fmt.Sprintf("Workflow '%s' completed but produced no output", workflow.Name), nil
 	}
-	
+
 	return result, nil
 }
 
@@ -128,7 +129,7 @@ func (h *ToolHandler) executeMCPTool(vars map[string]string) (string, error) {
 			break
 		}
 	}
-	
+
 	if server == nil {
 		return "", fmt.Errorf("MCP server not found: %s", h.tool.MCPServer)
 	}
@@ -144,7 +145,7 @@ func (h *ToolHandler) executeMCPTool(vars map[string]string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("server client is not stdio client type")
 	}
-	
+
 	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), h.tool.MCPTool, args)
 	if err != nil {
 		return "", fmt.Errorf("MCP tool call failed: %w", err)
@@ -158,10 +159,10 @@ func (h *ToolHandler) executeMCPTool(vars map[string]string) (string, error) {
 	// Extract text content from result
 	errorDetector := mcp.NewErrorDetector()
 	text := errorDetector.ExtractTextFromContent(result.Content)
-	
+
 	if text == "" {
 		return fmt.Sprintf("Tool completed: %v", result), nil
 	}
-	
+
 	return text, nil
 }

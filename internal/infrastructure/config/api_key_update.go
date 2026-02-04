@@ -24,7 +24,7 @@ func UpdatedGetAPIKey(providerName, configFile string) (string, error) {
 				}
 			}
 		}
-		
+
 		// Try legacy providers section
 		if enhancedCfg.AI.Providers != nil {
 			if provider, ok := enhancedCfg.AI.Providers[providerName]; ok {
@@ -35,7 +35,7 @@ func UpdatedGetAPIKey(providerName, configFile string) (string, error) {
 			}
 		}
 	}
-	
+
 	// If that fails, try the legacy config
 	legacyCfg, err := LoadConfig(configFile)
 	if err == nil && legacyCfg != nil && legacyCfg.AI != nil && legacyCfg.AI.Providers != nil {
@@ -46,7 +46,7 @@ func UpdatedGetAPIKey(providerName, configFile string) (string, error) {
 			}
 		}
 	}
-	
+
 	// If still not found, look in environment variables
 	switch providerName {
 	case "openai":
@@ -70,7 +70,7 @@ func UpdatedGetAPIKey(providerName, configFile string) (string, error) {
 			return apiKey, nil
 		}
 	}
-	
+
 	return "", fmt.Errorf("API key for provider %s not found in configuration or environment variables", providerName)
 }
 
@@ -90,7 +90,7 @@ func GetAPIEndpoint(providerName, configFile string) (string, error) {
 				}
 			}
 		}
-		
+
 		// Try legacy providers section
 		if enhancedCfg.AI.Providers != nil {
 			if provider, ok := enhancedCfg.AI.Providers[providerName]; ok {
@@ -100,7 +100,7 @@ func GetAPIEndpoint(providerName, configFile string) (string, error) {
 			}
 		}
 	}
-	
+
 	// If that fails, try the legacy config
 	legacyCfg, err := LoadConfig(configFile)
 	if err == nil && legacyCfg != nil && legacyCfg.AI != nil && legacyCfg.AI.Providers != nil {
@@ -110,7 +110,7 @@ func GetAPIEndpoint(providerName, configFile string) (string, error) {
 			}
 		}
 	}
-	
+
 	// Return default endpoints based on provider
 	switch providerName {
 	case "ollama":
@@ -124,7 +124,7 @@ func GetAPIEndpoint(providerName, configFile string) (string, error) {
 	case "openrouter":
 		return "https://openrouter.ai/api/v1", nil
 	}
-	
+
 	return "", fmt.Errorf("API endpoint for provider %s not found in configuration", providerName)
 }
 
@@ -136,14 +136,14 @@ func UpdateGetDefaultProvider(configFile string) (string, error) {
 		logging.Debug("Found default provider %s in enhanced config", enhancedCfg.AI.DefaultProvider)
 		return enhancedCfg.AI.DefaultProvider, nil
 	}
-	
+
 	// If that fails, try the legacy config
 	legacyCfg, err := LoadConfig(configFile)
 	if err == nil && legacyCfg != nil && legacyCfg.AI != nil && legacyCfg.AI.DefaultProvider != "" {
 		logging.Debug("Found default provider %s in legacy config", legacyCfg.AI.DefaultProvider)
 		return legacyCfg.AI.DefaultProvider, nil
 	}
-	
+
 	// Default to openai
 	logging.Debug("No default provider found in config, using openai")
 	return "openai", nil
@@ -152,7 +152,7 @@ func UpdateGetDefaultProvider(configFile string) (string, error) {
 // UpdateLoadAllProviders loads all providers from the config file
 func UpdateLoadAllProviders(configFile string) (map[string]ProviderConfig, error) {
 	result := make(map[string]ProviderConfig)
-	
+
 	// First try to read as enhanced config
 	enhancedCfg, err := LoadEnhancedConfig(configFile)
 	if err == nil && enhancedCfg != nil && enhancedCfg.AI != nil {
@@ -165,7 +165,7 @@ func UpdateLoadAllProviders(configFile string) (map[string]ProviderConfig, error
 				}
 			}
 		}
-		
+
 		// Get from legacy providers
 		if enhancedCfg.AI.Providers != nil {
 			for name, provider := range enhancedCfg.AI.Providers {
@@ -173,12 +173,12 @@ func UpdateLoadAllProviders(configFile string) (map[string]ProviderConfig, error
 				logging.Debug("Found provider %s in legacy providers section", name)
 			}
 		}
-		
+
 		if len(result) > 0 {
 			return result, nil
 		}
 	}
-	
+
 	// If that fails, try the legacy config
 	legacyCfg, err := LoadConfig(configFile)
 	if err == nil && legacyCfg != nil && legacyCfg.AI != nil && legacyCfg.AI.Providers != nil {
@@ -186,12 +186,12 @@ func UpdateLoadAllProviders(configFile string) (map[string]ProviderConfig, error
 			result[name] = provider
 			logging.Debug("Found provider %s in legacy config", name)
 		}
-		
+
 		if len(result) > 0 {
 			return result, nil
 		}
 	}
-	
+
 	return result, fmt.Errorf("no providers found in configuration")
 }
 
@@ -208,7 +208,7 @@ func GetInterfaceTypeForProvider(providerName, configFile string) (InterfaceType
 			}
 		}
 	}
-	
+
 	// If not found in config, use default mappings
 	switch providerName {
 	case "openai", "deepseek", "openrouter", "gemini":

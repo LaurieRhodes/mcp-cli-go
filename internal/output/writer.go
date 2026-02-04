@@ -30,7 +30,7 @@ func getStdoutWriter() io.Writer {
 		// Use stderr - it's always visible and doesn't get captured
 		return os.Stderr
 	}
-	
+
 	// On Windows, use standard stdout
 	return os.Stdout
 }
@@ -38,36 +38,36 @@ func getStdoutWriter() io.Writer {
 // Println writes a line to stdout with platform-appropriate handling
 func (w *Writer) Println(msg string) error {
 	_, err := fmt.Fprintln(w.stdout, msg)
-	
+
 	// Force flush if writer supports it
 	if syncer, ok := w.stdout.(interface{ Sync() error }); ok {
 		syncer.Sync()
 	}
-	
+
 	return err
 }
 
 // Print writes to stdout without newline
 func (w *Writer) Print(msg string) error {
 	_, err := fmt.Fprint(w.stdout, msg)
-	
+
 	// Force flush
 	if syncer, ok := w.stdout.(interface{ Sync() error }); ok {
 		syncer.Sync()
 	}
-	
+
 	return err
 }
 
 // Printf writes formatted output to stdout
 func (w *Writer) Printf(format string, args ...interface{}) error {
 	_, err := fmt.Fprintf(w.stdout, format, args...)
-	
+
 	// Force flush
 	if syncer, ok := w.stdout.(interface{ Sync() error }); ok {
 		syncer.Sync()
 	}
-	
+
 	return err
 }
 

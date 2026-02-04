@@ -33,12 +33,12 @@ func (sc *SentenceChunker) ChunkText(text string, maxTokens int) ([]domain.TextC
 	// Split text into sentences using regex that handles various sentence endings
 	sentenceRegex := regexp.MustCompile(`(?:[.!?]+\s+|\n+)`)
 	sentences := sentenceRegex.Split(text, -1)
-	
+
 	// Clean up sentences and track positions
 	var cleanSentences []string
 	var sentencePositions []int
 	currentPos := 0
-	
+
 	for _, sentence := range sentences {
 		sentence = strings.TrimSpace(sentence)
 		if sentence != "" {
@@ -47,7 +47,7 @@ func (sc *SentenceChunker) ChunkText(text string, maxTokens int) ([]domain.TextC
 			currentPos += len(sentence)
 		}
 	}
-	
+
 	if len(cleanSentences) == 0 {
 		return []domain.TextChunk{}, nil
 	}
@@ -65,15 +65,15 @@ func (sc *SentenceChunker) ChunkText(text string, maxTokens int) ([]domain.TextC
 			testText += " "
 		}
 		testText += sentence
-		
+
 		tokenCount := sc.tokenManager.CountTokensInString(testText)
-		
+
 		if tokenCount > maxTokens && currentChunk.Len() > 0 {
 			// Current chunk would be too large, finalize current chunk
 			chunkText := currentChunk.String()
 			if chunkText != "" {
 				endPos := sentencePositions[currentSentenceIndices[len(currentSentenceIndices)-1]] + len(cleanSentences[currentSentenceIndices[len(currentSentenceIndices)-1]])
-				
+
 				chunk := domain.TextChunk{
 					Text:       chunkText,
 					Index:      chunkIndex,
@@ -84,12 +84,12 @@ func (sc *SentenceChunker) ChunkText(text string, maxTokens int) ([]domain.TextC
 				chunks = append(chunks, chunk)
 				chunkIndex++
 			}
-			
+
 			// Start new chunk with overlap
 			overlapSentences := sc.getOverlapSentences(currentSentenceIndices, cleanSentences, sc.overlap)
 			currentChunk.Reset()
 			currentSentenceIndices = []int{}
-			
+
 			if len(overlapSentences) > 0 {
 				currentChunk.WriteString(strings.Join(overlapSentences, " "))
 				currentStartPos = sentencePositions[i-len(overlapSentences)]
@@ -100,7 +100,7 @@ func (sc *SentenceChunker) ChunkText(text string, maxTokens int) ([]domain.TextC
 				currentStartPos = sentencePositions[i]
 			}
 		}
-		
+
 		// Add current sentence
 		if currentChunk.Len() > 0 {
 			currentChunk.WriteString(" ")
@@ -108,12 +108,12 @@ func (sc *SentenceChunker) ChunkText(text string, maxTokens int) ([]domain.TextC
 		currentChunk.WriteString(sentence)
 		currentSentenceIndices = append(currentSentenceIndices, i)
 	}
-	
+
 	// Add final chunk if there's content
 	if currentChunk.Len() > 0 {
 		chunkText := currentChunk.String()
 		endPos := sentencePositions[currentSentenceIndices[len(currentSentenceIndices)-1]] + len(cleanSentences[currentSentenceIndices[len(currentSentenceIndices)-1]])
-		
+
 		chunk := domain.TextChunk{
 			Text:       chunkText,
 			Index:      chunkIndex,
@@ -133,13 +133,13 @@ func (sc *SentenceChunker) getOverlapSentences(currentIndices []int, sentences [
 	if overlap <= 0 || len(currentIndices) == 0 {
 		return []string{}
 	}
-	
+
 	// Take the last 'overlap' sentences from current chunk
 	startIdx := len(currentIndices) - overlap
 	if startIdx < 0 {
 		startIdx = 0
 	}
-	
+
 	var overlapSentences []string
 	for i := startIdx; i < len(currentIndices); i++ {
 		sentenceIdx := currentIndices[i]
@@ -147,7 +147,7 @@ func (sc *SentenceChunker) getOverlapSentences(currentIndices []int, sentences [
 			overlapSentences = append(overlapSentences, sentences[sentenceIdx])
 		}
 	}
-	
+
 	return overlapSentences
 }
 
@@ -185,12 +185,12 @@ func (pc *ParagraphChunker) ChunkText(text string, maxTokens int) ([]domain.Text
 	paragraphRegex := regexp.MustCompile(`\s*\
 `)
 	paragraphs := paragraphRegex.Split(text, -1)
-	
+
 	// Clean up paragraphs and track positions
 	var cleanParagraphs []string
 	var paragraphPositions []int
 	currentPos := 0
-	
+
 	for _, paragraph := range paragraphs {
 		paragraph = strings.TrimSpace(paragraph)
 		if paragraph != "" {
@@ -199,7 +199,7 @@ func (pc *ParagraphChunker) ChunkText(text string, maxTokens int) ([]domain.Text
 			currentPos += len(paragraph)
 		}
 	}
-	
+
 	if len(cleanParagraphs) == 0 {
 		return []domain.TextChunk{}, nil
 	}
@@ -217,15 +217,15 @@ func (pc *ParagraphChunker) ChunkText(text string, maxTokens int) ([]domain.Text
 			testText += ""
 		}
 		testText += paragraph
-		
+
 		tokenCount := pc.tokenManager.CountTokensInString(testText)
-		
+
 		if tokenCount > maxTokens && currentChunk.Len() > 0 {
 			// Current chunk would be too large, finalize current chunk
 			chunkText := currentChunk.String()
 			if chunkText != "" {
 				endPos := paragraphPositions[currentParagraphIndices[len(currentParagraphIndices)-1]] + len(cleanParagraphs[currentParagraphIndices[len(currentParagraphIndices)-1]])
-				
+
 				chunk := domain.TextChunk{
 					Text:       chunkText,
 					Index:      chunkIndex,
@@ -236,12 +236,12 @@ func (pc *ParagraphChunker) ChunkText(text string, maxTokens int) ([]domain.Text
 				chunks = append(chunks, chunk)
 				chunkIndex++
 			}
-			
+
 			// Start new chunk with overlap
 			overlapParagraphs := pc.getOverlapParagraphs(currentParagraphIndices, cleanParagraphs, pc.overlap)
 			currentChunk.Reset()
 			currentParagraphIndices = []int{}
-			
+
 			if len(overlapParagraphs) > 0 {
 				currentChunk.WriteString(strings.Join(overlapParagraphs, ""))
 				currentStartPos = paragraphPositions[i-len(overlapParagraphs)]
@@ -252,7 +252,7 @@ func (pc *ParagraphChunker) ChunkText(text string, maxTokens int) ([]domain.Text
 				currentStartPos = paragraphPositions[i]
 			}
 		}
-		
+
 		// Add current paragraph
 		if currentChunk.Len() > 0 {
 			currentChunk.WriteString("")
@@ -260,12 +260,12 @@ func (pc *ParagraphChunker) ChunkText(text string, maxTokens int) ([]domain.Text
 		currentChunk.WriteString(paragraph)
 		currentParagraphIndices = append(currentParagraphIndices, i)
 	}
-	
+
 	// Add final chunk if there's content
 	if currentChunk.Len() > 0 {
 		chunkText := currentChunk.String()
 		endPos := paragraphPositions[currentParagraphIndices[len(currentParagraphIndices)-1]] + len(cleanParagraphs[currentParagraphIndices[len(currentParagraphIndices)-1]])
-		
+
 		chunk := domain.TextChunk{
 			Text:       chunkText,
 			Index:      chunkIndex,
@@ -285,13 +285,13 @@ func (pc *ParagraphChunker) getOverlapParagraphs(currentIndices []int, paragraph
 	if overlap <= 0 || len(currentIndices) == 0 {
 		return []string{}
 	}
-	
+
 	// Take the last 'overlap' paragraphs from current chunk
 	startIdx := len(currentIndices) - overlap
 	if startIdx < 0 {
 		startIdx = 0
 	}
-	
+
 	var overlapParagraphs []string
 	for i := startIdx; i < len(currentIndices); i++ {
 		paragraphIdx := currentIndices[i]
@@ -299,7 +299,7 @@ func (pc *ParagraphChunker) getOverlapParagraphs(currentIndices []int, paragraph
 			overlapParagraphs = append(overlapParagraphs, paragraphs[paragraphIdx])
 		}
 	}
-	
+
 	return overlapParagraphs
 }
 
@@ -342,7 +342,7 @@ func (fc *FixedChunker) ChunkText(text string, maxTokens int) ([]domain.TextChun
 	var chunks []domain.TextChunk
 	chunkIndex := 0
 	overlapWords := 0
-	
+
 	if fc.overlap > 0 {
 		// Calculate overlap in words (approximate)
 		totalTokens := fc.tokenManager.CountTokensInString(text)
@@ -354,7 +354,7 @@ func (fc *FixedChunker) ChunkText(text string, maxTokens int) ([]domain.TextChun
 		var chunkWords []string
 		var currentTokens int
 		startWordIndex := i
-		
+
 		// Add overlap from previous chunk
 		if chunkIndex > 0 && overlapWords > 0 {
 			overlapStart := i - overlapWords
@@ -365,27 +365,27 @@ func (fc *FixedChunker) ChunkText(text string, maxTokens int) ([]domain.TextChun
 				chunkWords = append(chunkWords, words[j])
 			}
 		}
-		
+
 		// Add words until we reach maxTokens
 		for i < len(words) {
 			testChunk := append(chunkWords, words[i])
 			testText := strings.Join(testChunk, " ")
 			testTokens := fc.tokenManager.CountTokensInString(testText)
-			
+
 			if testTokens > maxTokens && len(chunkWords) > 0 {
 				// Don't add this word, chunk is full
 				break
 			}
-			
+
 			chunkWords = append(chunkWords, words[i])
 			currentTokens = testTokens
 			i++
 		}
-		
+
 		// Create chunk
 		if len(chunkWords) > 0 {
 			chunkText := strings.Join(chunkWords, " ")
-			
+
 			// Calculate positions (approximate)
 			startPos := 0
 			if startWordIndex > 0 {
@@ -393,7 +393,7 @@ func (fc *FixedChunker) ChunkText(text string, maxTokens int) ([]domain.TextChun
 				startPos = len(beforeText) + 1 // +1 for space
 			}
 			endPos := startPos + len(chunkText)
-			
+
 			chunk := domain.TextChunk{
 				Text:       chunkText,
 				Index:      chunkIndex,
@@ -404,7 +404,7 @@ func (fc *FixedChunker) ChunkText(text string, maxTokens int) ([]domain.TextChun
 			chunks = append(chunks, chunk)
 			chunkIndex++
 		}
-		
+
 		// If we haven't moved forward, advance by one word to avoid infinite loop
 		if i == startWordIndex {
 			i++
@@ -434,9 +434,15 @@ type ChunkingManager struct {
 func NewChunkingManager() *ChunkingManager {
 	return &ChunkingManager{
 		strategies: map[domain.ChunkingType]func(*tokens.TokenManager, int) domain.ChunkingStrategy{
-			domain.ChunkingSentence:  func(tm *tokens.TokenManager, overlap int) domain.ChunkingStrategy { return NewSentenceChunker(tm, overlap) },
-			domain.ChunkingParagraph: func(tm *tokens.TokenManager, overlap int) domain.ChunkingStrategy { return NewParagraphChunker(tm, overlap) },
-			domain.ChunkingFixed:     func(tm *tokens.TokenManager, overlap int) domain.ChunkingStrategy { return NewFixedChunker(tm, overlap) },
+			domain.ChunkingSentence: func(tm *tokens.TokenManager, overlap int) domain.ChunkingStrategy {
+				return NewSentenceChunker(tm, overlap)
+			},
+			domain.ChunkingParagraph: func(tm *tokens.TokenManager, overlap int) domain.ChunkingStrategy {
+				return NewParagraphChunker(tm, overlap)
+			},
+			domain.ChunkingFixed: func(tm *tokens.TokenManager, overlap int) domain.ChunkingStrategy {
+				return NewFixedChunker(tm, overlap)
+			},
 		},
 	}
 }
@@ -447,7 +453,7 @@ func (cm *ChunkingManager) GetStrategy(strategyType domain.ChunkingType, tokenMa
 	if !exists {
 		return nil, fmt.Errorf("unsupported chunking strategy: %s", strategyType)
 	}
-	
+
 	return factory(tokenManager, overlap), nil
 }
 
@@ -467,11 +473,11 @@ func (cm *ChunkingManager) GetStrategyDescription(strategyType domain.ChunkingTy
 	if err != nil {
 		return "Description unavailable"
 	}
-	
+
 	strategy, err := cm.GetStrategy(strategyType, dummyTokenManager, 0)
 	if err != nil {
 		return "Description unavailable"
 	}
-	
+
 	return strategy.GetDescription()
 }

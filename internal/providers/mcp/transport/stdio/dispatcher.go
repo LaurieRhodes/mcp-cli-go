@@ -2,7 +2,7 @@ package stdio
 
 import (
 	"sync"
-	
+
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages"
 )
@@ -28,12 +28,12 @@ func NewResponseDispatcher(client *StdioClient) *ResponseDispatcher {
 func (d *ResponseDispatcher) Start() {
 	d.startMutex.Lock()
 	defer d.startMutex.Unlock()
-	
+
 	if d.started {
 		return // Already started
 	}
 	d.started = true
-	
+
 	go d.dispatch()
 }
 
@@ -43,11 +43,11 @@ func (d *ResponseDispatcher) dispatch() {
 	for msg := range d.client.Read() {
 		msgID := msg.ID.String()
 		logging.Debug("Dispatcher received message ID: %s", msgID)
-		
+
 		d.pendingMutex.RLock()
 		ch, exists := d.pending[msgID]
 		d.pendingMutex.RUnlock()
-		
+
 		if exists {
 			logging.Debug("Routing response to waiting request: %s", msgID)
 			select {
@@ -56,7 +56,7 @@ func (d *ResponseDispatcher) dispatch() {
 			default:
 				logging.Warn("Failed to send response to channel (full or closed): %s", msgID)
 			}
-			
+
 			// Clean up
 			d.pendingMutex.Lock()
 			delete(d.pending, msgID)
@@ -71,11 +71,11 @@ func (d *ResponseDispatcher) dispatch() {
 // RegisterRequest registers a request ID and returns a channel for the response
 func (d *ResponseDispatcher) RegisterRequest(requestID string) chan *messages.JSONRPCMessage {
 	responseCh := make(chan *messages.JSONRPCMessage, 1)
-	
+
 	d.pendingMutex.Lock()
 	d.pending[requestID] = responseCh
 	d.pendingMutex.Unlock()
-	
+
 	logging.Debug("Registered request ID: %s", requestID)
 	return responseCh
 }
@@ -85,7 +85,7 @@ func (d *ResponseDispatcher) UnregisterRequest(requestID string) {
 	d.pendingMutex.Lock()
 	delete(d.pending, requestID)
 	d.pendingMutex.Unlock()
-	
+
 	logging.Debug("Unregistered request ID: %s", requestID)
 }
 

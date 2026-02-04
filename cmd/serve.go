@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	
+
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/runas"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
@@ -71,33 +71,33 @@ Claude Desktop Configuration:
 		if len(args) > 0 {
 			runasConfigPath = args[0]
 		}
-		
+
 		if runasConfigPath == "" {
 			return fmt.Errorf("runas config file is required")
 		}
-		
+
 		// Set logging to ERROR by default for clean MCP protocol
 		if !verbose {
 			logging.SetDefaultLevel(logging.ERROR)
 		}
-		
+
 		logging.Info("Starting MCP server mode with config: %s", runasConfigPath)
-		
+
 		// Load runas config
 		runasLoader := runas.NewLoader()
 		runasConfig, created, err := runasLoader.LoadOrDefault(runasConfigPath)
 		if err != nil {
 			return fmt.Errorf("failed to load runas config: %w", err)
 		}
-		
+
 		if created {
 			fmt.Fprintf(os.Stderr, "Created example runas config at: %s\n", runasConfigPath)
 			fmt.Fprintf(os.Stderr, "Please edit the file to configure your MCP server.\n")
 			return nil
 		}
-		
+
 		logging.Info("Loaded runas config: %s", runasConfig.ServerInfo.Name)
-		
+
 		// Determine config file location - always relative to the binary
 		actualConfigFile := configFile
 		if actualConfigFile == "config.yaml" {
@@ -110,7 +110,7 @@ Claude Desktop Configuration:
 			actualConfigFile = filepath.Join(exeDir, "config.yaml")
 			logging.Info("Using config file: %s", actualConfigFile)
 		}
-		
+
 		// CRITICAL: Change working directory to config file's directory
 		// This ensures relative paths in config.yaml (like "config/workflows/**/*.yaml")
 		// are resolved correctly regardless of where Claude Desktop starts the process
@@ -120,47 +120,47 @@ Claude Desktop Configuration:
 			return fmt.Errorf("failed to change to config directory %s: %w", configDir, err)
 		}
 		logging.Info("Changed working directory to: %s (was: %s)", configDir, originalWd)
-		
+
 		// Load application config
 		configService := infraConfig.NewService()
 		appConfig, err := configService.LoadConfig(actualConfigFile)
 		if err != nil {
 			return fmt.Errorf("failed to load application config from %s: %w", actualConfigFile, err)
 		}
-		
+
 		logging.Info("Loaded %d workflows from config", len(appConfig.Workflows))
-		
+
 		// === Process templates array (convert to tools) ===
 		// For MCP types using the new templates config_source pattern
 		if len(runasConfig.Templates) > 0 {
 			logging.Info("Processing %d template source(s)...", len(runasConfig.Templates))
-			
+
 			for _, templateSrc := range runasConfig.Templates {
 				// Extract template name from config_source path
 				basename := filepath.Base(templateSrc.ConfigSource)
 				templateName := strings.TrimSuffix(basename, filepath.Ext(basename))
-				
+
 				// Verify template exists
 				_, existsV1 := appConfig.Workflows[templateName]
 				templateV2, existsV2 := appConfig.Workflows[templateName]
-				
+
 				if !existsV1 && !existsV2 {
-					return fmt.Errorf("template source '%s' points to unknown template: %s", 
+					return fmt.Errorf("template source '%s' points to unknown template: %s",
 						templateSrc.ConfigSource, templateName)
 				}
-				
+
 				// Use custom name if provided, otherwise use template name
 				toolName := templateSrc.Name
 				if toolName == "" {
 					toolName = templateName
 				}
-				
+
 				// Use custom description if provided, otherwise derive from template
 				toolDescription := templateSrc.Description
 				if toolDescription == "" && existsV2 {
 					toolDescription = templateV2.Description
 				}
-				
+
 				// Standard input schema for all templates
 				// Templates receive input_data as their primary parameter
 				inputSchema := map[string]interface{}{
@@ -173,7 +173,7 @@ Claude Desktop Configuration:
 					},
 					"required": []string{"input_data"},
 				}
-				
+
 				// Create ToolExposure from template source
 				tool := runas.ToolExposure{
 					Template:    templateName,
@@ -184,17 +184,17 @@ Claude Desktop Configuration:
 						"input_data": "{{input_data}}",
 					},
 				}
-				
+
 				// Add to tools array
 				runasConfig.Tools = append(runasConfig.Tools, tool)
-				logging.Info("Created tool '%s' from template '%s' (source: %s)", 
+				logging.Info("Created tool '%s' from template '%s' (source: %s)",
 					toolName, templateName, templateSrc.ConfigSource)
 			}
-			
-			logging.Info("Processed %d template(s) into %d total tool(s)", 
+
+			logging.Info("Processed %d template(s) into %d total tool(s)",
 				len(runasConfig.Templates), len(runasConfig.Tools))
 		}
-		
+
 		// CRITICAL FIX: Initialize skills service using the same helper as chat/query
 		// This ensures skills are actually loaded and available for workflow execution
 		skillService, err := infraSkills.InitializeBuiltinSkills(configFile, appConfig)
@@ -205,11 +205,11 @@ Claude Desktop Configuration:
 		// === Handle mcp-skills type: Auto-discover and generate tools ===
 		if runasConfig.RunAsType == runas.RunAsTypeMCPSkills || runasConfig.RunAsType == runas.RunAsTypeProxySkills {
 			logging.Info("Auto-discovering skills for mcp-skills server type")
-			
+
 			logging.Info("Generating MCP tools from already-initialized skills")
 			// Get list of discovered skills
 			discoveredSkills := skillService.ListSkills()
-			
+
 			// Override with command-line flag if provided
 			if skillNames != "" {
 				// Parse comma-separated skill names
@@ -217,17 +217,17 @@ Claude Desktop Configuration:
 				for i := range requestedSkills {
 					requestedSkills[i] = strings.TrimSpace(requestedSkills[i])
 				}
-				
+
 				// Create temporary SkillsConfig to override
 				if runasConfig.SkillsConfig == nil {
 					runasConfig.SkillsConfig = &runas.SkillsConfig{}
 				}
 				runasConfig.SkillsConfig.IncludeSkills = requestedSkills
 				runasConfig.SkillsConfig.ExcludeSkills = nil // Clear excludes when using explicit include
-				
+
 				logging.Info("Using skills from command-line flag: %v", requestedSkills)
 			}
-			
+
 			// Filter skills based on include/exclude lists
 			var filteredSkills []string
 			for _, skillName := range discoveredSkills {
@@ -237,19 +237,19 @@ Claude Desktop Configuration:
 					logging.Info("Excluding skill: %s", skillName)
 				}
 			}
-			
+
 			logging.Info("Exposing %d skills as MCP tools", len(filteredSkills))
-			
+
 			// Generate MCP tools from skills
 			// For each skill, create a tool with load_skill template
 			runasConfig.Tools = make([]runas.ToolExposure, 0, len(filteredSkills)+1)
-			
+
 			for _, skillName := range filteredSkills {
 				skill, exists := skillService.GetSkill(skillName)
 				if !exists {
 					continue
 				}
-				
+
 				// Create tool for this skill
 				tool := runas.ToolExposure{
 					Name:        skill.GetMCPToolName(),
@@ -260,11 +260,11 @@ Claude Desktop Configuration:
 						"skill_name": skillName,
 					},
 				}
-				
+
 				runasConfig.Tools = append(runasConfig.Tools, tool)
 				logging.Info("Created tool '%s' for skill '%s'", tool.Name, skillName)
 			}
-			
+
 			// Add execute_skill_code tool for dynamic code execution
 			executeCodeTool := runas.ToolExposure{
 				Name: "execute_skill_code",
@@ -299,25 +299,25 @@ Claude Desktop Configuration:
 					"required": []string{"skill_name", "code"},
 				},
 			}
-			
+
 			runasConfig.Tools = append(runasConfig.Tools, executeCodeTool)
-			
+
 			logging.Info("Generated %d MCP tools from skills (including execute_skill_code)", len(runasConfig.Tools))
 		}
-		
+
 		// Validate templates exist (skip for special skill templates)
 		for i, tool := range runasConfig.Tools {
 			// Skip validation for special skill-related templates
 			if tool.Template == "load_skill" || tool.Template == "execute_skill_code" {
 				continue
 			}
-			
+
 			logging.Debug("Checking tool %d: name=%s, template=%s", i, tool.Name, tool.Template)
 			logging.Debug("Total workflows loaded: %d", len(appConfig.Workflows))
-			
+
 			_, existsV1 := appConfig.Workflows[tool.Template]
 			_, existsV2 := appConfig.Workflows[tool.Template]
-			
+
 			if !existsV1 && !existsV2 {
 				// Debug: Show some workflow keys
 				logging.Error("Template '%s' not found. Loaded workflows:", tool.Template)
@@ -328,17 +328,17 @@ Claude Desktop Configuration:
 						count++
 					}
 				}
-				return fmt.Errorf("tool %d (%s) references unknown template: %s", 
+				return fmt.Errorf("tool %d (%s) references unknown template: %s",
 					i, tool.Name, tool.Template)
 			}
 		}
-		
+
 		// Check runas type and start appropriate server
 		if runasConfig.RunAsType == runas.RunAsTypeProxy || runasConfig.RunAsType == runas.RunAsTypeProxySkills {
 			// Start HTTP proxy server
 			return startProxyServer(runasConfig, appConfig, configService, skillService)
 		}
-		
+
 		// Default: Start stdio MCP server
 		return startStdioServer(runasConfig, appConfig, configService, skillService)
 	},
@@ -347,15 +347,15 @@ Claude Desktop Configuration:
 // startProxyServer starts an HTTP proxy server
 func startProxyServer(runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, configService *infraConfig.Service, skillService *skillsvc.Service) error {
 	logging.Info("Starting HTTP proxy server on port %d", runasConfig.ProxyConfig.Port)
-	
+
 	// Create proxy server
 	proxyServer := proxy.NewProxyServer(runasConfig, appConfig)
-	
+
 	// Start proxy server (blocks until shutdown)
 	if err := proxyServer.Start(); err != nil {
 		return fmt.Errorf("proxy server error: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -366,62 +366,62 @@ func startStdioServer(runasConfig *runas.RunAsConfig, appConfig *config.Applicat
 	if socketPath != "" {
 		logging.Info("Detected MCP_SOCKET_PATH environment variable: %s", socketPath)
 		logging.Info("Starting dual-mode server: stdio + Unix socket")
-		
+
 		// Start Unix socket server in background
 		go startUnixSocketServer(socketPath, runasConfig, appConfig, configService, skillService)
-		
+
 		// Continue with stdio server in foreground (for Claude Desktop)
 		logging.Info("Starting stdio server (for Claude Desktop)")
 	} else {
 		logging.Info("Starting MCP server in stdio-only mode")
 	}
-	
+
 	// Create task manager
 	// Default TTL: 30 minutes, Max TTL: 2 hours, Poll interval: 5 seconds
 	taskManager := tasks.NewManager(30*time.Minute, 2*time.Hour, 5000)
 	defer taskManager.Close()
 	logging.Info("Task manager initialized (default TTL: 30m, max TTL: 2h, poll: 5s)")
-	
+
 	// Create server service
 	service := serverService.NewService(runasConfig, appConfig, configService, skillService)
 	service.SetTaskManager(taskManager)
-	
+
 	// Create stdio server
 	stdioServer := server.NewStdioServer(service)
-	
+
 	// Wire up progress notifier so service can send progress updates
 	service.SetProgressNotifier(stdioServer)
-	
+
 	// Start server
 	logging.Info("MCP server starting...")
 	if err := stdioServer.Start(); err != nil {
 		return fmt.Errorf("server error: %w", err)
 	}
-	
+
 	return nil
 }
 
 // startUnixSocketServer starts a Unix socket MCP server
 func startUnixSocketServer(socketPath string, runasConfig *runas.RunAsConfig, appConfig *config.ApplicationConfig, configService *infraConfig.Service, skillService *skillsvc.Service) error {
 	logging.Info("Starting Unix socket MCP server on: %s", socketPath)
-	
+
 	// Create task manager
 	taskManager := tasks.NewManager(30*time.Minute, 2*time.Hour, 5000)
 	defer taskManager.Close()
-	
+
 	// Create server service (separate instance for socket connections)
 	service := serverService.NewService(runasConfig, appConfig, configService, skillService)
 	service.SetTaskManager(taskManager)
-	
+
 	// Create Unix socket server
 	socketServer := server.NewUnixSocketServer(service, socketPath)
-	
+
 	// Start server (blocks until shutdown)
 	if err := socketServer.Start(); err != nil {
 		logging.Error("Unix socket server error: %v", err)
 		return fmt.Errorf("Unix socket server error: %w", err)
 	}
-	
+
 	return nil
 }
 

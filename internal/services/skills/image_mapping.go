@@ -48,7 +48,7 @@ func LoadSkillImageMapping(path string) (*SkillImageMapping, error) {
 		// Return default mapping if file doesn't exist
 		return &SkillImageMapping{
 			Defaults: SkillDefaults{
-				Image:       "python:3.11-slim",
+				Image:       "python:3.11-alpine",
 				NetworkMode: "none",
 				Memory:      "256MB",
 				CPU:         "0.5",
@@ -73,7 +73,7 @@ func LoadSkillImageMapping(path string) (*SkillImageMapping, error) {
 
 	// Set defaults if not specified
 	if mapping.Defaults.Image == "" {
-		mapping.Defaults.Image = "python:3.11-slim"
+		mapping.Defaults.Image = "python:3.11-alpine"
 	}
 	if mapping.Defaults.Language == "" {
 		mapping.Defaults.Language = "python"
@@ -114,10 +114,10 @@ func (m *SkillImageMapping) GetImageForSkill(skillName string) string {
 func LoadSkillImageMappingFromSkillsDir(configFilePath string) (*SkillImageMapping, error) {
 	// Get directory of config file
 	configDir := filepath.Dir(configFilePath)
-	
+
 	// Look for skill-images.yaml in config/skills/
 	mappingPath := filepath.Join(configDir, "skills", "skill-images.yaml")
-	
+
 	return LoadSkillImageMapping(mappingPath)
 }
 

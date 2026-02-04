@@ -25,23 +25,23 @@ type bedrockClaudeMessage struct {
 }
 
 type bedrockClaudeRequest struct {
-	AnthropicVersion string                  `json:"anthropic_version"`
-	MaxTokens        int                     `json:"max_tokens"`
-	Messages         []bedrockClaudeMessage  `json:"messages"`
-	Temperature      float64                 `json:"temperature,omitempty"`
-	TopP             float64                 `json:"top_p,omitempty"`
-	System           string                  `json:"system,omitempty"`
+	AnthropicVersion string                 `json:"anthropic_version"`
+	MaxTokens        int                    `json:"max_tokens"`
+	Messages         []bedrockClaudeMessage `json:"messages"`
+	Temperature      float64                `json:"temperature,omitempty"`
+	TopP             float64                `json:"top_p,omitempty"`
+	System           string                 `json:"system,omitempty"`
 }
 
 type bedrockClaudeResponse struct {
-	ID           string                  `json:"id"`
-	Type         string                  `json:"type"`
-	Role         string                  `json:"role"`
-	Content      []bedrockClaudeContent  `json:"content"`
-	Model        string                  `json:"model"`
-	StopReason   string                  `json:"stop_reason"`
-	StopSequence string                  `json:"stop_sequence,omitempty"`
-	Usage        bedrockClaudeUsage      `json:"usage"`
+	ID           string                 `json:"id"`
+	Type         string                 `json:"type"`
+	Role         string                 `json:"role"`
+	Content      []bedrockClaudeContent `json:"content"`
+	Model        string                 `json:"model"`
+	StopReason   string                 `json:"stop_reason"`
+	StopSequence string                 `json:"stop_sequence,omitempty"`
+	Usage        bedrockClaudeUsage     `json:"usage"`
 }
 
 type bedrockClaudeContent struct {
@@ -74,8 +74,8 @@ type bedrockTitanEmbeddingRequest struct {
 }
 
 type bedrockTitanEmbeddingResponse struct {
-	Embedding            []float32 `json:"embedding"`
-	InputTextTokenCount  int       `json:"inputTextTokenCount"`
+	Embedding           []float32 `json:"embedding"`
+	InputTextTokenCount int       `json:"inputTextTokenCount"`
 }
 
 // AWS Bedrock Cohere embedding request/response
@@ -92,16 +92,16 @@ type bedrockCohereEmbeddingResponse struct {
 
 // AWSBedrockClient implements domain.LLMProvider for AWS Bedrock
 type AWSBedrockClient struct {
-	httpClient      *http.Client
-	region          string
-	accessKey       string
-	secretKey       string
-	sessionToken    string
-	model           string
-	providerType    domain.ProviderType
-	config          *config.ProviderConfig
-	timeout         time.Duration
-	maxRetries      int
+	httpClient   *http.Client
+	region       string
+	accessKey    string
+	secretKey    string
+	sessionToken string
+	model        string
+	providerType domain.ProviderType
+	config       *config.ProviderConfig
+	timeout      time.Duration
+	maxRetries   int
 }
 
 // NewAWSBedrockClient creates a new AWS Bedrock provider
@@ -127,7 +127,7 @@ func NewAWSBedrockClient(providerType domain.ProviderType, cfg *config.ProviderC
 	}
 
 	sessionToken := cfg.AWSSessionToken // Optional
-	
+
 	model := cfg.DefaultModel
 	if model == "" {
 		return nil, fmt.Errorf("model ID is required for Bedrock")
@@ -163,7 +163,7 @@ func NewAWSBedrockClient(providerType domain.ProviderType, cfg *config.ProviderC
 func (c *AWSBedrockClient) CreateCompletion(ctx context.Context, req *domain.CompletionRequest) (*domain.CompletionResponse, error) {
 	// Convert messages to Claude Messages API format
 	messages := c.convertToClaudeMessages(req.Messages)
-	
+
 	// Create Bedrock request (Claude Messages API format)
 	bedrockReq := bedrockClaudeRequest{
 		AnthropicVersion: "bedrock-2023-05-31",
@@ -171,7 +171,7 @@ func (c *AWSBedrockClient) CreateCompletion(ctx context.Context, req *domain.Com
 		Messages:         messages,
 		Temperature:      0.7,
 	}
-	
+
 	// Add system prompt if provided
 	if req.SystemPrompt != "" {
 		bedrockReq.System = req.SystemPrompt
@@ -183,7 +183,7 @@ func (c *AWSBedrockClient) CreateCompletion(ctx context.Context, req *domain.Com
 	}
 
 	endpoint := fmt.Sprintf("https://bedrock-runtime.%s.amazonaws.com/model/%s/invoke", c.region, c.model)
-	
+
 	var lastErr error
 	for retry := 0; retry <= c.maxRetries; retry++ {
 		if retry > 0 {
@@ -226,7 +226,7 @@ func (c *AWSBedrockClient) CreateCompletion(ctx context.Context, req *domain.Com
 			lastErr = fmt.Errorf("failed to parse response: %w", err)
 			continue
 		}
-		
+
 		// Extract text from content blocks
 		var responseText string
 		for _, content := range bedrockResp.Content {
@@ -248,14 +248,14 @@ func (c *AWSBedrockClient) CreateCompletion(ctx context.Context, req *domain.Com
 func (c *AWSBedrockClient) StreamCompletion(ctx context.Context, req *domain.CompletionRequest, writer io.Writer) (*domain.CompletionResponse, error) {
 	// Convert messages to Claude Messages API format
 	messages := c.convertToClaudeMessages(req.Messages)
-	
+
 	bedrockReq := bedrockClaudeRequest{
 		AnthropicVersion: "bedrock-2023-05-31",
 		MaxTokens:        2048,
 		Messages:         messages,
 		Temperature:      0.7,
 	}
-	
+
 	// Add system prompt if provided
 	if req.SystemPrompt != "" {
 		bedrockReq.System = req.SystemPrompt
@@ -268,7 +268,7 @@ func (c *AWSBedrockClient) StreamCompletion(ctx context.Context, req *domain.Com
 
 	// Streaming endpoint
 	endpoint := fmt.Sprintf("https://bedrock-runtime.%s.amazonaws.com/model/%s/invoke-with-response-stream", c.region, c.model)
-	
+
 	var lastErr error
 	for retry := 0; retry <= c.maxRetries; retry++ {
 		if retry > 0 {
@@ -362,19 +362,19 @@ func (c *AWSBedrockClient) CreateEmbeddings(ctx context.Context, req *domain.Emb
 		embeddingModel = c.config.DefaultModel
 		logging.Debug("Using default_model from config: %s", embeddingModel)
 	}
-	
+
 	// Fallback to Cohere if no default configured
 	if embeddingModel == "" {
 		embeddingModel = "cohere.embed-english-v3"
 		logging.Debug("No default model in config, using fallback: %s", embeddingModel)
 	}
-	
+
 	// Override with requested model if specified
 	if req.Model != "" {
 		embeddingModel = req.Model
 		logging.Debug("Using model from request: %s", embeddingModel)
 	}
-	
+
 	logging.Info("Creating embeddings with model: %s for %d inputs", embeddingModel, len(req.Input))
 
 	// Route to appropriate implementation based on model
@@ -383,7 +383,7 @@ func (c *AWSBedrockClient) CreateEmbeddings(ctx context.Context, req *domain.Emb
 	} else if strings.Contains(embeddingModel, "titan") {
 		return c.createTitanEmbeddings(ctx, req.Input, embeddingModel)
 	}
-	
+
 	return nil, fmt.Errorf("unsupported embedding model: %s", embeddingModel)
 }
 
@@ -458,7 +458,7 @@ func (c *AWSBedrockClient) createCohereEmbeddings(ctx context.Context, inputs []
 // createTitanEmbeddings creates embeddings using Titan models (single-input API)
 func (c *AWSBedrockClient) createTitanEmbeddings(ctx context.Context, inputs []string, model string) (*domain.EmbeddingResponse, error) {
 	var embeddings []domain.Embedding
-	
+
 	// Titan processes one input at a time
 	for i, text := range inputs {
 		titanReq := bedrockTitanEmbeddingRequest{
@@ -508,7 +508,7 @@ func (c *AWSBedrockClient) createTitanEmbeddings(ctx context.Context, inputs []s
 			Embedding: titanResp.Embedding,
 		})
 	}
-	
+
 	logging.Info("Successfully created %d Titan embeddings", len(embeddings))
 
 	return &domain.EmbeddingResponse{
@@ -532,7 +532,7 @@ func (c *AWSBedrockClient) GetSupportedEmbeddingModels() []string {
 		}
 		return models
 	}
-	
+
 	// Fallback to default models with correct IDs
 	return []string{
 		"cohere.embed-english-v3",
@@ -550,7 +550,7 @@ func (c *AWSBedrockClient) GetMaxEmbeddingTokens(model string) int {
 			return modelConfig.MaxTokens
 		}
 	}
-	
+
 	// Fallback defaults by model type
 	switch {
 	case strings.Contains(model, "titan"):
@@ -594,19 +594,19 @@ func (c *AWSBedrockClient) Close() error {
 // convertToClaudeMessages converts domain messages to Claude Messages API format
 func (c *AWSBedrockClient) convertToClaudeMessages(messages []domain.Message) []bedrockClaudeMessage {
 	var claudeMessages []bedrockClaudeMessage
-	
+
 	for _, msg := range messages {
 		// Skip system messages (they go in the system field)
 		if msg.Role == "system" {
 			continue
 		}
-		
+
 		claudeMessages = append(claudeMessages, bedrockClaudeMessage{
 			Role:    msg.Role,
 			Content: msg.Content,
 		})
 	}
-	
+
 	return claudeMessages
 }
 
@@ -615,51 +615,51 @@ func (c *AWSBedrockClient) signRequest(req *http.Request, payload []byte) error 
 	now := time.Now().UTC()
 	dateStamp := now.Format("20060102")
 	amzDate := now.Format("20060102T150405Z")
-	
+
 	service := "bedrock"
-	
+
 	// Set required headers BEFORE using them
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Amz-Date", amzDate)
-	
+
 	// Include session token if present
 	if c.sessionToken != "" {
 		req.Header.Set("X-Amz-Security-Token", c.sessionToken)
 	}
-	
+
 	// Build canonical headers and signed headers list (must be in alphabetical order)
 	var canonicalHeadersList []string
 	var signedHeadersList []string
-	
+
 	canonicalHeadersList = append(canonicalHeadersList, fmt.Sprintf("content-type:%s", req.Header.Get("Content-Type")))
 	signedHeadersList = append(signedHeadersList, "content-type")
-	
+
 	canonicalHeadersList = append(canonicalHeadersList, fmt.Sprintf("host:%s", req.Host))
 	signedHeadersList = append(signedHeadersList, "host")
-	
+
 	canonicalHeadersList = append(canonicalHeadersList, fmt.Sprintf("x-amz-date:%s", amzDate))
 	signedHeadersList = append(signedHeadersList, "x-amz-date")
-	
+
 	// Include session token in canonical headers if present (alphabetically after x-amz-date)
 	if c.sessionToken != "" {
 		canonicalHeadersList = append(canonicalHeadersList, fmt.Sprintf("x-amz-security-token:%s", c.sessionToken))
 		signedHeadersList = append(signedHeadersList, "x-amz-security-token")
 	}
-	
+
 	// Join canonical headers WITHOUT trailing newline (we'll add it in the canonical request)
 	canonicalHeaders := strings.Join(canonicalHeadersList, "\n")
 	signedHeaders := strings.Join(signedHeadersList, ";")
-	
+
 	// Create canonical request components
 	// AWS SigV4 requires RFC 3986 URI encoding (which encodes colons)
 	canonicalURI := c.uriEncode(req.URL.Path)
-	canonicalQueryString := ""  // Empty for this request
+	canonicalQueryString := "" // Empty for this request
 	if req.URL.RawQuery != "" {
 		canonicalQueryString = req.URL.RawQuery
 	}
-	
+
 	payloadHash := hashSHA256(payload)
-	
+
 	// Build canonical request with exact format AWS expects
 	// Format: METHOD\nURI\nQUERY_STRING\nHEADERS\n\nSIGNED_HEADERS\nPAYLOAD_HASH
 	canonicalRequest := req.Method + "\n" +
@@ -669,34 +669,34 @@ func (c *AWSBedrockClient) signRequest(req *http.Request, payload []byte) error 
 		"\n" +
 		signedHeaders + "\n" +
 		payloadHash
-	
+
 	// Debug log the canonical request
 	logging.Debug("Canonical Request:\n%s", canonicalRequest)
 	logging.Debug("Canonical Request Hash: %s", hashSHA256([]byte(canonicalRequest)))
-	
+
 	// Create string to sign
 	credentialScope := fmt.Sprintf("%s/%s/%s/aws4_request", dateStamp, c.region, service)
 	stringToSign := fmt.Sprintf("AWS4-HMAC-SHA256\n%s\n%s\n%s",
 		amzDate,
 		credentialScope,
 		hashSHA256([]byte(canonicalRequest)))
-	
+
 	logging.Debug("String to Sign:\n%s", stringToSign)
-	
+
 	// Calculate signature
 	signature := c.calculateSignature(dateStamp, service, stringToSign)
-	
+
 	logging.Debug("Signature: %s", signature)
-	
+
 	// Add authorization header
 	authorization := fmt.Sprintf("AWS4-HMAC-SHA256 Credential=%s/%s, SignedHeaders=%s, Signature=%s",
 		c.accessKey,
 		credentialScope,
 		signedHeaders,
 		signature)
-	
+
 	req.Header.Set("Authorization", authorization)
-	
+
 	return nil
 }
 

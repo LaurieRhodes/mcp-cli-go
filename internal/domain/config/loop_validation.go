@@ -23,13 +23,13 @@ type LoopExecutionResult struct {
 	Failed      int
 	Skipped     int
 	FailedItems []int // Indices of failed items
-	
+
 	// Timing
 	Duration time.Duration
-	
+
 	// Success determination
 	Success bool // Based on min_success_rate or completion
-	
+
 	// Legacy fields (for backward compatibility)
 	Iterations  int
 	FinalOutput string
@@ -52,12 +52,12 @@ func (l *LoopV2) Validate() error {
 	if l.Mode == "" {
 		l.Mode = "refine"
 	}
-	
+
 	// Validate mode
 	if l.Mode != "iterate" && l.Mode != "refine" {
 		return fmt.Errorf("loop mode must be 'iterate' or 'refine', got '%s'", l.Mode)
 	}
-	
+
 	// Mode-specific requirements
 	if l.Mode == "iterate" {
 		if l.Items == "" {
@@ -68,32 +68,32 @@ func (l *LoopV2) Validate() error {
 			return fmt.Errorf("refine mode requires 'until' condition")
 		}
 	}
-	
+
 	// Workflow is required
 	if l.Workflow == "" {
 		return fmt.Errorf("workflow field is required")
 	}
-	
+
 	// Max iterations must be positive
 	if l.MaxIterations < 1 {
 		l.MaxIterations = 100 // Default
 	}
-	
+
 	// Validate success rate bounds
 	if l.MinSuccessRate < 0 || l.MinSuccessRate > 1 {
 		return fmt.Errorf("min_success_rate must be between 0.0 and 1.0, got %f", l.MinSuccessRate)
 	}
-	
+
 	// Retry configuration validation
 	if l.OnFailure == "retry" && l.MaxRetries < 1 {
 		return fmt.Errorf("retry mode requires max_retries >= 1")
 	}
-	
+
 	// Validate on_failure values
 	if l.OnFailure != "" && l.OnFailure != "halt" && l.OnFailure != "continue" && l.OnFailure != "retry" {
 		return fmt.Errorf("on_failure must be 'halt', 'continue', or 'retry', got '%s'", l.OnFailure)
 	}
-	
+
 	return nil
 }
 
@@ -103,12 +103,12 @@ func (l *LoopMode) Validate() error {
 	if l.Mode == "" {
 		l.Mode = "refine"
 	}
-	
+
 	// Validate mode
 	if l.Mode != "iterate" && l.Mode != "refine" {
 		return fmt.Errorf("loop mode must be 'iterate' or 'refine', got '%s'", l.Mode)
 	}
-	
+
 	// Mode-specific requirements
 	if l.Mode == "iterate" {
 		if l.Items == "" {
@@ -119,31 +119,31 @@ func (l *LoopMode) Validate() error {
 			return fmt.Errorf("refine mode requires 'until' condition")
 		}
 	}
-	
+
 	// Workflow is required
 	if l.Workflow == "" {
 		return fmt.Errorf("workflow field is required")
 	}
-	
+
 	// Max iterations must be positive
 	if l.MaxIterations < 1 {
 		l.MaxIterations = 100 // Default
 	}
-	
+
 	// Validate success rate bounds
 	if l.MinSuccessRate < 0 || l.MinSuccessRate > 1 {
 		return fmt.Errorf("min_success_rate must be between 0.0 and 1.0, got %f", l.MinSuccessRate)
 	}
-	
+
 	// Retry configuration validation
 	if l.OnFailure == "retry" && l.MaxRetries < 1 {
 		return fmt.Errorf("retry mode requires max_retries >= 1")
 	}
-	
+
 	// Validate on_failure values
 	if l.OnFailure != "" && l.OnFailure != "halt" && l.OnFailure != "continue" && l.OnFailure != "retry" {
 		return fmt.Errorf("on_failure must be 'halt', 'continue', or 'retry', got '%s'", l.OnFailure)
 	}
-	
+
 	return nil
 }

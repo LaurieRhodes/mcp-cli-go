@@ -29,8 +29,8 @@ type Orchestrator struct {
 	loopExecutor     *LoopExecutor
 	embeddingService domain.EmbeddingService
 	ragServerManager *host.ServerManager // Dedicated manager for RAG servers (internal, not exposed to LLM)
-	startFrom        string // Step name to start workflow from (skips previous steps)
-	endAt            string // Step name to end workflow at (skips steps after)
+	startFrom        string              // Step name to start workflow from (skips previous steps)
+	endAt            string              // Step name to end workflow at (skips steps after)
 }
 
 // NewOrchestrator creates a new workflow orchestrator
@@ -65,7 +65,7 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	if err := ValidateWorkflow(o.workflow); err != nil {
 		return fmt.Errorf("workflow validation failed:\n%w", err)
 	}
-	
+
 	// Set initial input
 	o.interpolator.Set("input", input)
 
@@ -73,7 +73,7 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	if o.startFrom != "" {
 		o.logger.Info("Resuming from step: %s", o.startFrom)
 	}
-	
+
 	// Log end-at if specified
 	if o.endAt != "" {
 		o.logger.Info("Ending at step: %s", o.endAt)
@@ -88,7 +88,7 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 		if maxWorkers <= 0 {
 			maxWorkers = 3 // Default
 		}
-		o.logger.Info("Parallel execution enabled (max_workers: %d, policy: %s)", 
+		o.logger.Info("Parallel execution enabled (max_workers: %d, policy: %s)",
 			maxWorkers, o.getErrorPolicy())
 	}
 
@@ -96,7 +96,7 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	if err := o.connectRAGServersIfNeeded(ctx); err != nil {
 		return fmt.Errorf("failed to connect RAG servers: %w", err)
 	}
-	
+
 	// Ensure RAG server connections are cleaned up
 	if o.ragServerManager != nil {
 		defer func() {
@@ -121,7 +121,7 @@ func (o *Orchestrator) Execute(ctx context.Context, input string) error {
 	if o.workflow.Execution.Parallel {
 		return o.executeParallel(ctx)
 	}
-	
+
 	return o.executeSequential(ctx)
 }
 
@@ -149,16 +149,16 @@ func (o *Orchestrator) executeSequential(ctx context.Context) error {
 	stepsRemaining := make(map[string]*config.StepV2)
 	for i := range o.workflow.Steps {
 		step := &o.workflow.Steps[i]
-		
+
 		// Skip steps that were marked completed
 		if completed[step.Name] {
 			o.logger.Debug("Skipping step: %s", step.Name)
 			continue
 		}
-		
+
 		stepsRemaining[step.Name] = step
 	}
-	
+
 	loopsRemaining := make(map[string]*config.LoopV2)
 	for i := range o.workflow.Loops {
 		loopsRemaining[o.workflow.Loops[i].Name] = &o.workflow.Loops[i]
@@ -166,15 +166,15 @@ func (o *Orchestrator) executeSequential(ctx context.Context) error {
 
 	maxIterations := 100
 	iteration := 0
-	
+
 	for len(stepsRemaining) > 0 || len(loopsRemaining) > 0 {
 		iteration++
 		if iteration > maxIterations {
 			return fmt.Errorf("dependency resolution exceeded max iterations (possible circular dependency)")
 		}
-		
+
 		progressMade := false
-		
+
 		// Try to execute steps whose dependencies are met
 		for name, step := range stepsRemaining {
 			if o.checkDependencies(step, completed) == nil {
@@ -187,7 +187,7 @@ func (o *Orchestrator) executeSequential(ctx context.Context) error {
 				progressMade = true
 			}
 		}
-		
+
 		// Try to execute loops (loops have no dependencies - they just run)
 		// Loops can be referenced by steps via needs: [loop_name]
 		for name, loop := range loopsRemaining {
@@ -200,7 +200,7 @@ func (o *Orchestrator) executeSequential(ctx context.Context) error {
 			progressMade = true
 			break // Execute one loop at a time, then re-check steps
 		}
-		
+
 		// If no progress was made, we have a deadlock
 		if !progressMade {
 			var pending []string
@@ -242,7 +242,7 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 
 	// Create dependency resolver
 	resolver := NewDependencyResolver(stepPtrs)
-	
+
 	// Validate dependencies
 	if err := resolver.ValidateDependenciesExist(); err != nil {
 		return fmt.Errorf("dependency validation failed: %w", err)
@@ -258,13 +258,13 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 		o,
 	)
 	pool.SetCancelFunc(cancel)
-	
+
 	// Start timeline tracking
 	pool.timeline.Start()
 
 	// Track completion
 	completed := make(map[string]bool)
-	
+
 	// Pre-mark steps as completed if using start-from or end-at
 	if o.startFrom != "" || o.endAt != "" {
 		if err := o.markStepsAsCompleted(completed); err != nil {
@@ -274,7 +274,7 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 
 	// Get initial ready steps (no dependencies)
 	readySteps := resolver.GetReadySteps(completed)
-	
+
 	o.logger.Debug("Initial ready steps: %d", len(readySteps))
 	for _, step := range readySteps {
 		o.logger.Debug("  - %s", step.Name)
@@ -296,13 +296,13 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 			stepsRemaining[step.Name] = step
 		}
 	}
-	
+
 	// Loops can run independently - submit them all at once
 	loopsRemaining := make(map[string]*config.LoopV2)
 	for i := range o.workflow.Loops {
 		loop := &o.workflow.Loops[i]
 		loopsRemaining[loop.Name] = loop
-		
+
 		// Submit loop immediately (loops have no dependencies)
 		o.logger.Debug("Submitting loop: %s", loop.Name)
 		if err := pool.SubmitLoop(ctx, loop); err != nil {
@@ -319,38 +319,38 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 		case completedName := <-pool.notifyCompletion:
 			// Step or loop completed
 			o.logger.Debug("Element completed: %s", completedName)
-			
+
 			// Check for error
 			if err, hasError := pool.GetError(completedName); hasError {
 				o.logger.Error("Element %s failed: %v", completedName, err)
-				
+
 				// Wait for in-flight elements based on error policy
 				pool.Wait()
-				
+
 				// Copy results to orchestrator
 				o.copyPoolResults(pool)
-				
+
 				return fmt.Errorf("element %s failed: %w", completedName, err)
 			}
-			
+
 			// Mark as completed
 			completed[completedName] = true
-			
+
 			// Remove from remaining (could be step or loop)
 			delete(stepsRemaining, completedName)
 			delete(loopsRemaining, completedName)
 			totalRemaining = len(stepsRemaining) + len(loopsRemaining)
-			
+
 			// Find newly ready steps
 			newReadySteps := resolver.GetReadySteps(completed)
-			
+
 			if len(newReadySteps) > 0 {
 				o.logger.Debug("New ready steps: %d", len(newReadySteps))
 				for _, step := range newReadySteps {
 					o.logger.Debug("  - %s", step.Name)
 				}
 			}
-			
+
 			// Submit newly ready steps
 			for _, step := range newReadySteps {
 				if err := pool.SubmitStep(ctx, step); err != nil {
@@ -362,7 +362,7 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 			}
 
 		case <-ctx.Done():
-			// Context cancelled (error or timeout)
+			// Context canceled (error or timeout)
 			pool.Wait()
 			o.copyPoolResults(pool)
 			return ctx.Err()
@@ -371,13 +371,13 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 
 	// Wait for all workers to complete
 	pool.Wait()
-	
+
 	// End timeline tracking
 	pool.timeline.End()
-	
+
 	// Copy results from pool to orchestrator
 	o.copyPoolResults(pool)
-	
+
 	// Check for any errors
 	allErrors := pool.GetAllErrors()
 	if len(allErrors) > 0 {
@@ -391,13 +391,13 @@ func (o *Orchestrator) executeParallel(ctx context.Context) error {
 	o.logger.Info("\n")
 	o.logger.Info(pool.bufferedLogger.GetExecutionSummary())
 	o.logger.Info(pool.timeline.GenerateGanttChart())
-	
+
 	// Calculate and display speedup
 	speedup := pool.timeline.GetSpeedup()
 	if speedup > 1.0 {
 		sequential := pool.timeline.GetSequentialEstimate()
 		parallel := pool.timeline.GetTotalDuration()
-		o.logger.Info("Performance: %.2fx speedup (Sequential: %v, Parallel: %v)\n", 
+		o.logger.Info("Performance: %.2fx speedup (Sequential: %v, Parallel: %v)\n",
 			speedup, sequential.Round(time.Millisecond), parallel.Round(time.Millisecond))
 	}
 
@@ -427,10 +427,10 @@ func (o *Orchestrator) checkDependencies(step *config.StepV2, completed map[stri
 // executeStep executes a single step
 func (o *Orchestrator) executeStep(ctx context.Context, step *config.StepV2) error {
 	o.logger.Info("Executing step: %s", step.Name)
-	
+
 	// Track step timing for steps level logging
 	stepStart := time.Now()
-	
+
 	// Find step index for steps level logging
 	stepIndex := 0
 	totalSteps := len(o.workflow.Steps)
@@ -440,7 +440,7 @@ func (o *Orchestrator) executeStep(ctx context.Context, step *config.StepV2) err
 			break
 		}
 	}
-	
+
 	o.logger.Step("\n[STEP %d/%d] %s", stepIndex, totalSteps, step.Name)
 
 	// Check condition
@@ -469,14 +469,14 @@ func (o *Orchestrator) executeStep(ctx context.Context, step *config.StepV2) err
 	} else {
 		err = fmt.Errorf("no execution mode specified")
 	}
-	
+
 	// Log step completion with timing
 	duration := time.Since(stepStart)
 	if err != nil {
 		o.logger.Step("  ✗ Failed (%.1fs): %v", duration.Seconds(), err)
 		return err
 	}
-	
+
 	o.logger.Step("  ✓ Completed (%.1fs)", duration.Seconds())
 	return nil
 }
@@ -497,7 +497,7 @@ func (o *Orchestrator) executeRegularStep(ctx context.Context, step *config.Step
 		// Apply error handling policy
 		return o.handleStepError(step, err)
 	}
-	
+
 	// Store result
 	o.stepResults[step.Name] = result.Output
 	o.interpolator.SetStepResult(step.Name, result.Output)
@@ -519,10 +519,10 @@ func (o *Orchestrator) handleStepError(step *config.StepV2, err error) error {
 		// Ultimate default: halt
 		onFailure = "halt"
 	}
-	
+
 	o.logger.Warn("Step '%s' failed: %v", step.Name, err)
 	o.logger.Warn("Error policy: %s", onFailure)
-	
+
 	switch onFailure {
 	case "continue":
 		// Log warning but continue workflow
@@ -531,12 +531,12 @@ func (o *Orchestrator) handleStepError(step *config.StepV2, err error) error {
 		o.stepResults[step.Name] = ""
 		o.interpolator.SetStepResult(step.Name, "")
 		return nil
-		
+
 	case "retry":
 		// Retry logic would go here (future enhancement)
 		o.logger.Warn("Retry not yet implemented, treating as halt")
 		return fmt.Errorf("step '%s' failed: %w", step.Name, err)
-		
+
 	case "halt", "cancel_all":
 		fallthrough
 	default:
@@ -562,7 +562,7 @@ func (o *Orchestrator) executeConsensusStep(ctx context.Context, step *config.St
 	if err != nil {
 		return fmt.Errorf("consensus execution failed: %w", err)
 	}
-	
+
 	// Check if result is nil (shouldn't happen if no error, but defensive)
 	if result == nil {
 		return fmt.Errorf("consensus returned nil result")
@@ -576,7 +576,7 @@ func (o *Orchestrator) executeConsensusStep(ctx context.Context, step *config.St
 	// Output consensus details with individual votes
 	o.logger.Output("Step %s consensus result: %s", step.Name, result.Result)
 	o.logger.Output("  Agreement: %.0f%%, Confidence: %s", result.Agreement*100, result.Confidence)
-	
+
 	// Show individual provider votes for transparency
 	if len(result.Votes) > 0 {
 		o.logger.Output("  Provider votes:")
@@ -594,11 +594,11 @@ func (o *Orchestrator) executeConsensusStep(ctx context.Context, step *config.St
 	if strings.Contains(step.Name, "validate") {
 		// Strip markdown formatting and normalize
 		cleaned := strings.TrimSpace(result.Result)
-		cleaned = strings.ReplaceAll(cleaned, "**", "")  // Remove bold
-		cleaned = strings.ReplaceAll(cleaned, "*", "")   // Remove italic
-		cleaned = strings.ReplaceAll(cleaned, "`", "")   // Remove code
+		cleaned = strings.ReplaceAll(cleaned, "**", "") // Remove bold
+		cleaned = strings.ReplaceAll(cleaned, "*", "")  // Remove italic
+		cleaned = strings.ReplaceAll(cleaned, "`", "")  // Remove code
 		resultUpper := strings.ToUpper(cleaned)
-		
+
 		if resultUpper != "SUCCESS" {
 			return fmt.Errorf("validation failed: %s", result.Result)
 		}
@@ -710,7 +710,7 @@ func (o *Orchestrator) executeEmbeddingsStep(ctx context.Context, step *config.S
 		includeMetadata = *emb.IncludeMetadata
 	}
 
-	o.logger.Info("Generating embeddings with %s/%s (strategy: %s, chunk size: %d)", 
+	o.logger.Info("Generating embeddings with %s/%s (strategy: %s, chunk size: %d)",
 		provider, model, chunkStrategy, maxChunkSize)
 
 	// Create embedding request
@@ -735,7 +735,7 @@ func (o *Orchestrator) executeEmbeddingsStep(ctx context.Context, step *config.S
 		return fmt.Errorf("failed to generate embeddings: %w", err)
 	}
 
-	o.logger.Info("Generated embeddings: %d chunks, %d vectors", 
+	o.logger.Info("Generated embeddings: %d chunks, %d vectors",
 		len(job.Chunks), len(job.Embeddings))
 
 	// Format output
@@ -755,13 +755,13 @@ func (o *Orchestrator) executeEmbeddingsStep(ctx context.Context, step *config.S
 		for i, embedding := range job.Embeddings {
 			vectors[i] = embedding.Vector
 		}
-		
+
 		minimal := map[string]interface{}{
 			"model":   job.Model,
 			"vectors": vectors,
 			"count":   len(vectors),
 		}
-		
+
 		outputData, err = json.MarshalIndent(minimal, "", "  ")
 		if err != nil {
 			return fmt.Errorf("failed to marshal embeddings: %w", err)
@@ -777,11 +777,11 @@ func (o *Orchestrator) executeEmbeddingsStep(ctx context.Context, step *config.S
 			return fmt.Errorf("failed to write output file: %w", err)
 		}
 		o.logger.Info("Embeddings written to: %s", interpolatedPath)
-		
+
 		// Store file path in results
 		result = fmt.Sprintf("Embeddings saved to: %s (%d vectors)", interpolatedPath, len(job.Embeddings))
 	}
-	
+
 	// Store result for interpolation
 	o.stepResults[step.Name] = result
 	o.interpolator.SetStepResult(step.Name, result)
@@ -802,7 +802,7 @@ func (o *Orchestrator) evaluateCondition(condition string) bool {
 
 	// For MVP, check if step result equals a value
 	// Format: ${{ stepName == "value" }}
-	
+
 	// Remove ${{ and }}
 	condition = strings.TrimSpace(condition)
 	condition = strings.TrimPrefix(condition, "${{")
@@ -892,9 +892,9 @@ func (o *Orchestrator) SetAppConfigForWorkflows(appConfig *config.ApplicationCon
 // executeWorkflowStep executes a step that calls another workflow
 func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.StepV2) error {
 	workflowName := step.Template.Name
-	
+
 	o.logger.Info("Calling workflow: %s", workflowName)
-	
+
 	// Extract directory from current workflow key for directory-aware resolution
 	var contextDir string
 	if o.workflowKey != "" {
@@ -902,7 +902,7 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 			contextDir = o.workflowKey[:idx]
 		}
 	}
-	
+
 	// Get the sub-workflow with directory-aware resolution
 	subWorkflow, exists := o.appConfig.GetWorkflowWithContext(workflowName, contextDir)
 	if !exists {
@@ -912,7 +912,7 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 		}
 		return fmt.Errorf("workflow '%s' not found", workflowName)
 	}
-	
+
 	// Determine the full key of the resolved workflow for sub-workflow context
 	var subWorkflowKey string
 	for key, wf := range o.appConfig.Workflows {
@@ -921,7 +921,7 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 			break
 		}
 	}
-	
+
 	// Prepare input for sub-workflow
 	var inputData string
 	if inputValue, ok := step.Template.With["input"]; ok {
@@ -933,28 +933,28 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 		interpolated, _ := o.interpolator.Interpolate(inputStr)
 		inputData = interpolated
 	}
-	
+
 	// Create a new orchestrator for the sub-workflow with its key for directory context
 	subLogger := NewLogger(subWorkflow.Execution.Logging, false)
 	// CRITICAL: Inherit output from parent logger (stdout in CLI, stderr in MCP serve mode)
 	subLogger.SetOutput(o.logger.GetOutput())
 	subOrchestrator := NewOrchestratorWithKey(subWorkflow, subWorkflowKey, subLogger)
-	
+
 	// Pass through app config and server manager
 	subOrchestrator.executor.SetAppConfig(o.executor.appConfig)
 	if o.executor.serverManager != nil {
 		subOrchestrator.executor.SetServerManager(o.executor.serverManager)
 	}
-	
+
 	// Pass app config to sub-orchestrator for nested workflow calls
 	subOrchestrator.SetAppConfigForWorkflows(o.appConfig)
-	
+
 	// Execute the sub-workflow
 	err := subOrchestrator.Execute(ctx, inputData)
- if err != nil {
- 	return fmt.Errorf("execution failed: %w", err)
- }
-	
+	if err != nil {
+		return fmt.Errorf("execution failed: %w", err)
+	}
+
 	// Get the final result from the sub-workflow
 	var result string
 	if len(subWorkflow.Steps) > 0 {
@@ -964,20 +964,19 @@ func (o *Orchestrator) executeWorkflowStep(ctx context.Context, step *config.Ste
 			result = finalResult
 		}
 	}
-	
+
 	// Store result (same as executeRegularStep)
 	o.stepResults[step.Name] = result
 	o.interpolator.SetStepResult(step.Name, result)
-	
+
 	o.logger.Info("Workflow '%s' completed, result available as {{%s}}", workflowName, step.Name)
-	
+
 	return nil
 }
+
 // parseExecutionOrder determines execution order from YAML structure
 
-
 // executeLoopElement executes a loop element
-
 
 func (o *Orchestrator) executeStepElement(ctx context.Context, step *config.StepV2) error {
 	// Check dependencies
@@ -1016,7 +1015,7 @@ func (o *Orchestrator) executeLoopStep(ctx context.Context, step *config.StepV2)
 	if o.appConfig == nil {
 		return fmt.Errorf("loop executor not initialized (appConfig missing)")
 	}
-	
+
 	// Initialize loop executor if not already done
 	if o.loopExecutor == nil {
 		o.loopExecutor = NewLoopExecutor(
@@ -1028,9 +1027,9 @@ func (o *Orchestrator) executeLoopStep(ctx context.Context, step *config.StepV2)
 			o.embeddingService,
 		)
 	}
-	
+
 	o.logger.Info("Starting loop: %s", step.Name)
-	
+
 	// Convert step.Loop to LoopV2 config
 	loopConfig := &config.LoopV2{
 		Name:           step.Name,
@@ -1050,20 +1049,20 @@ func (o *Orchestrator) executeLoopStep(ctx context.Context, step *config.StepV2)
 		Parallel:       step.Loop.Parallel,
 		MaxWorkers:     step.Loop.MaxWorkers,
 	}
-	
+
 	// Execute the loop using LoopExecutor
 	result, err := o.loopExecutor.ExecuteLoop(ctx, loopConfig)
 	if err != nil {
 		o.logger.Warn("Loop %s failed: %v", step.Name, err)
 		return err
 	}
-	
-	o.logger.Info("Loop %s completed: %d iterations, exit: %s", 
+
+	o.logger.Info("Loop %s completed: %d iterations, exit: %s",
 		step.Name, result.Iterations, result.ExitReason)
-	
+
 	// Store result for access by subsequent steps
 	o.interpolator.SetStepResult(step.Name, result.FinalOutput)
-	
+
 	return nil
 }
 
@@ -1075,14 +1074,12 @@ type loopResult struct {
 	ExitReason  string
 }
 
-
-
 // executeLoopInternal contains the actual loop execution logic
 func (o *Orchestrator) executeLoopInternal(ctx context.Context, name string, workflow string, with map[string]interface{}, maxIterations int, until string, onFailure string, accumulate string) (*loopResult, error) {
 	if maxIterations <= 0 {
 		return nil, fmt.Errorf("max_iterations must be > 0, got %d", maxIterations)
 	}
-	
+
 	// Extract directory from current workflow key for directory-aware resolution
 	var contextDir string
 	if o.workflowKey != "" {
@@ -1090,24 +1087,24 @@ func (o *Orchestrator) executeLoopInternal(ctx context.Context, name string, wor
 			contextDir = o.workflowKey[:idx]
 		}
 	}
-	
+
 	// Use contextual lookup to support relative workflow references
 	wf, exists := o.appConfig.GetWorkflowWithContext(workflow, contextDir)
 	if !exists {
 		return nil, fmt.Errorf("loop workflow '%s' not found", workflow)
 	}
-	
+
 	result := &loopResult{
 		AllOutputs: make([]string, 0),
 	}
-	
+
 	var lastOutput string
-	
+
 	for iteration := 1; iteration <= maxIterations; iteration++ {
 		o.logger.Info("Loop iteration %d/%d", iteration, maxIterations)
-		
+
 		o.interpolator.SetLoopVars(iteration, lastOutput, result.AllOutputs)
-		
+
 		inputData, err := o.prepareLoopInput(with, lastOutput)
 		if err != nil {
 			if onFailure == "halt" {
@@ -1116,7 +1113,7 @@ func (o *Orchestrator) executeLoopInternal(ctx context.Context, name string, wor
 			o.logger.Warn("Iteration %d input prep failed: %v", iteration, err)
 			continue
 		}
-		
+
 		output, err := o.executeLoopWorkflow(ctx, wf, inputData)
 		if err != nil {
 			if onFailure == "halt" {
@@ -1129,12 +1126,12 @@ func (o *Orchestrator) executeLoopInternal(ctx context.Context, name string, wor
 			}
 			continue
 		}
-		
+
 		lastOutput = output
 		result.AllOutputs = append(result.AllOutputs, output)
 		result.Iterations = iteration
 		result.FinalOutput = output
-		
+
 		if until != "" {
 			conditionMet, err := o.evaluateLoopCondition(ctx, until, output)
 			if err != nil {
@@ -1147,19 +1144,18 @@ func (o *Orchestrator) executeLoopInternal(ctx context.Context, name string, wor
 			}
 		}
 	}
-	
+
 	o.logger.Info("Loop completed: max iterations (%d) reached", maxIterations)
 	result.ExitReason = "max_iterations"
 	o.storeLoopResult(name, accumulate, result)
 	return result, nil
 }
 
-
 func (o *Orchestrator) prepareLoopInput(with map[string]interface{}, lastOutput string) (string, error) {
 	if with == nil || len(with) == 0 {
 		return lastOutput, nil
 	}
-	
+
 	if inputValue, ok := with["input"]; ok {
 		inputStr, ok := inputValue.(string)
 		if !ok {
@@ -1168,14 +1164,14 @@ func (o *Orchestrator) prepareLoopInput(with map[string]interface{}, lastOutput 
 		interpolated, _ := o.interpolator.Interpolate(inputStr)
 		return interpolated, nil
 	}
-	
+
 	var parts []string
 	for key, value := range with {
 		valueStr := fmt.Sprintf("%v", value)
 		interpolated, _ := o.interpolator.Interpolate(valueStr)
 		parts = append(parts, fmt.Sprintf("%s: %s", key, interpolated))
 	}
-	
+
 	return strings.Join(parts, "\n"), nil
 }
 
@@ -1184,31 +1180,31 @@ func (o *Orchestrator) executeLoopWorkflow(ctx context.Context, workflow *config
 	// CRITICAL: Inherit output from parent logger (stdout in CLI, stderr in MCP serve mode)
 	subLogger.SetOutput(o.logger.GetOutput())
 	subOrchestrator := NewOrchestrator(workflow, subLogger)
-	
+
 	subOrchestrator.executor.SetAppConfig(o.executor.appConfig)
 	if o.executor.serverManager != nil {
 		subOrchestrator.executor.SetServerManager(o.executor.serverManager)
 	}
 	subOrchestrator.SetAppConfigForWorkflows(o.appConfig)
-	
+
 	err := subOrchestrator.Execute(ctx, inputData)
- if err != nil {
- 	return "", fmt.Errorf("execution failed: %w", err)
- }
-	
+	if err != nil {
+		return "", fmt.Errorf("execution failed: %w", err)
+	}
+
 	if len(workflow.Steps) > 0 {
 		lastStepName := workflow.Steps[len(workflow.Steps)-1].Name
 		if output, ok := subOrchestrator.GetStepResult(lastStepName); ok {
 			return output, nil
 		}
 	}
-	
+
 	return "", fmt.Errorf("no output from workflow")
 }
 
 func (o *Orchestrator) evaluateLoopCondition(ctx context.Context, condition string, output string) (bool, error) {
 	interpolatedCondition, _ := o.interpolator.Interpolate(condition)
-	
+
 	prompt := fmt.Sprintf(
 		"Evaluate if this condition is satisfied. Answer only YES or NO.\n\n"+
 			"Condition: %s\n\n"+
@@ -1217,48 +1213,47 @@ func (o *Orchestrator) evaluateLoopCondition(ctx context.Context, condition stri
 		interpolatedCondition,
 		truncateString(output, 2000),
 	)
-	
+
 	providerName := "deepseek"
 	if o.appConfig.AI != nil && o.appConfig.AI.DefaultProvider != "" {
 		providerName = o.appConfig.AI.DefaultProvider
 	}
-	
+
 	provider, _ := o.executor.createProvider(providerName, "")
-	
+
 	request := &domain.CompletionRequest{
 		Messages: []domain.Message{
 			{Role: "user", Content: prompt},
 		},
 		Temperature: 0,
 	}
-	
+
 	response, _ := provider.CreateCompletion(ctx, request)
-	
+
 	answer := strings.ToUpper(strings.TrimSpace(response.Response))
 	o.logger.Debug("Condition evaluation: '%s' -> %s", condition, answer)
-	
+
 	return strings.Contains(answer, "YES"), nil
 }
 
 func (o *Orchestrator) storeLoopResult(name string, accumulate string, result *loopResult) {
 	o.interpolator.SetStepResult("loop.output", result.FinalOutput)
 	o.interpolator.SetStepResult("loop.iteration", fmt.Sprintf("%d", result.Iterations))
-	
+
 	if accumulate != "" {
 		history := strings.Join(result.AllOutputs, "\n---\n")
 		o.interpolator.SetStepResult(accumulate, history)
 	}
-	
+
 	o.interpolator.SetStepResult(name, result.FinalOutput)
 }
-
 
 // dependenciesMet checks if all dependencies for a step are satisfied
 func (o *Orchestrator) dependenciesMet(step *config.StepV2) bool {
 	if len(step.Needs) == 0 {
 		return true
 	}
-	
+
 	for _, depName := range step.Needs {
 		if _, exists := o.stepResults[depName]; !exists {
 			return false
@@ -1274,7 +1269,7 @@ func (o *Orchestrator) evaluateIfCondition(condition string) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	// Basic truthy check
 	return interpolated != "" && interpolated != "false" && interpolated != "0"
 }
@@ -1282,19 +1277,19 @@ func (o *Orchestrator) evaluateIfCondition(condition string) bool {
 // executeLoop executes a loop element
 func (o *Orchestrator) executeLoop(ctx context.Context, loop *config.LoopV2) error {
 	o.logger.Info("Executing loop: %s", loop.Name)
-	
+
 	if o.loopExecutor == nil {
 		return fmt.Errorf("loop executor not initialized (appConfig missing)")
 	}
-	
+
 	result, err := o.loopExecutor.ExecuteLoop(ctx, loop)
 	if err != nil {
 		return fmt.Errorf("loop %s failed: %w", loop.Name, err)
 	}
-	
-	o.logger.Info("Loop %s completed: %d iterations, exit: %s", 
+
+	o.logger.Info("Loop %s completed: %d iterations, exit: %s",
 		loop.Name, result.Iterations, result.ExitReason)
-	
+
 	return nil
 }
 
@@ -1302,11 +1297,11 @@ func (o *Orchestrator) executeLoop(ctx context.Context, loop *config.LoopV2) err
 func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
 	var startStepIndex int = -1
 	var endStepIndex int = -1
-	
+
 	// Find start-from step index
 	if o.startFrom != "" {
 		startStepExists := false
-		
+
 		for i, step := range o.workflow.Steps {
 			if step.Name == o.startFrom {
 				startStepExists = true
@@ -1314,7 +1309,7 @@ func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
 				break
 			}
 		}
-		
+
 		// Check loops too for start-from
 		if !startStepExists {
 			for _, loop := range o.workflow.Loops {
@@ -1329,7 +1324,7 @@ func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
 				}
 			}
 		}
-		
+
 		if !startStepExists {
 			availableSteps := make([]string, 0, len(o.workflow.Steps)+len(o.workflow.Loops))
 			for _, step := range o.workflow.Steps {
@@ -1340,21 +1335,21 @@ func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
 			}
 			return fmt.Errorf("start-from step '%s' not found in workflow. Available steps: %v", o.startFrom, availableSteps)
 		}
-		
+
 		// Mark all steps before start-from as completed
 		for i := 0; i < startStepIndex; i++ {
 			step := o.workflow.Steps[i]
 			completed[step.Name] = true
 			o.logger.Debug("Skipped (before start-from): %s", step.Name)
 		}
-		
+
 		o.logger.Info("Starting from step %d/%d: %s", startStepIndex+1, len(o.workflow.Steps), o.startFrom)
 	}
-	
+
 	// Find end-at step index
 	if o.endAt != "" {
 		endStepExists := false
-		
+
 		for i, step := range o.workflow.Steps {
 			if step.Name == o.endAt {
 				endStepExists = true
@@ -1362,7 +1357,7 @@ func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
 				break
 			}
 		}
-		
+
 		// Check loops too for end-at
 		if !endStepExists {
 			for _, loop := range o.workflow.Loops {
@@ -1375,7 +1370,7 @@ func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
 				}
 			}
 		}
-		
+
 		if !endStepExists {
 			availableSteps := make([]string, 0, len(o.workflow.Steps)+len(o.workflow.Loops))
 			for _, step := range o.workflow.Steps {
@@ -1386,25 +1381,25 @@ func (o *Orchestrator) markStepsAsCompleted(completed map[string]bool) error {
 			}
 			return fmt.Errorf("end-at step '%s' not found in workflow. Available steps: %v", o.endAt, availableSteps)
 		}
-		
+
 		// Mark all steps after end-at as completed
 		for i := endStepIndex + 1; i < len(o.workflow.Steps); i++ {
 			step := o.workflow.Steps[i]
 			completed[step.Name] = true
 			o.logger.Debug("Skipped (after end-at): %s", step.Name)
 		}
-		
+
 		o.logger.Info("Ending at step %d/%d: %s", endStepIndex+1, len(o.workflow.Steps), o.endAt)
 	}
-	
+
 	// Validate that start-from comes before end-at if both are specified
 	if startStepIndex != -1 && endStepIndex != -1 {
 		if startStepIndex > endStepIndex {
-			return fmt.Errorf("start-from step '%s' (index %d) comes after end-at step '%s' (index %d)", 
+			return fmt.Errorf("start-from step '%s' (index %d) comes after end-at step '%s' (index %d)",
 				o.startFrom, startStepIndex+1, o.endAt, endStepIndex+1)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -1416,51 +1411,51 @@ func (o *Orchestrator) connectRAGServersIfNeeded(ctx context.Context) error {
 		o.logger.Debug("No RAG steps detected, skipping RAG server connections")
 		return nil
 	}
-	
+
 	// Get RAG configuration
 	if o.appConfig == nil || o.appConfig.RAG == nil {
 		return fmt.Errorf("workflow uses RAG but no RAG configuration found")
 	}
-	
+
 	o.logger.Info("Workflow uses RAG, connecting to RAG servers...")
-	
+
 	// Create dedicated server manager for RAG (internal connections only)
 	o.ragServerManager = host.NewServerManagerWithOptions(true) // suppress console
-	
+
 	// Connect to all servers referenced in RAG config
 	connectedServers := make(map[string]bool)
 	for _, ragServerConfig := range o.appConfig.RAG.Servers {
 		mcpServerName := ragServerConfig.MCPServer
-		
+
 		// Skip if already connected
 		if connectedServers[mcpServerName] {
 			continue
 		}
-		
+
 		// Get server definition from app config
 		serverDef, exists := o.appConfig.Servers[mcpServerName]
 		if !exists {
 			o.logger.Warn("RAG server '%s' not found in servers config", mcpServerName)
 			continue
 		}
-		
+
 		o.logger.Info("Connecting RAG server (internal): %s", mcpServerName)
-		
+
 		// Connect to server (internal, not exposed to LLM)
 		_, err := o.ragServerManager.ConnectToServer(mcpServerName, serverDef, false)
 		if err != nil {
 			o.logger.Warn("Failed to connect RAG server '%s': %v", mcpServerName, err)
 			continue
 		}
-		
+
 		connectedServers[mcpServerName] = true
 		o.logger.Info("✓ Connected RAG server: %s", mcpServerName)
 	}
-	
+
 	if len(connectedServers) == 0 {
 		return fmt.Errorf("workflow uses RAG but failed to connect to any RAG servers")
 	}
-	
+
 	o.logger.Info("✓ Connected %d RAG server(s)", len(connectedServers))
 	return nil
 }
@@ -1472,7 +1467,7 @@ func (o *Orchestrator) workflowUsesRAG() bool {
 		if step.Rag != nil {
 			return true
 		}
-		
+
 		// Check if step uses a loop with child workflow
 		if step.Loop != nil && step.Loop.Workflow != "" {
 			childWorkflow, exists := o.appConfig.GetWorkflow(step.Loop.Workflow)
@@ -1486,6 +1481,6 @@ func (o *Orchestrator) workflowUsesRAG() bool {
 			}
 		}
 	}
-	
+
 	return false
 }

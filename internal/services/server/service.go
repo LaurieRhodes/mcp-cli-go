@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
-	
+
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/runas"
@@ -28,12 +28,12 @@ type ProgressNotifier interface {
 }
 
 type Service struct {
-	runasConfig        *runas.RunAsConfig
-	appConfig          *config.ApplicationConfig
-	configService      *infraConfig.Service
-	skillService       skills.SkillService
-	progressNotifier   ProgressNotifier
-	taskManager        *tasks.Manager
+	runasConfig      *runas.RunAsConfig
+	appConfig        *config.ApplicationConfig
+	configService    *infraConfig.Service
+	skillService     skills.SkillService
+	progressNotifier ProgressNotifier
+	taskManager      *tasks.Manager
 }
 
 // NewService creates a new MCP server service
@@ -59,7 +59,7 @@ func (s *Service) SetProgressNotifier(notifier ProgressNotifier) {
 // HandleInitialize handles the initialize request
 func (s *Service) HandleInitialize(params map[string]interface{}) (map[string]interface{}, error) {
 	logging.Info("Initialize request from client")
-	
+
 	// Log client info if provided
 	if clientInfo, ok := params["clientInfo"].(map[string]interface{}); ok {
 		if name, ok := clientInfo["name"].(string); ok {
@@ -69,12 +69,12 @@ func (s *Service) HandleInitialize(params map[string]interface{}) (map[string]in
 			logging.Info("Client version: %s", version)
 		}
 	}
-	
+
 	// Build capabilities
 	capabilities := map[string]interface{}{
 		"tools": map[string]interface{}{},
 	}
-	
+
 	// Add task capabilities if task manager is available
 	if s.taskManager != nil {
 		capabilities["tasks"] = map[string]interface{}{
@@ -86,7 +86,7 @@ func (s *Service) HandleInitialize(params map[string]interface{}) (map[string]in
 		}
 		logging.Info("Task support enabled - tasks/list, tasks/cancel, task-augmented tools/call")
 	}
-	
+
 	// Return server info and capabilities
 	return map[string]interface{}{
 		"protocolVersion": "2024-11-05",
@@ -101,23 +101,23 @@ func (s *Service) HandleInitialize(params map[string]interface{}) (map[string]in
 // HandleToolsList handles the tools/list request
 func (s *Service) HandleToolsList(params map[string]interface{}) (map[string]interface{}, error) {
 	logging.Info("Listing available tools")
-	
+
 	// Convert tool exposures to MCP tool format
 	tools := make([]map[string]interface{}, 0, len(s.runasConfig.Tools))
-	
+
 	for _, toolExposure := range s.runasConfig.Tools {
 		tool := map[string]interface{}{
 			"name":        toolExposure.Name,
 			"description": toolExposure.Description,
 			"inputSchema": toolExposure.InputSchema,
 		}
-		
+
 		tools = append(tools, tool)
 		logging.Debug("Registered tool: %s (template: %s)", toolExposure.Name, toolExposure.Template)
 	}
-	
+
 	logging.Info("Returning %d tools", len(tools))
-	
+
 	return map[string]interface{}{
 		"tools": tools,
 	}, nil
@@ -130,16 +130,16 @@ func (s *Service) HandleToolsCall(params map[string]interface{}) (map[string]int
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid 'name' parameter")
 	}
-	
+
 	logging.Info("Tool call request: %s", toolName)
-	
+
 	// Check for task augmentation
 	taskRequest, isTaskAugmented := params["task"].(map[string]interface{})
 	if isTaskAugmented && s.taskManager != nil {
 		logging.Info("Detected task-augmented tool call")
 		return s.handleTaskAugmentedToolCall(toolName, params, taskRequest)
 	}
-	
+
 	// Standard tool call (non-task)
 	return s.handleStandardToolCall(toolName, params)
 }
@@ -152,12 +152,12 @@ func (s *Service) handleStandardToolCall(toolName string, params map[string]inte
 		// Arguments may be optional
 		arguments = make(map[string]interface{})
 	}
-	
+
 	logging.Debug("Tool arguments: %+v", arguments)
-	
+
 	// Log params for debugging
 	logging.Debug("Raw params received: %+v", params)
-	
+
 	// Extract progress token if present (MCP protocol support)
 	var progressToken string
 	if meta, ok := params["_meta"].(map[string]interface{}); ok {
@@ -170,28 +170,28 @@ func (s *Service) handleStandardToolCall(toolName string, params map[string]inte
 	} else {
 		logging.Warn("No _meta field in params (progress notifications disabled)")
 	}
-	
+
 	// Find the tool exposure
 	toolExposure, found := s.runasConfig.GetToolByName(toolName)
 	if !found {
 		return nil, fmt.Errorf("tool not found: %s", toolName)
 	}
-	
+
 	// CHECK: Is this the execute_skill_code tool? (identified by template)
 	if toolExposure.Template == "execute_skill_code" {
 		return s.handleExecuteSkillCode(arguments)
 	}
-	
+
 	// CHECK: Is this a skill tool (uses load_skill template)?
 	if toolExposure.Template == "load_skill" {
 		return s.handleSkillToolCall(toolExposure, arguments)
 	}
-	
+
 	// Execute the template with progress token
 	result, err := s.executeTemplateWithProgress(toolExposure, arguments, progressToken)
 	if err != nil {
 		logging.Error("Template execution failed: %v", err)
-		
+
 		// Return error in MCP format
 		return map[string]interface{}{
 			"content": []interface{}{
@@ -203,7 +203,7 @@ func (s *Service) handleStandardToolCall(toolName string, params map[string]inte
 			"isError": true,
 		}, nil
 	}
-	
+
 	// Return success result in MCP format
 	return map[string]interface{}{
 		"content": []interface{}{
@@ -217,9 +217,9 @@ func (s *Service) handleStandardToolCall(toolName string, params map[string]inte
 
 // executeTemplateWithProgress executes a template and sends progress notifications
 func (s *Service) executeTemplateWithProgress(toolExposure *runas.ToolExposure, arguments map[string]interface{}, progressToken string) (string, error) {
-	logging.Info("Executing template with progress support: token=%s, hasNotifier=%v", 
+	logging.Info("Executing template with progress support: token=%s, hasNotifier=%v",
 		progressToken, s.progressNotifier != nil)
-	
+
 	// Send initial progress (0%)
 	if progressToken != "" && s.progressNotifier != nil {
 		logging.Info("Sending initial progress notification (0%%)")
@@ -232,24 +232,24 @@ func (s *Service) executeTemplateWithProgress(toolExposure *runas.ToolExposure, 
 			logging.Warn("No progress notifier available - progress notifications disabled")
 		}
 	}
-	
+
 	// Start heartbeat goroutine to send periodic progress updates
 	// This keeps the client alive during long-running template execution
 	done := make(chan bool)
 	if progressToken != "" && s.progressNotifier != nil {
 		go func() {
-			ticker := time.NewTicker(20 * time.Second)  // Send heartbeat every 20 seconds
+			ticker := time.NewTicker(20 * time.Second) // Send heartbeat every 20 seconds
 			defer ticker.Stop()
-			
+
 			for {
 				select {
 				case <-ticker.C:
 					// Send a "still working" notification with same progress value
 					// This resets the client's timeout without implying actual progress
 					s.progressNotifier.SendProgressNotification(
-						progressToken, 
-						0.5,  // Mid-point to indicate "in progress"
-						0, 
+						progressToken,
+						0.5, // Mid-point to indicate "in progress"
+						0,
 						fmt.Sprintf("Executing %s...", toolExposure.Name),
 					)
 					logging.Debug("Sent heartbeat progress notification")
@@ -259,13 +259,13 @@ func (s *Service) executeTemplateWithProgress(toolExposure *runas.ToolExposure, 
 			}
 		}()
 	}
-	
+
 	// Execute the template (this blocks)
 	result, err := s.executeTemplate(toolExposure, arguments)
-	
+
 	// Stop heartbeat
 	close(done)
-	
+
 	// Send completion progress (100%)
 	if progressToken != "" && s.progressNotifier != nil {
 		if err != nil {
@@ -276,24 +276,24 @@ func (s *Service) executeTemplateWithProgress(toolExposure *runas.ToolExposure, 
 			s.progressNotifier.SendProgressNotification(progressToken, 1.0, 0, fmt.Sprintf("Completed %s", toolExposure.Name))
 		}
 	}
-	
+
 	return result, err
 }
 
 // executeTemplate executes a template with the given arguments
 func (s *Service) executeTemplate(toolExposure *runas.ToolExposure, arguments map[string]interface{}) (string, error) {
 	logging.Info("Executing template: %s", toolExposure.Template)
-	
+
 	// Check if template exists using contextual lookup (v2 first, then v1)
 	var isV2 bool
 	var workflowV2 *config.WorkflowV2
 	var actualWorkflowKey string
-	
+
 	// Try contextual lookup to support short names (e.g., "main_workflow" when file is "dir/main_workflow")
 	if tmpl, exists := s.appConfig.GetWorkflowWithContext(toolExposure.Template, ""); exists {
 		isV2 = true
 		workflowV2 = tmpl
-		
+
 		// Find the actual key by searching the Workflows map
 		for key, wf := range s.appConfig.Workflows {
 			if wf == tmpl {
@@ -301,29 +301,29 @@ func (s *Service) executeTemplate(toolExposure *runas.ToolExposure, arguments ma
 				break
 			}
 		}
-		
+
 		if actualWorkflowKey == "" {
 			actualWorkflowKey = toolExposure.Template
 		}
-		
+
 		logging.Debug("Using workflow v2: %s (actual key: %s)", toolExposure.Template, actualWorkflowKey)
 	} else {
 		return "", fmt.Errorf("template not found: %s", toolExposure.Template)
 	}
-	
+
 	// Prepare input data by applying input mapping
 	inputData, err := s.prepareInputData(toolExposure, arguments)
 	if err != nil {
 		return "", fmt.Errorf("failed to prepare input data: %w", err)
 	}
-	
+
 	logging.Debug("Input data prepared: %s", inputData)
-	
+
 	// Execute template based on version
 	if isV2 {
 		return s.executeWorkflowV2(workflowV2, inputData, actualWorkflowKey, toolExposure)
 	}
-	
+
 	return s.executeTemplateV1(toolExposure.Template, inputData, toolExposure)
 }
 
@@ -337,15 +337,15 @@ func (s *Service) prepareInputData(toolExposure *runas.ToolExposure, arguments m
 				return str, nil
 			}
 		}
-		
+
 		// Try first argument
 		for _, v := range arguments {
 			return fmt.Sprintf("%v", v), nil
 		}
-		
+
 		return "", nil
 	}
-	
+
 	// Apply input mapping - simple replacement for now
 	result := ""
 	for argName := range toolExposure.InputMapping {
@@ -354,7 +354,7 @@ func (s *Service) prepareInputData(toolExposure *runas.ToolExposure, arguments m
 			break // Use first mapped argument
 		}
 	}
-	
+
 	return result, nil
 }
 
@@ -367,12 +367,12 @@ func (s *Service) executeTemplateV1(templateName string, inputData string, toolE
 // executeWorkflowV2 executes a v2 workflow
 func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, actualWorkflowKey string, toolExposure *runas.ToolExposure) (string, error) {
 	logging.Info("Executing workflow v2: %s", tmpl.Name)
-	
+
 	// Get provider configuration
 	var providerName string
 	var providerConfig *config.ProviderConfig
 	var err error
-	
+
 	if toolExposure.Overrides != nil && toolExposure.Overrides.Provider != "" {
 		providerName = toolExposure.Overrides.Provider
 		providerConfig, _, err = s.configService.GetProviderConfig(providerName)
@@ -382,20 +382,20 @@ func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, a
 	} else {
 		providerName, providerConfig, _, err = s.configService.GetDefaultProvider()
 	}
-	
+
 	if err != nil {
 		return "", fmt.Errorf("failed to get provider config: %w", err)
 	}
-	
+
 	// Override model if specified
 	if toolExposure.Overrides != nil && toolExposure.Overrides.Model != "" {
 		providerConfig.DefaultModel = toolExposure.Overrides.Model
 	} else if tmpl.Execution.Model != "" {
 		providerConfig.DefaultModel = tmpl.Execution.Model
 	}
-	
+
 	logging.Info("Using provider: %s (model: %s)", providerName, providerConfig.DefaultModel)
-	
+
 	// Import the provider factory and domain types to create the actual provider
 	// This implementation mirrors the CLI's executeWorkflowV2 function
 	return s.executeWorkflowV2WithProvider(tmpl, inputData, providerName, providerConfig, actualWorkflowKey, toolExposure)
@@ -405,26 +405,26 @@ func (s *Service) executeWorkflowV2(tmpl *config.WorkflowV2, inputData string, a
 func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputData string, providerName string, providerConfig *config.ProviderConfig, actualWorkflowKey string, toolExposure *runas.ToolExposure) (string, error) {
 	// Convert provider name to ProviderType (configuration-driven)
 	providerType := domain.ProviderType(providerName)
-	
+
 	logging.Debug("Creating provider: %s", providerType)
-	
+
 	// Get interface type from configuration
-	
+
 	// Create logger for workflow
 	logger := workflowservice.NewLogger(tmpl.Execution.Logging, false)
-	
+
 	// CRITICAL: In MCP serve mode, all logging must go to stderr
 	// stdout is reserved for JSON-RPC messages only
 	logger.SetOutput(os.Stderr)
-	
+
 	// Create orchestrator with workflow KEY for contextual nested workflow resolution
 	// This allows loops and nested workflows to resolve relative paths correctly
 	orchestrator := workflowservice.NewOrchestratorWithKey(tmpl, actualWorkflowKey, logger)
-	
+
 	// Set application config for provider creation and nested workflows
 	orchestrator.SetAppConfig(s.appConfig)
 	orchestrator.SetAppConfigForWorkflows(s.appConfig)
-	
+
 	// CRITICAL: Set skills service as server manager for built-in skill execution
 	// Use SkillsAwareServerManager to properly expose all skill tools
 	if s.skillService != nil {
@@ -434,14 +434,14 @@ func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputDa
 			orchestrator.SetServerManager(serverManager)
 		}
 	}
-	
+
 	// Execute workflow
 	ctx := context.Background()
 	err := orchestrator.Execute(ctx, inputData)
 	if err != nil {
 		return "", fmt.Errorf("workflow execution failed: %w", err)
 	}
-	
+
 	// Get result from last step
 	result := ""
 	if len(tmpl.Steps) > 0 {
@@ -450,19 +450,19 @@ func (s *Service) executeWorkflowV2WithProvider(tmpl *config.WorkflowV2, inputDa
 			result = output
 		}
 	}
-	
+
 	// Return result
 	if result != "" {
 		return result, nil
 	}
-	
+
 	return fmt.Sprintf("Workflow '%s' completed but produced no output", tmpl.Name), nil
 }
 
 // handleSkillToolCall handles calls to skill tools (tools using load_skill template)
 func (s *Service) handleSkillToolCall(toolExposure *runas.ToolExposure, arguments map[string]interface{}) (map[string]interface{}, error) {
 	logging.Info("Handling skill tool call: %s", toolExposure.Name)
-	
+
 	// Extract skill name from input mapping
 	skillName := ""
 	if mapping, ok := toolExposure.InputMapping["skill_name"]; ok {
@@ -471,22 +471,22 @@ func (s *Service) handleSkillToolCall(toolExposure *runas.ToolExposure, argument
 		// Fallback: convert tool name (python_best_practices -> python-best-practices)
 		skillName = strings.ReplaceAll(toolExposure.Name, "_", "-")
 	}
-	
+
 	// Build skill load request
 	request := &skills.SkillLoadRequest{
 		SkillName: skillName,
 		Mode:      skills.SkillLoadModePassive, // Default
 	}
-	
+
 	// Extract parameters from arguments
 	if mode, ok := arguments["mode"].(string); ok {
 		request.Mode = skills.SkillLoadMode(mode)
 	}
-	
+
 	if includeRefs, ok := arguments["include_references"].(bool); ok {
 		request.IncludeReferences = includeRefs
 	}
-	
+
 	if refFiles, ok := arguments["reference_files"].([]interface{}); ok {
 		for _, ref := range refFiles {
 			if refStr, ok := ref.(string); ok {
@@ -494,11 +494,11 @@ func (s *Service) handleSkillToolCall(toolExposure *runas.ToolExposure, argument
 			}
 		}
 	}
-	
+
 	if inputData, ok := arguments["input_data"].(string); ok {
 		request.InputData = inputData
 	}
-	
+
 	// Load the skill
 	result, err := s.skillService.LoadSkillByRequest(request)
 	if err != nil {
@@ -513,15 +513,15 @@ func (s *Service) handleSkillToolCall(toolExposure *runas.ToolExposure, argument
 			"isError": true,
 		}, nil
 	}
-	
+
 	// Return skill content
 	content := result.Content
 	if result.Mode == skills.SkillLoadModeActive {
 		content = result.Result
 	}
-	
+
 	logging.Info("Successfully loaded skill: %s (%d chars)", skillName, len(content))
-	
+
 	return map[string]interface{}{
 		"content": []interface{}{
 			map[string]interface{}{
@@ -535,27 +535,26 @@ func (s *Service) handleSkillToolCall(toolExposure *runas.ToolExposure, argument
 // handleExecuteSkillCode handles the execute_skill_code tool
 func (s *Service) handleExecuteSkillCode(arguments map[string]interface{}) (map[string]interface{}, error) {
 	logging.Info("Handling execute_skill_code request")
-	
+
 	// Extract skill_name
 	skillName, ok := arguments["skill_name"].(string)
 	if !ok || skillName == "" {
 		return s.errorResponse("skill_name parameter is required"), nil
 	}
-	
-	
+
 	// Get configured language(s) for this skill
 	configLanguage := s.skillService.GetSkillLanguage(skillName)
 	supportedLanguages := s.skillService.GetSkillLanguages(skillName)
-	
+
 	// Extract language from request (optional)
 	requestLanguage, _ := arguments["language"].(string)
-	
+
 	// Determine final language to use
 	var language string
 	if requestLanguage != "" {
 		// Language specified by caller - validate it
 		language = requestLanguage
-		
+
 		// Validate against config if config specifies languages
 		if len(supportedLanguages) > 0 {
 			valid := false
@@ -566,7 +565,7 @@ func (s *Service) handleExecuteSkillCode(arguments map[string]interface{}) (map[
 				}
 			}
 			if !valid {
-				return nil, fmt.Errorf("skill '%s' requires language to be one of %v, got '%s'", 
+				return nil, fmt.Errorf("skill '%s' requires language to be one of %v, got '%s'",
 					skillName, supportedLanguages, language)
 			}
 		}
@@ -578,26 +577,26 @@ func (s *Service) handleExecuteSkillCode(arguments map[string]interface{}) (map[
 		} else {
 			// Multi-language skill or no config - require explicit specification
 			if len(supportedLanguages) > 1 {
-				return nil, fmt.Errorf("skill '%s' supports multiple languages %v - you must specify which one to use", 
+				return nil, fmt.Errorf("skill '%s' supports multiple languages %v - you must specify which one to use",
 					skillName, supportedLanguages)
 			}
 			return nil, fmt.Errorf("language parameter is required for skill '%s'", skillName)
 		}
 	}
-	
+
 	// Final validation
 	if language != "bash" && language != "python" {
 		return nil, fmt.Errorf("language must be 'bash' or 'python', got: %s", language)
 	}
-	
+
 	// Extract code
 	code, ok := arguments["code"].(string)
 	if !ok || code == "" {
 		return s.errorResponse("code parameter is required"), nil
 	}
-	
+
 	logging.Info("Executing code for skill: %s (language: %s, code length: %d)", skillName, language, len(code))
-	
+
 	// Extract files (optional)
 	files := make(map[string][]byte)
 	if filesArg, ok := arguments["files"].(map[string]interface{}); ok {
@@ -615,7 +614,7 @@ func (s *Service) handleExecuteSkillCode(arguments map[string]interface{}) (map[
 			}
 		}
 	}
-	
+
 	// Create execution request
 	request := &skills.CodeExecutionRequest{
 		SkillName: skillName,
@@ -624,29 +623,29 @@ func (s *Service) handleExecuteSkillCode(arguments map[string]interface{}) (map[
 		Files:     files,
 		Timeout:   60, // 60 second timeout
 	}
-	
+
 	// Execute code
 	result, err := s.skillService.ExecuteCode(request)
 	if err != nil {
 		logging.Error("Code execution failed: %v", err)
 		return s.errorResponse(fmt.Sprintf("Code execution failed: %v", err)), nil
 	}
-	
+
 	// Check if execution had an error
 	if result.Error != nil {
 		logging.Warn("Code execution completed with error: %v", result.Error)
 		return s.errorResponse(fmt.Sprintf("Code execution error: %v\n\nOutput:\n%s", result.Error, result.Output)), nil
 	}
-	
+
 	// Success!
 	logging.Info("Code executed successfully (exit code: %d, duration: %dms)", result.ExitCode, result.Duration)
-	
+
 	// Format response with output
 	responseText := result.Output
 	if result.Duration > 0 {
 		responseText = fmt.Sprintf("%s\n\n[Executed in %dms]", result.Output, result.Duration)
 	}
-	
+
 	return map[string]interface{}{
 		"content": []interface{}{
 			map[string]interface{}{
@@ -667,7 +666,7 @@ func (s *Service) errorResponse(message string) map[string]interface{} {
 			},
 		},
 		"isError": true,
-		"error": message,  // Add error field for proper error propagation
+		"error":   message, // Add error field for proper error propagation
 	}
 }
 
@@ -713,30 +712,30 @@ func (s *Service) handleTaskAugmentedToolCall(toolName string, params map[string
 	if s.taskManager == nil {
 		return nil, fmt.Errorf("task support not enabled on this server")
 	}
-	
+
 	// Extract requested TTL
 	var requestedTTL int64
 	if ttl, ok := taskRequest["ttl"].(float64); ok {
 		requestedTTL = int64(ttl)
 	}
-	
+
 	// Serialize request params for storage
 	paramsJSON, err := json.Marshal(params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize request params: %w", err)
 	}
-	
+
 	// Create task
 	task, err := s.taskManager.CreateTask("tools/call", paramsJSON, requestedTTL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create task: %w", err)
 	}
-	
+
 	logging.Info("Created task %s for tool %s", task.ID, toolName)
-	
+
 	// Execute tool in background
 	go s.executeToolInBackground(task, toolName, params)
-	
+
 	// Return CreateTaskResult immediately
 	return map[string]interface{}{
 		"task": task.GetMetadata(s.taskManager.GetPollInterval()),
@@ -751,28 +750,28 @@ func (s *Service) executeToolInBackground(task *domain.Task, toolName string, pa
 			task.SetError(fmt.Errorf("panic: %v", r), false)
 		}
 	}()
-	
+
 	logging.Info("Starting background execution of tool %s (task %s)", toolName, task.ID)
-	
+
 	// Execute the standard tool call
 	result, err := s.handleStandardToolCall(toolName, params)
-	
+
 	// Check for cancellation
 	select {
 	case <-task.Cancel:
-		logging.Info("Task %s was cancelled during execution", task.ID)
+		logging.Info("Task %s was canceled during execution", task.ID)
 		task.SetCancelled()
 		return
 	default:
 	}
-	
+
 	// Update task with result
 	if err != nil {
 		logging.Error("Task %s failed: %v", task.ID, err)
 		task.SetError(err, false)
 		return
 	}
-	
+
 	// Check if result indicates a tool error
 	if isError, ok := result["isError"].(bool); ok && isError {
 		errorMsg := fmt.Sprintf("Tool error: %v", result["error"])
@@ -780,7 +779,7 @@ func (s *Service) executeToolInBackground(task *domain.Task, toolName string, pa
 		task.SetError(fmt.Errorf("%s", errorMsg), true)
 		return
 	}
-	
+
 	logging.Info("Task %s completed successfully", task.ID)
 	task.SetResult(result)
 }
@@ -790,19 +789,19 @@ func (s *Service) HandleTasksGet(params map[string]interface{}) (map[string]inte
 	if s.taskManager == nil {
 		return nil, fmt.Errorf("task support not enabled")
 	}
-	
+
 	taskID, ok := params["taskId"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid taskId parameter")
 	}
-	
+
 	logging.Info("Tasks/get request for task %s", taskID)
-	
+
 	metadata, err := s.taskManager.GetTaskMetadata(taskID)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return map[string]interface{}{
 		"task": metadata,
 	}, nil
@@ -813,25 +812,25 @@ func (s *Service) HandleTasksResult(params map[string]interface{}) (map[string]i
 	if s.taskManager == nil {
 		return nil, fmt.Errorf("task support not enabled")
 	}
-	
+
 	taskID, ok := params["taskId"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid taskId parameter")
 	}
-	
+
 	logging.Info("Tasks/result request for task %s", taskID)
-	
+
 	// Wait for result (blocks until task completes)
 	result, err := s.taskManager.WaitForResult(taskID, 30*time.Minute)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Return the result (should be a map from tool execution)
 	if resultMap, ok := result.(map[string]interface{}); ok {
 		return resultMap, nil
 	}
-	
+
 	// Wrap in standard format if not already
 	return map[string]interface{}{
 		"content": []interface{}{
@@ -848,28 +847,28 @@ func (s *Service) HandleTasksList(params map[string]interface{}) (map[string]int
 	if s.taskManager == nil {
 		return nil, fmt.Errorf("task support not enabled")
 	}
-	
+
 	cursor := ""
 	if c, ok := params["cursor"].(string); ok {
 		cursor = c
 	}
-	
+
 	logging.Info("Tasks/list request (cursor: %s)", cursor)
-	
+
 	// List tasks with pagination
 	tasks, nextCursor, err := s.taskManager.ListTasks(cursor, 20)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	result := map[string]interface{}{
 		"tasks": tasks,
 	}
-	
+
 	if nextCursor != "" {
 		result["nextCursor"] = nextCursor
 	}
-	
+
 	return result, nil
 }
 
@@ -878,25 +877,25 @@ func (s *Service) HandleTasksCancel(params map[string]interface{}) (map[string]i
 	if s.taskManager == nil {
 		return nil, fmt.Errorf("task support not enabled")
 	}
-	
+
 	taskID, ok := params["taskId"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid taskId parameter")
 	}
-	
+
 	logging.Info("Tasks/cancel request for task %s", taskID)
-	
+
 	// Cancel the task
 	if err := s.taskManager.CancelTask(taskID); err != nil {
 		return nil, err
 	}
-	
+
 	// Get updated metadata
 	metadata, err := s.taskManager.GetTaskMetadata(taskID)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return map[string]interface{}{
 		"task": metadata,
 	}, nil

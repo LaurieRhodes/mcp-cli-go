@@ -3,8 +3,8 @@ package cmd
 import (
 	"strings"
 
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/chat"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -25,7 +25,7 @@ provider types including OpenAI, Anthropic, Ollama, and others.`,
 
 		// Get output manager
 		outputMgr := output.GetGlobalManager()
-		
+
 		// Only show startup info if verbose
 		if outputMgr.ShouldShowStartupInfo() {
 			bold := color.New(color.Bold)
@@ -33,7 +33,7 @@ provider types including OpenAI, Anthropic, Ollama, and others.`,
 			if serversText == "" {
 				serversText = "none"
 			}
-			bold.Printf("Starting chat mode with servers: %s, provider: %s, model: %s\n\n", 
+			bold.Printf("Starting chat mode with servers: %s, provider: %s, model: %s\n\n",
 				serversText, chatConfig.ProviderName, chatConfig.ModelName)
 		}
 
@@ -44,10 +44,10 @@ provider types including OpenAI, Anthropic, Ollama, and others.`,
 }
 
 // parseChatConfig parses command line arguments into chat service config
-func parseChatConfig(cmd *cobra.Command, args []string) *chat.Config {
+func parseChatConfig(_ *cobra.Command, _ []string) *chat.Config {
 	// Process server configuration options - pass configFile
 	serverNames, userSpecified := host.ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
-	
+
 	// Parse skill names if provided
 	var skillNamesSlice []string
 	if skillNames != "" {
@@ -55,7 +55,7 @@ func parseChatConfig(cmd *cobra.Command, args []string) *chat.Config {
 			skillNamesSlice = append(skillNamesSlice, strings.TrimSpace(s))
 		}
 	}
-	
+
 	return &chat.Config{
 		ConfigFile:        configFile,
 		ServerName:        serverName,

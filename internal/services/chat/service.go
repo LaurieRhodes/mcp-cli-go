@@ -1,9 +1,10 @@
 package chat
 
 import (
-	appChat "github.com/LaurieRhodes/mcp-cli-go/internal/app/chat"
 	"fmt"
 	"strings"
+
+	appChat "github.com/LaurieRhodes/mcp-cli-go/internal/app/chat"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/core/chat"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
@@ -45,7 +46,7 @@ func NewService() *Service {
 // StartChat starts a chat session with the given configuration
 func (s *Service) StartChat(cfg *Config) error {
 	logging.Info("Initializing chat mode...")
-	
+
 	// Load configuration to get provider config
 	appConfig, err := s.configService.LoadConfig(cfg.ConfigFile)
 	if err == nil {
@@ -59,11 +60,11 @@ func (s *Service) StartChat(cfg *Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
-	
+
 	// Get provider configuration for token management
 	var providerConfig *config.ProviderConfig
 	var interfaceType config.InterfaceType
-	
+
 	// Determine which provider to use (same logic as AI service)
 	providerName := cfg.ProviderName
 	if providerName == "" {
@@ -73,7 +74,7 @@ func (s *Service) StartChat(cfg *Config) error {
 			providerName = "openai" // Final fallback
 		}
 	}
-	
+
 	if providerName != "" {
 		providerConfig, interfaceType, err = s.getProviderConfiguration(appConfig, providerName)
 		if err != nil {
@@ -82,13 +83,13 @@ func (s *Service) StartChat(cfg *Config) error {
 			logging.Info("Loaded provider configuration for %s (interface: %s)", providerName, interfaceType)
 		}
 	}
-	
+
 	// Get the model name (use override or provider default)
 	modelName := cfg.ModelName
 	if modelName == "" && providerConfig != nil {
 		modelName = providerConfig.DefaultModel
 	}
-	
+
 	// Initialize AI provider using the centralized AI service
 	provider, err := s.aiService.InitializeProvider(cfg.ConfigFile, cfg.ProviderName, cfg.ModelName)
 	if err != nil {
@@ -107,7 +108,7 @@ func (s *Service) StartChat(cfg *Config) error {
 	// ARCHITECTURAL FIX: Separate built-in skills from external servers
 	externalServers, needsSkills := infraSkills.SeparateSkillsFromServers(cfg.ServerNames)
 	logging.Debug("External servers: %v, needs built-in skills: %v", externalServers, needsSkills)
-	
+
 	// Update userSpecified map to only include external servers
 	externalUserSpecified := make(map[string]bool)
 	for _, server := range externalServers {
@@ -115,7 +116,7 @@ func (s *Service) StartChat(cfg *Config) error {
 			externalUserSpecified[server] = true
 		}
 	}
-	
+
 	// Initialize built-in skills service if needed
 	var skillService *skillsvc.Service
 	if needsSkills {
@@ -126,7 +127,7 @@ func (s *Service) StartChat(cfg *Config) error {
 		}
 		logging.Info("Built-in skills service initialized successfully")
 	}
-	
+
 	// Execute chat with server connections (ONLY external servers)
 	return host.RunCommand(func(conns []*host.ServerConnection) error {
 		// ARCHITECTURAL FIX: Create server manager (with skills if needed)
@@ -135,7 +136,7 @@ func (s *Service) StartChat(cfg *Config) error {
 			logging.Info("Wrapping chat server manager with built-in skills support")
 			serverManager = infraSkills.NewSkillsAwareServerManager(serverManager, skillService)
 		}
-		
+
 		return s.runChat(serverManager, provider, providerConfig, modelName, ui, appConfig, cfg.SkillNames)
 	}, cfg.ConfigFile, externalServers, externalUserSpecified)
 }
@@ -223,16 +224,16 @@ func (s *Service) runChat(serverManager domain.MCPServerManager, provider domain
 		chatManager = chat.NewChatManagerWithServerManagerAndUI(provider, serverManager, nil, model, ui)
 		logging.Info("Created chat manager with server manager and fallback token management")
 	}
-	
+
 	// Set enabled skills
 	chatManager.EnabledSkills = skillNames
-	
+
 	// Configure session logging if enabled
 	if sessionLogger != nil && sessionLogger.IsEnabled() {
 		providerName := string(provider.GetProviderType())
 		chatManager.SetSessionLogger(sessionLogger, providerName, model)
 	}
-	
+
 	if err := chatManager.StartChat(); err != nil {
 		return fmt.Errorf("chat error: %w", err)
 	}

@@ -45,25 +45,25 @@ func init() {
 
 func runInit(cmd *cobra.Command, args []string) error {
 	reader := bufio.NewReader(os.Stdin)
-	
+
 	// Get executable directory
 	execDir := getExecutableDir()
-	
+
 	// Welcome message
 	printWelcome()
-	
+
 	// Check if config already exists
 	configPath := filepath.Join(execDir, "config.yaml")
-	
+
 	if _, err := os.Stat(configPath); err == nil {
 		fmt.Println("⚠️  Configuration file already exists at:", configPath)
 		fmt.Print("Overwrite? [y/N]: ")
 		response, _ := reader.ReadString('\n')
 		if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(response)), "y") {
-			fmt.Println("Setup cancelled.")
+			fmt.Println("Setup canceled.")
 			return nil
 		}
-		
+
 		// Backup existing config
 		backupPath := configPath + ".backup"
 		if err := copyFile(configPath, backupPath); err != nil {
@@ -72,9 +72,9 @@ func runInit(cmd *cobra.Command, args []string) error {
 			fmt.Println("✓ Created backup at:", backupPath)
 		}
 	}
-	
+
 	var cfg *InitConfig
-	
+
 	// Check for "all services" mode first (unless using --quick or --full flags)
 	if !quickMode && !fullMode {
 		fmt.Println()
@@ -83,13 +83,13 @@ func runInit(cmd *cobra.Command, args []string) error {
 		fmt.Println("You can create a complete configuration with all services enabled,")
 		fmt.Println("or proceed with interactive setup to customize your installation.")
 		fmt.Println()
-		
+
 		if askYesNo(reader, "Create default config for all services (DeepSeek, RAG, Skills, all providers)", false) {
 			cfg = createAllServicesConfig()
 			return createModularConfig(execDir, cfg)
 		}
 	}
-	
+
 	if quickMode {
 		cfg = createQuickConfig()
 	} else if fullMode {
@@ -97,29 +97,29 @@ func runInit(cmd *cobra.Command, args []string) error {
 	} else {
 		cfg = createStandardConfig(reader)
 	}
-	
+
 	// Always create modular config
 	return createModularConfig(execDir, cfg)
 }
 
 // InitConfig holds configuration choices
 type InitConfig struct {
-	Providers         []string
-	Servers           []string
-	IncludeOllama     bool
-	IncludeOpenAI     bool
-	IncludeAnthropic  bool
-	IncludeDeepSeek   bool
-	IncludeGemini     bool
-	IncludeOpenRouter bool
-	IncludeLMStudio   bool
-	IncludeMoonshot   bool
-	IncludeBedrock    bool
+	Providers           []string
+	Servers             []string
+	IncludeOllama       bool
+	IncludeOpenAI       bool
+	IncludeAnthropic    bool
+	IncludeDeepSeek     bool
+	IncludeGemini       bool
+	IncludeOpenRouter   bool
+	IncludeLMStudio     bool
+	IncludeMoonshot     bool
+	IncludeBedrock      bool
 	IncludeAzureFoundry bool
-	IncludeVertexAI   bool
-	DefaultProvider   string
-	IncludeSkills     bool
-	IncludeRAG        bool
+	IncludeVertexAI     bool
+	DefaultProvider     string
+	IncludeSkills       bool
+	IncludeRAG          bool
 }
 
 func printWelcome() {
@@ -132,7 +132,7 @@ func createQuickConfig() *InitConfig {
 	fmt.Println("   Creating configuration with DeepSeek (requires API key)")
 	fmt.Println("   Includes: RAG support, Skills system")
 	fmt.Println()
-	
+
 	return &InitConfig{
 		Providers:       []string{"deepseek"},
 		Servers:         []string{},
@@ -149,7 +149,7 @@ func createAllServicesConfig() *InitConfig {
 	fmt.Println("   Creating complete configuration with all providers and services")
 	fmt.Println("   Default provider: DeepSeek")
 	fmt.Println()
-	
+
 	return &InitConfig{
 		Providers: []string{
 			"ollama",
@@ -164,21 +164,21 @@ func createAllServicesConfig() *InitConfig {
 			"azure-foundry",
 			"vertex-ai",
 		},
-		Servers:              []string{},
-		IncludeOllama:        true,
-		IncludeOpenAI:        true,
-		IncludeAnthropic:     true,
-		IncludeDeepSeek:      true,
-		IncludeGemini:        true,
-		IncludeOpenRouter:    true,
-		IncludeLMStudio:      true,
-		IncludeMoonshot:      true,
-		IncludeBedrock:       true,
-		IncludeAzureFoundry:  true,
-		IncludeVertexAI:      true,
-		DefaultProvider:      "deepseek",
-		IncludeSkills:        true,
-		IncludeRAG:           true,
+		Servers:             []string{},
+		IncludeOllama:       true,
+		IncludeOpenAI:       true,
+		IncludeAnthropic:    true,
+		IncludeDeepSeek:     true,
+		IncludeGemini:       true,
+		IncludeOpenRouter:   true,
+		IncludeLMStudio:     true,
+		IncludeMoonshot:     true,
+		IncludeBedrock:      true,
+		IncludeAzureFoundry: true,
+		IncludeVertexAI:     true,
+		DefaultProvider:     "deepseek",
+		IncludeSkills:       true,
+		IncludeRAG:          true,
 	}
 }
 
@@ -186,10 +186,10 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 	config := &InitConfig{
 		Servers: []string{}, // Empty - no assumptions about MCP servers
 	}
-	
+
 	fmt.Println("📋 Configuration Setup")
 	fmt.Println()
-	
+
 	// Ask about providers
 	fmt.Println("Which AI providers would you like to configure?")
 	fmt.Println()
@@ -208,7 +208,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 	fmt.Println()
 	fmt.Println("(You can add more providers later by editing config files)")
 	fmt.Println()
-	
+
 	// Ollama (local, no API key)
 	if askYesNo(reader, "Use Ollama (local, no API key needed)", true) {
 		config.IncludeOllama = true
@@ -217,7 +217,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "ollama"
 		}
 	}
-	
+
 	// OpenAI
 	if askYesNo(reader, "Use OpenAI (requires API key)", false) {
 		config.IncludeOpenAI = true
@@ -226,7 +226,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "openai"
 		}
 	}
-	
+
 	// Anthropic
 	if askYesNo(reader, "Use Anthropic Claude (requires API key)", false) {
 		config.IncludeAnthropic = true
@@ -235,7 +235,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "anthropic"
 		}
 	}
-	
+
 	// AWS Bedrock
 	if askYesNo(reader, "Use AWS Bedrock (requires AWS credentials)", false) {
 		config.IncludeBedrock = true
@@ -244,7 +244,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "bedrock"
 		}
 	}
-	
+
 	// Azure Foundry
 	if askYesNo(reader, "Use Azure AI Foundry (requires Azure credentials)", false) {
 		config.IncludeAzureFoundry = true
@@ -253,7 +253,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "azure-foundry"
 		}
 	}
-	
+
 	// GCP Vertex AI
 	if askYesNo(reader, "Use GCP Vertex AI (requires GCP credentials)", false) {
 		config.IncludeVertexAI = true
@@ -262,7 +262,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "vertex-ai"
 		}
 	}
-	
+
 	// DeepSeek
 	if askYesNo(reader, "Use DeepSeek (requires API key)", false) {
 		config.IncludeDeepSeek = true
@@ -271,7 +271,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "deepseek"
 		}
 	}
-	
+
 	// Gemini
 	if askYesNo(reader, "Use Gemini (requires API key)", false) {
 		config.IncludeGemini = true
@@ -280,7 +280,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "gemini"
 		}
 	}
-	
+
 	// OpenRouter
 	if askYesNo(reader, "Use OpenRouter (requires API key)", false) {
 		config.IncludeOpenRouter = true
@@ -289,7 +289,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "openrouter"
 		}
 	}
-	
+
 	// LM Studio
 	if askYesNo(reader, "Use LM Studio (local server, no API key)", false) {
 		config.IncludeLMStudio = true
@@ -298,7 +298,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "lmstudio"
 		}
 	}
-	
+
 	// Moonshot
 	if askYesNo(reader, "Use Moonshot Kimi (requires API key)", false) {
 		config.IncludeMoonshot = true
@@ -307,7 +307,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = "kimik2"
 		}
 	}
-	
+
 	// Default to ollama if no providers selected
 	if len(config.Providers) == 0 {
 		fmt.Println("\n💡 No providers selected. Defaulting to Ollama (local)")
@@ -315,7 +315,7 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 		config.Providers = append(config.Providers, "ollama")
 		config.DefaultProvider = "ollama"
 	}
-	
+
 	// Ask about default provider if multiple
 	if len(config.Providers) > 1 {
 		fmt.Println("\nMultiple providers configured.")
@@ -327,45 +327,45 @@ func createStandardConfig(reader *bufio.Reader) *InitConfig {
 			config.DefaultProvider = response
 		}
 	}
-	
+
 	// Ask about skills
 	fmt.Println()
 	fmt.Println("🎯 Anthropic Skills System:")
 	fmt.Println("Skills provide helper libraries for document creation, data processing, etc.")
 	fmt.Println("These enable dynamic code execution with helper library imports.")
 	fmt.Println()
-	
+
 	if askYesNo(reader, "Set up skills directory (download skills from GitHub)", true) {
 		config.IncludeSkills = true
 		fmt.Println("   ✓ Will create skills directory with README")
 		fmt.Println("   💡 Download skills from: https://github.com/anthropics/skills")
 	}
-	
+
 	// Ask about RAG
 	fmt.Println()
 	fmt.Println("🔍 RAG (Retrieval-Augmented Generation):")
 	fmt.Println("RAG allows workflows to search vector databases and retrieve context.")
 	fmt.Println("This is useful for document search, knowledge bases, and contextual responses.")
 	fmt.Println()
-	
+
 	if askYesNo(reader, "Set up RAG configuration directory", false) {
 		config.IncludeRAG = true
 		fmt.Println("   ✓ Will create config/rag/ directory")
 	}
-	
+
 	fmt.Println()
 	return config
 }
 
 func createFullConfig(reader *bufio.Reader) *InitConfig {
 	config := createStandardConfig(reader)
-	
+
 	// Ask about MCP servers
 	fmt.Println("\nMCP Servers:")
 	fmt.Println("MCP servers provide additional capabilities like file access, web search,")
 	fmt.Println("database connections, etc. You'll need to install and configure them separately.")
 	fmt.Println()
-	
+
 	if askYesNo(reader, "Add placeholder for MCP servers in config", false) {
 		fmt.Println()
 		fmt.Println("💡 To add MCP servers:")
@@ -378,7 +378,7 @@ func createFullConfig(reader *bufio.Reader) *InitConfig {
 		fmt.Println(`        command: /path/to/myserver-binary`)
 		fmt.Println()
 	}
-	
+
 	return config
 }
 
@@ -387,54 +387,54 @@ func askYesNo(reader *bufio.Reader, question string, defaultYes bool) bool {
 	if defaultYes {
 		prompt = "[Y/n]"
 	}
-	
+
 	fmt.Printf("%s %s: ", question, prompt)
 	response, _ := reader.ReadString('\n')
 	response = strings.ToLower(strings.TrimSpace(response))
-	
+
 	if response == "" {
 		return defaultYes
 	}
-	
+
 	return strings.HasPrefix(response, "y")
 }
 
 func createEnvFile(path string, config *InitConfig) error {
 	var content strings.Builder
-	
+
 	content.WriteString("# MCP CLI Environment Variables\n")
 	content.WriteString("# Generated by mcp-cli init\n\n")
-	
+
 	if config.IncludeOpenAI {
 		content.WriteString("# OpenAI API Key\n")
 		content.WriteString("# Get from: https://platform.openai.com/api-keys\n")
 		content.WriteString("OPENAI_API_KEY=\n\n")
 	}
-	
+
 	if config.IncludeAnthropic {
 		content.WriteString("# Anthropic API Key\n")
 		content.WriteString("# Get from: https://console.anthropic.com/\n")
 		content.WriteString("ANTHROPIC_API_KEY=\n\n")
 	}
-	
+
 	if config.IncludeDeepSeek {
 		content.WriteString("# DeepSeek API Key\n")
 		content.WriteString("# Get from: https://platform.deepseek.com/\n")
 		content.WriteString("DEEPSEEK_API_KEY=\n\n")
 	}
-	
+
 	if config.IncludeGemini {
 		content.WriteString("# Gemini API Key\n")
 		content.WriteString("# Get from: https://makersuite.google.com/app/apikey\n")
 		content.WriteString("GEMINI_API_KEY=\n\n")
 	}
-	
+
 	if config.IncludeOpenRouter {
 		content.WriteString("# OpenRouter API Key\n")
 		content.WriteString("# Get from: https://openrouter.ai/keys\n")
 		content.WriteString("OPENROUTER_API_KEY=\n\n")
 	}
-	
+
 	if config.IncludeBedrock {
 		content.WriteString("# AWS Bedrock Credentials\n")
 		content.WriteString("# Get from: AWS IAM Console\n")
@@ -443,14 +443,14 @@ func createEnvFile(path string, config *InitConfig) error {
 		content.WriteString("AWS_REGION=us-east-1\n")
 		content.WriteString("# AWS_SESSION_TOKEN=  # Optional, for temporary credentials\n\n")
 	}
-	
+
 	if config.IncludeAzureFoundry {
 		content.WriteString("# Azure AI Foundry Credentials\n")
 		content.WriteString("# Get from: Azure Portal > AI Foundry Resource > Keys and Endpoint\n")
 		content.WriteString("AZURE_FOUNDRY_API_KEY=\n")
 		content.WriteString("# AZURE_FOUNDRY_ENDPOINT=https://your-resource.openai.azure.com/openai/v1/\n\n")
 	}
-	
+
 	if config.IncludeVertexAI {
 		content.WriteString("# GCP Vertex AI Credentials\n")
 		content.WriteString("# Setup:\n")
@@ -462,14 +462,14 @@ func createEnvFile(path string, config *InitConfig) error {
 		content.WriteString("GCP_LOCATION=us-central1\n")
 		content.WriteString("GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json\n\n")
 	}
-	
+
 	// Only create .env if there are API keys to configure
-	if config.IncludeOpenAI || config.IncludeAnthropic || config.IncludeDeepSeek || 
-	   config.IncludeGemini || config.IncludeOpenRouter || config.IncludeBedrock ||
-	   config.IncludeAzureFoundry || config.IncludeVertexAI {
+	if config.IncludeOpenAI || config.IncludeAnthropic || config.IncludeDeepSeek ||
+		config.IncludeGemini || config.IncludeOpenRouter || config.IncludeBedrock ||
+		config.IncludeAzureFoundry || config.IncludeVertexAI {
 		return os.WriteFile(path, []byte(content.String()), 0644)
 	}
-	
+
 	return nil
 }
 
@@ -485,7 +485,7 @@ func getExecutableDir() string {
 func createModularConfig(baseDir string, initCfg *InitConfig) error {
 	// Create config directory next to executable
 	configDir := filepath.Join(baseDir, "config")
-	
+
 	// Ask user if they want a different location
 	fmt.Println()
 	fmt.Printf("📁 Config directory will be created at: %s\n", configDir)
@@ -493,8 +493,8 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 	reader := bufio.NewReader(os.Stdin)
 	response, _ := reader.ReadString('\n')
 	response = strings.TrimSpace(response)
-	
-	if strings.ToLower(response) == "n" {
+
+	if strings.EqualFold(response, "n") {
 		fmt.Print("Enter custom path: ")
 		customPath, _ := reader.ReadString('\n')
 		customPath = strings.TrimSpace(customPath)
@@ -509,61 +509,61 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 			}
 		}
 	}
-	
+
 	// Check if directory exists
 	if _, err := os.Stat(configDir); err == nil {
 		fmt.Printf("⚠️  Directory already exists: %s\n", configDir)
 		fmt.Print("Overwrite? [y/N]: ")
 		response, _ := reader.ReadString('\n')
 		if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(response)), "y") {
-			fmt.Println("Setup cancelled.")
+			fmt.Println("Setup canceled.")
 			return nil
 		}
 	}
-	
+
 	// Create generator config
 	genConfig := &config.GeneratorConfig{
-		Providers:          initCfg.Providers,
-		Servers:            initCfg.Servers,
-		DefaultProvider:    initCfg.DefaultProvider,
-		IncludeOllama:      initCfg.IncludeOllama,
-		IncludeOpenAI:      initCfg.IncludeOpenAI,
-		IncludeAnthropic:   initCfg.IncludeAnthropic,
-		IncludeDeepSeek:    initCfg.IncludeDeepSeek,
-		IncludeGemini:      initCfg.IncludeGemini,
-		IncludeOpenRouter:  initCfg.IncludeOpenRouter,
-		IncludeLMStudio:    initCfg.IncludeLMStudio,
-		IncludeMoonshot:    initCfg.IncludeMoonshot,
-		IncludeBedrock:     initCfg.IncludeBedrock,
+		Providers:           initCfg.Providers,
+		Servers:             initCfg.Servers,
+		DefaultProvider:     initCfg.DefaultProvider,
+		IncludeOllama:       initCfg.IncludeOllama,
+		IncludeOpenAI:       initCfg.IncludeOpenAI,
+		IncludeAnthropic:    initCfg.IncludeAnthropic,
+		IncludeDeepSeek:     initCfg.IncludeDeepSeek,
+		IncludeGemini:       initCfg.IncludeGemini,
+		IncludeOpenRouter:   initCfg.IncludeOpenRouter,
+		IncludeLMStudio:     initCfg.IncludeLMStudio,
+		IncludeMoonshot:     initCfg.IncludeMoonshot,
+		IncludeBedrock:      initCfg.IncludeBedrock,
 		IncludeAzureFoundry: initCfg.IncludeAzureFoundry,
-		IncludeVertexAI:    initCfg.IncludeVertexAI,
+		IncludeVertexAI:     initCfg.IncludeVertexAI,
 	}
-	
+
 	// Generate modular config
 	generator := config.NewModularConfigGenerator(configDir)
 	if err := generator.Generate(genConfig); err != nil {
 		return fmt.Errorf("failed to generate modular config: %w", err)
 	}
-	
+
 	// Create RAG directory if requested
 	if initCfg.IncludeRAG {
 		if err := createRAGDirectory(configDir); err != nil {
 			return fmt.Errorf("failed to create RAG directory: %w", err)
 		}
 	}
-	
+
 	// Create skills if requested
 	if initCfg.IncludeSkills {
 		if err := createSkillsDirectory(configDir, initCfg); err != nil {
 			return fmt.Errorf("failed to create skills: %w", err)
 		}
-		
+
 		// Create skills-auto.yaml runas config
 		if err := createSkillsRunAsConfig(configDir); err != nil {
 			return fmt.Errorf("failed to create skills runas config: %w", err)
 		}
 	}
-	
+
 	// Create .env file at executable level (parent directory)
 	parentDir := filepath.Dir(configDir)
 	if initCfg.IncludeOpenAI || initCfg.IncludeAnthropic || initCfg.IncludeDeepSeek ||
@@ -574,10 +574,10 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 			return fmt.Errorf("failed to create .env file: %w", err)
 		}
 	}
-	
+
 	// Print success message
 	printModularSuccess(configDir, initCfg)
-	
+
 	return nil
 }
 
@@ -585,13 +585,13 @@ func createModularConfig(baseDir string, initCfg *InitConfig) error {
 func printModularSuccess(configDir string, cfg *InitConfig) {
 	success := color.New(color.FgGreen, color.Bold)
 	info := color.New(color.FgCyan)
-	
+
 	parentDir := filepath.Dir(configDir)
-	
+
 	fmt.Println()
 	success.Println("✅ Modular Configuration Created!")
 	fmt.Println()
-	
+
 	info.Println("📁 Created structure:")
 	fmt.Printf("   %s/\n", parentDir)
 	fmt.Println("   ├── config.yaml          # Main config")
@@ -624,7 +624,7 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 	fmt.Println("       │   └── README.md")
 	fmt.Println("       └── workflows/")
 	fmt.Println()
-	
+
 	if cfg.IncludeOpenAI || cfg.IncludeAnthropic || cfg.IncludeDeepSeek ||
 		cfg.IncludeGemini || cfg.IncludeOpenRouter || cfg.IncludeBedrock ||
 		cfg.IncludeAzureFoundry || cfg.IncludeVertexAI {
@@ -632,7 +632,7 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 		fmt.Printf("   Edit: %s/.env\n", parentDir)
 		fmt.Println()
 	}
-	
+
 	info.Println("🎯 Next steps:")
 	fmt.Printf("   1. Review: %s/README.md\n", configDir)
 	if cfg.IncludeOpenAI || cfg.IncludeAnthropic || cfg.IncludeDeepSeek ||
@@ -653,7 +653,7 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 			fmt.Printf("   2. Run: ./mcp-cli query \"hello\"\n")
 		}
 	}
-	
+
 	fmt.Println()
 	info.Println("💡 Tips:")
 	fmt.Println("   • LLM and embedding providers are separated for clarity")
@@ -671,14 +671,14 @@ func printModularSuccess(configDir string, cfg *InitConfig) {
 func createRAGDirectory(configDir string) error {
 	ragDir := filepath.Join(configDir, "rag")
 	expansionDir := filepath.Join(ragDir, "expansion")
-	
+
 	color.New(color.FgCyan).Println("🔍 Creating RAG Configuration...")
-	
+
 	// Create directories
 	if err := os.MkdirAll(expansionDir, 0755); err != nil {
 		return fmt.Errorf("failed to create RAG directories: %w", err)
 	}
-	
+
 	// Create README
 	readmeContent := `# RAG Configuration
 
@@ -797,31 +797,31 @@ mcp-cli rag config --strategies
 - RAG patterns: See config/workflows/ examples
 - Query expansion: See config/rag/expansion/ for strategies
 `
-	
+
 	readmePath := filepath.Join(ragDir, "README.md")
 	if err := os.WriteFile(readmePath, []byte(readmeContent), 0644); err != nil {
 		return fmt.Errorf("failed to create RAG README: %w", err)
 	}
-	
+
 	fmt.Println("   ✓ Created config/rag/")
 	fmt.Println("   ✓ Created config/rag/expansion/")
 	fmt.Println("   ✓ Created config/rag/README.md")
-	
+
 	return nil
 }
 
 // createSkillsDirectory creates the skills directory with README pointing to Anthropic skills
 func createSkillsDirectory(configDir string, cfg *InitConfig) error {
 	skillsDir := filepath.Join(configDir, "skills")
-	
+
 	fmt.Println()
 	color.New(color.FgCyan).Println("📦 Creating Skills Directory...")
-	
+
 	// Create skills directory
 	if err := os.MkdirAll(skillsDir, 0755); err != nil {
 		return fmt.Errorf("failed to create skills directory: %w", err)
 	}
-	
+
 	// Create README with clear native vs MCP distinction
 	readmePath := filepath.Join(skillsDir, "README.md")
 	readmeContent := `# Skills Directory
@@ -1026,22 +1026,22 @@ mcp-cli serve config/runas/skills-auto.yaml
 **🚀 Skills work natively in mcp-cli - no server required!**  
 **🌐 But you can also share them via MCP server when needed.**
 `
-	
+
 	if err := os.WriteFile(readmePath, []byte(readmeContent), 0644); err != nil {
 		return fmt.Errorf("failed to create skills README: %w", err)
 	}
-	
+
 	fmt.Println("   ✓ Created README.md")
-	
+
 	// Create skill-images.yaml
 	if err := createSkillImagesConfig(skillsDir); err != nil {
 		return fmt.Errorf("failed to create skill-images.yaml: %w", err)
 	}
 	fmt.Println("   ✓ Created skill-images.yaml")
-	
+
 	fmt.Println("   💡 Download skills from: https://github.com/anthropics/skills")
 	fmt.Println()
-	
+
 	return nil
 }
 
@@ -1051,7 +1051,7 @@ func createSkillsRunAsConfig(configDir string) error {
 	if err := os.MkdirAll(runasDir, 0755); err != nil {
 		return err
 	}
-	
+
 	skillsConfig := `# Skills MCP Server Configuration
 # This configuration exposes all skills in config/skills as MCP tools
 
@@ -1086,12 +1086,12 @@ skills_config:
 # - Import from skill's scripts/ directory
 # - Create documents, process data, etc.
 `
-	
+
 	configPath := filepath.Join(runasDir, "skills-auto.yaml")
 	if err := os.WriteFile(configPath, []byte(skillsConfig), 0644); err != nil {
 		return err
 	}
-	
+
 	fmt.Println("   ✓ Created runasMCP/skills-auto.yaml")
 	return nil
 }
@@ -1200,12 +1200,12 @@ skills:
 #   - Quick Reference: docs/SKILLS_NETWORK_QUICK_REFERENCE.md
 #   - Security Guide: docs/SECURITY.md
 `
-	
+
 	configPath := filepath.Join(skillsDir, "skill-images.yaml")
 	if err := os.WriteFile(configPath, []byte(skillImagesConfig), 0644); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -1215,19 +1215,19 @@ func copyDir(src, dst string) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Get relative path
 		relPath, err := filepath.Rel(src, path)
 		if err != nil {
 			return err
 		}
-		
+
 		dstPath := filepath.Join(dst, relPath)
-		
+
 		if info.IsDir() {
 			return os.MkdirAll(dstPath, info.Mode())
 		}
-		
+
 		return copyFile(path, dstPath)
 	})
 }

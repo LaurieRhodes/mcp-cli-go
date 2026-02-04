@@ -18,11 +18,11 @@ import (
 
 // OpenAI API request/response structures
 type openaiMessage struct {
-	Role       string                   `json:"role"`
-	Content    string                   `json:"content,omitempty"`
-	Name       string                   `json:"name,omitempty"`
-	ToolCalls  []openaiToolCall         `json:"tool_calls,omitempty"`
-	ToolCallID string                   `json:"tool_call_id,omitempty"`
+	Role       string           `json:"role"`
+	Content    string           `json:"content,omitempty"`
+	Name       string           `json:"name,omitempty"`
+	ToolCalls  []openaiToolCall `json:"tool_calls,omitempty"`
+	ToolCallID string           `json:"tool_call_id,omitempty"`
 }
 
 type openaiToolCall struct {
@@ -51,19 +51,19 @@ type openaiChatRequest struct {
 }
 
 type openaiChatResponse struct {
-	ID      string           `json:"id"`
-	Object  string           `json:"object"`
-	Created int64            `json:"created"`
-	Model   string           `json:"model"`
-	Choices []openaiChoice   `json:"choices"`
-	Usage   openaiUsage      `json:"usage,omitempty"`
+	ID      string         `json:"id"`
+	Object  string         `json:"object"`
+	Created int64          `json:"created"`
+	Model   string         `json:"model"`
+	Choices []openaiChoice `json:"choices"`
+	Usage   openaiUsage    `json:"usage,omitempty"`
 }
 
 type openaiChoice struct {
-	Index        int             `json:"index"`
-	Message      openaiMessage   `json:"message,omitempty"`
-	Delta        openaiMessage   `json:"delta,omitempty"`
-	FinishReason string          `json:"finish_reason,omitempty"`
+	Index        int           `json:"index"`
+	Message      openaiMessage `json:"message,omitempty"`
+	Delta        openaiMessage `json:"delta,omitempty"`
+	FinishReason string        `json:"finish_reason,omitempty"`
 }
 
 type openaiUsage struct {
@@ -178,7 +178,7 @@ func NewOpenAICompatibleClient(providerType domain.ProviderType, cfg *config.Pro
 func (c *OpenAICompatibleClient) CreateCompletion(ctx context.Context, req *domain.CompletionRequest) (*domain.CompletionResponse, error) {
 	// Convert domain messages to OpenAI format
 	messages := convertToOpenAIMessages(req.Messages, req.SystemPrompt)
-	
+
 	// Convert domain tools to OpenAI format
 	tools := convertToOpenAITools(req.Tools)
 
@@ -239,15 +239,14 @@ func (c *OpenAICompatibleClient) CreateCompletion(ctx context.Context, req *doma
 	return nil, fmt.Errorf("failed after %d attempts: %w", c.maxRetries+1, lastErr)
 }
 
-
 // isRetryableError determines if an error should be retried
 func isRetryableError(err error) bool {
 	if err == nil {
 		return false
 	}
-	
+
 	errStr := err.Error()
-	
+
 	// Retry on network/timeout errors
 	if strings.Contains(errStr, "context deadline exceeded") ||
 		strings.Contains(errStr, "connection reset") ||
@@ -255,7 +254,7 @@ func isRetryableError(err error) bool {
 		strings.Contains(errStr, "timeout") {
 		return true
 	}
-	
+
 	// Retry on server errors (5xx) and rate limiting (429)
 	if strings.Contains(errStr, "500 Internal Server Error") ||
 		strings.Contains(errStr, "502 Bad Gateway") ||
@@ -264,7 +263,7 @@ func isRetryableError(err error) bool {
 		strings.Contains(errStr, "429 Too Many Requests") {
 		return true
 	}
-	
+
 	// Do NOT retry on client errors (4xx except 429)
 	if strings.Contains(errStr, "400 Bad Request") ||
 		strings.Contains(errStr, "401 Unauthorized") ||
@@ -272,7 +271,7 @@ func isRetryableError(err error) bool {
 		strings.Contains(errStr, "404 Not Found") {
 		return false
 	}
-	
+
 	// Default: don't retry unknown errors
 	return false
 }
@@ -305,7 +304,7 @@ func (c *OpenAICompatibleClient) StreamCompletion(ctx context.Context, req *doma
 		if err != nil {
 			lastErr = fmt.Errorf("%s API streaming error (attempt %d/%d): %w", c.providerType, retry+1, c.maxRetries+1, err)
 			logging.Error("%v", lastErr)
-			
+
 			// Don't retry client errors (4xx except 429)
 			if !isRetryableError(err) {
 				logging.Error("Non-retryable error detected, failing immediately")
@@ -318,7 +317,7 @@ func (c *OpenAICompatibleClient) StreamCompletion(ctx context.Context, req *doma
 		fullContent, toolCalls, streamErr := c.processStreamingResponse(resp, writer)
 		if streamErr != nil {
 			lastErr = streamErr
-			
+
 			// Only retry on retryable errors
 			if isRetryableError(streamErr) {
 				continue
@@ -506,7 +505,7 @@ func (c *OpenAICompatibleClient) sendRequest(ctx context.Context, endpoint strin
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	// Azure endpoints use "api-key" header, others use "Authorization: Bearer"
 	if c.isAzureEndpoint() {
 		req.Header.Set("api-key", c.apiKey)
@@ -550,14 +549,14 @@ func (c *OpenAICompatibleClient) sendStreamingRequest(ctx context.Context, endpo
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	// Azure endpoints use "api-key" header, others use "Authorization: Bearer"
 	if c.isAzureEndpoint() {
 		req.Header.Set("api-key", c.apiKey)
 	} else {
 		req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	}
-	
+
 	req.Header.Set("Accept", "text/event-stream")
 
 	resp, err := c.httpClient.Do(req)
@@ -624,7 +623,7 @@ func (c *OpenAICompatibleClient) processStreamingResponse(resp *http.Response, w
 		if len(delta.ToolCalls) > 0 {
 			for _, tc := range delta.ToolCalls {
 				idx := 0 // OpenAI doesn't provide index in streaming, use position
-				
+
 				if _, exists := toolCallMap[idx]; !exists {
 					toolCallMap[idx] = &openaiToolCall{
 						ID:   tc.ID,

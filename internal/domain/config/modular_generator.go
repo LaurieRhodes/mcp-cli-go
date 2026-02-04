@@ -82,20 +82,20 @@ func (g *ModularConfigGenerator) Generate(config *GeneratorConfig) error {
 
 // GeneratorConfig holds configuration for the generator
 type GeneratorConfig struct {
-	Providers          []string
-	Servers            []string
-	DefaultProvider    string
-	IncludeOllama      bool
-	IncludeOpenAI      bool
-	IncludeAnthropic   bool
-	IncludeDeepSeek    bool
-	IncludeGemini      bool
-	IncludeOpenRouter  bool
-	IncludeLMStudio    bool
-	IncludeMoonshot    bool
-	IncludeBedrock     bool
+	Providers           []string
+	Servers             []string
+	DefaultProvider     string
+	IncludeOllama       bool
+	IncludeOpenAI       bool
+	IncludeAnthropic    bool
+	IncludeDeepSeek     bool
+	IncludeGemini       bool
+	IncludeOpenRouter   bool
+	IncludeLMStudio     bool
+	IncludeMoonshot     bool
+	IncludeBedrock      bool
 	IncludeAzureFoundry bool
-	IncludeVertexAI    bool
+	IncludeVertexAI     bool
 }
 
 // createMainConfig creates the main config.yaml file at parent level
@@ -103,7 +103,7 @@ func (g *ModularConfigGenerator) createMainConfig(config *GeneratorConfig) error
 	// Config.yaml goes at parent level (next to executable)
 	parentDir := filepath.Dir(g.baseDir)
 	configDirName := filepath.Base(g.baseDir)
-	
+
 	mainConfig := MainConfigFile{
 		Includes: &IncludeDirectives{
 			Providers:  filepath.Join(configDirName, "providers/*.yaml"),
@@ -350,7 +350,7 @@ func (g *ModularConfigGenerator) createDeepSeekProvider(dir string) error {
 // createGeminiProvider creates gemini.yaml
 func (g *ModularConfigGenerator) createGeminiProvider(dir string) error {
 	provider := map[string]interface{}{
-		"interface_type": "gemini_native",  // Gemini native API with thought signatures
+		"interface_type": "gemini_native", // Gemini native API with thought signatures
 		"provider_name":  "gemini",
 		"config": map[string]interface{}{
 			"api_key":         "${GEMINI_API_KEY}",
@@ -425,12 +425,12 @@ func (g *ModularConfigGenerator) createBedrockProvider(dir string) error {
 		"interface_type": "aws_bedrock",
 		"provider_name":  "bedrock",
 		"config": map[string]interface{}{
-			"aws_region":           "${AWS_REGION}",
-			"aws_access_key_id":    "${AWS_ACCESS_KEY_ID}",
+			"aws_region":            "${AWS_REGION}",
+			"aws_access_key_id":     "${AWS_ACCESS_KEY_ID}",
 			"aws_secret_access_key": "${AWS_SECRET_ACCESS_KEY}",
-			"default_model":        "anthropic.claude-3-5-sonnet-20241022-v2:0",
-			"timeout_seconds":      300,
-			"max_retries":          3,
+			"default_model":         "anthropic.claude-3-5-sonnet-20241022-v2:0",
+			"timeout_seconds":       300,
+			"max_retries":           3,
 		},
 	}
 
@@ -462,27 +462,27 @@ func (g *ModularConfigGenerator) createVertexAIProvider(dir string) error {
 		"interface_type": "gcp_vertex_ai",
 		"provider_name":  "vertex-ai",
 		"config": map[string]interface{}{
-			"project_id":        "${GCP_PROJECT_ID}",
-			"location":          "${GCP_LOCATION:-us-central1}",
-			"credentials_path":  "${GOOGLE_APPLICATION_CREDENTIALS}",
-			"default_model":     "gemini-2.5-flash",
-			"timeout_seconds":   60,
-			"max_retries":       3,
-			"context_window":    1000000,
-			"reserve_tokens":    4000,
+			"project_id":       "${GCP_PROJECT_ID}",
+			"location":         "${GCP_LOCATION:-us-central1}",
+			"credentials_path": "${GOOGLE_APPLICATION_CREDENTIALS}",
+			"default_model":    "gemini-2.5-flash",
+			"timeout_seconds":  60,
+			"max_retries":      3,
+			"context_window":   1000000,
+			"reserve_tokens":   4000,
 			"embedding_models": map[string]interface{}{
 				"text-embedding-004": map[string]interface{}{
-					"max_tokens":  3072,
-					"dimensions":  768,
-					"default":     true,
+					"max_tokens": 3072,
+					"dimensions": 768,
+					"default":    true,
 				},
 				"text-multilingual-embedding-002": map[string]interface{}{
-					"max_tokens":  3072,
-					"dimensions":  768,
+					"max_tokens": 3072,
+					"dimensions": 768,
 				},
 				"textembedding-gecko@003": map[string]interface{}{
-					"max_tokens":  3072,
-					"dimensions":  768,
+					"max_tokens": 3072,
+					"dimensions": 768,
 				},
 			},
 		},
@@ -495,25 +495,25 @@ func (g *ModularConfigGenerator) createVertexAIProvider(dir string) error {
 func (g *ModularConfigGenerator) writeProviderFile(dir, filename string, data interface{}) error {
 	// Convert to ordered YAML manually to ensure interface_type and provider_name come first
 	var yamlContent strings.Builder
-	
+
 	// Extract the map
 	providerMap, ok := data.(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("invalid provider data format")
 	}
-	
+
 	// Write fields in specific order for readability
 	yamlContent.WriteString(fmt.Sprintf("interface_type: %s\n", providerMap["interface_type"]))
 	yamlContent.WriteString(fmt.Sprintf("provider_name: %s\n", providerMap["provider_name"]))
 	yamlContent.WriteString("config:\n")
-	
+
 	// Marshal just the config section
 	configMap := providerMap["config"].(map[string]interface{})
 	configYAML, err := yaml.Marshal(configMap)
 	if err != nil {
 		return fmt.Errorf("failed to marshal provider config: %w", err)
 	}
-	
+
 	// Indent the config section
 	lines := strings.Split(string(configYAML), "\n")
 	for _, line := range lines {
@@ -608,8 +608,8 @@ func (g *ModularConfigGenerator) createEmbeddingFiles(config *GeneratorConfig) e
 	}
 
 	// Create README if no embeddings providers
-	if !config.IncludeOpenAI && !config.IncludeOpenRouter && !config.IncludeOllama && 
-	   !config.IncludeBedrock && !config.IncludeAzureFoundry && !config.IncludeVertexAI {
+	if !config.IncludeOpenAI && !config.IncludeOpenRouter && !config.IncludeOllama &&
+		!config.IncludeBedrock && !config.IncludeAzureFoundry && !config.IncludeVertexAI {
 		readmePath := filepath.Join(embeddingsDir, "README.md")
 		readme := `# Embeddings Configuration
 
@@ -646,9 +646,9 @@ func (g *ModularConfigGenerator) createOpenAIEmbedding(dir string) error {
 		"interface_type": "openai_compatible",
 		"provider_name":  "openai",
 		"config": map[string]interface{}{
-			"api_key":         "${OPENAI_API_KEY}",
-			"api_endpoint":    "https://api.openai.com/v1",
-			"default_model":   "text-embedding-3-small",
+			"api_key":       "${OPENAI_API_KEY}",
+			"api_endpoint":  "https://api.openai.com/v1",
+			"default_model": "text-embedding-3-small",
 			"embedding_models": map[string]interface{}{
 				"text-embedding-3-small": map[string]interface{}{
 					"description": "Most capable embedding model for both english and non-english tasks",
@@ -678,9 +678,9 @@ func (g *ModularConfigGenerator) createOpenRouterEmbedding(dir string) error {
 		"interface_type": "openai_compatible",
 		"provider_name":  "openrouter",
 		"config": map[string]interface{}{
-			"api_key":         "${OPENROUTER_API_KEY}",
-			"api_endpoint":    "https://openrouter.ai/api/v1",
-			"default_model":   "text-embedding-3-small",
+			"api_key":       "${OPENROUTER_API_KEY}",
+			"api_endpoint":  "https://openrouter.ai/api/v1",
+			"default_model": "text-embedding-3-small",
 			"embedding_models": map[string]interface{}{
 				"text-embedding-3-small": map[string]interface{}{
 					"description": "OpenAI embedding model via OpenRouter",
@@ -705,8 +705,8 @@ func (g *ModularConfigGenerator) createOllamaEmbedding(dir string) error {
 		"interface_type": "openai_compatible",
 		"provider_name":  "ollama",
 		"config": map[string]interface{}{
-			"api_endpoint":    "http://localhost:11434",
-			"default_model":   "nomic-embed-text",
+			"api_endpoint":  "http://localhost:11434",
+			"default_model": "nomic-embed-text",
 			"embedding_models": map[string]interface{}{
 				"nomic-embed-text": map[string]interface{}{
 					"description": "High-performance open embedding model",
@@ -805,12 +805,12 @@ func (g *ModularConfigGenerator) createVertexAIEmbedding(dir string) error {
 		"interface_type": "gcp_vertex_ai",
 		"provider_name":  "vertex-ai",
 		"config": map[string]interface{}{
-			"project_id":        "${GCP_PROJECT_ID}",
-			"location":          "${GCP_LOCATION:-us-central1}",
-			"credentials_path":  "${GOOGLE_APPLICATION_CREDENTIALS}",
-			"default_model":     "text-embedding-004",
-			"timeout_seconds":   30,
-			"max_retries":       3,
+			"project_id":       "${GCP_PROJECT_ID}",
+			"location":         "${GCP_LOCATION:-us-central1}",
+			"credentials_path": "${GOOGLE_APPLICATION_CREDENTIALS}",
+			"default_model":    "text-embedding-004",
+			"timeout_seconds":  30,
+			"max_retries":      3,
 			"embedding_models": map[string]interface{}{
 				"text-embedding-004": map[string]interface{}{
 					"description": "Latest Google embedding model",
@@ -838,25 +838,25 @@ func (g *ModularConfigGenerator) createVertexAIEmbedding(dir string) error {
 func (g *ModularConfigGenerator) writeEmbeddingFile(dir, filename string, data interface{}) error {
 	// Convert to ordered YAML manually to ensure interface_type and provider_name come first
 	var yamlContent strings.Builder
-	
+
 	// Extract the map
 	embeddingMap, ok := data.(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("invalid embedding data format")
 	}
-	
+
 	// Write fields in specific order for readability
 	yamlContent.WriteString(fmt.Sprintf("interface_type: %s\n", embeddingMap["interface_type"]))
 	yamlContent.WriteString(fmt.Sprintf("provider_name: %s\n", embeddingMap["provider_name"]))
 	yamlContent.WriteString("config:\n")
-	
+
 	// Marshal just the config section
 	configMap := embeddingMap["config"].(map[string]interface{})
 	configYAML, err := yaml.Marshal(configMap)
 	if err != nil {
 		return fmt.Errorf("failed to marshal embedding config: %w", err)
 	}
-	
+
 	// Indent the config section
 	lines := strings.Split(string(configYAML), "\n")
 	for _, line := range lines {
@@ -877,7 +877,7 @@ func (g *ModularConfigGenerator) writeEmbeddingFile(dir, filename string, data i
 func (g *ModularConfigGenerator) createRunasMCPReadme() error {
 	runasMCPDir := filepath.Join(g.baseDir, "runasMCP")
 	readmePath := filepath.Join(runasMCPDir, "README.md")
-	
+
 	readme := `# MCP Server Mode Configurations
 
 This directory contains configurations for running mcp-cli as an MCP server.
@@ -944,7 +944,7 @@ Add to ` + "`claude_desktop_config.json`" + `:
 
 Each YAML file in this directory defines a separate MCP server configuration.
 `
-	
+
 	return os.WriteFile(readmePath, []byte(readme), 0644)
 }
 
@@ -952,7 +952,7 @@ Each YAML file in this directory defines a separate MCP server configuration.
 func (g *ModularConfigGenerator) createProxyReadme() error {
 	proxyDir := filepath.Join(g.baseDir, "proxy")
 	readmePath := filepath.Join(proxyDir, "README.md")
-	
+
 	readme := `# Proxy Mode Configurations
 
 This directory contains configurations for running workflows through the HTTP proxy.
@@ -1021,7 +1021,7 @@ Configure OpenWebUI to point to:
 - [MCP Server Mode](../runasMCP/README.md) - For Claude Desktop integration
 - [Workflows](../workflows/README.md) - Workflow documentation
 `
-	
+
 	return os.WriteFile(readmePath, []byte(readme), 0644)
 }
 

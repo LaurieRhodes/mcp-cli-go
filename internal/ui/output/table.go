@@ -32,13 +32,13 @@ func (t *Table) Render() error {
 	if len(t.headers) == 0 {
 		return fmt.Errorf("no headers defined")
 	}
-	
+
 	// Calculate column widths
 	widths := make([]int, len(t.headers))
 	for i, header := range t.headers {
 		widths[i] = len(header)
 	}
-	
+
 	for _, row := range t.rows {
 		for i, cell := range row {
 			if i < len(widths) && len(cell) > widths[i] {
@@ -46,30 +46,30 @@ func (t *Table) Render() error {
 			}
 		}
 	}
-	
+
 	// Render header
 	if err := t.renderRow(t.headers, widths); err != nil {
 		return err
 	}
-	
+
 	// Render separator
 	if err := t.renderSeparator(widths); err != nil {
 		return err
 	}
-	
+
 	// Render rows
 	for _, row := range t.rows {
 		if err := t.renderRow(row, widths); err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
 func (t *Table) renderRow(cells []string, widths []int) error {
 	var parts []string
-	
+
 	for i, cell := range cells {
 		width := widths[i]
 		if i >= len(widths) {
@@ -77,18 +77,18 @@ func (t *Table) renderRow(cells []string, widths []int) error {
 		}
 		parts = append(parts, padRight(cell, width))
 	}
-	
+
 	_, err := fmt.Fprintf(t.writer, "| %s |\n", strings.Join(parts, " | "))
 	return err
 }
 
 func (t *Table) renderSeparator(widths []int) error {
 	var parts []string
-	
+
 	for _, width := range widths {
 		parts = append(parts, strings.Repeat("-", width))
 	}
-	
+
 	_, err := fmt.Fprintf(t.writer, "|-%s-|\n", strings.Join(parts, "-|-"))
 	return err
 }
@@ -111,9 +111,9 @@ type List struct {
 type ListStyle string
 
 const (
-	ListStyleBullet  ListStyle = "bullet"
+	ListStyleBullet   ListStyle = "bullet"
 	ListStyleNumbered ListStyle = "numbered"
-	ListStyleDash    ListStyle = "dash"
+	ListStyleDash     ListStyle = "dash"
 )
 
 // NewList creates a new list
@@ -134,7 +134,7 @@ func (l *List) Add(item string) {
 func (l *List) Render() error {
 	for i, item := range l.items {
 		var prefix string
-		
+
 		switch l.style {
 		case ListStyleBullet:
 			prefix = "• "
@@ -143,12 +143,12 @@ func (l *List) Render() error {
 		case ListStyleDash:
 			prefix = "- "
 		}
-		
+
 		if _, err := fmt.Fprintf(l.writer, "%s%s\n", prefix, item); err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
@@ -180,7 +180,7 @@ func (kv *KeyValue) Render() error {
 			maxWidth = len(pair[0])
 		}
 	}
-	
+
 	// Render pairs
 	for _, pair := range kv.pairs {
 		paddedKey := padRight(pair[0], maxWidth)
@@ -188,6 +188,6 @@ func (kv *KeyValue) Render() error {
 			return err
 		}
 	}
-	
+
 	return nil
 }

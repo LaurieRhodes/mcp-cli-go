@@ -9,7 +9,7 @@ import (
 func TestLoadSkillImageMapping(t *testing.T) {
 	// Create temp directory for test files
 	tmpDir := t.TempDir()
-	
+
 	// Test 1: Valid V2 mapping file
 	t.Run("ValidMapping", func(t *testing.T) {
 		mappingFile := filepath.Join(tmpDir, "valid-mapping.yaml")
@@ -64,12 +64,12 @@ skills:
 	t.Run("FileNotExists", func(t *testing.T) {
 		nonExistentFile := filepath.Join(tmpDir, "does-not-exist.yaml")
 		mapping, err := LoadSkillImageMapping(nonExistentFile)
-		
+
 		// Should return default mapping, not error
 		if err != nil {
 			t.Fatalf("Expected default mapping, got error: %v", err)
 		}
-		
+
 		if mapping.Defaults.Image != "python:3.11-alpine" {
 			t.Errorf("Expected default image 'python:3.11-alpine', got '%s'", mapping.Defaults.Image)
 		}

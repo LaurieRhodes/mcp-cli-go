@@ -2,7 +2,7 @@ package messages
 
 import (
 	"encoding/json"
-	
+
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 )
 
@@ -18,7 +18,7 @@ type TasksGetResult struct {
 
 // TasksResultParams represents parameters for tasks/result
 type TasksResultParams struct {
-	TaskID string `json:"taskId"`
+	TaskID string                 `json:"taskId"`
 	Meta   map[string]interface{} `json:"_meta,omitempty"`
 }
 

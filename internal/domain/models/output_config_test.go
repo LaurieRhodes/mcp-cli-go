@@ -11,7 +11,7 @@ func TestOutputLevel_String(t *testing.T) {
 		{OutputNormal, "normal"},
 		{OutputVerbose, "verbose"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.expected, func(t *testing.T) {
 			if got := tt.level.String(); got != tt.expected {
@@ -23,15 +23,15 @@ func TestOutputLevel_String(t *testing.T) {
 
 func TestNewDefaultOutputConfig(t *testing.T) {
 	config := NewDefaultOutputConfig()
-	
+
 	if config.Level != OutputNormal {
 		t.Errorf("Expected OutputNormal, got %v", config.Level)
 	}
-	
+
 	if !config.ShowColors {
 		t.Error("Expected ShowColors to be true")
 	}
-	
+
 	if !config.ShowProgress {
 		t.Error("Expected ShowProgress to be true")
 	}
@@ -39,15 +39,15 @@ func TestNewDefaultOutputConfig(t *testing.T) {
 
 func TestNewQuietOutputConfig(t *testing.T) {
 	config := NewQuietOutputConfig()
-	
+
 	if config.Level != OutputQuiet {
 		t.Errorf("Expected OutputQuiet, got %v", config.Level)
 	}
-	
+
 	if config.ShowProgress {
 		t.Error("Expected ShowProgress to be false in quiet mode")
 	}
-	
+
 	if !config.SuppressServerStderr {
 		t.Error("Expected SuppressServerStderr to be true in quiet mode")
 	}
@@ -55,11 +55,11 @@ func TestNewQuietOutputConfig(t *testing.T) {
 
 func TestNewVerboseOutputConfig(t *testing.T) {
 	config := NewVerboseOutputConfig()
-	
+
 	if config.Level != OutputVerbose {
 		t.Errorf("Expected OutputVerbose, got %v", config.Level)
 	}
-	
+
 	if !config.ShowTimestamps {
 		t.Error("Expected ShowTimestamps to be true in verbose mode")
 	}
@@ -80,7 +80,7 @@ func TestOutputConfig_ShouldShow(t *testing.T) {
 		{"normal hides verbose", OutputNormal, OutputVerbose, false},
 		{"verbose shows all", OutputVerbose, OutputVerbose, true},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := &OutputConfig{Level: tt.config}
@@ -100,7 +100,7 @@ func TestOutputConfig_ShouldShowConnectionMessages(t *testing.T) {
 		{OutputNormal, false},
 		{OutputVerbose, true},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.level.String(), func(t *testing.T) {
 			config := &OutputConfig{Level: tt.level}
@@ -119,9 +119,9 @@ func TestOutputConfig_Clone(t *testing.T) {
 		ShowTimestamps:       true,
 		SuppressServerStderr: true,
 	}
-	
+
 	clone := original.Clone()
-	
+
 	// Verify values match
 	if clone.Level != original.Level {
 		t.Error("Clone Level mismatch")
@@ -138,7 +138,7 @@ func TestOutputConfig_Clone(t *testing.T) {
 	if clone.SuppressServerStderr != original.SuppressServerStderr {
 		t.Error("Clone SuppressServerStderr mismatch")
 	}
-	
+
 	// Verify it's a different instance
 	clone.Level = OutputQuiet
 	if original.Level == OutputQuiet {

@@ -209,7 +209,7 @@ type LLMProvider interface {
 }
 
 // EmbeddingModelConfig is imported from config package
-// EmbeddingProviderConfig is imported from config package  
+// EmbeddingProviderConfig is imported from config package
 // EmbeddingsConfig is imported from config package
 // ProviderConfig is imported from config package
 // ServerConfig is imported from config package

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("=== Skills System Test ===\n")
+	fmt.Println("=== Skills System Test ===")
 
 	// Create service
 	service := skillsvc.NewService()
@@ -37,14 +37,14 @@ func main() {
 		}
 
 		fmt.Printf("%2d. %s\n", i+1, skill.Name)
-		
+
 		// Truncate description if too long
 		desc := skill.Description
 		if len(desc) > 80 {
 			desc = desc[:77] + "..."
 		}
 		fmt.Printf("    Description: %s\n", desc)
-		
+
 		// Show resources
 		resources := []string{}
 		if skill.HasReferences {
@@ -59,7 +59,7 @@ func main() {
 		if skill.HasWorkflow {
 			resources = append(resources, "workflow")
 		}
-		
+
 		if len(resources) > 0 {
 			fmt.Printf("    Resources: %v\n", resources)
 		}
@@ -67,8 +67,8 @@ func main() {
 	}
 
 	// Test loading a skill
-	fmt.Println("=== Testing Passive Load ===\n")
-	
+	fmt.Println("=== Testing Passive Load ===")
+
 	testSkill := "initialization"
 	fmt.Printf("Loading skill: %s\n\n", testSkill)
 
@@ -96,7 +96,7 @@ func main() {
 	fmt.Printf("   %s\n\n", preview)
 
 	// Test MCP tool generation
-	fmt.Println("=== Testing MCP Tool Generation ===\n")
+	fmt.Println("=== Testing MCP Tool Generation ===")
 
 	tools, err := service.GenerateRunAsTools()
 	if err != nil {
@@ -105,7 +105,7 @@ func main() {
 	}
 
 	fmt.Printf("✅ Generated %d MCP tools\n\n", len(tools))
-	
+
 	// Show first 2 tools as examples
 	for i := 0; i < 2 && i < len(tools); i++ {
 		toolJSON, _ := json.MarshalIndent(tools[i], "   ", "  ")

@@ -138,9 +138,9 @@ func TestBuildMCPCliArgs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			logger := NewLogger("normal", false)
 			executor := NewExecutor(tt.workflow, logger)
-			
+
 			got := executor.buildMCPCliArgs(tt.step, tt.provider)
-			
+
 			assert.Equal(t, tt.wantArgs, got)
 		})
 	}

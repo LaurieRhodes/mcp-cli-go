@@ -11,18 +11,18 @@ type TaskStatus string
 const (
 	// TaskStatusWorking indicates the task is currently being processed
 	TaskStatusWorking TaskStatus = "working"
-	
+
 	// TaskStatusInputRequired indicates the task needs input before continuing
 	TaskStatusInputRequired TaskStatus = "input_required"
-	
+
 	// TaskStatusCompleted indicates the task completed successfully
 	TaskStatusCompleted TaskStatus = "completed"
-	
+
 	// TaskStatusFailed indicates the task failed
 	TaskStatusFailed TaskStatus = "failed"
-	
-	// TaskStatusCancelled indicates the task was cancelled
-	TaskStatusCancelled TaskStatus = "cancelled"
+
+	// TaskStatusCancelled indicates the task was canceled
+	TaskStatusCancelled TaskStatus = "canceled"
 )
 
 // IsTerminal returns true if the status is a terminal state
@@ -45,22 +45,22 @@ type CreateTaskResult struct {
 type TaskMetadata struct {
 	// TaskID is the unique identifier for the task
 	TaskID string `json:"taskId"`
-	
+
 	// Status is the current status of the task
 	Status TaskStatus `json:"status"`
-	
+
 	// StatusMessage provides additional context about the status
 	StatusMessage string `json:"statusMessage,omitempty"`
-	
+
 	// CreatedAt is the ISO 8601 timestamp when the task was created
 	CreatedAt string `json:"createdAt"`
-	
+
 	// LastUpdatedAt is the ISO 8601 timestamp of the last status update
 	LastUpdatedAt string `json:"lastUpdatedAt"`
-	
+
 	// TTL is the time-to-live in milliseconds (actual, not requested)
 	TTL int64 `json:"ttl"`
-	
+
 	// PollInterval is the suggested polling interval in milliseconds
 	PollInterval int64 `json:"pollInterval,omitempty"`
 }
@@ -74,16 +74,16 @@ type Task struct {
 	CreatedAt     time.Time
 	LastUpdatedAt time.Time
 	ExpiresAt     time.Time
-	
+
 	// Request information
 	RequestMethod string
 	RequestParams json.RawMessage
-	
+
 	// Result information
 	Result      interface{}
 	Error       error
 	IsToolError bool // For tool calls with isError=true
-	
+
 	// Execution context
 	Cancel     chan struct{}   // Channel to signal cancellation
 	Done       chan struct{}   // Channel signaling completion
@@ -132,9 +132,9 @@ func (t *Task) SetError(err error, isToolError bool) {
 	close(t.Done)
 }
 
-// SetCancelled marks the task as cancelled
+// SetCancelled marks the task as canceled
 func (t *Task) SetCancelled() {
-	t.UpdateStatus(TaskStatusCancelled, "Task was cancelled")
+	t.UpdateStatus(TaskStatusCancelled, "Task was canceled")
 	close(t.Done)
 }
 
@@ -148,7 +148,7 @@ type TaskListRequest struct {
 type TaskListResult struct {
 	// Tasks is the list of task metadata
 	Tasks []TaskMetadata `json:"tasks"`
-	
+
 	// NextCursor is the cursor for the next page (if any)
 	NextCursor string `json:"nextCursor,omitempty"`
 }
@@ -182,10 +182,10 @@ type TaskCancelResult struct {
 type TaskCapabilities struct {
 	// Requests maps request types to their task support
 	Requests map[string]bool `json:"requests,omitempty"`
-	
+
 	// List indicates if tasks/list is supported
 	List bool `json:"list,omitempty"`
-	
+
 	// Cancel indicates if tasks/cancel is supported
 	Cancel bool `json:"cancel,omitempty"`
 }

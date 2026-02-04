@@ -28,7 +28,7 @@ func GetProviderInterface(provider string, configFile string) config.InterfaceTy
 			}
 		}
 	}
-	
+
 	// If not found in config, use default mappings
 	switch provider {
 	case "openai", "deepseek", "openrouter", "gemini":
@@ -49,10 +49,10 @@ func GetProviderInterface(provider string, configFile string) config.InterfaceTy
 func ProcessOptionsEnhanced(configFile string, serverName string, disableFilesystem bool, providerName, modelName string) ([]string, map[string]bool, config.InterfaceType) {
 	// First get the basic server names and user specified map - pass configFile
 	serverNames, userSpecified := ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
-	
+
 	// Now determine the interface type
 	var interfaceType config.InterfaceType
-	
+
 	// If provider name is specified, get its interface
 	if providerName != "" {
 		interfaceType = GetProviderInterface(providerName, configFile)
@@ -65,11 +65,11 @@ func ProcessOptionsEnhanced(configFile string, serverName string, disableFilesys
 			interfaceType = GetProviderInterface(defaultProvider, configFile)
 		}
 	}
-	
+
 	// If no interface type determined yet, use a reasonable default
 	if interfaceType == "" {
 		interfaceType = config.OpenAICompatible
 	}
-	
+
 	return serverNames, userSpecified, interfaceType
 }

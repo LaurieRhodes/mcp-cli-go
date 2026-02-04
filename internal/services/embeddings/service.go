@@ -60,7 +60,7 @@ func (s *Service) GenerateEmbeddings(ctx context.Context, req *domain.EmbeddingJ
 	// Try to get embedding-specific configuration first
 	embeddingConfig, interfaceType, err := s.configService.GetEmbeddingProviderConfig(providerName)
 	var providerConfig *config.ProviderConfig
-	
+
 	if err != nil {
 		// Fallback to AI provider configuration
 		logging.Debug("Embedding config not found for %s, falling back to AI provider config", providerName)
@@ -88,7 +88,7 @@ func (s *Service) GenerateEmbeddings(ctx context.Context, req *domain.EmbeddingJ
 				MaxRetries:            embeddingConfig.MaxRetries,
 				EmbeddingModels:       embeddingConfig.Models,
 			}
-			
+
 			logging.Debug("Using embedding-specific configuration for %s", providerName)
 		}
 	}

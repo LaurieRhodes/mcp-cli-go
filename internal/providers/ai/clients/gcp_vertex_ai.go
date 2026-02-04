@@ -70,10 +70,10 @@ type vertexPart struct {
 }
 
 type vertexGenConfig struct {
-	Temperature     float64  `json:"temperature,omitempty"`
-	MaxOutputTokens int      `json:"maxOutputTokens,omitempty"`
-	TopP            float64  `json:"topP,omitempty"`
-	TopK            int      `json:"topK,omitempty"`
+	Temperature      float64 `json:"temperature,omitempty"`
+	MaxOutputTokens  int     `json:"maxOutputTokens,omitempty"`
+	TopP             float64 `json:"topP,omitempty"`
+	TopK             int     `json:"topK,omitempty"`
 	ResponseMimeType string  `json:"responseMimeType,omitempty"` // text/plain disables code execution
 }
 
@@ -113,17 +113,17 @@ type vertexEmbeddingPrediction struct {
 
 // GCPVertexAIClient implements domain.LLMProvider for Google Cloud Vertex AI
 type GCPVertexAIClient struct {
-	httpClient      *http.Client
-	projectID       string
-	location        string
-	model           string
-	accessToken     string
-	tokenExpiry     time.Time
-	serviceAccount  *gcpServiceAccount
-	providerType    domain.ProviderType
-	config          *config.ProviderConfig
-	timeout         time.Duration
-	maxRetries      int
+	httpClient     *http.Client
+	projectID      string
+	location       string
+	model          string
+	accessToken    string
+	tokenExpiry    time.Time
+	serviceAccount *gcpServiceAccount
+	providerType   domain.ProviderType
+	config         *config.ProviderConfig
+	timeout        time.Duration
+	maxRetries     int
 }
 
 // NewGCPVertexAIClient creates a new GCP Vertex AI provider
@@ -190,7 +190,7 @@ func NewGCPVertexAIClient(providerType domain.ProviderType, cfg *config.Provider
 func (c *GCPVertexAIClient) CreateCompletion(ctx context.Context, req *domain.CompletionRequest) (*domain.CompletionResponse, error) {
 	// Convert messages to Vertex AI format
 	contents := c.convertToVertexContents(req.Messages, req.SystemPrompt)
-	
+
 	vertexReq := vertexGeminiRequest{
 		Contents: contents,
 		GenerationConfig: &vertexGenConfig{
@@ -271,10 +271,10 @@ func (c *GCPVertexAIClient) CreateCompletion(ctx context.Context, req *domain.Co
 	return nil, fmt.Errorf("failed after %d attempts: %w", c.maxRetries+1, lastErr)
 }
 
-// StreamCompletion implements domain.LLMProvider  
+// StreamCompletion implements domain.LLMProvider
 func (c *GCPVertexAIClient) StreamCompletion(ctx context.Context, req *domain.CompletionRequest, writer io.Writer) (*domain.CompletionResponse, error) {
 	contents := c.convertToVertexContents(req.Messages, req.SystemPrompt)
-	
+
 	vertexReq := vertexGeminiRequest{
 		Contents: contents,
 		GenerationConfig: &vertexGenConfig{
@@ -351,7 +351,7 @@ func (c *GCPVertexAIClient) processVertexStream(resp *http.Response, writer io.W
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		
+
 		// Skip empty lines
 		if strings.TrimSpace(line) == "" {
 			continue
@@ -522,7 +522,7 @@ func (c *GCPVertexAIClient) Close() error {
 // convertToVertexContents converts domain messages to Vertex AI format
 func (c *GCPVertexAIClient) convertToVertexContents(messages []domain.Message, systemPrompt string) []vertexContent {
 	var contents []vertexContent
-	
+
 	// Add system prompt as first user message if present
 	if systemPrompt != "" {
 		contents = append(contents, vertexContent{
@@ -532,13 +532,13 @@ func (c *GCPVertexAIClient) convertToVertexContents(messages []domain.Message, s
 			},
 		})
 	}
-	
+
 	for _, msg := range messages {
 		role := msg.Role
 		if role == "system" {
 			role = "user" // Vertex AI doesn't have system role
 		}
-		
+
 		contents = append(contents, vertexContent{
 			Role: role,
 			Parts: []vertexPart{
@@ -546,7 +546,7 @@ func (c *GCPVertexAIClient) convertToVertexContents(messages []domain.Message, s
 			},
 		})
 	}
-	
+
 	return contents
 }
 

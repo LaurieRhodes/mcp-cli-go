@@ -120,11 +120,11 @@ func TestCountVotes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := ce.countVotes(tt.results, tt.requirement)
-			
+
 			assert.NoError(t, err)
 			assert.Equal(t, tt.wantSuccess, result.Success)
 			assert.InDelta(t, tt.wantAgree, result.Agreement, 0.01)
-			
+
 			if tt.wantSuccess && tt.wantResult != "" {
 				// Check that result matches (case-insensitive, whitespace-normalized)
 				assert.Contains(t, toUpperCase(result.Result), toUpperCase(tt.wantResult))

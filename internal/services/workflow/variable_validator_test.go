@@ -165,7 +165,7 @@ func TestVariableValidator_MultipleErrors(t *testing.T) {
 		Steps: []config.StepV2{
 			{Name: "step1", Run: "Do step 1"},
 			{Name: "step2", Run: "Use {{step1}} and {{nonexistent}}"}, // 2 errors: missing needs, nonexistent
-			{Name: "step3", Run: "Use {{step1}}"}, // 1 error: missing needs
+			{Name: "step3", Run: "Use {{step1}}"},                     // 1 error: missing needs
 		},
 	}
 
@@ -201,7 +201,7 @@ func TestVariableValidator_ExtractReferences(t *testing.T) {
 				return
 			}
 			for _, exp := range tt.expected {
-				if !contains(refs, exp) {
+				if !stringInSlice(refs, exp) {
 					t.Errorf("Expected %s in %v", exp, refs)
 				}
 			}
@@ -209,8 +209,8 @@ func TestVariableValidator_ExtractReferences(t *testing.T) {
 	}
 }
 
-// Helper function
-func contains(slice []string, item string) bool {
+// Helper function for variable validator tests - checks if string is in slice
+func stringInSlice(slice []string, item string) bool {
 	for _, s := range slice {
 		if s == item {
 			return true

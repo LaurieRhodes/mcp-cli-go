@@ -14,15 +14,15 @@ const (
 	// Method names for tools requests
 	toolsListMethod = "tools/list"
 	toolsCallMethod = "tools/call"
-	
+
 	// Method name for progress notifications
 	progressNotificationMethod = "notifications/progress"
 
 	// Default timeout for tools requests
 	// This is the timeout between progress updates, not total execution time
 	// If server sends progress notifications, timeout resets on each update
-	defaultToolsTimeout = 120 * time.Second  // Increased from 30s for skill execution
-	
+	defaultToolsTimeout = 120 * time.Second // Increased from 30s for skill execution
+
 	// Maximum total time for a single tool call (safety limit)
 	maxTotalToolCallTime = 30 * time.Minute
 )
@@ -30,7 +30,7 @@ const (
 // SendToolsList sends a tools/list request to the server and returns the result
 func SendToolsList(client *stdio.StdioClient, names []string) (*ToolsListResult, error) {
 	logging.Debug("Sending tools/list request")
-	
+
 	// Create request
 	requestID := fmt.Sprintf("tools-list-%d", time.Now().UnixNano())
 	request, err := messages.NewRequest(requestID, toolsListMethod, map[string]interface{}{})
@@ -38,17 +38,17 @@ func SendToolsList(client *stdio.StdioClient, names []string) (*ToolsListResult,
 		logging.Error("Failed to create tools/list request: %v", err)
 		return nil, fmt.Errorf("failed to create tools/list request: %w", err)
 	}
-	
+
 	// Get dispatcher
 	dispatcher := client.GetDispatcher()
 	if dispatcher == nil {
 		return nil, fmt.Errorf("client dispatcher not initialized")
 	}
-	
+
 	// Register for response BEFORE sending request
 	responseCh := dispatcher.RegisterRequest(requestID)
 	defer dispatcher.UnregisterRequest(requestID) // Clean up on timeout or error
-	
+
 	// Send the request
 	logging.Debug("Sending tools/list request with ID: %s", requestID)
 	if err := client.Write(request); err != nil {
@@ -62,7 +62,7 @@ func SendToolsList(client *stdio.StdioClient, names []string) (*ToolsListResult,
 	select {
 	case response := <-responseCh:
 		logging.Debug("Received tools/list response")
-		
+
 		// Check for errors
 		if response.Error != nil {
 			logging.Error("Server returned error: %s (code: %d)", response.Error.Message, response.Error.Code)
@@ -89,11 +89,11 @@ func SendToolsList(client *stdio.StdioClient, names []string) (*ToolsListResult,
 func SendToolsCall(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatcher, name string, arguments map[string]interface{}) (*ToolsCallResult, error) {
 	logging.Debug("Sending tools/call request for tool: %s", name)
 	logging.Debug("Tool arguments: %+v", arguments)
-	
+
 	// Create the parameters with progress token
 	// Include _meta.progressToken so server sends progress notifications
 	progressToken := fmt.Sprintf("progress_%d", time.Now().UnixNano())
-	
+
 	paramsMap := map[string]interface{}{
 		"name":      name,
 		"arguments": arguments,
@@ -109,9 +109,9 @@ func SendToolsCall(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatch
 		logging.Error("Failed to create tools/call request: %v", err)
 		return nil, fmt.Errorf("failed to create tools/call request: %w", err)
 	}
-	
+
 	logging.Debug("Created tools/call request with progress token: %s", progressToken)
-	
+
 	// Debug: Show what's actually being sent
 	if requestJSON, err := json.Marshal(request); err == nil {
 		logging.Debug("Sending tools/call JSON: %s", string(requestJSON))
@@ -129,25 +129,25 @@ func SendToolsCall(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatch
 	logging.Debug("Tools/call request sent successfully")
 
 	// Wait for response with timeout that resets on progress notifications
-	logging.Debug("Waiting for tools/call response (timeout: %v between updates, max total: %v)", 
+	logging.Debug("Waiting for tools/call response (timeout: %v between updates, max total: %v)",
 		defaultToolsTimeout, maxTotalToolCallTime)
-	
+
 	// Timer for timeout between progress updates
 	timeoutTimer := time.NewTimer(defaultToolsTimeout)
 	defer timeoutTimer.Stop()
-	
+
 	// Timer for maximum total execution time
 	maxTimer := time.NewTimer(maxTotalToolCallTime)
 	defer maxTimer.Stop()
-	
+
 	startTime := time.Now()
-	
+
 	for {
 		select {
 		case response := <-responseCh:
 			elapsed := time.Since(startTime)
 			logging.Debug("Received tools/call response after %v", elapsed)
-			
+
 			// Check for errors
 			if response.Error != nil {
 				logging.Error("Server returned error: %s (code: %d)", response.Error.Message, response.Error.Code)
@@ -173,7 +173,7 @@ func SendToolsCall(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatch
 			elapsed := time.Since(startTime)
 			logging.Error("Timed out waiting for tools/call response (total time: %v)", elapsed)
 			return nil, fmt.Errorf("timed out waiting for tools/call response after %v", elapsed)
-		
+
 		case <-maxTimer.C:
 			elapsed := time.Since(startTime)
 			logging.Error("Maximum execution time exceeded for tools/call (%v)", elapsed)

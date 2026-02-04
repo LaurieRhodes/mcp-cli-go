@@ -26,13 +26,13 @@ func NewSpinner(message string) *Spinner {
 // Start starts the spinner
 func (s *Spinner) Start() {
 	s.running = true
-	
+
 	go func() {
 		i := 0
 		for s.running {
 			frame := s.frames[i%len(s.frames)]
 			fmt.Printf("\r%s %s", Cyan(frame), s.message)
-			
+
 			select {
 			case <-s.done:
 				return
@@ -101,9 +101,9 @@ func (pb *ProgressBar) Increment() {
 func (pb *ProgressBar) Render() {
 	percent := float64(pb.current) / float64(pb.total)
 	filled := int(percent * float64(pb.width))
-	
+
 	bar := strings.Repeat("█", filled) + strings.Repeat("░", pb.width-filled)
-	
+
 	fmt.Printf("\r%s [%s] %d/%d (%.1f%%)",
 		pb.message,
 		Green(bar),
@@ -111,7 +111,7 @@ func (pb *ProgressBar) Render() {
 		pb.total,
 		percent*100,
 	)
-	
+
 	if pb.current >= pb.total {
 		fmt.Println()
 	}
@@ -171,7 +171,7 @@ func (si *StepIndicator) Fail(err error) {
 func (si *StepIndicator) render() {
 	// Move cursor up
 	fmt.Print("\033[" + fmt.Sprintf("%d", len(si.steps)) + "A")
-	
+
 	for i, step := range si.steps {
 		if i < si.current {
 			fmt.Printf("  %s %s\n", Green("✓"), step)
@@ -186,7 +186,7 @@ func (si *StepIndicator) render() {
 func (si *StepIndicator) renderFailed(err error) {
 	// Move cursor up
 	fmt.Print("\033[" + fmt.Sprintf("%d", len(si.steps)) + "A")
-	
+
 	for i, step := range si.steps {
 		if i < si.current {
 			fmt.Printf("  %s %s\n", Green("✓"), step)

@@ -18,13 +18,13 @@ type UnixSocketClient struct {
 	writer     *bufio.Writer
 	writeMutex sync.Mutex
 	readMutex  sync.Mutex
-	
+
 	// Response handling
 	pendingRequests map[string]chan json.RawMessage
 	requestMutex    sync.Mutex
-	
+
 	// Connection state
-	running bool
+	running  bool
 	stopChan chan struct{}
 }
 
@@ -33,12 +33,12 @@ func NewUnixSocketClient(socketPath string) (*UnixSocketClient, error) {
 	if socketPath == "" {
 		return nil, fmt.Errorf("socket path cannot be empty")
 	}
-	
+
 	// Check if socket exists
 	if _, err := os.Stat(socketPath); err != nil {
 		return nil, fmt.Errorf("socket not found: %s: %w", socketPath, err)
 	}
-	
+
 	return &UnixSocketClient{
 		socketPath:      socketPath,
 		pendingRequests: make(map[string]chan json.RawMessage),
@@ -53,15 +53,15 @@ func (c *UnixSocketClient) Start() error {
 	if err != nil {
 		return fmt.Errorf("failed to connect to socket %s: %w", c.socketPath, err)
 	}
-	
+
 	c.conn = conn
 	c.reader = bufio.NewReader(conn)
 	c.writer = bufio.NewWriter(conn)
 	c.running = true
-	
+
 	// Start read loop in background
 	go c.readLoop()
-	
+
 	return nil
 }
 
@@ -70,14 +70,14 @@ func (c *UnixSocketClient) Stop() error {
 	if !c.running {
 		return nil
 	}
-	
+
 	c.running = false
 	close(c.stopChan)
-	
+
 	if c.conn != nil {
 		return c.conn.Close()
 	}
-	
+
 	return nil
 }
 
@@ -86,10 +86,10 @@ func (c *UnixSocketClient) SendRequest(method string, params interface{}) (json.
 	if !c.running {
 		return nil, fmt.Errorf("client not running")
 	}
-	
+
 	// Generate request ID
 	requestID := fmt.Sprintf("%d", time.Now().UnixNano())
-	
+
 	// Create request
 	request := map[string]interface{}{
 		"jsonrpc": "2.0",
@@ -97,14 +97,14 @@ func (c *UnixSocketClient) SendRequest(method string, params interface{}) (json.
 		"method":  method,
 		"params":  params,
 	}
-	
+
 	// Create response channel
 	responseChan := make(chan json.RawMessage, 1)
-	
+
 	c.requestMutex.Lock()
 	c.pendingRequests[requestID] = responseChan
 	c.requestMutex.Unlock()
-	
+
 	// Serialize request
 	data, err := json.Marshal(request)
 	if err != nil {
@@ -113,7 +113,7 @@ func (c *UnixSocketClient) SendRequest(method string, params interface{}) (json.
 		c.requestMutex.Unlock()
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
-	
+
 	// Send request (MCP uses newline-delimited JSON)
 	c.writeMutex.Lock()
 	_, err = c.writer.Write(append(data, '\n'))
@@ -124,17 +124,17 @@ func (c *UnixSocketClient) SendRequest(method string, params interface{}) (json.
 		c.requestMutex.Unlock()
 		return nil, fmt.Errorf("failed to write request: %w", err)
 	}
-	
+
 	err = c.writer.Flush()
 	c.writeMutex.Unlock()
-	
+
 	if err != nil {
 		c.requestMutex.Lock()
 		delete(c.pendingRequests, requestID)
 		c.requestMutex.Unlock()
 		return nil, fmt.Errorf("failed to flush request: %w", err)
 	}
-	
+
 	// Wait for response (with timeout)
 	select {
 	case response := <-responseChan:
@@ -156,26 +156,26 @@ func (c *UnixSocketClient) readLoop() {
 		c.readMutex.Lock()
 		line, err := c.reader.ReadBytes('\n')
 		c.readMutex.Unlock()
-		
+
 		if err != nil {
 			if c.running {
 				fmt.Fprintf(os.Stderr, "Unix socket read error: %v\n", err)
 			}
 			return
 		}
-		
+
 		// Parse JSON-RPC response
 		var response struct {
 			ID     interface{}     `json:"id"`
 			Result json.RawMessage `json:"result"`
 			Error  interface{}     `json:"error"`
 		}
-		
+
 		if err := json.Unmarshal(line, &response); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to parse response: %v\n", err)
 			continue
 		}
-		
+
 		// Convert ID to string
 		var requestID string
 		switch id := response.ID.(type) {
@@ -186,7 +186,7 @@ func (c *UnixSocketClient) readLoop() {
 		default:
 			continue
 		}
-		
+
 		// Find pending request
 		c.requestMutex.Lock()
 		responseChan, exists := c.pendingRequests[requestID]
@@ -194,7 +194,7 @@ func (c *UnixSocketClient) readLoop() {
 			delete(c.pendingRequests, requestID)
 		}
 		c.requestMutex.Unlock()
-		
+
 		if exists {
 			// Check for error
 			if response.Error != nil {
@@ -230,17 +230,17 @@ func (c *UnixSocketClient) SendInitialize() (map[string]interface{}, error) {
 		},
 		"capabilities": map[string]interface{}{},
 	}
-	
+
 	response, err := c.SendRequest("initialize", params)
 	if err != nil {
 		return nil, fmt.Errorf("initialize request failed: %w", err)
 	}
-	
+
 	var result map[string]interface{}
 	if err := json.Unmarshal(response, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse initialize response: %w", err)
 	}
-	
+
 	return result, nil
 }
 
@@ -250,12 +250,12 @@ func (c *UnixSocketClient) SendToolsList(params interface{}) (map[string]interfa
 	if err != nil {
 		return nil, fmt.Errorf("tools/list request failed: %w", err)
 	}
-	
+
 	var result map[string]interface{}
 	if err := json.Unmarshal(response, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse tools/list response: %w", err)
 	}
-	
+
 	return result, nil
 }
 
@@ -265,16 +265,16 @@ func (c *UnixSocketClient) SendToolsCall(name string, arguments map[string]inter
 		"name":      name,
 		"arguments": arguments,
 	}
-	
+
 	response, err := c.SendRequest("tools/call", params)
 	if err != nil {
 		return nil, fmt.Errorf("tools/call request failed: %w", err)
 	}
-	
+
 	var result map[string]interface{}
 	if err := json.Unmarshal(response, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse tools/call response: %w", err)
 	}
-	
+
 	return result, nil
 }

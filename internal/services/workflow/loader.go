@@ -35,7 +35,7 @@ func (l *Loader) LoadFromBytes(data []byte) (*config.WorkflowV2, error) {
 	// Parse YAML with strict mode (errors on unknown fields)
 	decoder := yaml.NewDecoder(strings.NewReader(string(data)))
 	decoder.KnownFields(true) // Enable strict mode
-	
+
 	if err := decoder.Decode(&workflow); err != nil {
 		// Provide helpful error message for common YAML issues
 		errMsg := err.Error()
@@ -48,7 +48,7 @@ func (l *Loader) LoadFromBytes(data []byte) (*config.WorkflowV2, error) {
 					lineInfo = "line " + strings.Split(parts[1], ":")[0]
 				}
 			}
-			
+
 			return nil, fmt.Errorf("workflow YAML structure error at %s:\n"+
 				"  Found a map/object where a string was expected.\n"+
 				"  Common causes:\n"+
@@ -58,7 +58,7 @@ func (l *Loader) LoadFromBytes(data []byte) (*config.WorkflowV2, error) {
 				"    • Ensure all fields match the v2.0 schema\n"+
 				"  Original error: %v", lineInfo, err)
 		}
-		
+
 		return nil, fmt.Errorf("failed to parse workflow YAML: %w\n"+
 			"  Hint: Check YAML syntax, indentation, and field types", err)
 	}

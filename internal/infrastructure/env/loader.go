@@ -50,37 +50,37 @@ func (s *Store) LoadFromFile(filepath string) (int, error) {
 
 	count := 0
 	scanner := bufio.NewScanner(file)
-	
+
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		
+
 		// Skip empty lines and comments
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		
+
 		// Parse KEY=VALUE
 		parts := strings.SplitN(line, "=", 2)
 		if len(parts) != 2 {
 			continue // Skip malformed lines
 		}
-		
+
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
-		
+
 		// Remove surrounding quotes if present
 		value = strings.Trim(value, `"'`)
-		
+
 		if key != "" {
 			s.vars[key] = value
 			count++
 		}
 	}
-	
+
 	if err := scanner.Err(); err != nil {
 		return count, err
 	}
-	
+
 	return count, nil
 }
 
@@ -114,33 +114,33 @@ func (s *Store) GetWithFallback(key string) string {
 // This is called automatically during init
 func LoadDotEnv() error {
 	store := GetStore()
-	
+
 	// Get executable path
 	exe, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	
+
 	// Get directory containing executable
 	dir := filepath.Dir(exe)
-	
+
 	// Try to load .env file
 	envPath := filepath.Join(dir, ".env")
 	count, err := store.LoadFromFile(envPath)
-	
+
 	// We don't return error if file doesn't exist
 	// Only return error for actual read failures
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	
+
 	// Only log count if we actually loaded something
 	// Never log the actual values for security
 	if count > 0 {
 		// Note: We log count only, never the actual keys or values
 		_ = count // Loaded successfully
 	}
-	
+
 	return nil
 }
 
@@ -151,14 +151,14 @@ func ExpandEnv(s string) string {
 	if s == "" {
 		return s
 	}
-	
+
 	store := GetStore()
-	
+
 	// Custom expand function that checks our store first
 	mapper := func(key string) string {
 		return store.GetWithFallback(key)
 	}
-	
+
 	return os.Expand(s, mapper)
 }
 
@@ -167,7 +167,7 @@ func ExpandEnv(s string) string {
 func (s *Store) Keys() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	keys := make([]string, 0, len(s.vars))
 	for k := range s.vars {
 		keys = append(keys, k)
@@ -194,14 +194,14 @@ func (s *Store) Clear() {
 // that don't have full PATH set
 func EnsureStandardPaths() {
 	currentPath := os.Getenv("PATH")
-	
+
 	// Standard paths by platform
 	var standardPaths []string
-	
+
 	// Detect platform and set appropriate paths
 	// Note: runtime.GOOS would be "linux", "darwin", "windows"
-	if strings.Contains(strings.ToLower(os.Getenv("OS")), "windows") || 
-	   filepath.Separator == '\\' {
+	if strings.Contains(strings.ToLower(os.Getenv("OS")), "windows") ||
+		filepath.Separator == '\\' {
 		// Windows standard paths
 		standardPaths = []string{
 			`C:\Windows\system32`,
@@ -220,7 +220,7 @@ func EnsureStandardPaths() {
 			"/sbin",
 		}
 	}
-	
+
 	// Build map of existing paths for quick lookup
 	existingPaths := make(map[string]bool)
 	for _, p := range strings.Split(currentPath, string(os.PathListSeparator)) {
@@ -228,7 +228,7 @@ func EnsureStandardPaths() {
 			existingPaths[p] = true
 		}
 	}
-	
+
 	// Add missing standard paths
 	var pathsToAdd []string
 	for _, stdPath := range standardPaths {
@@ -236,7 +236,7 @@ func EnsureStandardPaths() {
 			pathsToAdd = append(pathsToAdd, stdPath)
 		}
 	}
-	
+
 	// Update PATH if we have paths to add
 	if len(pathsToAdd) > 0 {
 		// Add new paths to beginning of PATH (standard paths take precedence)

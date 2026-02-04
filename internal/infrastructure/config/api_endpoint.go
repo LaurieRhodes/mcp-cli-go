@@ -12,13 +12,13 @@ func (c *Config) GetAPIEndpoint(providerName string) (string, error) {
 		}
 		return "", fmt.Errorf("AI providers configuration not found")
 	}
-	
+
 	// Get the provider config
 	provider, ok := c.AI.Providers[providerName]
 	if !ok {
 		return "", fmt.Errorf("AI provider %s not found in configuration", providerName)
 	}
-	
+
 	// Check if API endpoint is set
 	if provider.APIEndpoint == "" {
 		// For Ollama, default to localhost
@@ -27,6 +27,6 @@ func (c *Config) GetAPIEndpoint(providerName string) (string, error) {
 		}
 		return "", fmt.Errorf("API endpoint for provider %s is not set", providerName)
 	}
-	
+
 	return provider.APIEndpoint, nil
 }

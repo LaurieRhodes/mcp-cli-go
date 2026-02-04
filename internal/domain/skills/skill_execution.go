@@ -6,10 +6,10 @@ type ExecutionMode string
 const (
 	// ExecutionModePassive loads skills as documentation only (no script execution)
 	ExecutionModePassive ExecutionMode = "passive"
-	
+
 	// ExecutionModeActive executes scripts (requires Docker/Podman)
 	ExecutionModeActive ExecutionMode = "active"
-	
+
 	// ExecutionModeAuto uses active if Docker/Podman available, otherwise passive
 	ExecutionModeAuto ExecutionMode = "auto"
 )

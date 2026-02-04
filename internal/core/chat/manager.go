@@ -1,4 +1,3 @@
-
 package chat
 
 import (
@@ -8,12 +7,13 @@ import (
 	"io"
 	"sort"
 	"strings"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
 	"time"
+
 	appChat "github.com/LaurieRhodes/mcp-cli-go/internal/app/chat"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
-    "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config" 
+	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	mcplib "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/mcp"
@@ -24,28 +24,28 @@ import (
 type ChatManager struct {
 	// LLM provider for chat completions (updated to use new domain interface)
 	LLMProvider domain.LLMProvider
-	
+
 	// Server connections for tool execution (legacy)
 	Connections []*host.ServerConnection
-	
+
 	// Server manager for tool execution (new, supports built-in skills)
 	ServerManager domain.MCPServerManager
-	
+
 	// Enabled skills
 	EnabledSkills []string
-	
+
 	// Chat context
 	Context *ChatContext
-	
+
 	// User interface manager
 	UI *UI
-	
+
 	// Whether to stream responses
 	StreamResponses bool
-	
+
 	// Available tools cache
 	toolsCache map[string][]tools.Tool
-	
+
 	// Last assistant message with tool calls
 	lastAssistantMessageWithToolCalls domain.Message
 
@@ -115,7 +115,6 @@ func NewChatManagerWithConfigAndUI(provider domain.LLMProvider, connections []*h
 	}
 }
 
-
 // NewChatManagerWithServerManagerAndUI creates a new chat manager with server manager (supports built-in skills)
 func NewChatManagerWithServerManagerAndUI(provider domain.LLMProvider, serverManager domain.MCPServerManager, providerConfig *config.ProviderConfig, model string, ui *UI) *ChatManager {
 	systemPrompt := `You are a helpful assistant with access to tools. Use the tools when necessary to fulfill user requests.
@@ -140,7 +139,7 @@ Skills provide specialized capabilities through code execution. There are two wa
 When writing code, save output files to /outputs/ directory:
    output.save('/outputs/result.docx')  ✅ CORRECT
    output.save('/home/result.docx')     ❌ WRONG - will be lost`
-	
+
 	return &ChatManager{
 		LLMProvider:     provider,
 		ServerManager:   serverManager,
@@ -151,6 +150,7 @@ When writing code, save output files to /outputs/ directory:
 		modelName:       model,
 	}
 }
+
 // ProcessUserMessage processes a user message and returns the response
 func (m *ChatManager) ProcessUserMessage(userInput string) error {
 	// Add user message to context
@@ -163,7 +163,7 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 	if m.session != nil {
 		m.session.AddMessage(convertDomainMessage(userMessage))
 	}
-	
+
 	// Get available tools for the LLM
 	logging.Info("Fetching available tools for LLM")
 	llmTools, err := m.GetAvailableTools()
@@ -173,57 +173,57 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 		llmTools = []domain.Tool{}
 	}
 	logging.Info("Successfully fetched %d tools for LLM", len(llmTools))
-	
+
 	// Get messages for the LLM
 	messages := m.Context.GetMessagesForLLM()
-	
+
 	// Show indicator that we're working
 	m.UI.PrintSystem("Thinking...")
-	
+
 	// Create completion request
 	completionReq := &domain.CompletionRequest{
 		Messages:     messages,
 		Tools:        llmTools,
-		SystemPrompt: "", // Already included in messages
+		SystemPrompt: "",  // Already included in messages
 		Temperature:  0.7, // Default temperature for chat
 		Stream:       m.StreamResponses,
 	}
-	
+
 	var response *domain.CompletionResponse
-	
+
 	// Use streaming if supported and enabled
 	if m.StreamResponses {
 		// Start the streaming response UI
 		m.UI.StartStreamingResponse()
-		
+
 		// Determine provider type for more accurate logging
 		providerType := m.LLMProvider.GetProviderType()
 		logging.Info("Starting streaming completion with %s", providerType)
-		
+
 		response, err = m.LLMProvider.StreamCompletion(context.Background(), completionReq, &streamingWriter{
 			onChunk: func(chunk string) error {
 				m.UI.StreamAssistantResponse(chunk)
 				return nil
 			},
 		})
-		
+
 		// End the streaming response UI
 		m.UI.EndStreamingResponse()
 	} else {
 		// Fallback to non-streaming
 		logging.Info("Starting non-streaming completion")
 		response, err = m.LLMProvider.CreateCompletion(context.Background(), completionReq)
-		
+
 		// Print the full response
 		if err == nil && response != nil {
 			m.UI.PrintAssistantResponse(response.Response)
 		}
 	}
-	
+
 	if err != nil {
 		return fmt.Errorf("LLM completion error: %w", err)
 	}
-	
+
 	// Add assistant message to context
 	if response != nil {
 		assistantMessage := domain.Message{
@@ -236,12 +236,12 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 		if m.session != nil {
 			m.session.AddMessage(convertDomainMessage(assistantMessage))
 		}
-		
+
 		// Save this for tool responses if it has tool calls
 		if len(response.ToolCalls) > 0 {
 			m.lastAssistantMessageWithToolCalls = assistantMessage
 		}
-		
+
 		// Handle tool calls if present
 		if len(response.ToolCalls) > 0 {
 			m.UI.PrintSystem("Executing tool calls...")
@@ -249,7 +249,7 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 			if err != nil {
 				m.UI.PrintError("Error executing tool calls: %v", err)
 			}
-			
+
 			// ALWAYS get a follow-up response after tool execution
 			// The LLM needs to synthesize the tool results into a final answer
 			err = m.ProcessAfterToolExecution(userMessage.Content)
@@ -258,7 +258,7 @@ func (m *ChatManager) ProcessUserMessage(userInput string) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -278,60 +278,60 @@ func (w *streamingWriter) Write(p []byte) (n int, err error) {
 func (m *ChatManager) ProcessAfterToolExecution(userQuery string) error {
 	// Get messages for the LLM - this will include the tool results now
 	messages := m.Context.GetMessagesForLLM()
-	
+
 	// Get available tools for the LLM (might need more tools)
 	llmTools, err := m.GetAvailableTools()
 	if err != nil {
 		llmTools = []domain.Tool{} // Continue without tools as fallback
 	}
-	
+
 	// Show indicator that we're working on a response
 	m.UI.PrintSystem("Generating response based on tool results...")
-	
+
 	// Create completion request
 	completionReq := &domain.CompletionRequest{
 		Messages:     messages,
 		Tools:        llmTools,
-		SystemPrompt: "", // Already included in messages
+		SystemPrompt: "",  // Already included in messages
 		Temperature:  0.7, // Default temperature for chat
 		Stream:       m.StreamResponses,
 	}
-	
+
 	var response *domain.CompletionResponse
-	
+
 	// Use streaming if supported and enabled
 	if m.StreamResponses {
 		// Start the streaming response UI
 		m.UI.StartStreamingResponse()
-		
+
 		// Determine provider type for more accurate logging
 		providerType := m.LLMProvider.GetProviderType()
 		logging.Info("Starting follow-up streaming completion with %s", providerType)
-		
+
 		response, err = m.LLMProvider.StreamCompletion(context.Background(), completionReq, &streamingWriter{
 			onChunk: func(chunk string) error {
 				m.UI.StreamAssistantResponse(chunk)
 				return nil
 			},
 		})
-		
+
 		// End the streaming response UI
 		m.UI.EndStreamingResponse()
 	} else {
 		// Fallback to non-streaming
 		logging.Info("Starting follow-up non-streaming completion")
 		response, err = m.LLMProvider.CreateCompletion(context.Background(), completionReq)
-		
+
 		// Print the full response
 		if err == nil && response != nil {
 			m.UI.PrintAssistantResponse(response.Response)
 		}
 	}
-	
+
 	if err != nil {
 		return fmt.Errorf("follow-up completion error: %w", err)
 	}
-	
+
 	// Add assistant message to context
 	if response != nil {
 		assistantMessage := domain.Message{
@@ -344,12 +344,12 @@ func (m *ChatManager) ProcessAfterToolExecution(userQuery string) error {
 		if m.session != nil {
 			m.session.AddMessage(convertDomainMessage(assistantMessage))
 		}
-		
+
 		// Save this for tool responses if it has tool calls
 		if len(response.ToolCalls) > 0 {
 			m.lastAssistantMessageWithToolCalls = assistantMessage
 		}
-		
+
 		// Handle any additional tool calls if present
 		if len(response.ToolCalls) > 0 {
 			m.UI.PrintSystem("Executing additional tool calls...")
@@ -358,13 +358,13 @@ func (m *ChatManager) ProcessAfterToolExecution(userQuery string) error {
 				m.UI.PrintError("Error executing additional tool calls: %v", err)
 				return err
 			}
-			
+
 			// Recursively get final response after additional tool execution
 			logging.Debug("Requesting final response after additional tool calls")
 			return m.ProcessAfterToolExecution(userQuery)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -373,7 +373,7 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 	for _, toolCall := range toolCalls {
 		// Execute the tool call
 		logging.Info("Executing tool call: %s", toolCall.Function.Name)
-		
+
 		// Log the arguments for debugging
 		argString := string(toolCall.Function.Arguments)
 		if argString == "" {
@@ -381,7 +381,7 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 		} else {
 			logging.Debug("Tool call arguments: %s", argString)
 		}
-		
+
 		// Add default arguments if none provided
 		if argString == "" || argString == "{}" || argString == "null" {
 			// Try to provide default arguments based on the tool
@@ -391,13 +391,13 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 				toolCall.Function.Arguments = []byte(defaultArgs)
 			}
 		}
-		
+
 		// Execute the tool
 		result, err := m.ExecuteToolCall(toolCall)
-		
+
 		// Add tool call to history
 		m.Context.AddToolCall(toolCall, result, err)
-		
+
 		// Prepare tool result content (use error message if execution failed)
 		var toolResultContent string
 		if err != nil {
@@ -406,21 +406,21 @@ func (m *ChatManager) HandleToolCalls(toolCalls []domain.ToolCall) error {
 		} else {
 			toolResultContent = result
 		}
-		
+
 		// CRITICAL: Always add tool result message, even for errors
 		// DeepSeek and other OpenAI-compatible APIs require a tool result for every tool_call_id
 		toolResultMessage := domain.Message{
-			Role:        "tool",
-			Content:     toolResultContent,
-			ToolCallID:  toolCall.ID,
+			Role:       "tool",
+			Content:    toolResultContent,
+			ToolCallID: toolCall.ID,
 		}
 		m.Context.AddMessage(toolResultMessage)
-		
+
 		// Don't print raw tool results in chat mode - let the LLM synthesize them
 		// The user will see the LLM's response after it processes the tool results
 		// m.UI.PrintToolResult(result)  // Commented out to avoid showing raw tool output
 	}
-	
+
 	return nil
 }
 
@@ -430,12 +430,12 @@ func (m *ChatManager) getDefaultToolArguments(toolName string) string {
 	if strings.Contains(toolName, "list_directory") {
 		return `{"path": "D:/Github/mcp-cli-go"}`
 	}
-	
+
 	// For List Allowed Directories, empty args are fine
 	if strings.Contains(toolName, "list_allowed_directories") {
 		return `{}`
 	}
-	
+
 	// For other tools, use an empty object
 	return `{}`
 }
@@ -446,7 +446,7 @@ func (m *ChatManager) ExecuteToolCall(toolCall domain.ToolCall) (string, error) 
 	if m.ServerManager != nil {
 		return m.executeToolCallWithServerManager(toolCall)
 	}
-	
+
 	// Fall back to legacy Connections-based execution
 	return m.executeToolCallWithConnections(toolCall)
 }
@@ -459,17 +459,17 @@ func (m *ChatManager) executeToolCallWithServerManager(toolCall domain.ToolCall)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse tool arguments: %w", err)
 	}
-	
+
 	// Show what we're doing
 	m.UI.PrintToolExecution(toolCall.Function.Name, "server-manager")
-	
+
 	// Execute tool using server manager
 	logging.Debug("Executing tool %s using server manager", toolCall.Function.Name)
 	result, err := m.ServerManager.ExecuteTool(context.Background(), toolCall.Function.Name, args)
 	if err != nil {
 		return "", fmt.Errorf("tool execution error: %w", err)
 	}
-	
+
 	return result, nil
 }
 
@@ -481,11 +481,11 @@ func (m *ChatManager) executeToolCallWithConnections(toolCall domain.ToolCall) (
 	if err != nil {
 		return "", fmt.Errorf("failed to parse tool arguments: %w", err)
 	}
-	
+
 	// Parse the function name to extract server and tool
 	toolName := toolCall.Function.Name
 	serverName := ""
-	
+
 	// Handle both formats: "server_name_tool_name" or "server-name-tool-name"
 	for _, conn := range m.Connections {
 		// Try different separators and variations
@@ -506,7 +506,7 @@ func (m *ChatManager) executeToolCallWithConnections(toolCall domain.ToolCall) (
 			break
 		}
 	}
-	
+
 	// If we still don't have a server name, try to find a tool with this name on any server
 	if serverName == "" {
 		for _, conn := range m.Connections {
@@ -515,26 +515,26 @@ func (m *ChatManager) executeToolCallWithConnections(toolCall domain.ToolCall) (
 				logging.Warn("Failed to get tools from server %s: %v", conn.Name, err)
 				continue
 			}
-			
+
 			for _, tool := range serverTools {
 				if tool.Name == toolName {
 					serverName = conn.Name
 					break
 				}
 			}
-			
+
 			if serverName != "" {
 				break
 			}
 		}
 	}
-	
+
 	// If we still don't have a server name, use the first available server
 	if serverName == "" && len(m.Connections) > 0 {
 		serverName = m.Connections[0].Name
 		logging.Warn("Could not determine server for tool %s, using default server %s", toolName, serverName)
 	}
-	
+
 	// Find the server connection
 	var serverConn *host.ServerConnection
 	for _, conn := range m.Connections {
@@ -543,37 +543,37 @@ func (m *ChatManager) executeToolCallWithConnections(toolCall domain.ToolCall) (
 			break
 		}
 	}
-	
+
 	if serverConn == nil {
 		return "", fmt.Errorf("server not found: %s", serverName)
 	}
-	
+
 	// Show what we're doing
 	m.UI.PrintToolExecution(toolName, serverName)
-	
+
 	// Execute the tool call using the tools package
 	logging.Info("Calling tool %s on server %s", toolName, serverName)
-	
+
 	// Type assert to stdio client
 	stdioClient := serverConn.GetStdioClient()
 	if stdioClient == nil {
 		return "", fmt.Errorf("server %s does not support stdio protocol", serverName)
 	}
-	
+
 	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), toolName, args)
 	if err != nil {
 		return "", fmt.Errorf("tool execution error: %w", err)
 	}
-	
+
 	// Enhanced error detection - check both top-level and nested error formats
 	// This follows MCP spec and handles legacy server implementations
 	errorDetector := mcplib.NewErrorDetector()
-	
+
 	// Log detailed error info for debugging
 	if logging.GetDefaultLevel() <= logging.DEBUG {
 		errorDetector.LogErrorDetails(result)
 	}
-	
+
 	// Check for errors using enhanced detection
 	if errorDetector.IsMCPError(result) {
 		// Try to get detailed error message
@@ -583,7 +583,7 @@ func (m *ChatManager) executeToolCallWithConnections(toolCall domain.ToolCall) (
 		// Fallback to generic error
 		return "", fmt.Errorf("tool execution failed: %s", result.Error)
 	}
-	
+
 	// Convert result to string if needed
 	var resultStr string
 	switch content := result.Content.(type) {
@@ -605,7 +605,7 @@ func (m *ChatManager) executeToolCallWithConnections(toolCall domain.ToolCall) (
 			resultStr = string(resultBytes)
 		}
 	}
-	
+
 	return resultStr, nil
 }
 
@@ -618,7 +618,7 @@ func (m *ChatManager) formatAnthropicToolResult(content interface{}) string {
 		resultBytes, _ = json.MarshalIndent(content, "", "  ")
 		return string(resultBytes)
 	}
-	
+
 	// Try to extract text content from Anthropic response format
 	var resultArr []map[string]interface{}
 	if err := json.Unmarshal(resultBytes, &resultArr); err == nil {
@@ -630,7 +630,7 @@ func (m *ChatManager) formatAnthropicToolResult(content interface{}) string {
 			}
 		}
 	}
-	
+
 	// If we can't extract from array format, try the object format
 	var resultObj map[string]interface{}
 	if err := json.Unmarshal(resultBytes, &resultObj); err == nil {
@@ -648,13 +648,13 @@ func (m *ChatManager) formatAnthropicToolResult(content interface{}) string {
 				return sb.String()
 			}
 		}
-		
+
 		// Try simpler format where text might be directly in the object
 		if text, ok := resultObj["text"].(string); ok {
 			return text
 		}
 	}
-	
+
 	// If all else fails, return pretty JSON
 	resultBytes, _ = json.MarshalIndent(content, "", "  ")
 	return string(resultBytes)
@@ -667,11 +667,11 @@ func formatToolNameForOpenAI(serverName, toolName string) string {
 	serverName = strings.ReplaceAll(serverName, ".", "_")
 	serverName = strings.ReplaceAll(serverName, " ", "_")
 	serverName = strings.ReplaceAll(serverName, "-", "_")
-	
+
 	// Make sure the tool name is valid too
 	toolName = strings.ReplaceAll(toolName, ".", "_")
 	toolName = strings.ReplaceAll(toolName, " ", "_")
-	
+
 	// Combine with underscore
 	return fmt.Sprintf("%s_%s", serverName, toolName)
 }
@@ -683,11 +683,11 @@ func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
 		logging.Debug("Getting tools from ServerManager (includes built-in skills)")
 		return m.ServerManager.GetAvailableTools()
 	}
-	
+
 	// Fall back to legacy Connections-based tool retrieval
 	var llmTools []domain.Tool
 	var anyErrors error
-	
+
 	for _, conn := range m.Connections {
 		serverTools, err := m.getServerTools(conn)
 		if err != nil {
@@ -695,19 +695,19 @@ func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
 			anyErrors = err
 			continue
 		}
-		
+
 		logging.Debug("Processing %d tools from server %s for LLM provider", len(serverTools), conn.Name)
-		
+
 		for _, tool := range serverTools {
 			// Format the tool name to be compatible with OpenAI's requirements
 			formattedName := formatToolNameForOpenAI(conn.Name, tool.Name)
-			
+
 			// Debug log the name transformation
 			logging.Debug("Transforming tool name for LLM: %s.%s -> %s", conn.Name, tool.Name, formattedName)
-			
+
 			// CRITICAL: Pass schema directly without transformation (Gemini CLI approach)
 			// This ensures Gemini and other providers receive the schema exactly as MCP server provided it
-			
+
 			// Create the tool with the formatted name using domain types
 			llmTool := domain.Tool{
 				Type: "function",
@@ -717,7 +717,7 @@ func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
 					Parameters:  tool.InputSchema, // Direct pass-through - no transformation
 				},
 			}
-			
+
 			// Enhanced logging for debugging Gemini tool calling issues
 			if logging.GetDefaultLevel() <= logging.DEBUG {
 				logging.Debug("=== Tool Registration for LLM ===")
@@ -729,15 +729,15 @@ func (m *ChatManager) GetAvailableTools() ([]domain.Tool, error) {
 				}
 				logging.Debug("=================================")
 			}
-			
+
 			llmTools = append(llmTools, llmTool)
 		}
 	}
-	
+
 	if len(llmTools) == 0 && anyErrors != nil {
 		return nil, fmt.Errorf("failed to get any tools: %w", anyErrors)
 	}
-	
+
 	logging.Info("Registered %d total tools for LLM provider", len(llmTools))
 	return llmTools, nil
 }
@@ -748,47 +748,47 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 	if cachedTools, ok := m.toolsCache[conn.Name]; ok {
 		return cachedTools, nil
 	}
-	
+
 	// Get the tools from the server with retry
 	var serverTools []tools.Tool
 	var lastErr error
-	
+
 	// Create lenient schema validator
 	schemaValidator := mcplib.NewLenientSchemaValidator()
-	
+
 	for retries := 0; retries < 3; retries++ {
 		if retries > 0 {
 			logging.Warn("Retrying tools list request for server %s (attempt %d/3)", conn.Name, retries+1)
 			time.Sleep(time.Duration(retries) * time.Second)
 		}
-		
+
 		logging.Info("Getting tools list from server %s", conn.Name)
-		
+
 		// Type assert to stdio client
 		stdioClient := conn.GetStdioClient()
 		if stdioClient == nil {
 			lastErr = fmt.Errorf("server %s does not support stdio protocol", conn.Name)
 			break
 		}
-		
+
 		result, err := tools.SendToolsList(stdioClient, nil)
 		if err != nil {
 			lastErr = fmt.Errorf("failed to get tools from server %s: %w", conn.Name, err)
 			logging.Error("%v", lastErr)
 			continue
 		}
-		
+
 		// Validate and log schemas with lenient validation
 		validatedTools := make([]tools.Tool, 0, len(result.Tools))
 		for _, tool := range result.Tools {
 			// Validate schema (lenient - logs warnings but doesn't reject)
 			if err := schemaValidator.ValidateSchema(tool.InputSchema); err != nil {
 				// This is a catastrophic error (not just validation failure)
-				logging.Error("Catastrophic error validating schema for tool %s.%s: %v", 
+				logging.Error("Catastrophic error validating schema for tool %s.%s: %v",
 					conn.Name, tool.Name, err)
 				continue // Skip this tool
 			}
-			
+
 			// Log schema for debugging if in debug mode
 			if logging.GetDefaultLevel() <= logging.DEBUG {
 				schemaValidator.LogSchemaForDebugging(
@@ -796,22 +796,22 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 					tool.InputSchema,
 				)
 			}
-			
+
 			// Accept the tool
 			validatedTools = append(validatedTools, tool)
 		}
-		
-		logging.Info("Validated %d/%d tools from server %s", 
+
+		logging.Info("Validated %d/%d tools from server %s",
 			len(validatedTools), len(result.Tools), conn.Name)
-		
+
 		// Cache the validated tools
 		m.toolsCache[conn.Name] = validatedTools
 		serverTools = validatedTools
-		
+
 		logging.Info("Successfully got %d tools from server %s", len(serverTools), conn.Name)
 		return serverTools, nil
 	}
-	
+
 	return nil, lastErr
 }
 
@@ -819,7 +819,7 @@ func (m *ChatManager) getServerTools(conn *host.ServerConnection) ([]tools.Tool,
 func (m *ChatManager) discoverAvailableSkills() []string {
 	var skillNames []string
 	skillsFound := make(map[string]bool) // Track unique skills
-	
+
 	// If EnabledSkills is set, use that as the filter
 	var enabledSkillsMap map[string]bool
 	if len(m.EnabledSkills) > 0 {
@@ -837,7 +837,7 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 		}
 		fmt.Printf("[DEBUG] EnabledSkills map after conversion: %v\n", enabledSkillsMap)
 	}
-	
+
 	// ARCHITECTURAL FIX: Use ServerManager if available
 	if m.ServerManager != nil {
 		// Get all tools from server manager
@@ -846,23 +846,23 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 			logging.Debug("Could not get tools from server manager: %v", err)
 			return skillNames
 		}
-		
+
 		// Look for skill tools (prefixed with "skills_")
 		for _, tool := range tools {
 			toolName := tool.Function.Name
-			
+
 			// Check if this is a skill tool
 			if strings.HasPrefix(toolName, "skills_") {
 				// Strip the prefix
 				skillTool := strings.TrimPrefix(toolName, "skills_")
-				
+
 				// Skip execute_skill_code (it's not a skill itself)
 				if skillTool == "execute_skill_code" {
 					continue
 				}
-				
+
 				logging.Debug("Checking skill tool '%s'", skillTool)
-				
+
 				// If EnabledSkills is set, only include tools in that list
 				if enabledSkillsMap != nil {
 					if !enabledSkillsMap[skillTool] {
@@ -871,7 +871,7 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 					}
 					logging.Debug("  Skill '%s' IS in enabled skills map", skillTool)
 				}
-				
+
 				if !skillsFound[skillTool] {
 					skillsFound[skillTool] = true
 					// Convert tool name to display name (underscore to hyphen)
@@ -881,12 +881,12 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 				}
 			}
 		}
-		
+
 		// Sort for consistent display
 		sort.Strings(skillNames)
 		return skillNames
 	}
-	
+
 	// Fall back to legacy Connections-based discovery
 	// Check each connected server
 	for _, conn := range m.Connections {
@@ -896,13 +896,13 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 			logging.Debug("Could not get tools from server %s: %v", conn.Name, err)
 			continue
 		}
-		
+
 		// Look for skill tools
 		for _, tool := range tools {
 			toolName := tool.Name
-			
+
 			logging.Debug("Checking tool '%s' from server '%s'", toolName, conn.Name)
-			
+
 			// If EnabledSkills is set, only include tools in that list
 			if enabledSkillsMap != nil {
 				if !enabledSkillsMap[toolName] {
@@ -911,12 +911,12 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 				}
 				logging.Debug("  Tool '%s' IS in enabled skills map", toolName)
 			}
-			
+
 			// Skip execute_skill_code (it's not a skill itself)
 			if toolName == "execute_skill_code" {
 				continue
 			}
-			
+
 			// Check if this tool is from the skills server
 			if conn.Name == "skills" && !skillsFound[toolName] {
 				skillsFound[toolName] = true
@@ -927,10 +927,10 @@ func (m *ChatManager) discoverAvailableSkills() []string {
 			}
 		}
 	}
-	
+
 	// Sort for consistent display
 	sort.Strings(skillNames)
-	
+
 	return skillNames
 }
 
@@ -941,7 +941,7 @@ func (m *ChatManager) SetSessionLogger(logger *appChat.SessionLogger, providerNa
 	m.sessionLogger = logger
 	m.providerName = providerName
 	m.modelName = modelName
-	
+
 	if logger != nil && logger.IsEnabled() {
 		logging.Info("Session logging enabled for chat")
 	}
@@ -953,7 +953,7 @@ func (m *ChatManager) logSession() {
 	if m.sessionLogger == nil || !m.sessionLogger.IsEnabled() || m.session == nil {
 		return
 	}
-	
+
 	if err := m.sessionLogger.LogSession(m.session, m.providerName, m.modelName); err != nil {
 		logging.Warn("Failed to log session: %v", err)
 	}
@@ -969,20 +969,20 @@ func (m *ChatManager) StartChat() error {
 
 	// Print welcome message
 	m.UI.PrintWelcome()
-	
+
 	// Print connected servers
 	var serverNames []string
 	for _, conn := range m.Connections {
 		serverNames = append(serverNames, conn.Name)
 	}
 	m.UI.PrintConnectedServers(serverNames)
-	
+
 	// Discover and print available skills
 	availableSkills := m.discoverAvailableSkills()
 	if len(availableSkills) > 0 {
 		m.UI.PrintEnabledSkills(availableSkills)
 	}
-	
+
 	// Main chat loop
 	for {
 		// Read user input
@@ -994,12 +994,12 @@ func (m *ChatManager) StartChat() error {
 			}
 			return fmt.Errorf("error reading input: %w", err)
 		}
-		
+
 		// Skip empty input
 		if strings.TrimSpace(userInput) == "" {
 			continue
 		}
-		
+
 		// Process commands
 		if strings.HasPrefix(userInput, "/") {
 			cmd := strings.TrimSpace(userInput)
@@ -1034,7 +1034,7 @@ func (m *ChatManager) StartChat() error {
 				continue
 			}
 		}
-		
+
 		// Process user message
 		err = m.ProcessUserMessage(userInput)
 		// Log session after processing message
@@ -1048,28 +1048,28 @@ func (m *ChatManager) StartChat() error {
 // PrintAvailableTools prints the available tools
 func (m *ChatManager) PrintAvailableTools() {
 	m.UI.PrintSystem("Available tools:")
-	
+
 	for _, conn := range m.Connections {
 		serverTools, err := m.getServerTools(conn)
 		if err != nil {
 			m.UI.PrintError("Failed to get tools from server %s: %v", conn.Name, err)
 			continue
 		}
-		
+
 		m.UI.PrintSystem("Server: %s", conn.Name)
-		
+
 		for _, tool := range serverTools {
 			fmt.Printf("  - %s: %s", tool.Name, tool.Description)
 		}
 	}
-	
+
 	fmt.Println()
 }
 
 // PrintChatHistory prints the chat history
 func (m *ChatManager) PrintChatHistory() {
 	m.UI.PrintSystem("Chat history:")
-	
+
 	for i, msg := range m.Context.Messages {
 		switch msg.Role {
 		case "user":
@@ -1093,20 +1093,20 @@ func (m *ChatManager) PrintChatHistory() {
 			fmt.Println(content)
 		}
 	}
-	
+
 	fmt.Println()
 }
 
 // PrintContextStats prints context utilization statistics
 func (m *ChatManager) PrintContextStats() {
 	stats := m.Context.GetContextStats()
-	
+
 	m.UI.PrintSystem("Context Statistics:")
 	fmt.Printf("  Model: %v", stats["model"])
 	fmt.Printf("  Messages: %v", stats["message_count"])
 	fmt.Printf("  Tool Calls: %v", stats["tool_call_count"])
 	fmt.Printf("  Token Management: %v", stats["token_management"])
-	
+
 	if stats["token_management"] == "enabled" {
 		fmt.Printf("  Current Tokens: %v", stats["current_tokens"])
 		fmt.Printf("  Max Tokens: %v", stats["max_tokens"])
@@ -1117,11 +1117,9 @@ func (m *ChatManager) PrintContextStats() {
 	} else {
 		fmt.Printf("  Max History Size: %v", stats["max_history_size"])
 	}
-	
+
 	fmt.Println()
 }
-
-
 
 // convertDomainMessage converts a domain.Message to models.Message for session logging
 func convertDomainMessage(msg domain.Message) models.Message {

@@ -32,7 +32,7 @@ func buildFiltersClause(filters map[string]interface{}) string {
 	if len(filters) == 0 {
 		return ""
 	}
-	
+
 	var conditions []string
 	for key, value := range filters {
 		switch v := value.(type) {
@@ -48,7 +48,7 @@ func buildFiltersClause(filters map[string]interface{}) string {
 			conditions = append(conditions, fmt.Sprintf("%s = '%v'", key, v))
 		}
 	}
-	
+
 	return strings.Join(conditions, " AND ")
 }
 
@@ -59,22 +59,22 @@ func cosineSimilarity(vec1, vec2 []float32) float64 {
 	if len(vec1) != len(vec2) {
 		return 0.0
 	}
-	
+
 	var dotProduct, normA, normB float64
-	
+
 	for i := 0; i < len(vec1); i++ {
 		dotProduct += float64(vec1[i]) * float64(vec2[i])
 		normA += float64(vec1[i]) * float64(vec1[i])
 		normB += float64(vec2[i]) * float64(vec2[i])
 	}
-	
+
 	normA = math.Sqrt(normA)
 	normB = math.Sqrt(normB)
-	
+
 	if normA == 0 || normB == 0 {
 		return 0.0
 	}
-	
+
 	return dotProduct / (normA * normB)
 }
 
@@ -83,13 +83,13 @@ func euclideanDistance(vec1, vec2 []float32) float64 {
 	if len(vec1) != len(vec2) {
 		return -1
 	}
-	
+
 	var sum float64
 	for i := 0; i < len(vec1); i++ {
 		diff := float64(vec1[i] - vec2[i])
 		sum += diff * diff
 	}
-	
+
 	return math.Sqrt(sum)
 }
 
@@ -98,12 +98,12 @@ func dotProduct(vec1, vec2 []float32) float64 {
 	if len(vec1) != len(vec2) {
 		return 0.0
 	}
-	
+
 	var result float64
 	for i := 0; i < len(vec1); i++ {
 		result += float64(vec1[i]) * float64(vec2[i])
 	}
-	
+
 	return result
 }
 
@@ -119,9 +119,8 @@ func getParamKeys(params map[string]interface{}) []string {
 // isParameterFormatError checks if an error is related to parameter formatting
 func isParameterFormatError(err error) bool {
 	errStr := strings.ToLower(err.Error())
-	return strings.Contains(errStr, "parameter") || 
-		   strings.Contains(errStr, "argument") || 
-		   strings.Contains(errStr, "missing") ||
-		   strings.Contains(errStr, "required")
+	return strings.Contains(errStr, "parameter") ||
+		strings.Contains(errStr, "argument") ||
+		strings.Contains(errStr, "missing") ||
+		strings.Contains(errStr, "required")
 }
-

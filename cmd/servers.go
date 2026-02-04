@@ -55,13 +55,13 @@ func listServers() error {
 	bold := color.New(color.Bold)
 	green := color.New(color.FgGreen)
 	cyan := color.New(color.FgCyan)
-	
+
 	bold.Printf("\nConfigured MCP Servers (%d total):\n", len(cfg.Servers))
 	fmt.Println(strings.Repeat("=", 50))
 
 	for _, name := range serverNames {
 		server := cfg.Servers[name]
-		
+
 		// Determine server type
 		serverType := "Traditional MCP Server"
 		if len(server.Args) > 0 && server.Args[0] == "serve" {
@@ -80,7 +80,7 @@ func listServers() error {
 				fmt.Printf("  Args:    %v\n", server.Args)
 			}
 		}
-		
+
 		if server.SystemPrompt != "" {
 			fmt.Printf("  Prompt:  %s\n", truncate(server.SystemPrompt, 60))
 		}
@@ -95,7 +95,7 @@ func listServers() error {
 	fmt.Printf("  mcp-cli query --server %s \"your question\"\n", serverNames[0])
 	fmt.Println("\n  # Chat with all servers")
 	fmt.Println("  mcp-cli chat")
-	
+
 	return nil
 }
 

@@ -22,18 +22,18 @@ type SessionLogger struct {
 
 // SessionLogEntry represents a logged session with metadata
 type SessionLogEntry struct {
-	SessionID     string                 `yaml:"session_id"`
-	UserID        string                 `yaml:"user_id,omitempty"`
-	ClientID      string                 `yaml:"client_id,omitempty"`
-	CreatedAt     time.Time              `yaml:"created_at"`
-	UpdatedAt     time.Time              `yaml:"updated_at"`
-	MessageCount  int                    `yaml:"message_count"`
-	TotalTokens   int                    `yaml:"total_tokens,omitempty"`
-	Provider      string                 `yaml:"provider,omitempty"`
-	Model         string                 `yaml:"model,omitempty"`
-	SystemPrompt  string                 `yaml:"system_prompt,omitempty"`
-	Messages      []models.Message       `yaml:"messages"`
-	Metadata      map[string]interface{} `yaml:"metadata,omitempty"`
+	SessionID    string                 `yaml:"session_id"`
+	UserID       string                 `yaml:"user_id,omitempty"`
+	ClientID     string                 `yaml:"client_id,omitempty"`
+	CreatedAt    time.Time              `yaml:"created_at"`
+	UpdatedAt    time.Time              `yaml:"updated_at"`
+	MessageCount int                    `yaml:"message_count"`
+	TotalTokens  int                    `yaml:"total_tokens,omitempty"`
+	Provider     string                 `yaml:"provider,omitempty"`
+	Model        string                 `yaml:"model,omitempty"`
+	SystemPrompt string                 `yaml:"system_prompt,omitempty"`
+	Messages     []models.Message       `yaml:"messages"`
+	Metadata     map[string]interface{} `yaml:"metadata,omitempty"`
 }
 
 // NewSessionLogger creates a new session logger
@@ -128,7 +128,7 @@ func (sl *SessionLogger) LogSession(session *Session, provider, model string) er
 		return fmt.Errorf("failed to write session log: %w", err)
 	}
 
-	logging.Debug("Logged session %s: %d messages, %d tokens", 
+	logging.Debug("Logged session %s: %d messages, %d tokens",
 		session.ID, entry.MessageCount, entry.TotalTokens)
 
 	return nil
@@ -186,7 +186,7 @@ func (sl *SessionLogger) ListSessions() ([]string, error) {
 		if file.IsDir() {
 			continue
 		}
-		
+
 		name := file.Name()
 		if filepath.Ext(name) == ".yaml" && len(name) > 13 && name[:8] == "session_" {
 			// Extract session ID from "session_<ID>.yaml"

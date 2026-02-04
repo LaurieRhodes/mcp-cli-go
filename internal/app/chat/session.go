@@ -13,7 +13,7 @@ type Session struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	Metadata     map[string]interface{}
-	
+
 	// For future multi-user support
 	UserID   string // Identifies the user (for authentication/auditing)
 	ClientID string // Identifies the client connection (for multi-session per user)

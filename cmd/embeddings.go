@@ -8,29 +8,29 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
+	"github.com/spf13/cobra"
 )
 
 // Embeddings command flags
 var (
-	embeddingProvider    string
-	embeddingModel       string
-	embeddingInputFile   string  // Renamed to avoid conflict
-	embeddingOutputFile  string  // Renamed to avoid conflict
+	embeddingProvider     string
+	embeddingModel        string
+	embeddingInputFile    string // Renamed to avoid conflict
+	embeddingOutputFile   string // Renamed to avoid conflict
 	embeddingOutputFormat string
-	chunkStrategy       string
-	maxChunkSize        int
-	chunkOverlap        int
-	includeMeta         bool
-	encodingFormat      string
-	dimensions          int
-	showModels          bool
-	showStrategies      bool
+	chunkStrategy         string
+	maxChunkSize          int
+	chunkOverlap          int
+	includeMeta           bool
+	encodingFormat        string
+	dimensions            int
+	showModels            bool
+	showStrategies        bool
 )
 
 // EmbeddingsCmd represents the embeddings command
@@ -70,22 +70,22 @@ func init() {
 	// Provider and model flags
 	EmbeddingsCmd.Flags().StringVar(&embeddingProvider, "provider", "", "AI provider to use (openai, deepseek, openrouter)")
 	EmbeddingsCmd.Flags().StringVar(&embeddingModel, "model", "", "Embedding model to use")
-	
+
 	// Input/output flags
 	EmbeddingsCmd.Flags().StringVar(&embeddingInputFile, "input-file", "", "Input file path")
 	EmbeddingsCmd.Flags().StringVar(&embeddingOutputFile, "output-file", "", "Output file path (default: stdout)")
 	EmbeddingsCmd.Flags().StringVar(&embeddingOutputFormat, "output-format", "json", "Output format (json, csv, compact)")
-	
+
 	// Chunking flags
 	EmbeddingsCmd.Flags().StringVar(&chunkStrategy, "chunk-strategy", "sentence", "Chunking strategy (sentence, paragraph, fixed)")
 	EmbeddingsCmd.Flags().IntVar(&maxChunkSize, "max-chunk-size", 512, "Maximum chunk size in tokens")
 	EmbeddingsCmd.Flags().IntVar(&chunkOverlap, "overlap", 0, "Overlap between chunks in tokens")
-	
+
 	// Embedding flags
 	EmbeddingsCmd.Flags().StringVar(&encodingFormat, "encoding-format", "float", "Encoding format (float, base64)")
 	EmbeddingsCmd.Flags().IntVar(&dimensions, "dimensions", 0, "Number of dimensions (for supported models)")
 	EmbeddingsCmd.Flags().BoolVar(&includeMeta, "include-metadata", true, "Include chunk and model metadata")
-	
+
 	// Info flags
 	EmbeddingsCmd.Flags().BoolVar(&showModels, "show-models", false, "Show available embedding models")
 	EmbeddingsCmd.Flags().BoolVar(&showStrategies, "show-strategies", false, "Show available chunking strategies")
@@ -93,30 +93,30 @@ func init() {
 
 func executeEmbeddings(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	
+
 	// Initialize services
 	configService := config.NewService()
 	providerFactory := ai.NewProviderFactory()
 	embeddingService := embeddings.NewService(configService, providerFactory)
-	
+
 	// Load configuration using configFile from root command
 	_, err := configService.LoadConfig(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
-	
+
 	// Handle info flags
 	if showModels {
 		return showAvailableModels(configService, providerFactory)
 	}
-	
+
 	if showStrategies {
 		return showAvailableStrategies(embeddingService)
 	}
-	
+
 	// Get input text
 	var inputText string
-	
+
 	if embeddingInputFile != "" {
 		// Read from file
 		data, err := os.ReadFile(embeddingInputFile)
@@ -143,11 +143,11 @@ func executeEmbeddings(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("no input provided. Use --input-file, provide text as argument, or pipe to stdin")
 		}
 	}
-	
+
 	if strings.TrimSpace(inputText) == "" {
 		return fmt.Errorf("input text is empty")
 	}
-	
+
 	// Create embedding request
 	req := &domain.EmbeddingJobRequest{
 		Input:          inputText,
@@ -163,20 +163,20 @@ func executeEmbeddings(cmd *cobra.Command, args []string) error {
 			"source":      getInputSource(),
 		},
 	}
-	
+
 	// Generate embeddings
 	logging.Info("Generating embeddings...")
 	job, err := embeddingService.GenerateEmbeddings(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to generate embeddings: %w", err)
 	}
-	
+
 	// Format and output results
 	output, err := formatOutput(job, embeddingOutputFormat, includeMeta)
 	if err != nil {
 		return fmt.Errorf("failed to format output: %w", err)
 	}
-	
+
 	// Write output
 	if embeddingOutputFile != "" {
 		err = os.WriteFile(embeddingOutputFile, []byte(output), 0644)
@@ -187,47 +187,47 @@ func executeEmbeddings(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Print(output)
 	}
-	
+
 	// Log summary
-	logging.Info("Embedding generation completed: %d chunks, %d embeddings", 
+	logging.Info("Embedding generation completed: %d chunks, %d embeddings",
 		len(job.Chunks), len(job.Embeddings))
-	
+
 	return nil
 }
 
 func showAvailableModels(configService domain.ConfigurationService, providerFactory domain.ProviderFactory) error {
 	fmt.Println("Available Embedding Models:")
 	fmt.Println("==========================")
-	
+
 	// Get default provider
 	defaultProviderName, defaultConfig, interfaceType, err := configService.GetDefaultProvider()
 	if err != nil {
 		logging.Warn("Could not get default provider: %v", err)
 		return nil
 	}
-	
+
 	// Create provider instance to get supported models
 	providerType := domain.ProviderType(defaultProviderName)
-	
+
 	provider, err := providerFactory.CreateProvider(providerType, defaultConfig, interfaceType)
 	if err != nil {
 		return fmt.Errorf("failed to create provider: %w", err)
 	}
 	defer provider.Close()
-	
+
 	models := provider.GetSupportedEmbeddingModels()
 	for _, model := range models {
 		maxTokens := provider.GetMaxEmbeddingTokens(model)
 		fmt.Printf("  %-30s (max tokens: %d)\n", model, maxTokens)
 	}
-	
+
 	return nil
 }
 
 func showAvailableStrategies(embeddingService domain.EmbeddingService) error {
 	fmt.Println("Available Chunking Strategies:")
 	fmt.Println("=============================")
-	
+
 	strategies := embeddingService.GetAvailableChunkingStrategies()
 	for _, strategy := range strategies {
 		fmt.Printf("  %-15s - %s", strategy, getStrategyDescription(strategy))
@@ -286,12 +286,12 @@ func formatJSON(job *domain.EmbeddingJob, includeMeta bool) (string, error) {
 		for i, embedding := range job.Embeddings {
 			vectors[i] = embedding.Vector
 		}
-		
+
 		minimal := map[string]interface{}{
 			"model":   job.Model,
 			"vectors": vectors,
 		}
-		
+
 		data, err := json.MarshalIndent(minimal, "", "  ")
 		if err != nil {
 			return "", err
@@ -302,11 +302,11 @@ func formatJSON(job *domain.EmbeddingJob, includeMeta bool) (string, error) {
 
 func formatCSV(job *domain.EmbeddingJob, includeMeta bool) (string, error) {
 	var lines []string
-	
+
 	if includeMeta {
 		// CSV with metadata
 		lines = append(lines, "chunk_index,text,vector_json,start_pos,end_pos,token_count")
-		
+
 		for _, embedding := range job.Embeddings {
 			vectorJSON, _ := json.Marshal(embedding.Vector)
 			text := strings.ReplaceAll(embedding.Chunk.Text, "\"", "\"\"") // Escape quotes
@@ -323,14 +323,14 @@ func formatCSV(job *domain.EmbeddingJob, includeMeta bool) (string, error) {
 	} else {
 		// CSV with just vectors
 		lines = append(lines, "chunk_index,vector_json")
-		
+
 		for i, embedding := range job.Embeddings {
 			vectorJSON, _ := json.Marshal(embedding.Vector)
 			line := fmt.Sprintf("%d,\"%s\"", i, string(vectorJSON))
 			lines = append(lines, line)
 		}
 	}
-	
+
 	return strings.Join(lines, "") + "", nil
 }
 
@@ -340,12 +340,12 @@ func formatCompact(job *domain.EmbeddingJob) (string, error) {
 	for i, embedding := range job.Embeddings {
 		vectors[i] = embedding.Vector
 	}
-	
+
 	compact := map[string]interface{}{
 		"model":   job.Model,
 		"vectors": vectors,
 	}
-	
+
 	data, err := json.Marshal(compact)
 	if err != nil {
 		return "", err

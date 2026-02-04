@@ -11,7 +11,7 @@ var (
 // In production mode, only WARN and above messages are logged
 func SetProductionMode(enabled bool) {
 	productionMode = enabled
-	
+
 	// Update the default level accordingly
 	if enabled {
 		SetDefaultLevel(WARN)

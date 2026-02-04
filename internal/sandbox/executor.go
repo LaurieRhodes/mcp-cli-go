@@ -21,12 +21,12 @@ type Executor interface {
 
 	// ExecuteBash runs a Bash script in a sandbox
 	ExecuteBash(ctx context.Context, skillDir, scriptPath string, args []string) (string, error)
-	
+
 	// ExecutePythonCode runs Python code with dual mount support
 	// workspaceDir: read-write workspace for files and code execution
 	// skillLibsDir: read-only skill directory for importing helper libraries
 	ExecutePythonCode(ctx context.Context, workspaceDir, skillLibsDir, scriptPath string, args []string) (string, error)
-	
+
 	// ExecuteBashCode runs Bash code with dual mount support
 	// workspaceDir: read-write workspace for files and code execution
 	// skillLibsDir: read-only skill directory (for future bash libraries)
@@ -50,12 +50,12 @@ type ExecutorConfig struct {
 // DefaultConfig returns default executor configuration
 func DefaultConfig() ExecutorConfig {
 	return ExecutorConfig{
-		PythonImage:  "python:3.11-slim",
-		Timeout:      30 * time.Second,
-		MemoryLimit:  "256m",
-		CPULimit:     "0.5",
-		OutputsDir:   "/tmp/mcp-outputs", // Default matches settings.yaml
-		NetworkMode:  "none",              // Default: no network for security
+		PythonImage: "python:3.11-slim",
+		Timeout:     30 * time.Second,
+		MemoryLimit: "256m",
+		CPULimit:    "0.5",
+		OutputsDir:  "/tmp/mcp-outputs", // Default matches settings.yaml
+		NetworkMode: "none",             // Default: no network for security
 	}
 }
 
@@ -64,24 +64,24 @@ func DefaultConfig() ExecutorConfig {
 func (c *ExecutorConfig) GetImageForSkill(skillLibsDir string) string {
 	// Extract skill name from path (e.g., /path/to/skills/docx -> "docx")
 	skillName := filepath.Base(skillLibsDir)
-	
+
 	// If no mapping, use default
 	if c.ImageMapping == nil {
 		return c.PythonImage
 	}
-	
+
 	// Type assert the mapping (avoid circular dependency by using interface{})
 	type imageMapper interface {
 		GetImageForSkill(string) string
 	}
-	
+
 	if mapper, ok := c.ImageMapping.(imageMapper); ok {
 		image := mapper.GetImageForSkill(skillName)
 		// Log the image being used for debugging
 		logging.Debug("Skill '%s' -> Image '%s' (from mapping)", skillName, image)
 		return image
 	}
-	
+
 	logging.Debug("Skill '%s' -> Image '%s' (default, no mapping)", skillName, c.PythonImage)
 	return c.PythonImage
 }
@@ -115,9 +115,9 @@ func isRunningInContainer() bool {
 	data, err := os.ReadFile("/proc/1/cgroup")
 	if err == nil {
 		content := string(data)
-		if strings.Contains(content, "docker") || 
-		   strings.Contains(content, "containerd") ||
-		   strings.Contains(content, "kubepods") {
+		if strings.Contains(content, "docker") ||
+			strings.Contains(content, "containerd") ||
+			strings.Contains(content, "kubepods") {
 			return true
 		}
 	}
@@ -129,17 +129,17 @@ func isRunningInContainer() bool {
 func (c *ExecutorConfig) GetNetworkModeForSkill(skillLibsDir string) string {
 	// Extract skill name from path
 	skillName := filepath.Base(skillLibsDir)
-	
+
 	// If no mapping, use default network mode
 	if c.ImageMapping == nil {
 		return c.NetworkMode
 	}
-	
+
 	// Type assert the mapping to access network mode settings
 	type networkMapper interface {
 		GetNetworkModeForSkill(string) string
 	}
-	
+
 	if mapper, ok := c.ImageMapping.(networkMapper); ok {
 		mode := mapper.GetNetworkModeForSkill(skillName)
 		if mode != "" {
@@ -147,7 +147,7 @@ func (c *ExecutorConfig) GetNetworkModeForSkill(skillLibsDir string) string {
 			return mode
 		}
 	}
-	
+
 	logging.Debug("Skill '%s' -> NetworkMode '%s' (default)", skillName, c.NetworkMode)
 	return c.NetworkMode
 }

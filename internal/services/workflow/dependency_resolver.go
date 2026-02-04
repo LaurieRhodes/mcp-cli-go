@@ -8,10 +8,10 @@ import (
 
 // DependencyResolver handles step dependency resolution
 type DependencyResolver struct {
-	steps         []*config.StepV2
-	stepsByName   map[string]*config.StepV2
-	dependencies  map[string][]string // step -> dependencies
-	dependents    map[string][]string // step -> steps that depend on it
+	steps        []*config.StepV2
+	stepsByName  map[string]*config.StepV2
+	dependencies map[string][]string // step -> dependencies
+	dependents   map[string][]string // step -> steps that depend on it
 }
 
 // NewDependencyResolver creates a new dependency resolver
@@ -59,13 +59,13 @@ func (r *DependencyResolver) GetReadySteps(completed map[string]bool) []*config.
 // areDependenciesMet checks if all dependencies for a step are satisfied
 func (r *DependencyResolver) areDependenciesMet(stepName string, completed map[string]bool) bool {
 	deps := r.dependencies[stepName]
-	
+
 	for _, dep := range deps {
 		if !completed[dep] {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
@@ -131,7 +131,7 @@ func (r *DependencyResolver) GetDependencies(stepName string) []string {
 func (r *DependencyResolver) GetExecutionOrder() ([]*config.StepV2, error) {
 	// Kahn's algorithm for topological sort
 	inDegree := make(map[string]int)
-	
+
 	// Calculate in-degree for each step
 	for _, step := range r.steps {
 		inDegree[step.Name] = len(r.dependencies[step.Name])

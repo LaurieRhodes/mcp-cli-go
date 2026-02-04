@@ -132,7 +132,7 @@ func (i *Interpolator) SetIterateLoopVars(index int, item interface{}, totalItem
 	i.variables["loop.count"] = fmt.Sprintf("%d", totalItems)
 	i.variables["loop.stats.succeeded"] = fmt.Sprintf("%d", succeeded)
 	i.variables["loop.stats.failed"] = fmt.Sprintf("%d", failed)
-	
+
 	// Set current item as JSON
 	if item != nil {
 		if itemStr, ok := item.(string); ok {

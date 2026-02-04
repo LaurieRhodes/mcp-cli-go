@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
+	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 )
 
@@ -35,7 +35,7 @@ func (s *Service) GetProviderFactory() domain.ProviderFactory {
 
 // InitializeProvider initializes an AI provider based on config and command-line overrides
 func (s *Service) InitializeProvider(configFile, providerOverride, modelOverride string) (domain.LLMProvider, error) {
-	logging.Debug("Initializing AI provider with config: %s, provider: %s, model: %s", 
+	logging.Debug("Initializing AI provider with config: %s, provider: %s, model: %s",
 		configFile, providerOverride, modelOverride)
 
 	// Load configuration
@@ -94,7 +94,7 @@ func (s *Service) InitializeProvider(configFile, providerOverride, modelOverride
 		return nil, fmt.Errorf("failed to create provider %s: %w", providerName, err)
 	}
 
-	logging.Info("Successfully initialized AI provider: %s with model: %s", 
+	logging.Info("Successfully initialized AI provider: %s with model: %s",
 		providerName, providerConfig.DefaultModel)
 
 	return provider, nil
@@ -135,7 +135,7 @@ func (s *Service) inferInterfaceType(providerName string) config.InterfaceType {
 	// This is a fallback for old configs that don't specify interface_type
 	// New configs should always specify interface_type in the provider file
 	providerLower := strings.ToLower(providerName)
-	
+
 	switch {
 	case providerLower == "anthropic":
 		return config.AnthropicNative
@@ -167,7 +167,7 @@ func (s *Service) mapProviderNameToType(providerName string) (domain.ProviderTyp
 func (s *Service) getAPIKeyFromEnv(providerName string) string {
 	envVars := map[string]string{
 		"openai":     "OPENAI_API_KEY",
-		"anthropic":  "ANTHROPIC_API_KEY", 
+		"anthropic":  "ANTHROPIC_API_KEY",
 		"gemini":     "GEMINI_API_KEY",
 		"deepseek":   "DEEPSEEK_API_KEY",
 		"openrouter": "OPENROUTER_API_KEY",

@@ -29,16 +29,16 @@ type GeminiNativeClient struct {
 
 // Gemini native API structures
 type geminiContent struct {
-	Role  string        `json:"role"`
-	Parts []geminiPart  `json:"parts"`
+	Role  string       `json:"role"`
+	Parts []geminiPart `json:"parts"`
 }
 
 type geminiPart struct {
-	Text             string                 `json:"text,omitempty"`
-	FunctionCall     *geminiFunctionCall    `json:"functionCall,omitempty"`
+	Text             string                  `json:"text,omitempty"`
+	FunctionCall     *geminiFunctionCall     `json:"functionCall,omitempty"`
 	FunctionResponse *geminiFunctionResponse `json:"functionResponse,omitempty"`
-	ThoughtSignature string                 `json:"thoughtSignature,omitempty"`
-	Thought          bool                   `json:"thought,omitempty"`
+	ThoughtSignature string                  `json:"thoughtSignature,omitempty"`
+	Thought          bool                    `json:"thought,omitempty"`
 }
 
 type geminiFunctionCall struct {
@@ -62,10 +62,10 @@ type geminiFunctionDeclaration struct {
 }
 
 type geminiGenerateContentRequest struct {
-	Contents         []geminiContent `json:"contents"`
-	Tools            []geminiTool    `json:"tools,omitempty"`
-	SystemInstruction *geminiContent `json:"systemInstruction,omitempty"`
-	GenerationConfig *geminiGenerationConfig `json:"generationConfig,omitempty"`
+	Contents          []geminiContent         `json:"contents"`
+	Tools             []geminiTool            `json:"tools,omitempty"`
+	SystemInstruction *geminiContent          `json:"systemInstruction,omitempty"`
+	GenerationConfig  *geminiGenerationConfig `json:"generationConfig,omitempty"`
 }
 
 type geminiGenerationConfig struct {
@@ -74,14 +74,14 @@ type geminiGenerationConfig struct {
 }
 
 type geminiGenerateContentResponse struct {
-	Candidates []geminiCandidate `json:"candidates"`
+	Candidates    []geminiCandidate    `json:"candidates"`
 	UsageMetadata *geminiUsageMetadata `json:"usageMetadata,omitempty"`
 }
 
 type geminiCandidate struct {
-	Content       geminiContent `json:"content"`
-	FinishReason  string        `json:"finishReason,omitempty"`
-	Index         int           `json:"index"`
+	Content      geminiContent `json:"content"`
+	FinishReason string        `json:"finishReason,omitempty"`
+	Index        int           `json:"index"`
 }
 
 type geminiUsageMetadata struct {
@@ -141,7 +141,7 @@ func NewGeminiNativeClient(providerType domain.ProviderType, cfg *config.Provide
 func (c *GeminiNativeClient) CreateCompletion(ctx context.Context, req *domain.CompletionRequest) (*domain.CompletionResponse, error) {
 	// Convert domain messages to Gemini format
 	contents, systemInstruction := convertToGeminiContents(req.Messages, req.SystemPrompt)
-	
+
 	// Convert domain tools to Gemini format
 	var tools []geminiTool
 	if len(req.Tools) > 0 {
@@ -165,10 +165,10 @@ func (c *GeminiNativeClient) CreateCompletion(ctx context.Context, req *domain.C
 
 	// Create request payload
 	payload := geminiGenerateContentRequest{
-		Contents:         contents,
-		Tools:            tools,
+		Contents:          contents,
+		Tools:             tools,
 		SystemInstruction: systemInstruction,
-		GenerationConfig: genConfig,
+		GenerationConfig:  genConfig,
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
@@ -199,7 +199,7 @@ func (c *GeminiNativeClient) CreateCompletion(ctx context.Context, req *domain.C
 		}
 
 		candidate := response.Candidates[0]
-		
+
 		// Convert response to domain format
 		textContent, toolCalls := convertFromGeminiContent(candidate.Content)
 
@@ -218,7 +218,7 @@ func (c *GeminiNativeClient) CreateCompletion(ctx context.Context, req *domain.C
 func (c *GeminiNativeClient) StreamCompletion(ctx context.Context, req *domain.CompletionRequest, writer io.Writer) (*domain.CompletionResponse, error) {
 	// Convert domain messages to Gemini format
 	contents, systemInstruction := convertToGeminiContents(req.Messages, req.SystemPrompt)
-	
+
 	// Convert domain tools to Gemini format
 	var tools []geminiTool
 	if len(req.Tools) > 0 {
@@ -242,10 +242,10 @@ func (c *GeminiNativeClient) StreamCompletion(ctx context.Context, req *domain.C
 
 	// Create request payload
 	payload := geminiGenerateContentRequest{
-		Contents:         contents,
-		Tools:            tools,
+		Contents:          contents,
+		Tools:             tools,
 		SystemInstruction: systemInstruction,
-		GenerationConfig: genConfig,
+		GenerationConfig:  genConfig,
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
@@ -480,7 +480,7 @@ func convertToGeminiContents(messages []domain.Message, systemPrompt string) ([]
 			} else {
 				responseData = map[string]interface{}{}
 			}
-			
+
 			content.Parts = []geminiPart{
 				{
 					FunctionResponse: &geminiFunctionResponse{
@@ -503,7 +503,7 @@ func convertToGeminiContents(messages []domain.Message, systemPrompt string) ([]
 				if err := json.Unmarshal(tc.Function.Arguments, &args); err != nil {
 					args = map[string]interface{}{}
 				}
-				
+
 				part := geminiPart{
 					FunctionCall: &geminiFunctionCall{
 						Name: tc.Function.Name,
@@ -530,14 +530,14 @@ func convertToGeminiContents(messages []domain.Message, systemPrompt string) ([]
 // convertToGeminiFunctionDeclarations converts domain tools to Gemini function declarations
 func convertToGeminiFunctionDeclarations(tools []domain.Tool) []geminiFunctionDeclaration {
 	declarations := make([]geminiFunctionDeclaration, len(tools))
-	
+
 	for i, tool := range tools {
 		declarations[i] = geminiFunctionDeclaration{
 			Name:        tool.Function.Name,
 			Description: tool.Function.Description,
 			Parameters:  tool.Function.Parameters, // Direct pass-through - critical for Gemini
 		}
-		
+
 		// Enhanced debugging for Gemini tool schema issues
 		if logging.GetDefaultLevel() <= logging.DEBUG {
 			logging.Debug("=== Gemini Tool Declaration ===")
@@ -551,7 +551,7 @@ func convertToGeminiFunctionDeclarations(tools []domain.Tool) []geminiFunctionDe
 			logging.Debug("===============================")
 		}
 	}
-	
+
 	return declarations
 }
 

@@ -20,14 +20,14 @@ type DooDockerExecutor struct {
 func NewDooDockerExecutor(config ExecutorConfig) (*DooDockerExecutor, error) {
 	// Try multiple socket locations (Docker and Podman)
 	socketPaths := []string{
-		"unix:///var/run/docker.sock",                                    // Standard Docker
+		"unix:///var/run/docker.sock",                                      // Standard Docker
 		fmt.Sprintf("unix:///run/user/%d/podman/podman.sock", os.Getuid()), // Podman rootless
-		"unix:///run/podman/podman.sock",                                 // Podman rootful
+		"unix:///run/podman/podman.sock",                                   // Podman rootful
 	}
-	
+
 	var client *docker.Client
 	var err error
-	
+
 	for _, socketPath := range socketPaths {
 		client, err = docker.NewClient(socketPath)
 		if err == nil {
@@ -90,7 +90,7 @@ func (d *DooDockerExecutor) executeInContainer(
 			WorkingDir:      "/skill",
 		},
 		HostConfig: &docker.HostConfig{
-			Binds:          []string{
+			Binds: []string{
 				fmt.Sprintf("%s:/skill:ro", skillDir),
 				fmt.Sprintf("%s:/outputs:rw", d.config.OutputsDir),
 			},
@@ -173,7 +173,7 @@ func (d *DooDockerExecutor) ensureImage(ctx context.Context, image string) error
 // getContainerLogs retrieves logs from a container
 func (d *DooDockerExecutor) getContainerLogs(containerID string) (string, error) {
 	var stdout, stderr []byte
-	
+
 	// Create pipes for output
 	stdoutPipe := &bytesWriter{buf: &stdout}
 	stderrPipe := &bytesWriter{buf: &stderr}
@@ -262,8 +262,8 @@ func (d *DooDockerExecutor) executeCodeInContainer(
 		},
 		HostConfig: &docker.HostConfig{
 			Binds: []string{
-				fmt.Sprintf("%s:/workspace:rw", workspaceDir),  // Read-write workspace
-				fmt.Sprintf("%s:/skill:ro", skillLibsDir),      // Read-only skill libs,
+				fmt.Sprintf("%s:/workspace:rw", workspaceDir),      // Read-write workspace
+				fmt.Sprintf("%s:/skill:ro", skillLibsDir),          // Read-only skill libs,
 				fmt.Sprintf("%s:/outputs:rw", d.config.OutputsDir), // Persistent outputs directory
 			},
 			ReadonlyRootfs: false, // Can't be read-only with /tmp needed
@@ -330,4 +330,3 @@ func (d *DooDockerExecutor) executeCodeInContainer(
 }
 
 var _ io.Writer = (*bytesWriter)(nil) // Ensure interface compliance
-

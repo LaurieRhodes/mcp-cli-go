@@ -23,26 +23,26 @@ skills:
     image: mcp-skills-docx
     network_mode: bridge
 `
-	
+
 	tmpFile, err := os.CreateTemp("", "test-skill-images-*.yaml")
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
 	defer os.Remove(tmpFile.Name())
-	
+
 	if _, err := tmpFile.WriteString(testConfig); err != nil {
 		t.Fatalf("Failed to write test config: %v", err)
 	}
 	tmpFile.Close()
-	
+
 	// Load configuration
 	mapping, err := LoadSkillImageMapping(tmpFile.Name())
 	if err != nil {
 		t.Fatalf("Failed to load config: %v", err)
 	}
-	
+
 	// Test cases
-	tests := []struct{
+	tests := []struct {
 		name     string
 		skill    string
 		expected string
@@ -52,12 +52,12 @@ skills:
 		{"Explicitly set to bridge", "test-network", "bridge"},
 		{"Unknown skill uses default", "unknown", "none"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := mapping.GetNetworkModeForSkill(tt.skill)
 			if result != tt.expected {
-				t.Errorf("GetNetworkModeForSkill(%s) = %s; want %s", 
+				t.Errorf("GetNetworkModeForSkill(%s) = %s; want %s",
 					tt.skill, result, tt.expected)
 			}
 		})
@@ -76,26 +76,26 @@ skills:
   custom:
     image: my-custom-image
 `
-	
+
 	tmpFile, err := os.CreateTemp("", "test-skill-images-*.yaml")
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
 	defer os.Remove(tmpFile.Name())
-	
+
 	if _, err := tmpFile.WriteString(testConfig); err != nil {
 		t.Fatalf("Failed to write test config: %v", err)
 	}
 	tmpFile.Close()
-	
+
 	// Load configuration
 	mapping, err := LoadSkillImageMapping(tmpFile.Name())
 	if err != nil {
 		t.Fatalf("Failed to load config: %v", err)
 	}
-	
+
 	// Test image mapping - use skill names directly
-	tests := []struct{
+	tests := []struct {
 		name     string
 		skill    string
 		expected string
@@ -104,12 +104,12 @@ skills:
 		{"Custom skill", "custom", "my-custom-image"},
 		{"Unmapped skill uses default", "unknown", "python:3.11-alpine"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := mapping.GetImageForSkill(tt.skill)
 			if result != tt.expected {
-				t.Errorf("GetImageForSkill(%s) = %s; want %s", 
+				t.Errorf("GetImageForSkill(%s) = %s; want %s",
 					tt.skill, result, tt.expected)
 			}
 		})

@@ -6,13 +6,13 @@ import (
 
 // ApplicationConfig represents the complete application configuration
 type ApplicationConfig struct {
-	Servers     map[string]ServerConfig      `yaml:"servers"`
-	AI          *AIConfig                    `yaml:"ai,omitempty"`
-	Embeddings  *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
-	Chat        *ChatConfig                  `yaml:"chat,omitempty"`
-	Skills      *SkillsConfig                `yaml:"skills,omitempty"`
-	RAG         *RagConfig                   `yaml:"rag,omitempty"`
-	Workflows   map[string]*WorkflowV2       `yaml:"-"` // Loaded separately from config/workflows/
+	Servers    map[string]ServerConfig `yaml:"servers"`
+	AI         *AIConfig               `yaml:"ai,omitempty"`
+	Embeddings *EmbeddingsConfig       `yaml:"embeddings,omitempty"`
+	Chat       *ChatConfig             `yaml:"chat,omitempty"`
+	Skills     *SkillsConfig           `yaml:"skills,omitempty"`
+	RAG        *RagConfig              `yaml:"rag,omitempty"`
+	Workflows  map[string]*WorkflowV2  `yaml:"-"` // Loaded separately from config/workflows/
 }
 
 // ValidateWorkflows validates all workflow v2 definitions
@@ -83,7 +83,7 @@ func (c *ApplicationConfig) ListWorkflows() []string {
 type SkillsConfig struct {
 	// SkillsDirectory is the directory containing skill definitions
 	SkillsDirectory string `yaml:"skills_directory,omitempty"`
-	
+
 	// OutputsDir is the directory where skill outputs are persisted
 	OutputsDir string `yaml:"outputs_dir,omitempty"`
 }

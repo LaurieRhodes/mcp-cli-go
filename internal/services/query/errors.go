@@ -7,17 +7,17 @@ import (
 
 // Error codes as constants
 const (
-	ErrConfigNotFoundCode    = 10
-	ErrProviderNotFoundCode  = 11
-	ErrModelNotFoundCode     = 12
-	ErrServerConnectionCode  = 13
-	ErrToolExecutionCode     = 14
-	ErrLLMRequestCode        = 15
-	ErrContextNotFoundCode   = 16
-	ErrInitializationCode    = 17
-	ErrOutputFormatCode      = 18
-	ErrOutputWriteCode       = 19
-	ErrInvalidArgumentCode   = 20
+	ErrConfigNotFoundCode   = 10
+	ErrProviderNotFoundCode = 11
+	ErrModelNotFoundCode    = 12
+	ErrServerConnectionCode = 13
+	ErrToolExecutionCode    = 14
+	ErrLLMRequestCode       = 15
+	ErrContextNotFoundCode  = 16
+	ErrInitializationCode   = 17
+	ErrOutputFormatCode     = 18
+	ErrOutputWriteCode      = 19
+	ErrInvalidArgumentCode  = 20
 )
 
 // Error types with wrapped errors for error code mapping
@@ -58,7 +58,7 @@ func GetExitCode(err error) int {
 			return code
 		}
 	}
-	
+
 	// Default error code for unknown errors
 	return 1
 }
@@ -67,7 +67,7 @@ func GetExitCode(err error) int {
 func FormatError(err error, errType error, format string, args ...interface{}) error {
 	// Create the formatted error message
 	formattedErr := fmt.Errorf(format, args...)
-	
+
 	// Wrap the original error with both the formatted message and the error type
 	return fmt.Errorf("%w: %v: %w", errType, formattedErr, err)
 }

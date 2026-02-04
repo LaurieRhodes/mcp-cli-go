@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 	"sync"
-	
+
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages"
 )
@@ -26,20 +26,20 @@ type MessageHandler interface {
 
 // StdioServer implements an MCP server using stdin/stdout
 type StdioServer struct {
-	handler    MessageHandler
-	stdin      io.Reader
-	stdout     io.Writer
-	ctx        context.Context
-	cancel     context.CancelFunc
-	wg         sync.WaitGroup
-	writeMutex sync.Mutex
+	handler     MessageHandler
+	stdin       io.Reader
+	stdout      io.Writer
+	ctx         context.Context
+	cancel      context.CancelFunc
+	wg          sync.WaitGroup
+	writeMutex  sync.Mutex
 	initialized bool
 }
 
 // NewStdioServer creates a new stdio-based MCP server
 func NewStdioServer(handler MessageHandler) *StdioServer {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	return &StdioServer{
 		handler: handler,
 		stdin:   os.Stdin,
@@ -52,17 +52,17 @@ func NewStdioServer(handler MessageHandler) *StdioServer {
 // Start starts the MCP server, listening for messages on stdin
 func (s *StdioServer) Start() error {
 	logging.Info("Starting MCP server in stdio mode")
-	
+
 	// Start reading loop
 	s.wg.Add(1)
 	go s.readLoop()
-	
+
 	// Wait for context cancellation
 	<-s.ctx.Done()
-	
+
 	// Wait for goroutines to finish
 	s.wg.Wait()
-	
+
 	logging.Info("MCP server stopped")
 	return nil
 }
@@ -76,22 +76,22 @@ func (s *StdioServer) Stop() {
 // readLoop reads JSON-RPC messages from stdin
 func (s *StdioServer) readLoop() {
 	defer s.wg.Done()
-	
+
 	logging.Debug("Starting stdin read loop")
 	scanner := bufio.NewScanner(s.stdin)
-	
+
 	// Increase buffer size for large messages
 	buf := make([]byte, 1024*1024) // 1MB buffer
 	scanner.Buffer(buf, 1024*1024)
-	
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if len(line) == 0 {
 			continue
 		}
-		
+
 		logging.Debug("Received message: %s", line)
-		
+
 		// Parse JSON-RPC message
 		var msg messages.JSONRPCMessage
 		if err := json.Unmarshal([]byte(line), &msg); err != nil {
@@ -99,26 +99,26 @@ func (s *StdioServer) readLoop() {
 			s.sendError(messages.NewRequestID(nil), -32700, "Parse error", nil)
 			continue
 		}
-		
+
 		// Handle the message
 		s.handleMessage(&msg)
 	}
-	
+
 	if err := scanner.Err(); err != nil {
 		logging.Error("Error reading from stdin: %v", err)
 	}
-	
+
 	logging.Debug("Stdin read loop ended")
 }
 
 // handleMessage routes messages to appropriate handlers
 func (s *StdioServer) handleMessage(msg *messages.JSONRPCMessage) {
 	logging.Debug("Handling message: method=%s, id=%v", msg.Method, msg.ID)
-	
+
 	// Check if this is a notification (no ID or null ID)
 	// Notifications should never receive a response
 	isNotification := msg.ID.IsEmpty()
-	
+
 	switch msg.Method {
 	case "initialize":
 		s.handleInitialize(msg)
@@ -155,7 +155,7 @@ func (s *StdioServer) handleMessage(msg *messages.JSONRPCMessage) {
 // handleInitialize handles the initialize request
 func (s *StdioServer) handleInitialize(msg *messages.JSONRPCMessage) {
 	logging.Info("Handling initialize request")
-	
+
 	// Parse params
 	params := make(map[string]interface{})
 	if len(msg.Params) > 0 {
@@ -165,7 +165,7 @@ func (s *StdioServer) handleInitialize(msg *messages.JSONRPCMessage) {
 			return
 		}
 	}
-	
+
 	// Call handler
 	result, err := s.handler.HandleInitialize(params)
 	if err != nil {
@@ -175,7 +175,7 @@ func (s *StdioServer) handleInitialize(msg *messages.JSONRPCMessage) {
 		})
 		return
 	}
-	
+
 	// Send response
 	s.sendResponse(msg.ID, result)
 	logging.Info("Initialize request handled successfully")
@@ -184,7 +184,7 @@ func (s *StdioServer) handleInitialize(msg *messages.JSONRPCMessage) {
 // handleToolsList handles the tools/list request
 func (s *StdioServer) handleToolsList(msg *messages.JSONRPCMessage) {
 	logging.Info("Handling tools/list request")
-	
+
 	// Parse params (may be nil)
 	params := make(map[string]interface{})
 	if len(msg.Params) > 0 {
@@ -194,7 +194,7 @@ func (s *StdioServer) handleToolsList(msg *messages.JSONRPCMessage) {
 			return
 		}
 	}
-	
+
 	// Call handler
 	result, err := s.handler.HandleToolsList(params)
 	if err != nil {
@@ -204,7 +204,7 @@ func (s *StdioServer) handleToolsList(msg *messages.JSONRPCMessage) {
 		})
 		return
 	}
-	
+
 	// Send response
 	s.sendResponse(msg.ID, result)
 	logging.Debug("Tools list request handled successfully")
@@ -213,7 +213,7 @@ func (s *StdioServer) handleToolsList(msg *messages.JSONRPCMessage) {
 // handleToolsCall handles the tools/call request
 func (s *StdioServer) handleToolsCall(msg *messages.JSONRPCMessage) {
 	logging.Info("Handling tools/call request")
-	
+
 	// Parse params
 	params := make(map[string]interface{})
 	if len(msg.Params) > 0 {
@@ -223,7 +223,7 @@ func (s *StdioServer) handleToolsCall(msg *messages.JSONRPCMessage) {
 			return
 		}
 	}
-	
+
 	// Debug: Log received params
 	logging.Debug("Received tools/call params: %+v", params)
 	if meta, ok := params["_meta"]; ok {
@@ -231,12 +231,12 @@ func (s *StdioServer) handleToolsCall(msg *messages.JSONRPCMessage) {
 	} else {
 		logging.Warn("No _meta found in tools/call params")
 	}
-	
+
 	// Call handler
 	result, err := s.handler.HandleToolsCall(params)
 	if err != nil {
 		logging.Error("Tools call handler failed: %v", err)
-		
+
 		// Return error in MCP tool result format
 		s.sendResponse(msg.ID, map[string]interface{}{
 			"content": []interface{}{
@@ -249,7 +249,7 @@ func (s *StdioServer) handleToolsCall(msg *messages.JSONRPCMessage) {
 		})
 		return
 	}
-	
+
 	// Send response
 	s.sendResponse(msg.ID, result)
 	logging.Debug("Tools call request handled successfully")
@@ -264,20 +264,20 @@ func (s *StdioServer) sendResponse(id messages.RequestID, result interface{}) {
 		s.sendError(id, -32603, "Internal error", nil)
 		return
 	}
-	
+
 	response := messages.JSONRPCMessage{
 		JSONRPC: "2.0",
 		ID:      id,
 		Result:  resultJSON,
 	}
-	
+
 	s.writeMessage(&response)
 }
 
 // handleTasksGet handles tasks/get requests
 func (s *StdioServer) handleTasksGet(msg *messages.JSONRPCMessage) {
 	logging.Info("Handling tasks/get request")
-	
+
 	// Parse params
 	params := make(map[string]interface{})
 	if len(msg.Params) > 0 {
@@ -287,7 +287,7 @@ func (s *StdioServer) handleTasksGet(msg *messages.JSONRPCMessage) {
 			return
 		}
 	}
-	
+
 	// Call handler
 	result, err := s.handler.HandleTasksGet(params)
 	if err != nil {
@@ -295,7 +295,7 @@ func (s *StdioServer) handleTasksGet(msg *messages.JSONRPCMessage) {
 		s.sendError(msg.ID, -32603, err.Error(), nil)
 		return
 	}
-	
+
 	// Send success response
 	s.sendResponse(msg.ID, result)
 }
@@ -303,7 +303,7 @@ func (s *StdioServer) handleTasksGet(msg *messages.JSONRPCMessage) {
 // handleTasksResult handles tasks/result requests
 func (s *StdioServer) handleTasksResult(msg *messages.JSONRPCMessage) {
 	logging.Info("Handling tasks/result request")
-	
+
 	// Parse params
 	params := make(map[string]interface{})
 	if len(msg.Params) > 0 {
@@ -313,7 +313,7 @@ func (s *StdioServer) handleTasksResult(msg *messages.JSONRPCMessage) {
 			return
 		}
 	}
-	
+
 	// Call handler (this will block until task completes)
 	result, err := s.handler.HandleTasksResult(params)
 	if err != nil {
@@ -321,7 +321,7 @@ func (s *StdioServer) handleTasksResult(msg *messages.JSONRPCMessage) {
 		s.sendError(msg.ID, -32603, err.Error(), nil)
 		return
 	}
-	
+
 	// Send success response
 	s.sendResponse(msg.ID, result)
 }
@@ -329,7 +329,7 @@ func (s *StdioServer) handleTasksResult(msg *messages.JSONRPCMessage) {
 // handleTasksList handles tasks/list requests
 func (s *StdioServer) handleTasksList(msg *messages.JSONRPCMessage) {
 	logging.Info("Handling tasks/list request")
-	
+
 	// Parse params
 	params := make(map[string]interface{})
 	if len(msg.Params) > 0 {
@@ -339,7 +339,7 @@ func (s *StdioServer) handleTasksList(msg *messages.JSONRPCMessage) {
 			return
 		}
 	}
-	
+
 	// Call handler
 	result, err := s.handler.HandleTasksList(params)
 	if err != nil {
@@ -347,7 +347,7 @@ func (s *StdioServer) handleTasksList(msg *messages.JSONRPCMessage) {
 		s.sendError(msg.ID, -32603, err.Error(), nil)
 		return
 	}
-	
+
 	// Send success response
 	s.sendResponse(msg.ID, result)
 }
@@ -355,7 +355,7 @@ func (s *StdioServer) handleTasksList(msg *messages.JSONRPCMessage) {
 // handleTasksCancel handles tasks/cancel requests
 func (s *StdioServer) handleTasksCancel(msg *messages.JSONRPCMessage) {
 	logging.Info("Handling tasks/cancel request")
-	
+
 	// Parse params
 	params := make(map[string]interface{})
 	if len(msg.Params) > 0 {
@@ -365,7 +365,7 @@ func (s *StdioServer) handleTasksCancel(msg *messages.JSONRPCMessage) {
 			return
 		}
 	}
-	
+
 	// Call handler
 	result, err := s.handler.HandleTasksCancel(params)
 	if err != nil {
@@ -373,7 +373,7 @@ func (s *StdioServer) handleTasksCancel(msg *messages.JSONRPCMessage) {
 		s.sendError(msg.ID, -32603, err.Error(), nil)
 		return
 	}
-	
+
 	// Send success response
 	s.sendResponse(msg.ID, result)
 }
@@ -391,7 +391,7 @@ func (s *StdioServer) sendError(id messages.RequestID, code int, message string,
 			dataJSON = d
 		}
 	}
-	
+
 	response := messages.JSONRPCMessage{
 		JSONRPC: "2.0",
 		ID:      id,
@@ -401,7 +401,7 @@ func (s *StdioServer) sendError(id messages.RequestID, code int, message string,
 			Data:    dataJSON,
 		},
 	}
-	
+
 	s.writeMessage(&response)
 }
 
@@ -409,19 +409,19 @@ func (s *StdioServer) sendError(id messages.RequestID, code int, message string,
 func (s *StdioServer) writeMessage(msg *messages.JSONRPCMessage) {
 	s.writeMutex.Lock()
 	defer s.writeMutex.Unlock()
-	
+
 	// Marshal to JSON
 	data, err := json.Marshal(msg)
 	if err != nil {
 		logging.Error("Failed to marshal response: %v", err)
 		return
 	}
-	
+
 	// Write to stdout with newline
 	data = append(data, '\n')
-	
+
 	logging.Debug("Sending message: %s", string(data))
-	
+
 	if _, err := s.stdout.Write(data); err != nil {
 		logging.Error("Failed to write to stdout: %v", err)
 		return
@@ -433,7 +433,7 @@ func (s *StdioServer) writeMessage(msg *messages.JSONRPCMessage) {
 func (s *StdioServer) SendProgressNotification(progressToken string, progress float64, total int, message string) {
 	s.writeMutex.Lock()
 	defer s.writeMutex.Unlock()
-	
+
 	// Create progress notification
 	notification := map[string]interface{}{
 		"jsonrpc": "2.0",
@@ -443,7 +443,7 @@ func (s *StdioServer) SendProgressNotification(progressToken string, progress fl
 			"progress":      progress,
 		},
 	}
-	
+
 	// Add optional fields
 	if total > 0 {
 		notification["params"].(map[string]interface{})["total"] = total
@@ -451,20 +451,20 @@ func (s *StdioServer) SendProgressNotification(progressToken string, progress fl
 	if message != "" {
 		notification["params"].(map[string]interface{})["message"] = message
 	}
-	
+
 	// Marshal to JSON
 	data, err := json.Marshal(notification)
 	if err != nil {
 		logging.Error("Failed to marshal progress notification: %v", err)
 		return
 	}
-	
+
 	// Write to stdout with newline
 	data = append(data, '\n')
-	
-	logging.Debug("Sending progress notification: token=%s, progress=%.2f, message=%s", 
+
+	logging.Debug("Sending progress notification: token=%s, progress=%.2f, message=%s",
 		progressToken, progress, message)
-	
+
 	if _, err := s.stdout.Write(data); err != nil {
 		logging.Error("Failed to write progress notification: %v", err)
 		return

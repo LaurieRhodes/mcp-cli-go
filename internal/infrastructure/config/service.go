@@ -37,7 +37,7 @@ func getExecutableDir() string {
 // This is called during config loading to ensure env vars are available
 func (s *Service) loadEnvFile(configPath string) error {
 	store := env.GetStore()
-	
+
 	// Try .env in config directory first
 	configDir := filepath.Dir(configPath)
 	envPath := filepath.Join(configDir, ".env")
@@ -47,7 +47,7 @@ func (s *Service) loadEnvFile(configPath string) error {
 		}
 		return nil
 	}
-	
+
 	// Try .env in executable directory
 	execDir := getExecutableDir()
 	envPath = filepath.Join(execDir, ".env")
@@ -57,7 +57,7 @@ func (s *Service) loadEnvFile(configPath string) error {
 		}
 		return nil
 	}
-	
+
 	// .env file is optional, not an error if missing
 	return nil
 }
@@ -71,16 +71,16 @@ func expandEnvVars(s string) string {
 	if s == "" {
 		return s
 	}
-	
+
 	// Check if it looks like an environment variable reference
 	// Pattern: ${VAR} or $VAR (where VAR starts with letter/underscore)
-	hasEnvPattern := strings.Contains(s, "${") || 
+	hasEnvPattern := strings.Contains(s, "${") ||
 		(strings.Contains(s, "$") && len(s) > 1 && (s[0] == '$' || strings.Contains(s, " $")))
-	
+
 	if !hasEnvPattern {
 		return s
 	}
-	
+
 	// Use our secure env expansion which checks .env store first
 	return env.ExpandEnv(s)
 }
@@ -107,7 +107,7 @@ func (s *Service) expandEnvVarsInConfig(config *domainConfig.ApplicationConfig) 
 			config.AI.Interfaces[interfaceType] = interfaceConfig
 		}
 	}
-	
+
 	// Expand in legacy providers
 	if config.AI != nil && config.AI.Providers != nil {
 		for providerName, providerConfig := range config.AI.Providers {
@@ -125,7 +125,7 @@ func (s *Service) expandEnvVarsInConfig(config *domainConfig.ApplicationConfig) 
 			config.AI.Providers[providerName] = providerConfig
 		}
 	}
-	
+
 	// Expand in embedding providers
 	if config.Embeddings != nil && config.Embeddings.Interfaces != nil {
 		for interfaceType, interfaceConfig := range config.Embeddings.Interfaces {
@@ -137,7 +137,7 @@ func (s *Service) expandEnvVarsInConfig(config *domainConfig.ApplicationConfig) 
 			config.Embeddings.Interfaces[interfaceType] = interfaceConfig
 		}
 	}
-	
+
 	// Expand in servers
 	if config.Servers != nil {
 		for serverName, serverConfig := range config.Servers {
@@ -159,12 +159,12 @@ func (s *Service) expandEnvVarsInConfig(config *domainConfig.ApplicationConfig) 
 func (s *Service) LoadConfig(filePath string) (*domainConfig.ApplicationConfig, error) {
 	// Load .env file first
 	s.loadEnvFile(filePath)
-	
+
 	// Initialize loader if needed
 	if s.loader == nil {
 		s.loader = domainConfig.NewLoader()
 	}
-	
+
 	// Use loader (handles both single file and modular)
 	config, err := s.loader.Load(filePath)
 	if err != nil {
@@ -173,11 +173,11 @@ func (s *Service) LoadConfig(filePath string) (*domainConfig.ApplicationConfig, 
 
 	// Expand environment variables in config
 	s.expandEnvVarsInConfig(config)
-	
+
 	// Store config directory for future use
 	s.configDir = filepath.Dir(filePath)
 	s.config = config
-	
+
 	return config, nil
 }
 
@@ -196,7 +196,7 @@ func (s *Service) LoadConfigOrCreateExample(filePath string) (*domainConfig.Appl
 		// Some other error checking file
 		return nil, false, fmt.Errorf("error checking config file: %w", err)
 	}
-	
+
 	// File doesn't exist - create example
 	exampleConfig := &domainConfig.ApplicationConfig{
 		Servers: make(map[string]domainConfig.ServerConfig),
@@ -292,13 +292,13 @@ func (s *Service) GetEmbeddingProviderConfig(providerName string) (*domainConfig
 						MaxRetries:     aiProvider.MaxRetries,
 						Models:         aiProvider.EmbeddingModels,
 					}
-					
+
 					availableModels := make([]string, 0, len(aiProvider.EmbeddingModels))
 					for modelName := range aiProvider.EmbeddingModels {
 						availableModels = append(availableModels, modelName)
 					}
 					embeddingProvider.AvailableModels = availableModels
-					
+
 					return embeddingProvider, interfaceType, nil
 				}
 			}
@@ -348,7 +348,7 @@ func (s *Service) GetDefaultEmbeddingProvider() (string, *domainConfig.Embedding
 	}
 
 	var defaultProviderName string
-	
+
 	if s.config.Embeddings != nil && s.config.Embeddings.DefaultProvider != "" {
 		defaultProviderName = s.config.Embeddings.DefaultProvider
 	} else if s.config.AI != nil && s.config.AI.DefaultProvider != "" {
@@ -382,7 +382,7 @@ func (s *Service) ListServers() []string {
 // ListEmbeddingProviders returns a list of configured embedding provider names
 func (s *Service) ListEmbeddingProviders() []string {
 	providers := make(map[string]bool)
-	
+
 	if s.config != nil && s.config.Embeddings != nil && s.config.Embeddings.Interfaces != nil {
 		for _, interfaceConfig := range s.config.Embeddings.Interfaces {
 			for providerName := range interfaceConfig.Providers {
@@ -390,7 +390,7 @@ func (s *Service) ListEmbeddingProviders() []string {
 			}
 		}
 	}
-	
+
 	if s.config != nil && s.config.AI != nil && s.config.AI.Interfaces != nil {
 		for _, interfaceConfig := range s.config.AI.Interfaces {
 			for providerName, providerConfig := range interfaceConfig.Providers {
@@ -400,12 +400,12 @@ func (s *Service) ListEmbeddingProviders() []string {
 			}
 		}
 	}
-	
+
 	names := make([]string, 0, len(providers))
 	for name := range providers {
 		names = append(names, name)
 	}
-	
+
 	return names
 }
 
@@ -459,7 +459,7 @@ func (s *Service) LoadYAMLFile(filePath string, config interface{}) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return yaml.Unmarshal(data, config)
 }
 
@@ -470,7 +470,7 @@ func (s *Service) GetRagConfig() *domainConfig.RagConfig {
 	if s.config != nil && s.config.RAG != nil {
 		return s.config.RAG
 	}
-	
+
 	// Return defaults if not configured
 	return &domainConfig.RagConfig{
 		DefaultFusion: "rrf",
@@ -481,10 +481,9 @@ func (s *Service) GetRagConfig() *domainConfig.RagConfig {
 			CaseSensitive: false,
 		},
 		Fusion: domainConfig.FusionSettings{
-			RRF: domainConfig.RRFSettings{K: 60},
+			RRF:      domainConfig.RRFSettings{K: 60},
 			Weighted: domainConfig.WeightedSettings{Normalize: true},
 		},
 		Servers: make(map[string]domainConfig.RagServerConfig),
 	}
 }
-

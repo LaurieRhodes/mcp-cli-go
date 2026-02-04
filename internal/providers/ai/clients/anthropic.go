@@ -12,20 +12,20 @@ import (
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai/streaming"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai/streaming"
 )
 
 const (
 	// Base URLs for the Anthropic API
 	anthropicBaseURL = "https://api.anthropic.com/v1/messages"
-	
+
 	// API version header
 	anthropicAPIVersion = "2023-06-01"
-	
+
 	// Default settings
-	defaultMaxTokens = 4096
-	defaultTimeout   = 300 * time.Second
+	defaultMaxTokens  = 4096
+	defaultTimeout    = 300 * time.Second
 	defaultMaxRetries = 5
 )
 
@@ -53,7 +53,7 @@ func NewAnthropicClient(cfg *config.ProviderConfig) (domain.LLMProvider, error) 
 	if cfg == nil {
 		return nil, fmt.Errorf("configuration is required")
 	}
-	
+
 	if cfg.APIKey == "" {
 		return nil, fmt.Errorf("Anthropic API key is required")
 	}
@@ -64,13 +64,13 @@ func NewAnthropicClient(cfg *config.ProviderConfig) (domain.LLMProvider, error) 
 
 	// Format model name to ensure it uses the correct format
 	model := formatClaudeModel(cfg.DefaultModel)
-	
+
 	// Verify that we're using a supported model
 	if !supportedClaudeModels[model] {
 		logging.Warn("Using possibly unsupported Claude model: %s", model)
 		logging.Info("Supported models are: %v", supportedClaudeModels)
 	}
-	
+
 	logging.Info("Creating Anthropic client with model: %s", model)
 
 	// Set timeout from config or use default
@@ -110,7 +110,7 @@ func (c *AnthropicClient) CreateCompletion(ctx context.Context, req *domain.Comp
 
 	// Convert our message format to Anthropic's format
 	anthropicMessages, systemPrompt := c.convertToAnthropicMessages(messages, req.SystemPrompt)
-	
+
 	// Convert our tool format to Anthropic's format if tools are provided
 	var anthropicTools []map[string]interface{}
 	if len(tools) > 0 {
@@ -195,7 +195,7 @@ func (c *AnthropicClient) StreamCompletion(ctx context.Context, req *domain.Comp
 
 	// Convert our message format to Anthropic's format
 	anthropicMessages, systemPrompt := c.convertToAnthropicMessages(messages, req.SystemPrompt)
-	
+
 	// Convert our tool format to Anthropic's format if tools are provided
 	var anthropicTools []map[string]interface{}
 	if len(tools) > 0 {
@@ -205,10 +205,10 @@ func (c *AnthropicClient) StreamCompletion(ctx context.Context, req *domain.Comp
 
 	// Create the request payload
 	payload := map[string]interface{}{
-		"model":       c.model,
-		"messages":    anthropicMessages,
-		"max_tokens":  c.getMaxTokens(req.MaxTokens),
-		"stream":      true,
+		"model":      c.model,
+		"messages":   anthropicMessages,
+		"max_tokens": c.getMaxTokens(req.MaxTokens),
+		"stream":     true,
 	}
 
 	// Add system prompt if present
@@ -261,13 +261,13 @@ func (c *AnthropicClient) StreamCompletion(ctx context.Context, req *domain.Comp
 		// Process the streaming response using the streaming processor
 		processor := streaming.NewAnthropicProcessor()
 		fullContent, streamingToolCalls, streamErr := processor.ProcessStreamingResponse(response, callback)
-		
+
 		if streamErr != nil {
 			lastErr = streamErr
 			logging.Error("%v", lastErr)
-			
+
 			if strings.Contains(streamErr.Error(), "context deadline exceeded") ||
-			   strings.Contains(streamErr.Error(), "connection reset by peer") {
+				strings.Contains(streamErr.Error(), "connection reset by peer") {
 				continue
 			}
 			break
@@ -319,15 +319,15 @@ func (c *AnthropicClient) ValidateConfig() error {
 	if c.config == nil {
 		return fmt.Errorf("configuration is required")
 	}
-	
+
 	if c.config.APIKey == "" {
 		return fmt.Errorf("API key is required")
 	}
-	
+
 	if c.config.DefaultModel == "" {
 		return fmt.Errorf("default model is required")
 	}
-	
+
 	return nil
 }
 
@@ -409,19 +409,19 @@ func formatClaudeModel(model string) string {
 	if supportedClaudeModels[model] {
 		return model
 	}
-	
+
 	// If not, try to normalize the model name
 	if strings.Contains(model, "claude") {
 		// Try different patterns
 		if !strings.Contains(model, "-") {
 			// Add required hyphens
 			model = strings.Replace(model, "claude", "claude-", 1)
-			if strings.Contains(model, "claude-3") && !strings.Contains(model, "haiku") && 
-			   !strings.Contains(model, "opus") && !strings.Contains(model, "sonnet") {
+			if strings.Contains(model, "claude-3") && !strings.Contains(model, "haiku") &&
+				!strings.Contains(model, "opus") && !strings.Contains(model, "sonnet") {
 				model = strings.Replace(model, "claude-3", "claude-3-sonnet", 1)
 			}
 		}
-		
+
 		// Add date suffix if missing
 		if !strings.Contains(model, "-202") {
 			// Default to most compatible version
@@ -438,7 +438,7 @@ func formatClaudeModel(model string) string {
 			}
 		}
 	}
-	
+
 	return model
 }
 
@@ -465,7 +465,7 @@ func (c *AnthropicClient) extractContentAndToolCalls(response interface{}) (stri
 					// Found a tool_use in content blocks
 					id, _ := blockMap["id"].(string)
 					name, _ := blockMap["name"].(string)
-					
+
 					var arguments string
 					if input, ok := blockMap["input"].(map[string]interface{}); ok {
 						argsJSON, err := json.Marshal(input)
@@ -477,7 +477,7 @@ func (c *AnthropicClient) extractContentAndToolCalls(response interface{}) (stri
 					} else {
 						arguments = "{}"
 					}
-					
+
 					logging.Debug("Found tool_use in content block: %s (%s) with args: %s", name, id, arguments)
 					toolCalls = append(toolCalls, internalToolCall{
 						ID:   id,
@@ -499,15 +499,15 @@ func (c *AnthropicClient) extractContentAndToolCalls(response interface{}) (stri
 func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage, systemPrompt string) ([]map[string]interface{}, string) {
 	anthropicMessages := make([]map[string]interface{}, 0)
 	var systemContent string
-	
+
 	// Add system prompt from request if provided
 	if systemPrompt != "" {
 		systemContent = systemPrompt + ""
 	}
-	
+
 	// Filter out system messages as they are handled differently in Anthropic's API
 	var nonSystemMessages []internalMessage
-	
+
 	for _, msg := range messages {
 		if msg.Role == "system" {
 			systemContent += msg.Content + ""
@@ -515,37 +515,37 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 			nonSystemMessages = append(nonSystemMessages, msg)
 		}
 	}
-	
+
 	// Convert non-system messages
 	for _, msg := range nonSystemMessages {
 		role := msg.Role
-		
+
 		// Handle tool results correctly for Claude
 		if msg.Role == "tool" {
 			// For Claude API, tool results must be in USER messages
 			anthropicMsg := map[string]interface{}{
 				"role": "user",
 			}
-			
+
 			toolResult := map[string]interface{}{
 				"type":        "tool_result",
 				"tool_use_id": msg.ToolCallID,
 				"content":     msg.Content,
 			}
-			
+
 			anthropicMsg["content"] = []map[string]interface{}{toolResult}
 			anthropicMessages = append(anthropicMessages, anthropicMsg)
-			
+
 			logging.Debug("Converting tool result to user message with tool_result content block")
 		} else if msg.Role == "assistant" {
 			// For assistant messages, handle both text content and tool calls
 			anthropicMsg := map[string]interface{}{
 				"role": role,
 			}
-			
+
 			// Create content blocks array for the assistant message
 			contentBlocks := []map[string]interface{}{}
-			
+
 			// Add text content if it exists
 			if msg.Content != "" {
 				contentBlocks = append(contentBlocks, map[string]interface{}{
@@ -553,7 +553,7 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 					"text": msg.Content,
 				})
 			}
-			
+
 			// Add tool_use blocks for each tool call in the message
 			for _, toolCall := range msg.ToolCalls {
 				// Parse the function arguments as JSON
@@ -562,7 +562,7 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 					input = map[string]interface{}{}
 					logging.Warn("Failed to parse tool arguments: %v", err)
 				}
-				
+
 				// Create the tool_use block
 				toolUseBlock := map[string]interface{}{
 					"type":  "tool_use",
@@ -570,11 +570,11 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 					"name":  toolCall.Function.Name,
 					"input": input,
 				}
-				
+
 				contentBlocks = append(contentBlocks, toolUseBlock)
 				logging.Debug("Adding tool_use block to assistant message: %s (%s)", toolCall.Function.Name, toolCall.ID)
 			}
-			
+
 			anthropicMsg["content"] = contentBlocks
 			anthropicMessages = append(anthropicMessages, anthropicMsg)
 		} else {
@@ -582,7 +582,7 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 			anthropicMsg := map[string]interface{}{
 				"role": role,
 			}
-			
+
 			if msg.Content != "" {
 				anthropicMsg["content"] = []map[string]interface{}{
 					{
@@ -591,14 +591,14 @@ func (c *AnthropicClient) convertToAnthropicMessages(messages []internalMessage,
 					},
 				}
 			}
-			
+
 			anthropicMessages = append(anthropicMessages, anthropicMsg)
 		}
 	}
-	
+
 	// Trim any trailing whitespace from system content
 	systemContent = strings.TrimSpace(systemContent)
-	
+
 	return anthropicMessages, systemContent
 }
 
@@ -607,22 +607,22 @@ func (c *AnthropicClient) convertToAnthropicTools(tools []internalTool) []map[st
 	if len(tools) == 0 {
 		return nil
 	}
-	
+
 	anthropicTools := make([]map[string]interface{}, 0, len(tools))
 	for i, tool := range tools {
 		if tool.Type != "function" && tool.Type != "" {
 			logging.Warn("Skipping tool with non-function type: %s", tool.Type)
 			continue
 		}
-		
+
 		// Get properties from parameters
 		var properties map[string]interface{}
 		var required []string
-		
+
 		if props, ok := tool.Function.Parameters["properties"].(map[string]interface{}); ok {
 			properties = props
 		}
-		
+
 		if req, ok := tool.Function.Parameters["required"].([]interface{}); ok {
 			required = make([]string, len(req))
 			for i, r := range req {
@@ -633,11 +633,11 @@ func (c *AnthropicClient) convertToAnthropicTools(tools []internalTool) []map[st
 		} else if req, ok := tool.Function.Parameters["required"].([]string); ok {
 			required = req
 		}
-		
+
 		if properties == nil {
 			properties = make(map[string]interface{})
 		}
-		
+
 		anthropicTool := map[string]interface{}{
 			"name":        tool.Function.Name,
 			"description": tool.Function.Description,
@@ -647,21 +647,21 @@ func (c *AnthropicClient) convertToAnthropicTools(tools []internalTool) []map[st
 				"required":   required,
 			},
 		}
-		
+
 		logging.Debug("Tool %d: %s", i, tool.Function.Name)
 		anthropicTools = append(anthropicTools, anthropicTool)
 	}
-	
+
 	return anthropicTools
 }
 
 // Internal types for compatibility
 type internalMessage struct {
-	Role       string               `json:"role"`
-	Content    string               `json:"content,omitempty"`
-	Name       string               `json:"name,omitempty"`
-	ToolCalls  []internalToolCall   `json:"tool_calls,omitempty"`
-	ToolCallID string               `json:"tool_call_id,omitempty"`
+	Role       string             `json:"role"`
+	Content    string             `json:"content,omitempty"`
+	Name       string             `json:"name,omitempty"`
+	ToolCalls  []internalToolCall `json:"tool_calls,omitempty"`
+	ToolCallID string             `json:"tool_call_id,omitempty"`
 }
 
 type internalToolCall struct {
@@ -696,7 +696,7 @@ func convertDomainMessages(domainMessages []domain.Message) []internalMessage {
 			Name:       msg.Name,
 			ToolCallID: msg.ToolCallID,
 		}
-		
+
 		// Convert tool calls
 		if len(msg.ToolCalls) > 0 {
 			messages[i].ToolCalls = make([]internalToolCall, len(msg.ToolCalls))

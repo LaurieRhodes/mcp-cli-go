@@ -21,17 +21,17 @@ type ChatContext struct {
 	// LLM configuration
 	Provider string
 	Model    string
-	
+
 	// LLM client
 	LLMClient domain.LLMProvider
-	
+
 	// Chat history
 	ConversationHistory []domain.Message
-	
+
 	// Tool information
-	ToolHistory  []ToolHistoryEntry
+	ToolHistory    []ToolHistoryEntry
 	AvailableTools []domain.Tool
-	
+
 	// Session state
 	ExitRequested bool
 }
@@ -40,10 +40,10 @@ type ChatContext struct {
 type ToolHistoryEntry struct {
 	// The tool call that was made
 	ToolCall domain.ToolCall `json:"tool_call"`
-	
+
 	// The response from the tool
 	Response string `json:"response"`
-	
+
 	// The server that handled the tool call
 	Server string `json:"server"`
 }
@@ -128,7 +128,7 @@ func (c *ChatContext) ToDict() map[string]interface{} {
 	for i, s := range c.ServerStreams {
 		servers[i] = s.Name
 	}
-	
+
 	return map[string]interface{}{
 		"servers":  servers,
 		"provider": c.Provider,

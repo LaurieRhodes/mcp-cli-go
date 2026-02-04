@@ -13,13 +13,13 @@ func ReadFile(path string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get absolute path: %w", err)
 	}
-	
+
 	// Read the file
 	data, err := os.ReadFile(absPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-	
+
 	return data, nil
 }
 
@@ -30,12 +30,12 @@ func WriteFile(path string, data []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
-	
+
 	// Write the file
 	if err := os.WriteFile(absPath, data, 0644); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -46,7 +46,7 @@ func FileExists(path string) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	// Check if the file exists
 	_, err = os.Stat(absPath)
 	return err == nil
@@ -56,13 +56,13 @@ func FileExists(path string) bool {
 func CreateConfigDirectory(configPath string) error {
 	// Get the directory part of the path
 	dir := filepath.Dir(configPath)
-	
+
 	// Create the directory if it doesn't exist
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
-	
+
 	return nil
 }

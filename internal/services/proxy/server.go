@@ -64,25 +64,25 @@ func (s *ProxyServer) Start() error {
 	if s.config.ProxyConfig == nil {
 		return fmt.Errorf("proxy_config is required for proxy server types")
 	}
-	
+
 	proxyConfig := s.config.ProxyConfig
-	
+
 	// Set defaults
 	port := proxyConfig.Port
 	if port == 0 {
 		port = 8080
 	}
-	
+
 	host := proxyConfig.Host
 	if host == "" {
 		host = "0.0.0.0"
 	}
-	
+
 	// Validate API key
 	if proxyConfig.APIKey == "" {
 		return fmt.Errorf("api_key is required in proxy_config for security")
 	}
-	
+
 	// If config_source is specified, connect to source MCP server and discover tools
 	if s.config.ConfigSource != "" {
 		logging.Info("Discovering tools from source MCP server: %s", s.config.ConfigSource)
@@ -90,24 +90,24 @@ func (s *ProxyServer) Start() error {
 			return fmt.Errorf("failed to discover tools from source: %w", err)
 		}
 	}
-	
+
 	// Initialize tool handlers
 	if err := s.initializeToolHandlers(); err != nil {
 		return fmt.Errorf("failed to initialize tool handlers: %w", err)
 	}
-	
+
 	// Generate OpenAPI spec
 	s.openAPISpec = s.generateOpenAPISpec()
-	
+
 	// Create HTTP mux
 	mux := http.NewServeMux()
-	
+
 	// Register routes
 	s.registerRoutes(mux)
-	
+
 	// Apply middleware
 	handler := s.applyMiddleware(mux)
-	
+
 	// Create HTTP server
 	addr := fmt.Sprintf("%s:%d", host, port)
 	s.httpServer = &http.Server{
@@ -117,7 +117,7 @@ func (s *ProxyServer) Start() error {
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
-	
+
 	// Start server in goroutine
 	errChan := make(chan error, 1)
 	go func() {
@@ -125,7 +125,7 @@ func (s *ProxyServer) Start() error {
 		logging.Info("OpenAPI docs available at: http://%s/docs", addr)
 		logging.Info("Server: %s v%s", s.config.ServerInfo.Name, s.config.ServerInfo.Version)
 		logging.Info("Exposed tools: %d", len(s.config.Tools))
-		
+
 		if proxyConfig.TLS != nil && proxyConfig.TLS.CertFile != "" && proxyConfig.TLS.KeyFile != "" {
 			logging.Info("TLS enabled")
 			errChan <- s.httpServer.ListenAndServeTLS(proxyConfig.TLS.CertFile, proxyConfig.TLS.KeyFile)
@@ -133,11 +133,11 @@ func (s *ProxyServer) Start() error {
 			errChan <- s.httpServer.ListenAndServe()
 		}
 	}()
-	
+
 	// Wait for interrupt signal or server error
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	
+
 	select {
 	case err := <-errChan:
 		if err != nil && err != http.ErrServerClosed {
@@ -147,7 +147,7 @@ func (s *ProxyServer) Start() error {
 		logging.Info("Received signal %v, shutting down...", sig)
 		return s.Shutdown()
 	}
-	
+
 	return nil
 }
 
@@ -156,10 +156,10 @@ func (s *ProxyServer) Shutdown() error {
 	if s.httpServer == nil {
 		return nil
 	}
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	
+
 	logging.Info("Shutting down HTTP proxy server...")
 	return s.httpServer.Shutdown(ctx)
 }
@@ -167,25 +167,25 @@ func (s *ProxyServer) Shutdown() error {
 // registerRoutes registers all HTTP routes
 func (s *ProxyServer) registerRoutes(mux *http.ServeMux) {
 	basePath := s.config.ProxyConfig.BasePath
-	
+
 	// Health check endpoint
 	mux.HandleFunc(basePath+"/health", s.handleHealth)
-	
+
 	// OpenAPI spec endpoint
 	mux.HandleFunc(basePath+"/openapi.json", s.handleOpenAPISpec)
-	
+
 	// OpenAPI docs endpoint (if enabled)
 	if s.config.ProxyConfig.EnableDocs {
 		mux.HandleFunc(basePath+"/docs", s.handleDocs)
 	}
-	
+
 	// Tool endpoints - one per tool (at root level to match mcpo behavior)
 	for toolName, handler := range s.toolHandlers {
 		path := fmt.Sprintf("%s/%s", basePath, toolName)
 		mux.HandleFunc(path, s.createToolEndpoint(handler))
 		logging.Debug("Registered tool endpoint: POST %s", path)
 	}
-	
+
 	// List tools endpoint
 	mux.HandleFunc(basePath+"/tools", s.handleListTools)
 }
@@ -193,16 +193,16 @@ func (s *ProxyServer) registerRoutes(mux *http.ServeMux) {
 // applyMiddleware applies middleware to the handler chain
 func (s *ProxyServer) applyMiddleware(handler http.Handler) http.Handler {
 	// Apply middleware in reverse order (last applied is executed first)
-	
+
 	// CORS middleware
 	handler = corsMiddleware(s.config.ProxyConfig.CORSOrigins)(handler)
-	
+
 	// API key authentication middleware
 	handler = apiKeyMiddleware(s.config.ProxyConfig.APIKey)(handler)
-	
+
 	// Logging middleware
 	handler = loggingMiddleware(handler)
-	
+
 	return handler
 }
 
@@ -212,7 +212,7 @@ func (s *ProxyServer) handleHealth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status":  "healthy",
@@ -228,7 +228,7 @@ func (s *ProxyServer) handleListTools(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	tools := make([]map[string]interface{}, 0, len(s.config.Tools))
 	for _, tool := range s.config.Tools {
 		tools = append(tools, map[string]interface{}{
@@ -238,7 +238,7 @@ func (s *ProxyServer) handleListTools(w http.ResponseWriter, r *http.Request) {
 			"endpoint":    fmt.Sprintf("/%s", tool.Name),
 		})
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"tools": tools,
@@ -252,7 +252,7 @@ func (s *ProxyServer) handleOpenAPISpec(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(s.openAPISpec)
 }
@@ -263,7 +263,7 @@ func (s *ProxyServer) handleDocs(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	// Serve Swagger UI HTML
 	html := s.generateSwaggerUIHTML()
 	w.Header().Set("Content-Type", "text/html")
@@ -275,22 +275,22 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 	// Extract server name from config_source path
 	// e.g., "config/servers/filesystem.yaml" → "filesystem"
 	serverName := strings.TrimSuffix(filepath.Base(s.config.ConfigSource), filepath.Ext(s.config.ConfigSource))
-	
+
 	logging.Info("Discovering tools from MCP server: %s", serverName)
-	
+
 	// Get server config from appConfig
 	serverConfig, exists := s.appConfig.Servers[serverName]
 	if !exists {
 		return fmt.Errorf("server %s not found in application config", serverName)
 	}
-	
+
 	// Create infrastructure server config
 	infraServerConfig := config.ServerConfig{
 		Command: serverConfig.Command,
 		Args:    serverConfig.Args,
 		Env:     serverConfig.Env,
 	}
-	
+
 	// Create and start stdio client
 	params := stdio.StdioServerParameters{
 		Command: infraServerConfig.Command,
@@ -298,20 +298,20 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 		Env:     infraServerConfig.Env,
 	}
 	client := stdio.NewStdioClient(params)
-	
+
 	if err := client.Start(); err != nil {
 		return fmt.Errorf("failed to start MCP server %s: %w", serverName, err)
 	}
-	
+
 	// Send initialize request
 	initResult, err := initialize.SendInitialize(client, client.GetDispatcher())
 	if err != nil {
 		client.Stop()
 		return fmt.Errorf("failed to initialize MCP server %s: %w", serverName, err)
 	}
-	
+
 	logging.Info("Connected to %s v%s", initResult.ServerInfo.Name, initResult.ServerInfo.Version)
-	
+
 	// Create server connection
 	conn := &host.ServerConnection{
 		Name:         serverName,
@@ -319,27 +319,27 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 		ServerInfo:   initResult.ServerInfo,
 		Capabilities: initResult.Capabilities,
 	}
-	
+
 	// Store connection
 	s.mcpServers = append(s.mcpServers, conn)
-	
+
 	// Auto-populate server_info if not set in proxy config
 	if s.config.ServerInfo.Name == "" {
 		s.config.ServerInfo.Name = fmt.Sprintf("%s-proxy", initResult.ServerInfo.Name)
 		s.config.ServerInfo.Version = initResult.ServerInfo.Version
 		s.config.ServerInfo.Description = fmt.Sprintf("HTTP proxy for %s", initResult.ServerInfo.Name)
-		logging.Info("Auto-populated server_info from source: %s v%s", 
+		logging.Info("Auto-populated server_info from source: %s v%s",
 			s.config.ServerInfo.Name, s.config.ServerInfo.Version)
 	}
-	
+
 	// Get tools from server using tools/list
 	toolsResult, err := tools.SendToolsList(client, nil)
 	if err != nil {
 		return fmt.Errorf("failed to list tools from %s: %w", serverName, err)
 	}
-	
+
 	logging.Info("Discovered %d tools from %s", len(toolsResult.Tools), serverName)
-	
+
 	// Convert MCP tools to RunAs tools
 	s.config.Tools = make([]runas.ToolExposure, len(toolsResult.Tools))
 	for i, tool := range toolsResult.Tools {
@@ -352,10 +352,10 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 			MCPTool:   tool.Name,
 			Template:  "", // No template for MCP tools
 		}
-		
+
 		logging.Debug("Discovered tool: %s - %s", tool.Name, tool.Description)
 	}
-	
+
 	return nil
 }
 
@@ -363,10 +363,10 @@ func (s *ProxyServer) discoverToolsFromSource() error {
 func (s *ProxyServer) initializeToolHandlers() error {
 	// Create schema generator with MCP server connections
 	schemaGen := NewSchemaGenerator(s.appConfig)
-	
+
 	for i := range s.config.Tools {
 		tool := &s.config.Tools[i]
-		
+
 		// Auto-generate schema and description if not provided
 		if tool.InputSchema == nil || tool.Description == "" {
 			schema, description, err := schemaGen.GenerateForTool(tool)
@@ -385,7 +385,7 @@ func (s *ProxyServer) initializeToolHandlers() error {
 				}
 				description = fmt.Sprintf("Execute %s", tool.Name)
 			}
-			
+
 			// Update tool with generated values
 			if tool.InputSchema == nil {
 				tool.InputSchema = schema
@@ -396,14 +396,15 @@ func (s *ProxyServer) initializeToolHandlers() error {
 				logging.Debug("Auto-generated description for tool %s: %s", tool.Name, description)
 			}
 		}
-		
+
 		// Create handler for this tool
-		handler := NewToolHandler(tool, s); _ = handler
-		
+		handler := NewToolHandler(tool, s)
+		_ = handler
+
 		s.toolHandlers[tool.Name] = handler
 		logging.Debug("Initialized handler for tool: %s", tool.Name)
 	}
-	
+
 	return nil
 }
 
@@ -414,7 +415,7 @@ func (s *ProxyServer) createToolEndpoint(handler *ToolHandler) http.HandlerFunc 
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		
+
 		// Handle the tool execution
 		handler.Handle(w, r)
 	}

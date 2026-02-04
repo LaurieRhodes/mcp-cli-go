@@ -16,11 +16,11 @@ type Service struct {
 
 // ServiceConfig contains embedding service configuration
 type ServiceConfig struct {
-	Model          string
-	ChunkSize      int
-	ChunkOverlap   int
-	ChunkStrategy  models.ChunkingStrategy
-	BatchSize      int
+	Model         string
+	ChunkSize     int
+	ChunkOverlap  int
+	ChunkStrategy models.ChunkingStrategy
+	BatchSize     int
 }
 
 // NewService creates a new embeddings service

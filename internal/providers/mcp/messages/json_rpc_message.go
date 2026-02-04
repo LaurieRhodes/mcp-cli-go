@@ -18,14 +18,14 @@ func (r *RequestID) UnmarshalJSON(data []byte) error {
 		r.value = num
 		return nil
 	}
-	
+
 	// Try to unmarshal as a string
 	var str string
 	if err := json.Unmarshal(data, &str); err == nil {
 		r.value = str
 		return nil
 	}
-	
+
 	// Allow null/nil for notifications
 	return nil
 }

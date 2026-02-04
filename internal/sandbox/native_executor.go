@@ -11,14 +11,14 @@ import (
 
 // NativeExecutor uses Docker/Podman CLI from host (for native deployments)
 type NativeExecutor struct {
-	config     ExecutorConfig
-	command    string // "docker" or "podman"
+	config  ExecutorConfig
+	command string // "docker" or "podman"
 }
 
 // NewNativeExecutor creates a new native Docker/Podman executor
 func NewNativeExecutor(config ExecutorConfig) (*NativeExecutor, error) {
 	executor := &NativeExecutor{config: config}
-	
+
 	// Try docker first, then podman
 	if cmd := exec.Command("docker", "version"); cmd.Run() == nil {
 		executor.command = "docker"
@@ -27,7 +27,7 @@ func NewNativeExecutor(config ExecutorConfig) (*NativeExecutor, error) {
 	} else {
 		return nil, fmt.Errorf("neither docker nor podman found")
 	}
-	
+
 	return executor, nil
 }
 
@@ -41,19 +41,19 @@ func (n *NativeExecutor) ExecutePython(ctx context.Context, skillDir, scriptPath
 	// Build docker/podman run command with security constraints
 	cmdArgs := []string{
 		"run",
-		"--rm",                                    // Remove container after execution
-		"--read-only",                             // Read-only root filesystem
-		"--network=" + n.config.NetworkMode,       // Network mode from config
-		"--memory=" + n.config.MemoryLimit,       // Memory limit
-		"--cpus=" + n.config.CPULimit,            // CPU limit
-		"--pids-limit=100",                        // Process limit
-		"--security-opt=no-new-privileges",        // No privilege escalation
-		"--cap-drop=ALL",                          // Drop all capabilities
+		"--rm",                                      // Remove container after execution
+		"--read-only",                               // Read-only root filesystem
+		"--network=" + n.config.NetworkMode,         // Network mode from config
+		"--memory=" + n.config.MemoryLimit,          // Memory limit
+		"--cpus=" + n.config.CPULimit,               // CPU limit
+		"--pids-limit=100",                          // Process limit
+		"--security-opt=no-new-privileges",          // No privilege escalation
+		"--cap-drop=ALL",                            // Drop all capabilities
 		"-v", fmt.Sprintf("%s:/skill:ro", skillDir), // Mount skill dir read-only
-		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir),  // Persistent outputs directory
-		"-w", "/skill",                            // Working directory
-		n.config.PythonImage,                      // Python image
-		"python", scriptPath,                      // Command
+		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir), // Persistent outputs directory
+		"-w", "/skill", // Working directory
+		n.config.PythonImage, // Python image
+		"python", scriptPath, // Command
 	}
 	cmdArgs = append(cmdArgs, args...)
 
@@ -124,26 +124,26 @@ func (n *NativeExecutor) ExecutePythonCode(ctx context.Context, workspaceDir, sk
 	image := n.config.GetImageForSkill(skillLibsDir)
 	networkMode := n.config.GetNetworkModeForSkill(skillLibsDir)
 	logging.Info("🐳 Executing skill from '%s' with image '%s' (network: %s)", skillLibsDir, image, networkMode)
-	
+
 	// Build docker/podman run command with dual mounts
 	cmdArgs := []string{
 		"run",
-		"--rm",                                      // Remove container after execution
-		"--read-only",                               // Read-only root filesystem
-		"--network=" + networkMode,                  // Network mode for this skill
-		"--memory=" + n.config.MemoryLimit,         // Memory limit
-		"--cpus=" + n.config.CPULimit,              // CPU limit
-		"--pids-limit=100",                          // Process limit
-		"--security-opt=no-new-privileges",          // No privilege escalation
-		"--cap-drop=ALL",                            // Drop all capabilities
-		"-v", fmt.Sprintf("%s:/workspace:rw", workspaceDir),     // Read-write workspace
-		"-v", fmt.Sprintf("%s:/skill:ro", skillLibsDir),         // Read-only skill libs
-		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir),  // Persistent outputs directory
-		"-w", "/workspace",                          // Working directory
-		"-e", "PYTHONPATH=/skill",                   // Can import from /skill
-		"--tmpfs", "/tmp:rw,exec,size=100m",        // Writable /tmp for Python
-		image,                                       // Use skill-specific image
-		"python", scriptPath,                        // Command (relative to /workspace)
+		"--rm",                                              // Remove container after execution
+		"--read-only",                                       // Read-only root filesystem
+		"--network=" + networkMode,                          // Network mode for this skill
+		"--memory=" + n.config.MemoryLimit,                  // Memory limit
+		"--cpus=" + n.config.CPULimit,                       // CPU limit
+		"--pids-limit=100",                                  // Process limit
+		"--security-opt=no-new-privileges",                  // No privilege escalation
+		"--cap-drop=ALL",                                    // Drop all capabilities
+		"-v", fmt.Sprintf("%s:/workspace:rw", workspaceDir), // Read-write workspace
+		"-v", fmt.Sprintf("%s:/skill:ro", skillLibsDir), // Read-only skill libs
+		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir), // Persistent outputs directory
+		"-w", "/workspace", // Working directory
+		"-e", "PYTHONPATH=/skill", // Can import from /skill
+		"--tmpfs", "/tmp:rw,exec,size=100m", // Writable /tmp for Python
+		image,                // Use skill-specific image
+		"python", scriptPath, // Command (relative to /workspace)
 	}
 	cmdArgs = append(cmdArgs, args...)
 
@@ -170,25 +170,25 @@ func (n *NativeExecutor) ExecuteBashCode(ctx context.Context, workspaceDir, skil
 	image := n.config.GetImageForSkill(skillLibsDir)
 	networkMode := n.config.GetNetworkModeForSkill(skillLibsDir)
 	logging.Info("🐳 Executing bash skill from '%s' with image '%s' (network: %s)", skillLibsDir, image, networkMode)
-	
+
 	// Build docker/podman run command with dual mounts
 	cmdArgs := []string{
 		"run",
-		"--rm",                                      // Remove container after execution
-		"--read-only",                               // Read-only root filesystem
-		"--network=" + networkMode,                  // Network mode for this skill
-		"--memory=" + n.config.MemoryLimit,         // Memory limit
-		"--cpus=" + n.config.CPULimit,              // CPU limit
-		"--pids-limit=100",                          // Process limit
-		"--security-opt=no-new-privileges",          // No privilege escalation
-		"--cap-drop=ALL",                            // Drop all capabilities
-		"-v", fmt.Sprintf("%s:/workspace:rw", workspaceDir),     // Read-write workspace
-		"-v", fmt.Sprintf("%s:/skill:ro", skillLibsDir),         // Read-only skill libs
-		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir),  // Persistent outputs directory
-		"-w", "/workspace",                          // Working directory
-		"--tmpfs", "/tmp:rw,exec,size=100m",        // Writable /tmp
-		image,                                       // Use skill-specific image
-		"bash", scriptPath,                          // Command (relative to /workspace)
+		"--rm",                                              // Remove container after execution
+		"--read-only",                                       // Read-only root filesystem
+		"--network=" + networkMode,                          // Network mode for this skill
+		"--memory=" + n.config.MemoryLimit,                  // Memory limit
+		"--cpus=" + n.config.CPULimit,                       // CPU limit
+		"--pids-limit=100",                                  // Process limit
+		"--security-opt=no-new-privileges",                  // No privilege escalation
+		"--cap-drop=ALL",                                    // Drop all capabilities
+		"-v", fmt.Sprintf("%s:/workspace:rw", workspaceDir), // Read-write workspace
+		"-v", fmt.Sprintf("%s:/skill:ro", skillLibsDir), // Read-only skill libs
+		"-v", fmt.Sprintf("%s:/outputs:rw", n.config.OutputsDir), // Persistent outputs directory
+		"-w", "/workspace", // Working directory
+		"--tmpfs", "/tmp:rw,exec,size=100m", // Writable /tmp
+		image,              // Use skill-specific image
+		"bash", scriptPath, // Command (relative to /workspace)
 	}
 	cmdArgs = append(cmdArgs, args...)
 

@@ -24,7 +24,7 @@ func NewManager(config *models.OutputConfig) *Manager {
 	if config == nil {
 		config = models.NewDefaultOutputConfig()
 	}
-	
+
 	return &Manager{
 		config: config,
 		writer: NewOutputWriter(config, os.Stdout),
@@ -42,7 +42,7 @@ func (m *Manager) GetWriter() ports.OutputWriter {
 func (m *Manager) SetVerbosity(level models.OutputLevel) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.config.Level = level
 	// Update writer config
 	if w, ok := m.writer.(*OutputWriter); ok {
@@ -93,10 +93,10 @@ func NewOutputWriter(config *models.OutputConfig, output io.Writer) *OutputWrite
 	if output == nil {
 		output = os.Stdout
 	}
-	
+
 	// Configure console colors
 	console.SetColorsEnabled(config.ShowColors)
-	
+
 	return &OutputWriter{
 		config: config,
 		output: output,
@@ -107,7 +107,7 @@ func NewOutputWriter(config *models.OutputConfig, output io.Writer) *OutputWrite
 func (w *OutputWriter) WriteInfo(format string, args ...interface{}) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
-	
+
 	if w.config.ShouldShow(models.OutputNormal) {
 		msg := fmt.Sprintf(format, args...)
 		fmt.Fprintln(w.output, console.Info(msg))
@@ -118,7 +118,7 @@ func (w *OutputWriter) WriteInfo(format string, args ...interface{}) {
 func (w *OutputWriter) WriteSuccess(format string, args ...interface{}) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
-	
+
 	if w.config.ShouldShow(models.OutputQuiet) {
 		msg := fmt.Sprintf(format, args...)
 		fmt.Fprintln(w.output, console.Success(msg))
@@ -129,7 +129,7 @@ func (w *OutputWriter) WriteSuccess(format string, args ...interface{}) {
 func (w *OutputWriter) WriteError(format string, args ...interface{}) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
-	
+
 	// Always show errors
 	msg := fmt.Sprintf(format, args...)
 	fmt.Fprintln(w.output, console.Error(msg))
@@ -139,7 +139,7 @@ func (w *OutputWriter) WriteError(format string, args ...interface{}) {
 func (w *OutputWriter) WriteWarning(format string, args ...interface{}) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
-	
+
 	if w.config.ShouldShow(models.OutputNormal) {
 		msg := fmt.Sprintf(format, args...)
 		fmt.Fprintln(w.output, console.Warning(msg))
@@ -150,7 +150,7 @@ func (w *OutputWriter) WriteWarning(format string, args ...interface{}) {
 func (w *OutputWriter) WriteDebug(format string, args ...interface{}) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
-	
+
 	if w.config.ShouldShow(models.OutputVerbose) {
 		msg := fmt.Sprintf(format, args...)
 		if w.config.ShowTimestamps {
@@ -164,7 +164,7 @@ func (w *OutputWriter) WriteDebug(format string, args ...interface{}) {
 func (w *OutputWriter) WriteLine(format string, args ...interface{}) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
-	
+
 	msg := fmt.Sprintf(format, args...)
 	fmt.Fprintln(w.output, msg)
 }
@@ -180,7 +180,7 @@ func (w *OutputWriter) GetConfig() *models.OutputConfig {
 func (w *OutputWriter) SetConfig(config *models.OutputConfig) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	
+
 	w.config = config
 	console.SetColorsEnabled(config.ShowColors)
 }

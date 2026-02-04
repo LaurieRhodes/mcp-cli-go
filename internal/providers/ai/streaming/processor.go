@@ -18,8 +18,8 @@ type StreamProcessor interface {
 
 // ToolCall represents a tool call for streaming processors
 type ToolCall struct {
-	ID       string          `json:"id"`
-	Type     string          `json:"type"`
+	ID       string           `json:"id"`
+	Type     string           `json:"type"`
 	Function ToolCallFunction `json:"function"`
 }
 
@@ -44,13 +44,13 @@ func (p *AnthropicProcessor) ProcessStreamingResponse(response interface{}, call
 	if !ok {
 		return "", nil, fmt.Errorf("invalid response format")
 	}
-	
+
 	defer resp.Body.Close()
 
 	// Initialize variables for accumulating content and tool calls
 	var fullContent string
 	var allToolCalls []ToolCall
-	
+
 	// Map to track tool calls by ID for accumulation
 	toolCallMap := make(map[string]*map[string]interface{})
 	// Map to track partial JSON accumulation for each tool call
@@ -113,7 +113,7 @@ func (p *AnthropicProcessor) ProcessStreamingResponse(response interface{}, call
 
 // processContentBlockDelta processes content_block_delta events
 func (p *AnthropicProcessor) processContentBlockDelta(
-	delta map[string]interface{}, 
+	delta map[string]interface{},
 	indexToToolID map[int]string,
 	partialJSONMap map[int]string,
 	toolCallMap map[string]*map[string]interface{},
@@ -127,7 +127,7 @@ func (p *AnthropicProcessor) processContentBlockDelta(
 			if text, ok := contentDelta["text"].(string); ok && text != "" {
 				*fullContent += text
 				logging.Debug("Content delta: %s", text)
-				
+
 				// Call the callback with the chunk
 				if callback != nil {
 					if err := callback(text); err != nil {
@@ -147,7 +147,7 @@ func (p *AnthropicProcessor) processContentBlockDelta(
 					}
 					partialJSONMap[indexInt] += partialJSON
 					logging.Debug("Accumulating JSON for index %d: %s", indexInt, partialJSON)
-					
+
 					// Find the tool ID for this index
 					if toolID, exists := indexToToolID[indexInt]; exists {
 						// Found a tool, update its arguments
@@ -164,7 +164,7 @@ func (p *AnthropicProcessor) processContentBlockDelta(
 
 // processContentBlockStart processes content_block_start events
 func (p *AnthropicProcessor) processContentBlockStart(
-	delta map[string]interface{}, 
+	delta map[string]interface{},
 	indexToToolID map[int]string,
 	partialJSONMap map[int]string,
 	toolCallMap map[string]*map[string]interface{},
@@ -178,7 +178,7 @@ func (p *AnthropicProcessor) processContentBlockStart(
 			if text, ok := contentBlock["text"].(string); ok && text != "" {
 				*fullContent += text
 				logging.Debug("Content block start text: %s", text)
-				
+
 				// Call the callback with the chunk
 				if callback != nil {
 					if err := callback(text); err != nil {
@@ -189,23 +189,23 @@ func (p *AnthropicProcessor) processContentBlockStart(
 		} else if blockType == "tool_use" {
 			// Handle tool use block
 			logging.Debug("Processing tool_use content block: %v", contentBlock)
-			
+
 			// Extract tool ID and index
 			id, _ := contentBlock["id"].(string)
 			if id == "" {
 				logging.Warn("Tool use block missing ID")
 				return
 			}
-			
+
 			index, _ := delta["index"].(float64)
 			indexInt := int(index)
-			
+
 			// Store the mapping of index to tool ID
 			indexToToolID[indexInt] = id
 			logging.Debug("Mapped index %d to tool ID %s", indexInt, id)
-			
+
 			name, _ := contentBlock["name"].(string)
-			
+
 			// Get or create the tool call in the map
 			if _, exists := toolCallMap[id]; !exists {
 				logging.Debug("Creating new tool call entry for ID: %s, index: %d", id, indexInt)
@@ -219,14 +219,14 @@ func (p *AnthropicProcessor) processContentBlockStart(
 					},
 				}
 				toolCallMap[id] = &newToolCall
-				
+
 				// If we already have partial JSON for this index, apply it now
 				if jsonStr, exists := partialJSONMap[indexInt]; exists && jsonStr != "" {
 					logging.Debug("Applying existing JSON for index %d to new tool call %s: %s", indexInt, id, jsonStr)
 					(*toolCallMap[id])["function"].(map[string]interface{})["arguments"] = jsonStr
 				}
 			}
-			
+
 			// Handle input if present
 			if input, ok := contentBlock["input"].(map[string]interface{}); ok && len(input) > 0 {
 				argsJSON, err := json.Marshal(input)
@@ -241,7 +241,7 @@ func (p *AnthropicProcessor) processContentBlockStart(
 
 // processContentBlockStop processes content_block_stop events
 func (p *AnthropicProcessor) processContentBlockStop(
-	delta map[string]interface{}, 
+	delta map[string]interface{},
 	indexToToolID map[int]string,
 	partialJSONMap map[int]string,
 	toolCallMap map[string]*map[string]interface{},
@@ -257,7 +257,7 @@ func (p *AnthropicProcessor) processContentBlockStop(
 					var jsonObj interface{}
 					if err := json.Unmarshal([]byte(jsonStr), &jsonObj); err != nil {
 						logging.Warn("Invalid accumulated JSON for tool %s: %s - ERROR: %v", toolID, jsonStr, err)
-						
+
 						// Attempt to fix common JSON errors
 						fixedJSON := p.attemptJSONFix(jsonStr)
 						if fixedJSON != jsonStr {
@@ -267,7 +267,7 @@ func (p *AnthropicProcessor) processContentBlockStop(
 							}
 						}
 					}
-					
+
 					logging.Debug("Setting final arguments from accumulated JSON for tool %s: %s", toolID, jsonStr)
 					(*toolCallMap[toolID])["function"].(map[string]interface{})["arguments"] = jsonStr
 				}
@@ -280,17 +280,17 @@ func (p *AnthropicProcessor) processContentBlockStop(
 
 // processMessageDelta processes message_delta events
 func (p *AnthropicProcessor) processMessageDelta(
-	delta map[string]interface{}, 
+	delta map[string]interface{},
 	indexToToolID map[int]string,
 	partialJSONMap map[int]string,
 	toolCallMap map[string]*map[string]interface{},
 ) {
 	// Check if this is a message stop with tool_use reason
 	if delta["delta"] != nil {
-		if stopReason, ok := delta["delta"].(map[string]interface{})["stop_reason"].(string); ok && 
-		stopReason == "tool_use" {
+		if stopReason, ok := delta["delta"].(map[string]interface{})["stop_reason"].(string); ok &&
+			stopReason == "tool_use" {
 			logging.Debug("Message stopped due to tool_use, processing tool calls")
-			
+
 			// Process and finalize all accumulated JSON
 			for index, jsonStr := range partialJSONMap {
 				// Find the tool ID for this index
@@ -300,7 +300,7 @@ func (p *AnthropicProcessor) processMessageDelta(
 						var jsonObj interface{}
 						if err := json.Unmarshal([]byte(jsonStr), &jsonObj); err != nil {
 							logging.Warn("Invalid accumulated JSON for tool %s: %s - ERROR: %v", toolID, jsonStr, err)
-							
+
 							// Attempt to fix common JSON errors
 							fixedJSON := p.attemptJSONFix(jsonStr)
 							if fixedJSON != jsonStr {
@@ -310,7 +310,7 @@ func (p *AnthropicProcessor) processMessageDelta(
 								}
 							}
 						}
-						
+
 						logging.Debug("Setting arguments from accumulated JSON for tool %s: %s", toolID, jsonStr)
 						(*toolCallMap[toolID])["function"].(map[string]interface{})["arguments"] = jsonStr
 					}
@@ -322,24 +322,24 @@ func (p *AnthropicProcessor) processMessageDelta(
 
 // processMessageStop processes message_stop events and returns all tool calls
 func (p *AnthropicProcessor) processMessageStop(
-	delta map[string]interface{}, 
+	delta map[string]interface{},
 	indexToToolID map[int]string,
 	partialJSONMap map[int]string,
 	toolCallMap map[string]*map[string]interface{},
 ) []ToolCall {
 	var allToolCalls []ToolCall
-	
+
 	logging.Debug("Message stop event, processing accumulated tool calls")
-	
+
 	// Final attempt to fix any incomplete arguments before converting
 	for id, toolCall := range toolCallMap {
 		argsStr, _ := (*toolCall)["function"].(map[string]interface{})["arguments"].(string)
-		
+
 		// Try to validate JSON and fix if needed
 		var jsonObj interface{}
 		if err := json.Unmarshal([]byte(argsStr), &jsonObj); err != nil {
 			logging.Warn("Invalid JSON in final tool call %s: %s - ERROR: %v", id, argsStr, err)
-			
+
 			// Attempt to fix common JSON errors
 			fixedJSON := p.attemptJSONFix(argsStr)
 			if fixedJSON != argsStr {
@@ -350,7 +350,7 @@ func (p *AnthropicProcessor) processMessageStop(
 			}
 		}
 	}
-	
+
 	// Convert all tool calls and add them to the result
 	for id, toolCall := range toolCallMap {
 		if tc := p.convertToolCallToOurFormat(*toolCall); tc != nil {
@@ -358,26 +358,26 @@ func (p *AnthropicProcessor) processMessageStop(
 			allToolCalls = append(allToolCalls, *tc)
 		}
 	}
-	
+
 	return allToolCalls
 }
 
 // recoverToolCallsFromPartialJSON tries to recover tool calls from partial JSON when all else fails
 func (p *AnthropicProcessor) recoverToolCallsFromPartialJSON(partialJSONMap map[int]string) []ToolCall {
 	var allToolCalls []ToolCall
-	
+
 	logging.Warn("Final emergency tool call recovery from partial JSON")
-	
+
 	for index, jsonStr := range partialJSONMap {
 		// Try to determine the tool name from the JSON itself
 		var toolName string
-		
+
 		// Check if this is a filesystem call from the JSON content
 		if strings.Contains(jsonStr, "path") {
 			// Default to list_directory as it's the most common first call
 			toolName = "filesystem_list_directory"
 		}
-		
+
 		// If we found a tool name, create a tool call
 		if toolName != "" {
 			// Try to fix the JSON
@@ -405,9 +405,9 @@ func (p *AnthropicProcessor) recoverToolCallsFromPartialJSON(partialJSONMap map[
 					}
 				}
 			}
-			
+
 			logging.Debug("Creating emergency tool call with name %s and args %s", toolName, jsonStr)
-			
+
 			allToolCalls = append(allToolCalls, ToolCall{
 				ID:   fmt.Sprintf("emergency_%d", index),
 				Type: "function",
@@ -418,7 +418,7 @@ func (p *AnthropicProcessor) recoverToolCallsFromPartialJSON(partialJSONMap map[
 			})
 		}
 	}
-	
+
 	return allToolCalls
 }
 
@@ -426,17 +426,17 @@ func (p *AnthropicProcessor) recoverToolCallsFromPartialJSON(partialJSONMap map[
 func (p *AnthropicProcessor) attemptJSONFix(jsonStr string) string {
 	// Remove any trailing commas
 	jsonStr = strings.TrimSuffix(strings.TrimSpace(jsonStr), ",")
-	
+
 	// Ensure it's properly closed
 	if !strings.HasSuffix(jsonStr, "}") && strings.Contains(jsonStr, "{") {
 		jsonStr += "}"
 	}
-	
+
 	// If it's empty or just whitespace, return empty object
 	if strings.TrimSpace(jsonStr) == "" {
 		return "{}"
 	}
-	
+
 	return jsonStr
 }
 
@@ -447,24 +447,24 @@ func (p *AnthropicProcessor) convertToolCallToOurFormat(toolCall map[string]inte
 		logging.Warn("Tool call missing ID")
 		return nil
 	}
-	
+
 	funcMap, ok := toolCall["function"].(map[string]interface{})
 	if !ok {
 		logging.Warn("Tool call missing function map")
 		return nil
 	}
-	
+
 	name, _ := funcMap["name"].(string)
 	if name == "" {
 		logging.Warn("Tool call missing function name")
 		return nil
 	}
-	
+
 	argsStr, _ := funcMap["arguments"].(string)
 	if argsStr == "" {
 		argsStr = "{}"
 	}
-	
+
 	return &ToolCall{
 		ID:   id,
 		Type: "function",
@@ -496,13 +496,13 @@ func NewSSEReader(reader io.Reader) *SSEReader {
 // ReadEvent reads the next event from the stream
 func (r *SSEReader) ReadEvent() (*SSEEvent, error) {
 	event := &SSEEvent{}
-	
+
 	for {
 		line, err := r.readLine()
 		if err != nil {
 			return nil, err
 		}
-		
+
 		if line == "" {
 			// End of event
 			if event.Data != "" {
@@ -510,7 +510,7 @@ func (r *SSEReader) ReadEvent() (*SSEEvent, error) {
 			}
 			continue
 		}
-		
+
 		if strings.HasPrefix(line, "id:") {
 			event.ID = strings.TrimSpace(line[3:])
 		} else if strings.HasPrefix(line, "event:") {
@@ -532,7 +532,7 @@ func (r *SSEReader) readLine() (string, error) {
 	if line, ok := r.getLineFromBuffer(); ok {
 		return line, nil
 	}
-	
+
 	// Read more data
 	buf := make([]byte, 1024)
 	n, err := r.reader.Read(buf)
@@ -544,14 +544,14 @@ func (r *SSEReader) readLine() (string, error) {
 		}
 		return "", err
 	}
-	
+
 	r.buffer.Write(buf[:n])
-	
+
 	// Try again
 	if line, ok := r.getLineFromBuffer(); ok {
 		return line, nil
 	}
-	
+
 	// No complete line yet
 	return "", nil
 }
@@ -560,20 +560,20 @@ func (r *SSEReader) readLine() (string, error) {
 func (r *SSEReader) getLineFromBuffer() (string, bool) {
 	// Convert buffer to string
 	data := r.buffer.String()
-	
+
 	// Look for newline
 	index := strings.Index(data, "\n")
 	if index < 0 {
 		return "", false
 	}
-	
+
 	// Extract line
 	line := data[:index]
-	
+
 	// Remove from buffer
 	r.buffer.Reset()
 	r.buffer.WriteString(data[index+1:])
-	
+
 	// Remove carriage returns
 	return strings.TrimRight(line, "\r"), true
 }

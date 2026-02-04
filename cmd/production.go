@@ -1,4 +1,5 @@
 // production.go contains production environment settings
+//go:build production
 // +build production
 
 package cmd

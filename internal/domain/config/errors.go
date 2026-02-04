@@ -32,7 +32,7 @@ func (e *ConfigError) WithCause(cause error) *ConfigError {
 // Error implements the error interface
 func (e *ConfigError) Error() string {
 	msg := e.Message
-	
+
 	if len(e.Context) > 0 {
 		msg += " ("
 		first := true
@@ -45,11 +45,11 @@ func (e *ConfigError) Error() string {
 		}
 		msg += ")"
 	}
-	
+
 	if e.Cause != nil {
 		msg += fmt.Sprintf(": %v", e.Cause)
 	}
-	
+
 	return msg
 }
 

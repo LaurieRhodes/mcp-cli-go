@@ -9,7 +9,7 @@ import (
 // This is used when spawning server processes.
 func GetDefaultEnvironment() map[string]string {
 	env := make(map[string]string)
-	
+
 	// Populate from current process environment
 	for _, item := range os.Environ() {
 		parts := strings.SplitN(item, "=", 2)
@@ -19,7 +19,7 @@ func GetDefaultEnvironment() map[string]string {
 			env[key] = value
 		}
 	}
-	
+
 	return env
 }
 
@@ -27,12 +27,12 @@ func GetDefaultEnvironment() map[string]string {
 // Values in the provided environment take precedence over the defaults.
 func MergeEnvironment(env map[string]string) map[string]string {
 	merged := GetDefaultEnvironment()
-	
+
 	// Add or overwrite values from the provided environment
 	for key, value := range env {
 		merged[key] = value
 	}
-	
+
 	return merged
 }
 
@@ -40,10 +40,10 @@ func MergeEnvironment(env map[string]string) map[string]string {
 // This is useful for passing to exec.Command.
 func EnvToSlice(env map[string]string) []string {
 	result := make([]string, 0, len(env))
-	
+
 	for key, value := range env {
 		result = append(result, key+"="+value)
 	}
-	
+
 	return result
 }

@@ -105,7 +105,7 @@ func (v *LenientSchemaValidator) ShouldAcceptSchema(schema map[string]interface{
 // LogSchemaForDebugging logs schema information for debugging purposes
 func (v *LenientSchemaValidator) LogSchemaForDebugging(toolName string, schema map[string]interface{}) {
 	logging.Debug("Tool schema for %s:", toolName)
-	
+
 	if schemaJSON, err := json.MarshalIndent(schema, "  ", "  "); err == nil {
 		logging.Debug("  %s", string(schemaJSON))
 	} else {

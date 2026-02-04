@@ -65,23 +65,23 @@ func (ce *ConsensusExecutor) ExecuteConsensus(
 		}
 	}
 
-	ce.logger.Debug("Consensus results: %d successful, %d failed (API errors)", 
+	ce.logger.Debug("Consensus results: %d successful, %d failed (API errors)",
 		successCount, failCount)
 
 	// Check if we have any successful responses
 	if successCount == 0 {
-		return nil, fmt.Errorf("all %d consensus providers failed (API errors, not votes)", 
+		return nil, fmt.Errorf("all %d consensus providers failed (API errors, not votes)",
 			len(consensus.Executions))
 	}
 
 	// Check if we have enough successful providers to meet requirement
 	// For any requirement, we need at least 2 successful providers
 	if successCount < 2 {
-		return nil, fmt.Errorf("insufficient successful providers for consensus: only %d/%d succeeded (need at least 2)", 
+		return nil, fmt.Errorf("insufficient successful providers for consensus: only %d/%d succeeded (need at least 2)",
 			successCount, len(consensus.Executions))
 	}
 
-	ce.logger.Info("Consensus voting with %d providers (ignoring %d API failures)", 
+	ce.logger.Info("Consensus voting with %d providers (ignoring %d API failures)",
 		successCount, failCount)
 
 	// Count votes from successful results only
@@ -96,7 +96,7 @@ func (ce *ConsensusExecutor) executeParallel(
 ) []*ProviderResult {
 	// Channel for results
 	resultsChan := make(chan *ProviderResult, len(consensus.Executions))
-	
+
 	// WaitGroup for goroutines
 	var wg sync.WaitGroup
 
@@ -209,7 +209,7 @@ func (ce *ConsensusExecutor) countVotes(
 			normalized := normalizeOutput(r.Output)
 			votes[r.Provider+"/"+r.Model] = r.Output // Store original
 			counts[normalized]++
-			
+
 			// Log what each provider voted (for debugging)
 			ce.logger.Info("Provider %s/%s normalized vote: %s", r.Provider, r.Model, normalized)
 		}
@@ -289,25 +289,25 @@ func (ce *ConsensusExecutor) countVotes(
 func normalizeOutput(output string) string {
 	// Trim whitespace
 	output = strings.TrimSpace(output)
-	
+
 	// Convert to uppercase for case-insensitive comparison
 	outputUpper := strings.ToUpper(output)
-	
+
 	// For validation outputs, extract SUCCESS or FAIL
 	// Check for SUCCESS (but not if FAIL is also present, which would indicate FAIL)
 	if strings.Contains(outputUpper, "SUCCESS") && !strings.Contains(outputUpper, "FAIL") {
 		return "SUCCESS"
 	}
-	
+
 	// Check for FAIL
 	if strings.Contains(outputUpper, "FAIL") {
 		return "FAIL"
 	}
-	
+
 	// For other consensus outputs, normalize the entire string
 	normalized := removeExtraWhitespace(output)
 	normalized = toUpperCase(normalized)
-	
+
 	return normalized
 }
 
@@ -316,7 +316,7 @@ func removeExtraWhitespace(s string) string {
 	// Simple whitespace removal
 	result := ""
 	prevSpace := false
-	
+
 	for _, r := range s {
 		if r == ' ' || r == '\t' || r == '\n' || r == '\r' {
 			if !prevSpace {
@@ -328,7 +328,7 @@ func removeExtraWhitespace(s string) string {
 			prevSpace = false
 		}
 	}
-	
+
 	// Trim
 	if len(result) > 0 && result[0] == ' ' {
 		result = result[1:]
@@ -336,7 +336,7 @@ func removeExtraWhitespace(s string) string {
 	if len(result) > 0 && result[len(result)-1] == ' ' {
 		result = result[:len(result)-1]
 	}
-	
+
 	return result
 }
 

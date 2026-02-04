@@ -39,10 +39,10 @@ type CompletionRequest struct {
 
 // CompletionResponse contains the LLM's response
 type CompletionResponse struct {
-	Content   string              `json:"content"`
-	ToolCalls []models.ToolCall   `json:"tool_calls,omitempty"`
-	Usage     models.Usage        `json:"usage,omitempty"`
-	Model     string              `json:"model"`
+	Content   string            `json:"content"`
+	ToolCalls []models.ToolCall `json:"tool_calls,omitempty"`
+	Usage     models.Usage      `json:"usage,omitempty"`
+	Model     string            `json:"model"`
 }
 
 // ProviderType identifies the LLM provider

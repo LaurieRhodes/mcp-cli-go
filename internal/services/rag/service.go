@@ -15,12 +15,12 @@ import (
 
 // Service provides high-level RAG operations
 type Service struct {
-	configService   *infraConfig.Service
-	serverManager   domain.MCPServerManager
+	configService    *infraConfig.Service
+	serverManager    domain.MCPServerManager
 	embeddingService domain.EmbeddingService
-	retriever       *MultiVectorRetriever
-	expander        *QueryExpander
-	ragConfig       *config.RagConfig
+	retriever        *MultiVectorRetriever
+	expander         *QueryExpander
+	ragConfig        *config.RagConfig
 }
 
 // NewService creates a new RAG service
@@ -48,35 +48,35 @@ func NewServiceWithConfig(ragConfig *config.RagConfig, serverManager domain.MCPS
 	expander := NewQueryExpander(expansionConfig)
 
 	return &Service{
-		configService:   nil, // Not needed when config is provided directly
-		serverManager:   serverManager,
+		configService:    nil, // Not needed when config is provided directly
+		serverManager:    serverManager,
 		embeddingService: embeddingService,
-		retriever:       retriever,
-		expander:        expander,
-		ragConfig:       ragConfig,
+		retriever:        retriever,
+		expander:         expander,
+		ragConfig:        ragConfig,
 	}
 }
 
 // SearchRequest represents a RAG search request
 type SearchRequest struct {
-	Query       string   // Search query
-	Server      string   // Server name (from config)
-	Strategies  []string // Strategy names to use
-	TopK        int      // Number of results
-	Fusion      string   // Fusion method (rrf, weighted, max, avg)
-	ExpandQuery bool     // Enable query expansion
+	Query       string                 // Search query
+	Server      string                 // Server name (from config)
+	Strategies  []string               // Strategy names to use
+	TopK        int                    // Number of results
+	Fusion      string                 // Fusion method (rrf, weighted, max, avg)
+	ExpandQuery bool                   // Enable query expansion
 	Filters     map[string]interface{} // Additional filters
 }
 
 // SearchResponse represents a RAG search response
 type SearchResponse struct {
-	Query            string                 `json:"query"`
-	ExpandedQuery    *ExpandedQuery        `json:"expanded_query,omitempty"`
-	Results          []SearchResult         `json:"results"`
-	Strategy         string                 `json:"strategy,omitempty"`
-	Fusion           string                 `json:"fusion,omitempty"`
-	TotalResults     int                    `json:"total_results"`
-	ExecutionTimeMs  int64                  `json:"execution_time_ms"`
+	Query           string         `json:"query"`
+	ExpandedQuery   *ExpandedQuery `json:"expanded_query,omitempty"`
+	Results         []SearchResult `json:"results"`
+	Strategy        string         `json:"strategy,omitempty"`
+	Fusion          string         `json:"fusion,omitempty"`
+	TotalResults    int            `json:"total_results"`
+	ExecutionTimeMs int64          `json:"execution_time_ms"`
 }
 
 // Search performs a RAG search
@@ -111,7 +111,7 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*SearchRespons
 				MaxExpansions: s.ragConfig.QueryExpansion.MaxExpansions,
 			},
 		}
-		
+
 		var err error
 		expandedQuery, err = s.expander.ExpandQuery(ctx, req.Query, expansionConfig)
 		if err != nil {
@@ -151,7 +151,7 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*SearchRespons
 func (s *Service) generateQueryEmbedding(ctx context.Context, query string, serverConfig config.RagServerConfig, strategies []string) ([]float32, error) {
 	// Determine which embedding config to use
 	var embeddingConfig *config.QueryEmbeddingConfig
-	
+
 	// If using a single strategy, check if it has a specific embedding config
 	if len(strategies) == 1 {
 		for _, strategy := range serverConfig.Strategies {
@@ -162,18 +162,18 @@ func (s *Service) generateQueryEmbedding(ctx context.Context, query string, serv
 			}
 		}
 	}
-	
+
 	// Fall back to server-level default
 	if embeddingConfig == nil {
 		embeddingConfig = serverConfig.QueryEmbedding
 		logging.Debug("Using server-level embedding config")
 	}
-	
+
 	// If still no config, return error
 	if embeddingConfig == nil {
 		return nil, fmt.Errorf("no query embedding configuration found for server %s", serverConfig.MCPServer)
 	}
-	
+
 	// Generate embedding based on configured type
 	switch embeddingConfig.Type {
 	case "mcp_tool":
@@ -190,47 +190,47 @@ func (s *Service) generateEmbeddingViaMCPTool(ctx context.Context, query string,
 	if config.ToolName == "" {
 		return nil, fmt.Errorf("tool_name is required when type=mcp_tool")
 	}
-	
+
 	// Build tool parameters
 	params := map[string]interface{}{
 		"texts": []string{query},
 	}
-	
+
 	// Add default parameters from config
 	for k, v := range config.DefaultParams {
 		params[k] = v
 	}
-	
+
 	logging.Debug("Calling MCP tool %s with params: %v", config.ToolName, params)
-	
+
 	// Execute tool via server manager
 	rawResult, err := s.serverManager.ExecuteTool(ctx, config.ToolName, params)
 	if err != nil {
 		return nil, fmt.Errorf("MCP tool %s failed: %w", config.ToolName, err)
 	}
-	
+
 	// Parse JSON result
 	var result map[string]interface{}
 	if err := json.Unmarshal([]byte(rawResult), &result); err != nil {
 		return nil, fmt.Errorf("failed to parse result from %s: %w", config.ToolName, err)
 	}
-	
+
 	// Expected: { "embeddings": [ { "vector": [...], ... } ] }
 	embeddings, ok := result["embeddings"].([]interface{})
 	if !ok || len(embeddings) == 0 {
 		return nil, fmt.Errorf("unexpected response structure from %s: no embeddings array", config.ToolName)
 	}
-	
+
 	firstEmbedding, ok := embeddings[0].(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("unexpected embedding structure from %s", config.ToolName)
 	}
-	
+
 	vectorInterface, ok := firstEmbedding["vector"].([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("no vector field in embedding result from %s", config.ToolName)
 	}
-	
+
 	// Convert []interface{} of floats to []float32
 	vector := make([]float32, len(vectorInterface))
 	for i, v := range vectorInterface {
@@ -243,9 +243,9 @@ func (s *Service) generateEmbeddingViaMCPTool(ctx context.Context, query string,
 			return nil, fmt.Errorf("unexpected vector element type at index %d: %T", i, v)
 		}
 	}
-	
+
 	logging.Debug("Generated embedding vector of dimension: %d", len(vector))
-	
+
 	return vector, nil
 }
 
@@ -254,14 +254,14 @@ func (s *Service) generateEmbeddingViaService(ctx context.Context, query string,
 	if s.embeddingService == nil {
 		return nil, fmt.Errorf("embedding service not available")
 	}
-	
+
 	// Build embedding request
 	req := &domain.EmbeddingJobRequest{
 		Input:    query,
 		Provider: config.Provider,
 		Model:    config.Model,
 	}
-	
+
 	// Add optional parameters
 	if dimensions, ok := config.DefaultParams["dimensions"].(int); ok {
 		req.Dimensions = dimensions
@@ -269,34 +269,34 @@ func (s *Service) generateEmbeddingViaService(ctx context.Context, query string,
 	if encodingFormat, ok := config.DefaultParams["encoding_format"].(string); ok {
 		req.EncodingFormat = encodingFormat
 	}
-	
+
 	logging.Debug("Generating embedding via service with provider=%s, model=%s", req.Provider, req.Model)
-	
+
 	// Generate embedding
 	job, err := s.embeddingService.GenerateEmbeddings(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("embedding service failed: %w", err)
 	}
-	
+
 	// Extract vector from first embedding
 	if len(job.Embeddings) == 0 {
 		return nil, fmt.Errorf("no embeddings generated")
 	}
-	
+
 	vector := job.Embeddings[0].Vector
 	logging.Debug("Generated embedding vector of dimension: %d via service", len(vector))
-	
+
 	return vector, nil
 }
 
 // buildSearchConfig builds a MultiVectorSearchConfig from request and server config
 func (s *Service) buildSearchConfig(req SearchRequest, serverConfig config.RagServerConfig) MultiVectorSearchConfig {
 	searchConfig := MultiVectorSearchConfig{
-		Table:              serverConfig.Table,
-		TextColumns:        serverConfig.TextColumns,
-		MetadataColumns:    serverConfig.MetadataColumns,
-		GlobalMaxResults:   req.TopK,
-		CombinationMethod:  req.Fusion,
+		Table:             serverConfig.Table,
+		TextColumns:       serverConfig.TextColumns,
+		MetadataColumns:   serverConfig.MetadataColumns,
+		GlobalMaxResults:  req.TopK,
+		CombinationMethod: req.Fusion,
 	}
 
 	// Build vector column configs
@@ -311,7 +311,7 @@ func (s *Service) buildSearchConfig(req SearchRequest, serverConfig config.RagSe
 					MaxResults:          req.TopK,
 					Filters:             strategy.Filters,
 				}
-				
+
 				// Apply request-level filters
 				if req.Filters != nil {
 					if vectorCol.Filters == nil {
@@ -321,7 +321,7 @@ func (s *Service) buildSearchConfig(req SearchRequest, serverConfig config.RagSe
 						vectorCol.Filters[k] = v
 					}
 				}
-				
+
 				searchConfig.VectorColumns = append(searchConfig.VectorColumns, vectorCol)
 				break
 			}

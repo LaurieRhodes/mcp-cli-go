@@ -6,10 +6,10 @@ type OutputLevel int
 const (
 	// OutputQuiet shows only essential output (errors, final results)
 	OutputQuiet OutputLevel = iota
-	
+
 	// OutputNormal shows standard output (user-facing messages, results)
 	OutputNormal
-	
+
 	// OutputVerbose shows detailed output (connection info, progress, debug)
 	OutputVerbose
 )
@@ -32,16 +32,16 @@ func (l OutputLevel) String() string {
 type OutputConfig struct {
 	// Level controls verbosity
 	Level OutputLevel
-	
+
 	// ShowColors enables/disables colored output
 	ShowColors bool
-	
+
 	// ShowProgress enables/disables progress indicators
 	ShowProgress bool
-	
+
 	// ShowTimestamps adds timestamps to output
 	ShowTimestamps bool
-	
+
 	// SuppressServerStderr suppresses MCP server stderr output
 	SuppressServerStderr bool
 }

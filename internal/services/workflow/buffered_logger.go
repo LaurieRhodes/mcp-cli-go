@@ -50,7 +50,7 @@ func (bl *BufferedLogger) StartStep(stepName string) {
 		logs:      make([]LogEntry, 0),
 		startTime: time.Now(),
 	}
-	
+
 	bl.buffers[stepName] = buffer
 	bl.order = append(bl.order, stepName)
 }
@@ -87,7 +87,7 @@ func (bl *BufferedLogger) Log(stepName, level, format string, args ...interface{
 	}
 
 	message := fmt.Sprintf(format, args...)
-	
+
 	buffer.mu.Lock()
 	buffer.logs = append(buffer.logs, LogEntry{
 		timestamp: time.Now(),
@@ -167,7 +167,7 @@ func (bl *BufferedLogger) GetBuffer(stepName string) *StepLogBuffer {
 func (bl *BufferedLogger) Clear() {
 	bl.mu.Lock()
 	defer bl.mu.Unlock()
-	
+
 	bl.buffers = make(map[string]*StepLogBuffer)
 	bl.order = make([]string, 0)
 }
@@ -193,7 +193,7 @@ func (bl *BufferedLogger) GetExecutionSummary() string {
 	sb.WriteString("═══════════════════════════════════════════════════════\n\n")
 
 	totalDuration := time.Duration(0)
-	
+
 	for _, stepName := range bl.order {
 		buffer := bl.buffers[stepName]
 		if buffer == nil {
@@ -206,7 +206,7 @@ func (bl *BufferedLogger) GetExecutionSummary() string {
 			duration = buffer.endTime.Sub(buffer.startTime)
 			totalDuration += duration
 		}
-		
+
 		status := "✓"
 		hasError := false
 		for _, log := range buffer.logs {
@@ -218,7 +218,7 @@ func (bl *BufferedLogger) GetExecutionSummary() string {
 		if hasError {
 			status = "✗"
 		}
-		
+
 		sb.WriteString(fmt.Sprintf("%s %-30s %8v\n", status, stepName, duration.Round(time.Millisecond)))
 		buffer.mu.Unlock()
 	}

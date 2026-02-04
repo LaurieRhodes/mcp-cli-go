@@ -27,7 +27,7 @@ func NewExposureParser(appConfig *config.ApplicationConfig, mcpServers []*host.S
 // ParseExposure parses the expose field and returns a list of ToolExposure items
 func (p *ExposureParser) ParseExposure(expose []interface{}) ([]ToolExposure, error) {
 	var tools []ToolExposure
-	
+
 	for i, item := range expose {
 		itemTools, err := p.parseExposureItem(item, i)
 		if err != nil {
@@ -35,7 +35,7 @@ func (p *ExposureParser) ParseExposure(expose []interface{}) ([]ToolExposure, er
 		}
 		tools = append(tools, itemTools...)
 	}
-	
+
 	return tools, nil
 }
 
@@ -68,15 +68,15 @@ func (p *ExposureParser) parseStringExposure(name string, index int) ([]ToolExpo
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("expose item %d: invalid server.tool format: %s", index, name)
 		}
-		
+
 		serverName := parts[0]
 		toolName := parts[1]
-		
+
 		// Verify server exists
 		if _, exists := p.appConfig.Servers[serverName]; !exists {
 			return nil, fmt.Errorf("expose item %d: server not found: %s", index, serverName)
 		}
-		
+
 		logging.Debug("Exposing specific tool: %s from server %s", toolName, serverName)
 		return []ToolExposure{{
 			MCPServer: serverName,
@@ -84,11 +84,11 @@ func (p *ExposureParser) parseStringExposure(name string, index int) ([]ToolExpo
 			Name:      toolName,
 		}}, nil
 	}
-	
+
 	// Check if it's a template
 	_, existsV2 := p.appConfig.Workflows[name]
 	_, existsV1 := p.appConfig.Workflows[name]
-	
+
 	if existsV2 || existsV1 {
 		logging.Debug("Exposing template: %s", name)
 		return []ToolExposure{{
@@ -96,16 +96,16 @@ func (p *ExposureParser) parseStringExposure(name string, index int) ([]ToolExpo
 			Name:     name,
 		}}, nil
 	}
-	
+
 	// Check if it's a server (expose all tools)
 	if _, exists := p.appConfig.Servers[name]; exists {
 		logging.Debug("Exposing all tools from server: %s", name)
 		return p.autoDiscoverServerTools(name)
 	}
-	
+
 	// Check if it's a map with server and tools list
 	// This handles YAML parsing where a map might be in the list
-	
+
 	// Not found
 	return nil, fmt.Errorf("expose item %d: '%s' not found (not a server, template, or server.tool)", index, name)
 }
@@ -130,7 +130,7 @@ func (p *ExposureParser) parseMapExposure(m map[string]interface{}, index int) (
 			default:
 				return nil, fmt.Errorf("expose item %d: 'tools' must be a list of strings", index)
 			}
-			
+
 			// Create tool exposure for each tool
 			var tools []ToolExposure
 			for _, toolName := range toolNames {
@@ -142,31 +142,31 @@ func (p *ExposureParser) parseMapExposure(m map[string]interface{}, index int) (
 			}
 			return tools, nil
 		}
-		
+
 		// No tools list - expose all tools from server
 		return p.autoDiscoverServerTools(serverName)
 	}
-	
+
 	// Check if it's {template: name, as: custom_name} format
 	if templateName, ok := m["template"].(string); ok {
 		tool := ToolExposure{
 			Template: templateName,
 			Name:     templateName,
 		}
-		
+
 		// Check for custom name
 		if asName, ok := m["as"].(string); ok {
 			tool.Name = asName
 		}
-		
+
 		// Check for custom description
 		if desc, ok := m["description"].(string); ok {
 			tool.Description = desc
 		}
-		
+
 		return []ToolExposure{tool}, nil
 	}
-	
+
 	// Check if it's {server: name, tool: name, as: custom_name} format
 	if serverName, ok := m["server"].(string); ok {
 		if toolName, ok := m["tool"].(string); ok {
@@ -175,21 +175,21 @@ func (p *ExposureParser) parseMapExposure(m map[string]interface{}, index int) (
 				MCPTool:   toolName,
 				Name:      toolName,
 			}
-			
+
 			// Check for custom name
 			if asName, ok := m["as"].(string); ok {
 				tool.Name = asName
 			}
-			
+
 			// Check for custom description
 			if desc, ok := m["description"].(string); ok {
 				tool.Description = desc
 			}
-			
+
 			return []ToolExposure{tool}, nil
 		}
 	}
-	
+
 	return nil, fmt.Errorf("expose item %d: invalid map format (use {server: name} or {template: name} or {server: name, tool: name})", index)
 }
 
@@ -203,25 +203,25 @@ func (p *ExposureParser) autoDiscoverServerTools(serverName string) ([]ToolExpos
 			break
 		}
 	}
-	
+
 	if serverConn == nil {
 		return nil, fmt.Errorf("server %s not connected (required for auto-discovery)", serverName)
 	}
-	
+
 	// Get all tools from the server
 	logging.Debug("Auto-discovering tools from server: %s", serverName)
-	
+
 	// Type assert to stdio client
 	stdioClient := serverConn.GetStdioClient()
 	if stdioClient == nil {
 		return nil, fmt.Errorf("server %s does not support stdio protocol", serverName)
 	}
-	
+
 	result, err := tools.SendToolsList(stdioClient, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tools from server %s: %w", serverName, err)
 	}
-	
+
 	// Convert to ToolExposure
 	var exposures []ToolExposure
 	for _, tool := range result.Tools {
@@ -232,7 +232,7 @@ func (p *ExposureParser) autoDiscoverServerTools(serverName string) ([]ToolExpos
 		})
 		logging.Debug("  - Discovered tool: %s", tool.Name)
 	}
-	
+
 	logging.Info("Auto-discovered %d tools from server %s", len(exposures), serverName)
 	return exposures, nil
 }
@@ -243,7 +243,7 @@ func (p *ExposureParser) ParseServer(serverName string) ([]ToolExposure, error) 
 	if _, exists := p.appConfig.Servers[serverName]; !exists {
 		return nil, fmt.Errorf("server not found: %s", serverName)
 	}
-	
+
 	logging.Debug("Exposing all tools from server (shorthand): %s", serverName)
 	return p.autoDiscoverServerTools(serverName)
 }

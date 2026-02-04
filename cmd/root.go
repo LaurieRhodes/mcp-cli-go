@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/models"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/env"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +23,7 @@ func getColorizedHelp() string {
 	blue := color.New(color.FgBlue).SprintFunc()
 	magenta := color.New(color.FgMagenta, color.Bold).SprintFunc()
 	white := color.New(color.FgWhite).SprintFunc()
-	
+
 	header := cyan("================================================================================") + "\n" +
 		cyan("                          MCP Command-Line Tool") + "\n" +
 		cyan("          Protocol-level CLI for Model Context Provider servers") + "\n" +
@@ -31,7 +31,7 @@ func getColorizedHelp() string {
 		white("A versatile command-line interface for interacting with AI models through the\n") +
 		white("Model Context Protocol (MCP). Supports multiple AI providers, workflow templates,\n") +
 		white("embeddings generation, and can run as an MCP server itself.\n\n")
-	
+
 	setup := yellow("+----------------------------------------------------------------------------+\n") +
 		yellow("| ") + magenta("First Time Setup") + yellow("                                                           |\n") +
 		yellow("+----------------------------------------------------------------------------+\n") +
@@ -39,7 +39,7 @@ func getColorizedHelp() string {
 		yellow("| ") + green("mcp-cli init") + "                 Interactive guided setup                     " + yellow("|\n") +
 		yellow("| ") + green("mcp-cli init --full") + "          Complete setup with all options              " + yellow("|\n") +
 		yellow("+----------------------------------------------------------------------------+\n\n")
-	
+
 	usage := blue("+----------------------------------------------------------------------------+\n") +
 		blue("| ") + magenta("Basic Usage") + blue("                                                                |\n") +
 		blue("+----------------------------------------------------------------------------+\n") +
@@ -50,7 +50,7 @@ func getColorizedHelp() string {
 		blue("|                                                                            |\n") +
 		blue("| ") + yellow("For query options: ") + green("mcp-cli query --help") + "                                   " + blue("|\n") +
 		blue("+----------------------------------------------------------------------------+\n\n")
-	
+
 	templates := cyan("+----------------------------------------------------------------------------+\n") +
 		cyan("| ") + magenta("Workflow Templates") + cyan("                                                         |\n") +
 		cyan("+----------------------------------------------------------------------------+\n") +
@@ -67,7 +67,7 @@ func getColorizedHelp() string {
 		cyan("|                                                                            |\n") +
 		cyan("| ") + yellow("Workflow flags: ") + white("--start-from, --end-at, --log-level                      ") + cyan("|\n") +
 		cyan("+----------------------------------------------------------------------------+\n\n")
-	
+
 	server := yellow("+----------------------------------------------------------------------------+\n") +
 		yellow("| ") + magenta("MCP Server Mode") + yellow("                                                            |\n") +
 		yellow("+----------------------------------------------------------------------------+\n") +
@@ -77,7 +77,7 @@ func getColorizedHelp() string {
 		yellow("| ") + green("mcp-cli serve config/runas/agent.yaml") + "   Start MCP server                  " + yellow("|\n") +
 		yellow("| ") + green("mcp-cli serve --verbose agent.yaml") + "      With detailed logging             " + yellow("|\n") +
 		yellow("+----------------------------------------------------------------------------+\n\n")
-	
+
 	embeddings := blue("+----------------------------------------------------------------------------+\n") +
 		blue("| ") + magenta("Embeddings & Vector Search") + blue("                                                 |\n") +
 		blue("+----------------------------------------------------------------------------+\n") +
@@ -88,7 +88,7 @@ func getColorizedHelp() string {
 		blue("|                                                                            |\n") +
 		blue("| ") + yellow("For chunking, output options: ") + green("mcp-cli embeddings --help") + "                   " + blue("|\n") +
 		blue("+----------------------------------------------------------------------------+\n\n")
-	
+
 	rag := yellow("+----------------------------------------------------------------------------+\n") +
 		yellow("| ") + magenta("RAG Operations") + yellow("                                                             |\n") +
 		yellow("+----------------------------------------------------------------------------+\n") +
@@ -98,14 +98,14 @@ func getColorizedHelp() string {
 		yellow("|                                                                            |\n") +
 		yellow("| ") + yellow("For all RAG options: ") + green("mcp-cli rag --help") + "                                   " + yellow("|\n") +
 		yellow("+----------------------------------------------------------------------------+\n\n")
-	
+
 	configSection := cyan("+----------------------------------------------------------------------------+\n") +
 		cyan("| ") + magenta("Configuration") + cyan("                                                              |\n") +
 		cyan("+----------------------------------------------------------------------------+\n") +
 		cyan("| ") + green("mcp-cli config validate") + "                      Validate configuration       " + cyan("|\n") +
 		cyan("| ") + green("mcp-cli config --help") + "                        See all config commands      " + cyan("|\n") +
 		cyan("+----------------------------------------------------------------------------+")
-	
+
 	return header + setup + usage + templates + server + embeddings + rag + configSection
 }
 
@@ -120,12 +120,12 @@ var (
 	verbose           bool
 	logLevel          string
 	noColor           bool
-	
+
 	// Template-based workflow flags
-	workflowName      string
-	startFromStep     string
-	endAtStep         string
-	inputData         string
+	workflowName  string
+	startFromStep string
+	endAtStep     string
+	inputData     string
 
 	// RootCmd represents the base command when called without any subcommands
 	RootCmd = &cobra.Command{
@@ -138,17 +138,17 @@ var (
 			if cmdName == "init" || cmdName == "help" || cmdName == "completion" || cmdName == "serve" {
 				return
 			}
-			
+
 			// Check if config exists (except for init command)
 			checkConfigExists(configFile)
-			
+
 			// Determine output configuration based on command and flags
 			var outputConfig *models.OutputConfig
-			
+
 			isQueryCommand := cmd.Name() == "query"
 			isTemplateMode := workflowName != ""
 			isEmbeddingsCommand := cmd.Name() == "embeddings"
-			
+
 			if verbose {
 				// Verbose flag: Show everything
 				outputConfig = models.NewVerboseOutputConfig()
@@ -159,19 +159,19 @@ var (
 				// Chat and other commands: Normal mode
 				outputConfig = models.NewDefaultOutputConfig()
 			}
-			
+
 			// Apply no-color flag
 			if noColor {
 				outputConfig.ShowColors = false
 			}
-			
+
 			// Set global output manager
 			outputManager := output.NewManager(outputConfig)
 			output.SetGlobalManager(outputManager)
-			
+
 			// Configure legacy logging to match output level
 			configureLegacyLogging(outputConfig)
-			
+
 			// Try to load default provider from config if not specified
 			if providerName == "" {
 				configService := config.NewService()
@@ -193,7 +193,7 @@ var (
 				}
 				return
 			}
-			
+
 			// Execute the chat command by default
 			if err := ChatCmd.RunE(cmd, args); err != nil {
 				os.Exit(1)
@@ -239,12 +239,12 @@ func init() {
 	// This ensures environment variables are available for config substitution
 	// Silently ignores if .env doesn't exist
 	_ = env.LoadDotEnv()
-	
+
 	// Ensure standard system paths are in PATH (ALWAYS runs, independent of .env)
 	// Fixes issues when running from non-interactive shells (Claude Desktop, systemd, cron)
 	// that may have minimal PATH set
 	env.EnsureStandardPaths()
-	
+
 	// Global flags
 	RootCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml", "Path to configuration file (YAML/JSON)")
 	RootCmd.PersistentFlags().StringVarP(&serverName, "server", "s", "", "MCP server(s) to use (comma-separated, e.g., 'filesystem,brave-search')")
@@ -255,7 +255,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging (shortcut for --log-level verbose)")
 	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "", "Set log level: error, warn, info, step, steps, debug, verbose, noisy (default: info)")
 	RootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colored output (for piping or logging)")
-	
+
 	// Template-based workflow flags (only for root command, not subcommands)
 	RootCmd.Flags().StringVar(&workflowName, "workflow", "", "Execute workflow by name")
 	RootCmd.Flags().StringVar(&startFromStep, "start-from", "", "Start workflow from specific step (skips previous steps)")
@@ -270,12 +270,12 @@ func init() {
 	RootCmd.AddCommand(InteractiveCmd)
 	RootCmd.AddCommand(QueryCmd)
 	RootCmd.AddCommand(ServersCmd)
-	RootCmd.AddCommand(WorkflowsCmd)  // List workflows
-	RootCmd.AddCommand(SkillsCmd)     // List skills
+	RootCmd.AddCommand(WorkflowsCmd) // List workflows
+	RootCmd.AddCommand(SkillsCmd)    // List skills
 	RootCmd.AddCommand(EmbeddingsCmd)
-	RootCmd.AddCommand(RagCmd)  // RAG operations
+	RootCmd.AddCommand(RagCmd) // RAG operations
 	RootCmd.AddCommand(ConfigCmd)
-	RootCmd.AddCommand(InitCmd)  // Setup wizard
+	RootCmd.AddCommand(InitCmd) // Setup wizard
 	// Note: ServeCmd is added in serve.go's init() function
 
 	// Configuration-based initialization
@@ -284,7 +284,7 @@ func init() {
 		if isInitCommand() {
 			return
 		}
-		
+
 		// Only load provider and model if not already specified on command line
 		if providerName == "" || modelName == "" {
 			configService := config.NewService()
@@ -294,7 +294,7 @@ func init() {
 					providerName = appConfig.AI.DefaultProvider
 					logging.Debug("Loaded default provider from config: %s", providerName)
 				}
-				
+
 				// If model not specified and we have a provider, try to get default model
 				if modelName == "" && providerName != "" {
 					// Try to get provider config
@@ -306,7 +306,7 @@ func init() {
 			}
 		}
 	})
-	
+
 	// Set custom help template with colors
 	setColoredHelpTemplate()
 }
@@ -318,7 +318,7 @@ func setColoredHelpTemplate() {
 	green := color.New(color.FgGreen).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
 	blue := color.New(color.FgBlue, color.Bold).SprintFunc()
-	
+
 	// Custom usage template with colors
 	cobra.AddTemplateFunc("styleHeading", func(s string) string {
 		return cyan(s)
@@ -332,7 +332,7 @@ func setColoredHelpTemplate() {
 	cobra.AddTemplateFunc("styleExample", func(s string) string {
 		return blue(s)
 	})
-	
+
 	usageTemplate := `{{styleHeading "Usage:"}}{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
@@ -357,7 +357,7 @@ func setColoredHelpTemplate() {
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `
-	
+
 	RootCmd.SetUsageTemplate(usageTemplate)
 }
 
@@ -372,7 +372,7 @@ func configureLegacyLogging(config *models.OutputConfig) {
 	case models.OutputVerbose:
 		logging.SetDefaultLevel(logging.DEBUG)
 	}
-	
+
 	// Configure color output
 	logging.SetColorOutput(config.ShowColors)
 }

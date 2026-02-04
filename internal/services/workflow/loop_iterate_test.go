@@ -6,7 +6,7 @@ import (
 
 func TestParseJSONL(t *testing.T) {
 	le := &LoopExecutor{logger: NewLogger("normal", false)}
-	
+
 	tests := []struct {
 		name      string
 		input     string
@@ -32,8 +32,8 @@ func TestParseJSONL(t *testing.T) {
 			wantErr:   false,
 		},
 		{
-			name: "single JSONL item",
-			input: `{"id": "1", "value": "test"}`,
+			name:      "single JSONL item",
+			input:     `{"id": "1", "value": "test"}`,
 			wantCount: 1,
 			wantErr:   false,
 		},
@@ -50,7 +50,7 @@ func TestParseJSONL(t *testing.T) {
 			wantErr:   true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			items, err := le.parseJSONL(tt.input)
@@ -67,7 +67,7 @@ func TestParseJSONL(t *testing.T) {
 
 func TestParseJSONArray(t *testing.T) {
 	le := &LoopExecutor{logger: NewLogger("normal", false)}
-	
+
 	tests := []struct {
 		name      string
 		input     string
@@ -109,7 +109,7 @@ func TestParseJSONArray(t *testing.T) {
 			wantErr:   true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			items, err := le.parseJSONArray(tt.input)
@@ -126,7 +126,7 @@ func TestParseJSONArray(t *testing.T) {
 
 func TestParseTextLines(t *testing.T) {
 	le := &LoopExecutor{logger: NewLogger("normal", false)}
-	
+
 	tests := []struct {
 		name      string
 		input     string
@@ -166,7 +166,7 @@ line 3`,
 			wantCount: 3,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			items := le.parseTextLines(tt.input)
@@ -179,7 +179,7 @@ line 3`,
 
 func TestParseArrayInput(t *testing.T) {
 	le := &LoopExecutor{logger: NewLogger("normal", false)}
-	
+
 	tests := []struct {
 		name       string
 		input      string
@@ -218,7 +218,7 @@ item 3`,
 			wantErr:   true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			items, err := le.parseArrayInput(tt.input)
@@ -235,7 +235,7 @@ item 3`,
 
 func TestExtractItemID(t *testing.T) {
 	le := &LoopExecutor{logger: NewLogger("normal", false)}
-	
+
 	tests := []struct {
 		name     string
 		item     interface{}
@@ -282,7 +282,7 @@ func TestExtractItemID(t *testing.T) {
 			expected: "ITEM-003",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := le.extractItemID(tt.item, tt.index)

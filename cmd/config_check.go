@@ -19,20 +19,20 @@ func checkConfigExists(configPath string) {
 func printNoConfigError() {
 	errorColor := color.New(color.FgRed, color.Bold)
 	infoColor := color.New(color.FgCyan)
-	
+
 	fmt.Fprintln(os.Stderr)
 	errorColor.Fprintln(os.Stderr, "⚠️  No configuration found")
 	fmt.Fprintln(os.Stderr)
-	
+
 	infoColor.Fprintln(os.Stderr, "Get started in 30 seconds:")
 	fmt.Fprintln(os.Stderr, "  ./mcp-cli init --quick       (recommended, uses local ollama)")
 	fmt.Fprintln(os.Stderr)
-	
+
 	infoColor.Fprintln(os.Stderr, "Or for guided setup:")
 	fmt.Fprintln(os.Stderr, "  ./mcp-cli init               (interactive)")
 	fmt.Fprintln(os.Stderr, "  ./mcp-cli init --full        (all options)")
 	fmt.Fprintln(os.Stderr)
-	
+
 	infoColor.Fprintln(os.Stderr, "Need help?")
 	fmt.Fprintln(os.Stderr, "  ./mcp-cli init --help")
 	fmt.Fprintln(os.Stderr)

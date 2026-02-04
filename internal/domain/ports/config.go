@@ -26,9 +26,9 @@ type ConfigService interface {
 
 // AppConfig represents the complete application configuration
 type AppConfig struct {
-	Servers    map[string]ServerConfig       `json:"servers"`
-	Providers  map[string]ProviderConfig     `json:"providers"`
-	Embeddings *EmbeddingsConfig             `json:"embeddings,omitempty"`
+	Servers    map[string]ServerConfig   `json:"servers"`
+	Providers  map[string]ProviderConfig `json:"providers"`
+	Embeddings *EmbeddingsConfig         `json:"embeddings,omitempty"`
 	// Workflows removed - use actual config.ApplicationConfig.Workflows (WorkflowV2)
 }
 

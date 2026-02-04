@@ -122,7 +122,7 @@ func (c *ChatContext) UpdateProvider(model string, providerConfig *config.Provid
 
 	c.CurrentModel = model
 	c.ProviderConfig = providerConfig
-	
+
 	if model == "" {
 		c.TokenManager = nil
 		return nil
@@ -153,10 +153,10 @@ func (c *ChatContext) UpdateProvider(model string, providerConfig *config.Provid
 	}
 
 	c.TokenManager = tokenManager
-	
+
 	// Immediately trim messages if we're over the new limit
 	c.TrimHistory()
-	
+
 	return nil
 }
 
@@ -178,11 +178,11 @@ func (c *ChatContext) AddToolCall(toolCall domain.ToolCall, result string, err e
 		Result:    result,
 		Timestamp: time.Now(),
 	}
-	
+
 	if err != nil {
 		history.Error = err.Error()
 	}
-	
+
 	c.ToolCalls = append(c.ToolCalls, history)
 }
 
@@ -195,7 +195,7 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 			Content: c.BuildSystemPrompt(),
 		},
 	}
-	
+
 	// Add all conversation messages (no validation yet)
 	messages = append(messages, c.Messages...)
 
@@ -204,42 +204,42 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 	if c.TokenManager != nil {
 		originalCount := len(messages)
 		messages = c.TokenManager.TrimMessagesToFit(messages, 0) // Use default reserve tokens
-		
+
 		if len(messages) != originalCount {
 			logging.Debug("Trimmed messages: %d -> %d", originalCount, len(messages))
 		}
-		
+
 		// Log context utilization
 		utilization := c.TokenManager.GetContextUtilization(messages)
 		if utilization > 80.0 {
-			logging.Warn("High context utilization: %.1f%% (%d/%d tokens)", 
-				utilization, 
+			logging.Warn("High context utilization: %.1f%% (%d/%d tokens)",
+				utilization,
 				c.TokenManager.CountTokensInMessages(messages),
 				c.TokenManager.GetMaxTokens())
 		} else {
-			logging.Debug("Context utilization: %.1f%% (%d/%d tokens)", 
+			logging.Debug("Context utilization: %.1f%% (%d/%d tokens)",
 				utilization,
 				c.TokenManager.CountTokensInMessages(messages),
 				c.TokenManager.GetMaxTokens())
 		}
 	}
-	
+
 	// Debug: Log ALL messages BEFORE validation
 	logging.Debug("=== ALL MESSAGES BEFORE VALIDATION (count: %d) ===", len(messages))
 	for i, msg := range messages {
-		logging.Debug("  Pre-validation Message %d: role=%s, tool_call_id='%s', has_tool_calls=%v, content_len=%d", 
+		logging.Debug("  Pre-validation Message %d: role=%s, tool_call_id='%s', has_tool_calls=%v, content_len=%d",
 			i, msg.Role, msg.ToolCallID, len(msg.ToolCalls) > 0, len(msg.Content))
 		if msg.Role == "tool" && msg.ToolCallID == "" {
 			logging.Warn("  ⚠️  Tool message %d has EMPTY ToolCallID!", i)
 		}
 	}
 	logging.Debug("=== END PRE-VALIDATION MESSAGES ===")
-	
+
 	// CRITICAL FIX: Validate tool call/response pairing AFTER trimming
 	// This prevents orphaned tool messages when trimming removes assistant messages
 	validatedMessages := []domain.Message{messages[0]} // Keep system message
 	toolCallIDToIndex := make(map[string]int)
-	
+
 	// Build mapping and validate pairing on the FINAL (post-trim) message set
 	for _, msg := range messages[1:] {
 		if msg.Role == "assistant" && len(msg.ToolCalls) > 0 {
@@ -266,7 +266,7 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 			validatedMessages = append(validatedMessages, msg)
 		}
 	}
-	
+
 	// Log the message structure for debugging
 	logging.Debug("Sending %d messages to LLM (after validation)", len(validatedMessages))
 	for i, msg := range validatedMessages {
@@ -276,7 +276,7 @@ func (c *ChatContext) GetMessagesForLLM() []domain.Message {
 			logging.Debug("Message %d: role=%s, tool_call_id=%s, content_len=%d", i, msg.Role, msg.ToolCallID, len(msg.Content))
 		}
 	}
-	
+
 	return validatedMessages
 }
 
@@ -295,14 +295,14 @@ func (c *ChatContext) TrimHistory() {
 		// Use sophisticated token-based trimming
 		originalCount := len(c.Messages)
 		originalTokens := c.TokenManager.CountTokensInMessages(c.Messages)
-		
+
 		c.Messages = c.TokenManager.TrimMessagesToFit(c.Messages, 0) // Use default reserve tokens
-		
+
 		newCount := len(c.Messages)
 		newTokens := c.TokenManager.CountTokensInMessages(c.Messages)
-		
+
 		if newCount != originalCount {
-			logging.Info("Token-based trimming: %d→%d messages, %d→%d tokens", 
+			logging.Info("Token-based trimming: %d→%d messages, %d→%d tokens",
 				originalCount, newCount, originalTokens, newTokens)
 		}
 	} else {
@@ -318,11 +318,11 @@ func (c *ChatContext) TrimHistory() {
 // GetContextStats returns context utilization statistics
 func (c *ChatContext) GetContextStats() map[string]interface{} {
 	stats := make(map[string]interface{})
-	
+
 	stats["message_count"] = len(c.Messages)
 	stats["tool_call_count"] = len(c.ToolCalls)
 	stats["model"] = c.CurrentModel
-	
+
 	if c.TokenManager != nil {
 		tokenStats := c.TokenManager.GetContextStats(c.Messages)
 		for key, value := range tokenStats {
@@ -333,31 +333,31 @@ func (c *ChatContext) GetContextStats() map[string]interface{} {
 		stats["max_history_size"] = c.MaxHistorySize
 		stats["token_management"] = "disabled"
 	}
-	
+
 	return stats
 }
 
 // FormatToolHistoryForLLM formats the tool history for the LLM
 func (c *ChatContext) FormatToolHistoryForLLM() string {
 	var history strings.Builder
-	
+
 	// Only include the most recent tool calls (last 5)
 	recentCalls := c.ToolCalls
 	if len(recentCalls) > 5 {
 		recentCalls = recentCalls[len(recentCalls)-5:]
 	}
-	
+
 	if len(recentCalls) == 0 {
 		return ""
 	}
-	
+
 	history.WriteString("Here are the results of recent tool calls:\n\n")
-	
+
 	for i, toolCall := range recentCalls {
 		history.WriteString(fmt.Sprintf("Tool call %d:\n", i+1))
 		history.WriteString(fmt.Sprintf("- Name: %s\n", toolCall.ToolCall.Function.Name))
 		history.WriteString(fmt.Sprintf("- Arguments: %s\n", string(toolCall.ToolCall.Function.Arguments)))
-		
+
 		if toolCall.Error != "" {
 			history.WriteString(fmt.Sprintf("- Error: %s\n", toolCall.Error))
 		} else {
@@ -368,10 +368,10 @@ func (c *ChatContext) FormatToolHistoryForLLM() string {
 			}
 			history.WriteString(fmt.Sprintf("- Result: %s\n", result))
 		}
-		
+
 		history.WriteString("\n")
 	}
-	
+
 	return history.String()
 }
 

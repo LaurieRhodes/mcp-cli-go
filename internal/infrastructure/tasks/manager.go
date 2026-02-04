@@ -27,7 +27,7 @@ type Manager struct {
 // NewManager creates a new task manager
 func NewManager(defaultTTL, maxTTL time.Duration, pollInterval int64) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	m := &Manager{
 		tasks:        make(map[string]*domain.Task),
 		defaultTTL:   defaultTTL,
@@ -36,11 +36,11 @@ func NewManager(defaultTTL, maxTTL time.Duration, pollInterval int64) *Manager {
 		ctx:          ctx,
 		cancel:       cancel,
 	}
-	
+
 	// Start cleanup routine
 	m.cleanupTicker = time.NewTicker(1 * time.Minute)
 	go m.cleanupExpiredTasks()
-	
+
 	return m
 }
 
@@ -50,7 +50,7 @@ func (m *Manager) CreateTask(requestMethod string, requestParams interface{}, re
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate task ID: %w", err)
 	}
-	
+
 	// Determine TTL
 	ttl := m.defaultTTL
 	if requestedTTL > 0 {
@@ -61,7 +61,7 @@ func (m *Manager) CreateTask(requestMethod string, requestParams interface{}, re
 			ttl = m.maxTTL
 		}
 	}
-	
+
 	now := time.Now()
 	task := &domain.Task{
 		ID:            taskID,
@@ -75,11 +75,11 @@ func (m *Manager) CreateTask(requestMethod string, requestParams interface{}, re
 		Done:          make(chan struct{}),
 		ResultChan:    make(chan domain.TaskResult, 1),
 	}
-	
+
 	m.mu.Lock()
 	m.tasks[taskID] = task
 	m.mu.Unlock()
-	
+
 	logging.Info("Created task %s for %s (TTL: %s)", taskID, requestMethod, ttl)
 	return task, nil
 }
@@ -88,12 +88,12 @@ func (m *Manager) CreateTask(requestMethod string, requestParams interface{}, re
 func (m *Manager) GetTask(taskID string) (*domain.Task, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	task, exists := m.tasks[taskID]
 	if !exists {
 		return nil, fmt.Errorf("task not found: %s", taskID)
 	}
-	
+
 	return task, nil
 }
 
@@ -103,7 +103,7 @@ func (m *Manager) GetTaskMetadata(taskID string) (domain.TaskMetadata, error) {
 	if err != nil {
 		return domain.TaskMetadata{}, err
 	}
-	
+
 	return task.GetMetadata(m.pollInterval), nil
 }
 
@@ -114,7 +114,7 @@ func (m *Manager) WaitForResult(taskID string, timeout time.Duration) (interface
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// If already in terminal state, return immediately
 	if task.Status.IsTerminal() {
 		if task.Error != nil {
@@ -122,21 +122,21 @@ func (m *Manager) WaitForResult(taskID string, timeout time.Duration) (interface
 		}
 		return task.Result, nil
 	}
-	
+
 	// Wait for completion or timeout
 	ctx, cancel := context.WithTimeout(m.ctx, timeout)
 	defer cancel()
-	
+
 	select {
 	case <-task.Done:
 		if task.Error != nil {
 			return nil, task.Error
 		}
 		return task.Result, nil
-		
+
 	case <-ctx.Done():
 		return nil, fmt.Errorf("timeout waiting for task result")
-		
+
 	case <-m.ctx.Done():
 		return nil, fmt.Errorf("task manager shutting down")
 	}
@@ -148,21 +148,21 @@ func (m *Manager) CancelTask(taskID string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Can only cancel non-terminal tasks
 	if task.Status.IsTerminal() {
 		return fmt.Errorf("task %s is already in terminal state: %s", taskID, task.Status)
 	}
-	
+
 	// Signal cancellation
 	close(task.Cancel)
-	
+
 	// Update status
 	m.mu.Lock()
 	task.SetCancelled()
 	m.mu.Unlock()
-	
-	logging.Info("Cancelled task %s", taskID)
+
+	logging.Info("Canceled task %s", taskID)
 	return nil
 }
 
@@ -170,40 +170,40 @@ func (m *Manager) CancelTask(taskID string) error {
 func (m *Manager) ListTasks(cursor string, limit int) ([]domain.TaskMetadata, string, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	// Collect all tasks
 	var allTasks []*domain.Task
 	for _, task := range m.tasks {
 		allTasks = append(allTasks, task)
 	}
-	
+
 	// Sort by creation time (newest first)
 	// TODO: Implement proper sorting
-	
+
 	// Apply pagination
 	start := 0
 	if cursor != "" {
 		// Decode cursor to find start position
 		// For now, simple implementation without cursor
 	}
-	
+
 	end := start + limit
 	if end > len(allTasks) {
 		end = len(allTasks)
 	}
-	
+
 	// Convert to metadata
 	var result []domain.TaskMetadata
 	for i := start; i < end; i++ {
 		result = append(result, allTasks[i].GetMetadata(m.pollInterval))
 	}
-	
+
 	// Generate next cursor if there are more results
 	nextCursor := ""
 	if end < len(allTasks) {
 		nextCursor = fmt.Sprintf("%d", end)
 	}
-	
+
 	return result, nextCursor, nil
 }
 
@@ -211,7 +211,7 @@ func (m *Manager) ListTasks(cursor string, limit int) ([]domain.TaskMetadata, st
 func (m *Manager) DeleteTask(taskID string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	delete(m.tasks, taskID)
 	logging.Debug("Deleted task %s", taskID)
 	return nil
@@ -231,7 +231,7 @@ func (m *Manager) cleanupExpiredTasks() {
 				}
 			}
 			m.mu.Unlock()
-			
+
 		case <-m.ctx.Done():
 			m.cleanupTicker.Stop()
 			return
@@ -242,14 +242,14 @@ func (m *Manager) cleanupExpiredTasks() {
 // Close shuts down the task manager
 func (m *Manager) Close() {
 	m.cancel()
-	
+
 	// Cancel all pending tasks
 	m.mu.Lock()
 	for id, task := range m.tasks {
 		if !task.Status.IsTerminal() {
 			close(task.Cancel)
 			task.SetCancelled()
-			logging.Info("Cancelled task %s during shutdown", id)
+			logging.Info("Canceled task %s during shutdown", id)
 		}
 	}
 	m.mu.Unlock()
@@ -267,7 +267,7 @@ func generateTaskID() (string, error) {
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
-	
+
 	// Format as UUID-style string
 	return fmt.Sprintf("%s-%s-%s-%s-%s",
 		hex.EncodeToString(bytes[0:4]),
@@ -289,20 +289,20 @@ func (m *Manager) GetTaskCount() int {
 func (m *Manager) GetTaskStats() map[string]int {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	stats := map[string]int{
-		"total":         0,
-		"working":       0,
-		"completed":     0,
-		"failed":        0,
-		"cancelled":     0,
+		"total":          0,
+		"working":        0,
+		"completed":      0,
+		"failed":         0,
+		"canceled":      0,
 		"input_required": 0,
 	}
-	
+
 	for _, task := range m.tasks {
 		stats["total"]++
 		stats[string(task.Status)]++
 	}
-	
+
 	return stats
 }

@@ -19,7 +19,6 @@ func (tm testMapper) GetImageForSkill(skillName string) string {
 }
 
 func TestGetImageForSkill(t *testing.T) {
-	
 	mapping := testMapper{
 		skills: map[string]string{
 			"docx": "mcp-skills-docx",
@@ -29,12 +28,12 @@ func TestGetImageForSkill(t *testing.T) {
 		},
 		defaultImage: "mcp-skills-office",
 	}
-	
+
 	config := ExecutorConfig{
 		PythonImage:  "python:3.11-slim",
 		ImageMapping: mapping,
 	}
-	
+
 	tests := []struct {
 		name          string
 		skillPath     string
@@ -66,12 +65,12 @@ func TestGetImageForSkill(t *testing.T) {
 			expectedImage: "mcp-skills-office",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			image := config.GetImageForSkill(tt.skillPath)
 			if image != tt.expectedImage {
-				t.Errorf("GetImageForSkill(%s) = %s, want %s", 
+				t.Errorf("GetImageForSkill(%s) = %s, want %s",
 					filepath.Base(tt.skillPath), image, tt.expectedImage)
 			}
 		})
@@ -83,14 +82,14 @@ func TestExecutorConfigWithoutMapping(t *testing.T) {
 		PythonImage:  "python:3.11-slim",
 		ImageMapping: nil,
 	}
-	
+
 	// Should always return default when no mapping
 	tests := []string{
 		"/skills/docx",
 		"/skills/pptx",
 		"/skills/anything",
 	}
-	
+
 	for _, skillPath := range tests {
 		image := config.GetImageForSkill(skillPath)
 		if image != "python:3.11-slim" {
@@ -98,4 +97,3 @@ func TestExecutorConfigWithoutMapping(t *testing.T) {
 		}
 	}
 }
-

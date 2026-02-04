@@ -11,9 +11,9 @@ import (
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	domainConfig "github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/initialize"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/messages/tools"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/stdio"
@@ -90,14 +90,14 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig domainCo
 	defer m.mu.Unlock()
 
 	logging.Info("Connecting to server: %s", serverName)
-	
+
 	// NESTED MCP DETECTION: Check if we should use Unix socket instead of stdio
 	if os.Getenv("MCP_NESTED") == "1" {
 		logging.Info("Nested MCP context detected (MCP_NESTED=1)")
-		
+
 		// Try to get socket path from environment
 		socketPath := os.Getenv(fmt.Sprintf("MCP_%s_SOCKET", strings.ToUpper(serverName)))
-		
+
 		if socketPath == "" {
 			// Fallback: construct from socket directory
 			socketDir := os.Getenv("MCP_SOCKET_DIR")
@@ -106,12 +106,12 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig domainCo
 			}
 			socketPath = filepath.Join(socketDir, serverName+".sock")
 		}
-		
+
 		// Check if socket exists
 		if _, err := os.Stat(socketPath); err == nil {
 			logging.Info("Unix socket found: %s", socketPath)
 			logging.Info("Attempting Unix socket connection (avoiding stdio conflict)")
-			
+
 			// Try Unix socket connection
 			conn, err := m.connectViaUnixSocket(serverName, socketPath, userSpecified)
 			if err != nil {
@@ -127,7 +127,7 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig domainCo
 			logging.Info("Falling back to stdio connection")
 		}
 	}
-	
+
 	// Default: stdio connection
 	logging.Debug("Using stdio connection for server: %s", serverName)
 	logging.Debug("Server command: %s %v", serverConfig.Command, serverConfig.Args)
@@ -180,19 +180,19 @@ func (m *ServerManager) ConnectToServer(serverName string, serverConfig domainCo
 // connectViaUnixSocket connects to a server via Unix domain socket
 func (m *ServerManager) connectViaUnixSocket(serverName string, socketPath string, userSpecified bool) (*ServerConnection, error) {
 	logging.Info("Connecting to %s via Unix socket: %s", serverName, socketPath)
-	
+
 	// Create Unix socket client
 	client, err := unixsocket.NewUnixSocketClient(socketPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Unix socket client: %w", err)
 	}
-	
+
 	// Start the client
 	logging.Debug("Starting Unix socket client for server: %s", serverName)
 	if err := client.Start(); err != nil {
 		return nil, fmt.Errorf("failed to start Unix socket client: %w", err)
 	}
-	
+
 	// Send initialize request using the Unix socket client's method
 	logging.Debug("Sending initialize request via Unix socket to server: %s", serverName)
 	initResponse, err := client.SendInitialize()
@@ -201,11 +201,11 @@ func (m *ServerManager) connectViaUnixSocket(serverName string, socketPath strin
 		client.Stop()
 		return nil, fmt.Errorf("failed to initialize server %s: %w", serverName, err)
 	}
-	
+
 	// Parse server info and capabilities from response
 	var serverInfo initialize.ServerInfo
 	var capabilities initialize.ServerCapabilities
-	
+
 	if si, ok := initResponse["serverInfo"].(map[string]interface{}); ok {
 		if name, ok := si["name"].(string); ok {
 			serverInfo.Name = name
@@ -217,7 +217,7 @@ func (m *ServerManager) connectViaUnixSocket(serverName string, socketPath strin
 			serverInfo.ProtocolVersion = protocol
 		}
 	}
-	
+
 	if caps, ok := initResponse["capabilities"].(map[string]interface{}); ok {
 		if tools, ok := caps["tools"].(map[string]interface{}); ok {
 			capabilities.ProvidesTools = tools != nil
@@ -229,7 +229,7 @@ func (m *ServerManager) connectViaUnixSocket(serverName string, socketPath strin
 			capabilities.ProvidesResources = resources != nil
 		}
 	}
-	
+
 	// Create the connection
 	conn := &ServerConnection{
 		Name:          serverName,
@@ -238,12 +238,12 @@ func (m *ServerManager) connectViaUnixSocket(serverName string, socketPath strin
 		Capabilities:  capabilities,
 		UserSpecified: userSpecified,
 	}
-	
+
 	// Add to connections
 	m.connections = append(m.connections, conn)
 	logging.Info("Successfully connected to server via Unix socket: %s (%s v%s)",
 		serverName, conn.ServerInfo.Name, conn.ServerInfo.Version)
-	
+
 	return conn, nil
 }
 
@@ -297,7 +297,7 @@ func (m *ServerManager) ConnectToServers(configFile string, serverNames []string
 		logging.Error("Failed to connect to any of the requested servers")
 		return fmt.Errorf("failed to connect to any of the requested servers")
 	}
-	
+
 	if len(m.connections) == 0 {
 		logging.Info("No server connections - running with LLM only")
 	} else {
@@ -334,7 +334,7 @@ func (m *ServerManager) CloseConnections() {
 	logging.Info("Closing all server connections")
 	for _, conn := range m.connections {
 		logging.Debug("Closing connection to server: %s", conn.Name)
-		
+
 		// Handle both stdio and Unix socket clients
 		switch client := conn.Client.(type) {
 		case *stdio.StdioClient:
@@ -375,14 +375,14 @@ func (m *ServerManager) SetQuiet(quiet bool) {
 func (m *ServerManager) GetAvailableTools() ([]domain.Tool, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	var allTools []domain.Tool
-	
+
 	for _, conn := range m.connections {
 		// Handle both stdio and Unix socket clients
 		var toolsList map[string]interface{}
 		var err error
-		
+
 		switch client := conn.Client.(type) {
 		case *stdio.StdioClient:
 			// Get tools from server using MCP protocol
@@ -403,28 +403,28 @@ func (m *ServerManager) GetAvailableTools() ([]domain.Tool, error) {
 				})
 			}
 			continue
-			
+
 		case *unixsocket.UnixSocketClient:
 			toolsList, err = client.SendToolsList(nil)
 			if err != nil {
 				logging.Warn("Failed to get tools from server %s: %v", conn.Name, err)
 				continue
 			}
-			
+
 		default:
 			logging.Warn("Unknown client type for server: %s", conn.Name)
 			continue
 		}
-		
+
 		// Parse tools from Unix socket response
 		if toolsArray, ok := toolsList["tools"].([]interface{}); ok {
 			for _, t := range toolsArray {
 				if toolMap, ok := t.(map[string]interface{}); ok {
 					tool := domain.Tool{
-						Type: "function",
+						Type:     "function",
 						Function: domain.ToolFunction{},
 					}
-					
+
 					if name, ok := toolMap["name"].(string); ok {
 						tool.Function.Name = name
 					}
@@ -434,13 +434,13 @@ func (m *ServerManager) GetAvailableTools() ([]domain.Tool, error) {
 					if schema, ok := toolMap["inputSchema"].(map[string]interface{}); ok {
 						tool.Function.Parameters = schema
 					}
-					
+
 					allTools = append(allTools, tool)
 				}
 			}
 		}
 	}
-	
+
 	return allTools, nil
 }
 
@@ -448,12 +448,12 @@ func (m *ServerManager) GetAvailableTools() ([]domain.Tool, error) {
 func (m *ServerManager) ExecuteTool(ctx context.Context, toolName string, params map[string]interface{}) (string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	// Find which server has this tool
 	for _, conn := range m.connections {
 		// Get tools list based on client type
 		var hasToolResult bool
-		
+
 		switch client := conn.Client.(type) {
 		case *stdio.StdioClient:
 			result, err := tools.SendToolsList(client, nil)
@@ -467,7 +467,7 @@ func (m *ServerManager) ExecuteTool(ctx context.Context, toolName string, params
 					break
 				}
 			}
-			
+
 		case *unixsocket.UnixSocketClient:
 			result, err := client.SendToolsList(nil)
 			if err != nil {
@@ -484,35 +484,35 @@ func (m *ServerManager) ExecuteTool(ctx context.Context, toolName string, params
 					}
 				}
 			}
-			
+
 		default:
 			continue
 		}
-		
+
 		if !hasToolResult {
 			continue
 		}
-		
+
 		// Execute the tool on this server
 		logging.Debug("Executing tool %s on server %s", toolName, conn.Name)
-		
+
 		switch client := conn.Client.(type) {
 		case *stdio.StdioClient:
 			callResult, err := tools.SendToolsCall(client, client.GetDispatcher(), toolName, params)
 			if err != nil {
 				return "", fmt.Errorf("tool execution failed: %w", err)
 			}
-			
+
 			// Check for error in result
 			if callResult.IsError {
 				return "", fmt.Errorf("tool error: %s", callResult.Error)
 			}
-			
+
 			// Convert content to string
 			if callResult.Content == nil {
 				return "", nil
 			}
-			
+
 			// Try to convert content to a reasonable string representation
 			switch v := callResult.Content.(type) {
 			case string:
@@ -530,13 +530,13 @@ func (m *ServerManager) ExecuteTool(ctx context.Context, toolName string, params
 				}
 				return string(jsonBytes), nil
 			}
-			
+
 		case *unixsocket.UnixSocketClient:
 			result, err := client.SendToolsCall(toolName, params)
 			if err != nil {
 				return "", fmt.Errorf("tool execution failed: %w", err)
 			}
-			
+
 			// Check for error in result
 			if isError, ok := result["isError"].(bool); ok && isError {
 				if errMsg, ok := result["error"].(string); ok {
@@ -544,7 +544,7 @@ func (m *ServerManager) ExecuteTool(ctx context.Context, toolName string, params
 				}
 				return "", fmt.Errorf("tool error (no message)")
 			}
-			
+
 			// Convert content to string
 			if content, ok := result["content"]; ok {
 				switch v := content.(type) {
@@ -564,11 +564,11 @@ func (m *ServerManager) ExecuteTool(ctx context.Context, toolName string, params
 					return string(jsonBytes), nil
 				}
 			}
-			
+
 			return "", nil
 		}
 	}
-	
+
 	return "", fmt.Errorf("tool '%s' not found on any connected server", toolName)
 }
 
@@ -583,7 +583,7 @@ func (m *ServerManager) StartServer(ctx context.Context, serverName string, cfg 
 func (m *ServerManager) StopServer(serverName string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	for i, conn := range m.connections {
 		if conn.Name == serverName {
 			// Handle both stdio and Unix socket clients
@@ -595,13 +595,13 @@ func (m *ServerManager) StopServer(serverName string) error {
 			default:
 				logging.Warn("Unknown client type for server: %s", serverName)
 			}
-			
+
 			// Remove from connections slice
 			m.connections = append(m.connections[:i], m.connections[i+1:]...)
 			return nil
 		}
 	}
-	
+
 	return fmt.Errorf("server '%s' not found", serverName)
 }
 
@@ -609,7 +609,7 @@ func (m *ServerManager) StopServer(serverName string) error {
 func (m *ServerManager) GetServer(serverName string) (domain.MCPServer, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	for _, conn := range m.connections {
 		if conn.Name == serverName {
 			// ServerConnection can be returned as MCPServer if it implements the interface
@@ -617,7 +617,7 @@ func (m *ServerManager) GetServer(serverName string) (domain.MCPServer, bool) {
 			return nil, true
 		}
 	}
-	
+
 	return nil, false
 }
 
@@ -625,7 +625,7 @@ func (m *ServerManager) GetServer(serverName string) (domain.MCPServer, bool) {
 func (m *ServerManager) ListServers() map[string]domain.MCPServer {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	servers := make(map[string]domain.MCPServer)
 	// ServerConnection doesn't implement MCPServer interface
 	// This method is not critical for RAG functionality

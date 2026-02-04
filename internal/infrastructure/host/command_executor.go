@@ -7,39 +7,39 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/output"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/mcp/transport/stdio"
 )
 
 // CommandOptions provides configuration for command execution
 type CommandOptions struct {
-	SuppressConsole bool  // Suppress console output (connection messages, etc.)
-	SuppressStderr  bool  // Suppress server stderr (not recommended - use only for truly quiet operation)
+	SuppressConsole bool // Suppress console output (connection messages, etc.)
+	SuppressStderr  bool // Suppress server stderr (not recommended - use only for truly quiet operation)
 }
 
 // DefaultCommandOptions returns the default command options
 func DefaultCommandOptions() *CommandOptions {
 	return &CommandOptions{
-		SuppressConsole: false,  // Show connection messages by default
-		SuppressStderr:  false,  // Always preserve server stderr for error handling
+		SuppressConsole: false, // Show connection messages by default
+		SuppressStderr:  false, // Always preserve server stderr for error handling
 	}
 }
 
 // QuietCommandOptions returns options for quiet operation (suppresses console but preserves server errors)
 func QuietCommandOptions() *CommandOptions {
 	return &CommandOptions{
-		SuppressConsole: true,   // Hide connection messages
-		SuppressStderr:  false,  // Still preserve server stderr for error handling
+		SuppressConsole: true,  // Hide connection messages
+		SuppressStderr:  false, // Still preserve server stderr for error handling
 	}
 }
 
 // SilentCommandOptions returns options for completely silent operation (not recommended)
 func SilentCommandOptions() *CommandOptions {
 	return &CommandOptions{
-		SuppressConsole: true,  // Hide connection messages
-		SuppressStderr:  true,  // Suppress server stderr (DANGEROUS - may hide critical errors)
+		SuppressConsole: true, // Hide connection messages
+		SuppressStderr:  true, // Suppress server stderr (DANGEROUS - may hide critical errors)
 	}
 }
 
@@ -51,8 +51,8 @@ func RunCommand(commandFunc func([]*ServerConnection) error, configFile string, 
 // RunCommandWithOptions executes a function with connections to the specified servers using custom options
 func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFile string, serverNames []string, userSpecified map[string]bool, options *CommandOptions) error {
 	logging.Info("Running command with servers: %v", serverNames)
-	
-	// Create a context that can be cancelled - use 30 minute timeout for workflow execution
+
+	// Create a context that can be canceled - use 30 minute timeout for workflow execution
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 
@@ -77,7 +77,7 @@ func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFi
 
 	// Get the connections
 	connections := manager.GetConnections()
-	
+
 	// IMPORTANT: Allow zero connections for pure LLM queries
 	// Only log a warning, don't fail - the command function will decide if it needs servers
 	if len(connections) == 0 {
@@ -102,7 +102,7 @@ func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFi
 		errCh <- commandFunc(connections)
 	}()
 
-	// Wait for the command to complete or context to be cancelled
+	// Wait for the command to complete or context to be canceled
 	logging.Debug("Waiting for command to complete (timeout: 10m)")
 	select {
 	case err := <-errCh:
@@ -122,7 +122,7 @@ func RunCommandWithOptions(commandFunc func([]*ServerConnection) error, configFi
 func ProcessOptions(configFile, serverFlag string, disableFilesystem bool, provider string, model string) ([]string, map[string]bool) {
 	logging.Debug("Processing options: server=%s, disableFilesystem=%v, provider=%s, model=%s",
 		serverFlag, disableFilesystem, provider, model)
-	
+
 	// Parse the server list
 	serverNames := []string{}
 	if serverFlag != "" {
@@ -146,7 +146,7 @@ func ProcessOptions(configFile, serverFlag string, disableFilesystem bool, provi
 				logging.Debug("Adding server from config: %s", serverName)
 			}
 			logging.Info("Loaded %d server(s) from config", len(serverNames))
-			
+
 			// Only show message if in verbose mode (to stderr, not stdout!)
 			outputMgr := output.GetGlobalManager()
 			if outputMgr.ShouldShowConnectionMessages() {

@@ -26,7 +26,6 @@ type GeminiClient struct {
 	maxRetries   int
 }
 
-
 // Gemini API request/response types for embeddings
 type geminiEmbeddingContent struct {
 	Parts []struct {

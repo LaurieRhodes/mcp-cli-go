@@ -8,7 +8,7 @@ import (
 func TestColors(t *testing.T) {
 	// Disable colors for testing
 	SetColorsEnabled(false)
-	
+
 	tests := []struct {
 		name     string
 		fn       func(string) string
@@ -21,7 +21,7 @@ func TestColors(t *testing.T) {
 		{"Yellow", Yellow, "test", "test"},
 		{"Blue", Blue, "test", "test"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.fn(tt.input)
@@ -30,19 +30,19 @@ func TestColors(t *testing.T) {
 			}
 		})
 	}
-	
+
 	// Re-enable colors
 	SetColorsEnabled(true)
 }
 
 func TestColorsEnabled(t *testing.T) {
 	SetColorsEnabled(true)
-	
+
 	result := Red("test")
 	if result == "test" {
 		t.Error("Expected colored output when colors enabled")
 	}
-	
+
 	if result == "" {
 		t.Error("Expected non-empty result")
 	}
@@ -60,7 +60,7 @@ func TestFormatMessages(t *testing.T) {
 		{"Warning", Warning, "careful", "⚠"},
 		{"Info", Info, "note", "ℹ"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.fn(tt.input)
@@ -82,9 +82,9 @@ func TestPrintFunctions(t *testing.T) {
 func TestChatUI(t *testing.T) {
 	var buf bytes.Buffer
 	ui := NewChatUI(&buf)
-	
+
 	ui.DisplayWelcome("openai", "gpt-4")
-	
+
 	if buf.Len() == 0 {
 		t.Error("Expected output from DisplayWelcome")
 	}
@@ -93,20 +93,20 @@ func TestChatUI(t *testing.T) {
 func TestChatUIMetadata(t *testing.T) {
 	var buf bytes.Buffer
 	ui := NewChatUI(&buf)
-	
+
 	// Test with metadata enabled
 	ui.SetShowMeta(true)
 	ui.DisplaySessionInfo("test-123", 5)
-	
+
 	if buf.Len() == 0 {
 		t.Error("Expected output when metadata enabled")
 	}
-	
+
 	// Test with metadata disabled
 	buf.Reset()
 	ui.SetShowMeta(false)
 	ui.DisplaySessionInfo("test-123", 5)
-	
+
 	// Should still produce some output for session info
 	// but usage display would be skipped
 }

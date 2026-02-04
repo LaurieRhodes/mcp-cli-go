@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	infraSkills "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/skills"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
+
+	infraSkills "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/skills"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
@@ -87,7 +88,7 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Redirect stdin to prevent blocking when called via MCP tools
 		redirectStdinIfNotTerminal()
-		
+
 		// ARCHITECTURAL FIX: Handle noisy flag override for query command
 		// This allows --noisy to override the default quiet behavior of query mode
 		if noisy && !verbose {
@@ -95,7 +96,7 @@ Examples:
 			logging.SetDefaultLevel(logging.INFO)
 			logging.Info("Noisy mode enabled for query command")
 		}
-		
+
 		// Input validation
 		if maxTokens != 0 && maxTokens < 1 {
 			if errorCodeOnly {
@@ -103,7 +104,7 @@ Examples:
 			}
 			return fmt.Errorf("--max-tokens must be positive, got %d", maxTokens)
 		}
-		
+
 		// Validate context file exists if specified
 		if contextFile != "" {
 			if _, err := os.Stat(contextFile); os.IsNotExist(err) {
@@ -113,7 +114,7 @@ Examples:
 				return fmt.Errorf("context file does not exist: %s", contextFile)
 			}
 		}
-		
+
 		// Validate output file path is writable (check parent directory)
 		if outputFile != "" {
 			// Extract directory from output file path
@@ -125,7 +126,7 @@ Examples:
 			} else {
 				outputDir = "." // Current directory
 			}
-			
+
 			// Check if directory exists and is writable
 			if stat, err := os.Stat(outputDir); err != nil {
 				if errorCodeOnly {
@@ -139,7 +140,7 @@ Examples:
 				return fmt.Errorf("output path is not a directory: %s", outputDir)
 			}
 		}
-		
+
 		// Get question from either positional args, query-specific --input-data, or root --input-data flag
 		var question string
 		if len(args) > 0 {
@@ -159,7 +160,7 @@ Examples:
 				`echo "What is the capital of France?" | mcp-cli query --input-data -`,
 			})
 			fmt.Fprintln(os.Stderr, cliErr.Format())
-			
+
 			// Exit immediately with proper code
 			if errorCodeOnly {
 				os.Exit(query.ErrInvalidArgumentCode)
@@ -175,7 +176,7 @@ Examples:
 		// ARCHITECTURAL FIX: Separate built-in skills from external servers
 		externalServers, needsSkills := infraSkills.SeparateSkillsFromServers(serverNames)
 		logging.Debug("External servers: %v, needs built-in skills: %v", externalServers, needsSkills)
-		
+
 		// Update userSpecified map to only include external servers
 		externalUserSpecified := make(map[string]bool)
 		for _, server := range externalServers {
@@ -247,7 +248,7 @@ Examples:
 						logging.Debug("Using system prompt from config for server: %s", serverNames[0])
 					}
 				}
-				
+
 				// If no server-specific prompt, try the default system prompt
 				if systemPrompt == "" {
 					if oldCfg.AI != nil && oldCfg.AI.DefaultSystemPrompt != "" {
@@ -268,7 +269,7 @@ Examples:
 				rawDataOutput = true
 				logging.Debug("Raw data output enabled from global settings")
 			}
-			
+
 			// Check for server-specific settings
 			for _, name := range serverNames {
 				serverSettings, err := oldCfg.GetServerSettings(name)
@@ -301,7 +302,7 @@ Examples:
 				}
 				return fmt.Errorf("failed to load config for skills: %w", err)
 			}
-			
+
 			skillService, err = infraSkills.InitializeBuiltinSkills(configFile, appConfig)
 			if err != nil {
 				if errorCodeOnly {
@@ -331,7 +332,7 @@ Examples:
 				logging.Info("Wrapping query server manager with built-in skills support")
 				serverManager = infraSkills.NewSkillsAwareServerManager(serverManager, skillService)
 			}
-			
+
 			// Create query handler with server manager instead of connections
 			handler := query.NewQueryHandlerWithServerManager(serverManager, llmProvider, aiOptions, systemPrompt)
 
@@ -367,7 +368,7 @@ Examples:
 		if result != nil && len(result.ToolCalls) > 0 {
 			// Check if we need to use raw data output
 			applyRawDataOutput := rawDataOutput
-			
+
 			// Also check for server-specific overrides
 			for _, conn := range result.ServerConnections {
 				if serverRawDataOverride[conn] {
@@ -375,7 +376,7 @@ Examples:
 					break
 				}
 			}
-			
+
 			// Apply raw data output if needed
 			if applyRawDataOutput {
 				rawData := extractRawData(result.ToolCalls)
@@ -437,7 +438,7 @@ Examples:
 func ProcessOptions(configFile, serverFlag string, disableFilesystem bool, provider string, model string) ([]string, map[string]bool) {
 	logging.Debug("Processing options: server=%s, disableFilesystem=%v, provider=%s, model=%s",
 		serverFlag, disableFilesystem, provider, model)
-	
+
 	// Parse the server list
 	serverNames := []string{}
 	if serverFlag != "" {
@@ -488,15 +489,15 @@ func extractRawData(toolCalls []query.ToolCallInfo) string {
 	if len(toolCalls) == 0 {
 		return ""
 	}
-	
+
 	var result strings.Builder
 	result.WriteString("RAW TOOL DATA:\n------------------------\n\n")
-	
+
 	for i, tc := range toolCalls {
 		if tc.Success {
 			result.WriteString(fmt.Sprintf("Tool Call #%d: %s\n", i+1, tc.Name))
 			result.WriteString("Result:\n")
-			
+
 			// Try to format the result if it's JSON
 			formattedResult := formatToolResult(tc.Result)
 			if formattedResult != "" {
@@ -504,11 +505,11 @@ func extractRawData(toolCalls []query.ToolCallInfo) string {
 			} else {
 				result.WriteString(tc.Result)
 			}
-			
+
 			result.WriteString("\n\n")
 		}
 	}
-	
+
 	return result.String()
 }
 
@@ -519,14 +520,14 @@ func formatToolResult(resultStr string) string {
 	if jsonStart < 0 {
 		return ""
 	}
-	
+
 	// Try to parse and format the JSON
 	var data interface{}
 	err := json.Unmarshal([]byte(resultStr[jsonStart:]), &data)
 	if err != nil {
 		return ""
 	}
-	
+
 	// Format the result based on type
 	switch v := data.(type) {
 	case map[string]interface{}:
@@ -540,17 +541,17 @@ func formatToolResult(resultStr string) string {
 func formatJsonObject(obj map[string]interface{}, indent int) string {
 	var result strings.Builder
 	indentStr := strings.Repeat("  ", indent)
-	
+
 	// Special handling for security incident data
 	if val, ok := obj["result"].(map[string]interface{}); ok {
 		if incidents, ok := val["value"].([]interface{}); ok {
 			// Found security incidents, format them nicely
 			result.WriteString(fmt.Sprintf("%sFound %d security incidents:\n\n", indentStr, len(incidents)))
-			
+
 			for i, inc := range incidents {
 				if incident, ok := inc.(map[string]interface{}); ok {
 					result.WriteString(fmt.Sprintf("%sIncident %d:\n", indentStr, i+1))
-					
+
 					// Format each field
 					for field, value := range incident {
 						result.WriteString(fmt.Sprintf("%s- %s: %v\n", indentStr+"  ", field, value))
@@ -558,15 +559,15 @@ func formatJsonObject(obj map[string]interface{}, indent int) string {
 					result.WriteString("\n")
 				}
 			}
-			
+
 			return result.String()
 		}
 	}
-	
+
 	// Generic object formatting
 	for key, value := range obj {
 		result.WriteString(fmt.Sprintf("%s%s: ", indentStr, key))
-		
+
 		switch v := value.(type) {
 		case map[string]interface{}:
 			result.WriteString("\n")
@@ -585,7 +586,7 @@ func formatJsonObject(obj map[string]interface{}, indent int) string {
 			result.WriteString(fmt.Sprintf("%v\n", v))
 		}
 	}
-	
+
 	return result.String()
 }
 

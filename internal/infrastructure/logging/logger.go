@@ -88,17 +88,17 @@ func supportsColor() bool {
 		// Users can disable if needed
 		return true
 	}
-	
+
 	// For Unix systems, check if we're outputting to a terminal
 	if os.Getenv("TERM") == "dumb" {
 		return false
 	}
-	
+
 	// Check if NO_COLOR environment variable is set
 	if os.Getenv("NO_COLOR") != "" {
 		return false
 	}
-	
+
 	return true
 }
 
@@ -142,11 +142,11 @@ func (l *Logger) IsColorOutputEnabled() bool {
 // formatLevel formats a log level with appropriate coloring
 func (l *Logger) formatLevel(level LogLevel) string {
 	levelName := levelNames[level]
-	
+
 	if !l.colorOutput {
 		return fmt.Sprintf("[%s]", levelName)
 	}
-	
+
 	color := levelColors[level]
 	return fmt.Sprintf("%s[%s]%s", color, levelName, colorReset)
 }

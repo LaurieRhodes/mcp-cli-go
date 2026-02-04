@@ -10,20 +10,20 @@ type WorkflowV2 struct {
 	Description string            `yaml:"description"`
 	Execution   ExecutionContext  `yaml:"execution"`
 	Env         map[string]string `yaml:"env,omitempty"`
-	Steps []StepV2 `yaml:"steps,omitempty"`
-	Loops []LoopV2 `yaml:"loops,omitempty"`
+	Steps       []StepV2          `yaml:"steps,omitempty"`
+	Loops       []LoopV2          `yaml:"loops,omitempty"`
 }
 
 // ExecutionContext defines workflow-level defaults for all steps
 type ExecutionContext struct {
 	// Provider configuration (fallback chain)
-	Provider  string           `yaml:"provider,omitempty"`
-	Model     string           `yaml:"model,omitempty"`
+	Provider  string             `yaml:"provider,omitempty"`
+	Model     string             `yaml:"model,omitempty"`
 	Providers []ProviderFallback `yaml:"providers,omitempty"`
 
 	// MCP servers
 	Servers []string `yaml:"servers,omitempty"`
-	
+
 	// Anthropic Skills
 	Skills []string `yaml:"skills,omitempty"`
 
@@ -53,16 +53,16 @@ type ProviderFallback struct {
 
 // StepV2 represents a workflow step with property inheritance
 type StepV2 struct {
-	Name string `yaml:"name"`
-	ExecutionOrder int `yaml:"execution_order,omitempty"`
+	Name           string `yaml:"name"`
+	ExecutionOrder int    `yaml:"execution_order,omitempty"`
 
 	// Core execution
-	Run string `yaml:"run,omitempty"` // The prompt
-	Loop       *LoopMode       `yaml:"loop,omitempty"`       // Loop execution
+	Run  string    `yaml:"run,omitempty"`  // The prompt
+	Loop *LoopMode `yaml:"loop,omitempty"` // Loop execution
 
 	// Provider override (inherits from execution if not specified)
-	Provider  string           `yaml:"provider,omitempty"`
-	Model     string           `yaml:"model,omitempty"`
+	Provider  string             `yaml:"provider,omitempty"`
+	Model     string             `yaml:"model,omitempty"`
 	Providers []ProviderFallback `yaml:"providers,omitempty"`
 
 	// Override execution context
@@ -80,81 +80,78 @@ type StepV2 struct {
 	Embeddings *EmbeddingsMode `yaml:"embeddings,omitempty"`
 	Template   *TemplateMode   `yaml:"template,omitempty"`
 	Consensus  *ConsensusMode  `yaml:"consensus,omitempty"`
-	Rag        *RagMode        `yaml:"rag,omitempty"`  // RAG retrieval
+	Rag        *RagMode        `yaml:"rag,omitempty"` // RAG retrieval
 
 	// Control flow
-	If       string   `yaml:"if,omitempty"`
-	Needs    []string `yaml:"needs,omitempty"`
-	
+	If    string   `yaml:"if,omitempty"`
+	Needs []string `yaml:"needs,omitempty"`
+
 	// Error handling
-	OnFailure  string `yaml:"on_failure,omitempty"` // halt|continue|retry (inherits from execution.on_error if not specified)
+	OnFailure  string `yaml:"on_failure,omitempty"`  // halt|continue|retry (inherits from execution.on_error if not specified)
 	MaxRetries int    `yaml:"max_retries,omitempty"` // Number of retries for on_failure: retry
 }
 
 // LoopV2 represents an iterative execution block
 type LoopV2 struct {
-	Name          string                 `yaml:"name"`
-	
+	Name string `yaml:"name"`
+
 	// Core execution
-	Workflow      string                 `yaml:"workflow"`            // Required: workflow to call
-	Mode          string                 `yaml:"mode,omitempty"`      // "iterate" | "refine" (default: refine)
-	Items         string                 `yaml:"items,omitempty"`     // Array source for iterate mode (template)
-	With          map[string]interface{} `yaml:"with,omitempty"`      // Input parameters
-	
+	Workflow string                 `yaml:"workflow"`        // Required: workflow to call
+	Mode     string                 `yaml:"mode,omitempty"`  // "iterate" | "refine" (default: refine)
+	Items    string                 `yaml:"items,omitempty"` // Array source for iterate mode (template)
+	With     map[string]interface{} `yaml:"with,omitempty"`  // Input parameters
+
 	// Iteration control
-	MaxIterations int                    `yaml:"max_iterations"`      // Safety limit
-	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates, refine mode)
-	
+	MaxIterations int    `yaml:"max_iterations"` // Safety limit
+	Until         string `yaml:"until"`          // Exit condition (LLM evaluates, refine mode)
+
 	// Error handling
-	OnFailure     string                 `yaml:"on_failure,omitempty"` // halt|continue|retry
-	MaxRetries    int                    `yaml:"max_retries,omitempty"` // Retries per item (for on_failure: retry)
-	RetryDelay    string                 `yaml:"retry_delay,omitempty"` // Backoff duration (e.g. "5s")
-	
+	OnFailure  string `yaml:"on_failure,omitempty"`  // halt|continue|retry
+	MaxRetries int    `yaml:"max_retries,omitempty"` // Retries per item (for on_failure: retry)
+	RetryDelay string `yaml:"retry_delay,omitempty"` // Backoff duration (e.g. "5s")
+
 	// Success criteria
-	MinSuccessRate float64               `yaml:"min_success_rate,omitempty"` // Minimum success rate 0.0-1.0
-	
+	MinSuccessRate float64 `yaml:"min_success_rate,omitempty"` // Minimum success rate 0.0-1.0
+
 	// Timeouts
-	TimeoutPerItem string                `yaml:"timeout_per_item,omitempty"` // Per-iteration timeout (e.g. "30s")
-	TotalTimeout   string                `yaml:"total_timeout,omitempty"`    // Total loop timeout (e.g. "1h")
-	
+	TimeoutPerItem string `yaml:"timeout_per_item,omitempty"` // Per-iteration timeout (e.g. "30s")
+	TotalTimeout   string `yaml:"total_timeout,omitempty"`    // Total loop timeout (e.g. "1h")
+
 	// Legacy/existing fields
-	Accumulate    string                 `yaml:"accumulate,omitempty"` // Store iteration results
-	Parallel      bool                   `yaml:"parallel,omitempty"`   // Enable parallel execution
-	MaxWorkers    int                    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)
+	Accumulate string `yaml:"accumulate,omitempty"`  // Store iteration results
+	Parallel   bool   `yaml:"parallel,omitempty"`    // Enable parallel execution
+	MaxWorkers int    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)
 }
 
 // LoopMode defines loop execution within a step
 type LoopMode struct {
 	// Core execution
-	Workflow      string                 `yaml:"workflow"`            // Required workflow to call
-	Mode          string                 `yaml:"mode,omitempty"`      // "iterate" | "refine" (default: refine)
-	Items         string                 `yaml:"items,omitempty"`     // Array source for iterate mode (template)
-	With          map[string]interface{} `yaml:"with,omitempty"`      // Input parameters
-	
+	Workflow string                 `yaml:"workflow"`        // Required workflow to call
+	Mode     string                 `yaml:"mode,omitempty"`  // "iterate" | "refine" (default: refine)
+	Items    string                 `yaml:"items,omitempty"` // Array source for iterate mode (template)
+	With     map[string]interface{} `yaml:"with,omitempty"`  // Input parameters
+
 	// Iteration control
-	MaxIterations int                    `yaml:"max_iterations"`      // Safety limit (required)
-	Until         string                 `yaml:"until"`               // Exit condition (LLM evaluates, refine mode)
-	
+	MaxIterations int    `yaml:"max_iterations"` // Safety limit (required)
+	Until         string `yaml:"until"`          // Exit condition (LLM evaluates, refine mode)
+
 	// Error handling
-	OnFailure     string                 `yaml:"on_failure,omitempty"` // halt|continue|retry
-	MaxRetries    int                    `yaml:"max_retries,omitempty"` // Retries per item (for on_failure: retry)
-	RetryDelay    string                 `yaml:"retry_delay,omitempty"` // Backoff duration (e.g. "5s")
-	
+	OnFailure  string `yaml:"on_failure,omitempty"`  // halt|continue|retry
+	MaxRetries int    `yaml:"max_retries,omitempty"` // Retries per item (for on_failure: retry)
+	RetryDelay string `yaml:"retry_delay,omitempty"` // Backoff duration (e.g. "5s")
+
 	// Success criteria
-	MinSuccessRate float64               `yaml:"min_success_rate,omitempty"` // Minimum success rate 0.0-1.0
-	
+	MinSuccessRate float64 `yaml:"min_success_rate,omitempty"` // Minimum success rate 0.0-1.0
+
 	// Timeouts
-	TimeoutPerItem string                `yaml:"timeout_per_item,omitempty"` // Per-iteration timeout (e.g. "30s")
-	TotalTimeout   string                `yaml:"total_timeout,omitempty"`    // Total loop timeout (e.g. "1h")
-	
+	TimeoutPerItem string `yaml:"timeout_per_item,omitempty"` // Per-iteration timeout (e.g. "30s")
+	TotalTimeout   string `yaml:"total_timeout,omitempty"`    // Total loop timeout (e.g. "1h")
+
 	// Legacy/existing fields
-	Accumulate    string                 `yaml:"accumulate,omitempty"` // Store iteration results
-	Parallel      bool                   `yaml:"parallel,omitempty"`   // Enable parallel execution
-	MaxWorkers    int                    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)
+	Accumulate string `yaml:"accumulate,omitempty"`  // Store iteration results
+	Parallel   bool   `yaml:"parallel,omitempty"`    // Enable parallel execution
+	MaxWorkers int    `yaml:"max_workers,omitempty"` // Concurrent worker limit (default: 3)
 }
-
-
-
 
 // EmbeddingsMode represents embeddings generation
 type EmbeddingsMode struct {
@@ -167,10 +164,10 @@ type EmbeddingsMode struct {
 	InputFile string      `yaml:"input_file,omitempty"` // alternative to Input
 
 	// Chunking configuration
-	ChunkStrategy  string `yaml:"chunk_strategy,omitempty"`   // sentence, paragraph, fixed
-	MaxChunkSize   int    `yaml:"max_chunk_size,omitempty"`   // default: 512
-	Overlap        int    `yaml:"overlap,omitempty"`          // overlap between chunks in tokens
-	
+	ChunkStrategy string `yaml:"chunk_strategy,omitempty"` // sentence, paragraph, fixed
+	MaxChunkSize  int    `yaml:"max_chunk_size,omitempty"` // default: 512
+	Overlap       int    `yaml:"overlap,omitempty"`        // overlap between chunks in tokens
+
 	// Model configuration
 	Dimensions int `yaml:"dimensions,omitempty"` // for supported models
 
@@ -189,11 +186,11 @@ type TemplateMode struct {
 
 // ConsensusMode represents multi-provider consensus execution
 type ConsensusMode struct {
-	Prompt       string            `yaml:"prompt"`
-	Executions   []ConsensusExec   `yaml:"executions"`
-	Require      string            `yaml:"require"` // unanimous, 2/3, majority
-	AllowPartial bool              `yaml:"allow_partial,omitempty"`
-	Timeout      time.Duration     `yaml:"timeout,omitempty"`
+	Prompt       string          `yaml:"prompt"`
+	Executions   []ConsensusExec `yaml:"executions"`
+	Require      string          `yaml:"require"` // unanimous, 2/3, majority
+	AllowPartial bool            `yaml:"allow_partial,omitempty"`
+	Timeout      time.Duration   `yaml:"timeout,omitempty"`
 }
 
 // ConsensusExec represents a single provider execution in consensus
@@ -217,24 +214,24 @@ type ConsensusResult struct {
 // RagMode represents RAG retrieval execution
 type RagMode struct {
 	// Query configuration
-	Query       string    `yaml:"query"`              // Search query (supports templating)
+	Query       string    `yaml:"query"`                  // Search query (supports templating)
 	QueryVector []float32 `yaml:"query_vector,omitempty"` // Pre-computed vector (optional)
-	
+
 	// Server configuration
-	Server  string   `yaml:"server,omitempty"`   // Single server (default: from rag config)
-	Servers []string `yaml:"servers,omitempty"`  // Multiple servers for fusion
-	
+	Server  string   `yaml:"server,omitempty"`  // Single server (default: from rag config)
+	Servers []string `yaml:"servers,omitempty"` // Multiple servers for fusion
+
 	// Strategy configuration
 	Strategies []string `yaml:"strategies,omitempty"` // Vector strategies to use
 	TopK       int      `yaml:"top_k,omitempty"`      // Number of results (default: from config)
-	
+
 	// Fusion configuration
 	Fusion string `yaml:"fusion,omitempty"` // rrf, weighted, max, avg (default: from config)
-	
+
 	// Query expansion
-	ExpandQuery   bool `yaml:"expand_query,omitempty"`    // Enable query expansion
-	QueryVariants int  `yaml:"query_variants,omitempty"`  // Number of variants to generate
-	
+	ExpandQuery   bool `yaml:"expand_query,omitempty"`   // Enable query expansion
+	QueryVariants int  `yaml:"query_variants,omitempty"` // Number of variants to generate
+
 	// Output configuration
 	OutputFormat string `yaml:"output_format,omitempty"` // json, text, compact
 }

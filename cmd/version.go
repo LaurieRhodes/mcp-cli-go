@@ -27,7 +27,7 @@ var VersionCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(VersionCmd)
-	
+
 	// Also add --version flag to root command
 	RootCmd.Version = Version
 	RootCmd.SetVersionTemplate(fmt.Sprintf("mcp-cli version %s (built: %s, commit: %s)\n", Version, BuildTime, GitCommit))

@@ -1,27 +1,27 @@
 package workflow
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"context"
 	"strings"
 	"sync"
 
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
 )
 
 // LoopExecutor handles loop execution
 type LoopExecutor struct {
-	appConfig     *config.ApplicationConfig
-	logger        *Logger
-	interpolator  *Interpolator
-	executor      *Executor
-	serverManager domain.MCPServerManager
+	appConfig        *config.ApplicationConfig
+	logger           *Logger
+	interpolator     *Interpolator
+	executor         *Executor
+	serverManager    domain.MCPServerManager
 	embeddingService domain.EmbeddingService
 }
 
@@ -35,11 +35,11 @@ func NewLoopExecutor(
 	embeddingService domain.EmbeddingService,
 ) *LoopExecutor {
 	return &LoopExecutor{
-		appConfig:     appConfig,
-		logger:        logger,
-		interpolator:  interpolator,
-		executor:      executor,
-		serverManager: serverManager,
+		appConfig:        appConfig,
+		logger:           logger,
+		interpolator:     interpolator,
+		executor:         executor,
+		serverManager:    serverManager,
 		embeddingService: embeddingService,
 	}
 }
@@ -55,16 +55,16 @@ type LoopResult struct {
 // ExecuteLoop executes a loop until condition is met or max iterations reached
 func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*LoopResult, error) {
 	le.logger.Info("Starting loop: %s (max %d iterations)", loop.Name, loop.MaxIterations)
-	
+
 	if loop.MaxIterations <= 0 {
 		return nil, fmt.Errorf("max_iterations must be > 0, got %d", loop.MaxIterations)
 	}
-	
+
 	// Validate loop configuration
 	if err := loop.Validate(); err != nil {
 		return nil, fmt.Errorf("loop validation failed: %w", err)
 	}
-	
+
 	// Check mode and dispatch to appropriate handler
 	if loop.Mode == "iterate" {
 		// Execute iterate mode
@@ -80,31 +80,31 @@ func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*
 			ExitReason:  result.ExitReason,
 		}, nil
 	}
-	
+
 	// Get the workflow to execute (for refine mode)
 	workflow, exists := le.appConfig.GetWorkflow(loop.Workflow)
 	if !exists {
 		return nil, fmt.Errorf("loop workflow '%s' not found", loop.Workflow)
 	}
-	
+
 	// Check if parallel execution is enabled
 	if loop.Parallel {
 		return le.ExecuteLoopParallel(ctx, loop, workflow)
 	}
-	
+
 	// Sequential execution (existing refine mode logic)
 	result := &LoopResult{
 		AllOutputs: make([]string, 0),
 	}
-	
+
 	var lastOutput string
-	
+
 	for iteration := 1; iteration <= loop.MaxIterations; iteration++ {
 		le.logger.Info("Loop iteration %d/%d", iteration, loop.MaxIterations)
-		
+
 		// Set loop variables for interpolation
 		le.interpolator.SetLoopVars(iteration, lastOutput, result.AllOutputs)
-		
+
 		// Prepare input for workflow
 		inputData, err := le.prepareLoopInput(loop, iteration, lastOutput)
 		if err != nil {
@@ -114,7 +114,7 @@ func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*
 			le.logger.Warn("Iteration %d input preparation failed: %v", iteration, err)
 			continue
 		}
-		
+
 		// Execute the workflow
 		output, err := le.executeWorkflow(ctx, workflow, inputData)
 		if err != nil {
@@ -128,15 +128,15 @@ func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*
 			}
 			continue
 		}
-		
+
 		// Store result
 		lastOutput = output
 		result.AllOutputs = append(result.AllOutputs, output)
 		result.Iterations = iteration
 		result.FinalOutput = output
-		
+
 		le.logger.Debug("Iteration %d output: %s", iteration, truncate(output, 100))
-		
+
 		// Evaluate exit condition
 		if loop.Until != "" {
 			conditionMet, err := le.evaluateCondition(ctx, loop.Until, output)
@@ -145,18 +145,18 @@ func (le *LoopExecutor) ExecuteLoop(ctx context.Context, loop *config.LoopV2) (*
 			} else if conditionMet {
 				le.logger.Info("Loop exit condition met after %d iterations", iteration)
 				result.ExitReason = "condition_met"
-				
+
 				// Store final result
 				le.storeLoopResult(loop, result)
 				return result, nil
 			}
 		}
 	}
-	
+
 	// Max iterations reached
 	le.logger.Info("Loop completed: max iterations (%d) reached", loop.MaxIterations)
 	result.ExitReason = "max_iterations"
-	
+
 	// Store final result
 	le.storeLoopResult(loop, result)
 	return result, nil
@@ -168,14 +168,14 @@ func (le *LoopExecutor) prepareLoopInput(loop *config.LoopV2, iteration int, las
 	if loop.With == nil || len(loop.With) == 0 {
 		return lastOutput, nil
 	}
-	
+
 	// If there's an 'input' key, use that
 	if inputValue, ok := loop.With["input"]; ok {
 		inputStr, ok := inputValue.(string)
 		if !ok {
 			return "", fmt.Errorf("loop input must be a string")
 		}
-		
+
 		// Interpolate
 		interpolated, err := le.interpolator.Interpolate(inputStr)
 		if err != nil {
@@ -183,7 +183,7 @@ func (le *LoopExecutor) prepareLoopInput(loop *config.LoopV2, iteration int, las
 		}
 		return interpolated, nil
 	}
-	
+
 	// Otherwise, build from all 'with' parameters
 	var parts []string
 	for key, value := range loop.With {
@@ -194,7 +194,7 @@ func (le *LoopExecutor) prepareLoopInput(loop *config.LoopV2, iteration int, las
 		}
 		parts = append(parts, fmt.Sprintf("%s: %s", key, interpolated))
 	}
-	
+
 	return strings.Join(parts, "\n"), nil
 }
 
@@ -207,17 +207,17 @@ func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.Wo
 	// CRITICAL: Inherit output from parent logger (stdout in CLI, stderr in MCP serve mode)
 	subLogger.SetOutput(le.logger.GetOutput())
 	subOrchestrator := NewOrchestrator(workflow, subLogger)
-	
+
 	// Pass through dependencies
 	subOrchestrator.executor.SetAppConfig(le.appConfig)
-	
+
 	// CRITICAL: Initialize subordinate workflow's server manager
 	// This follows the exact same path as standalone workflow execution
 	subordinateServerManager, err := InitializeWorkflowServerManager(workflow, le.appConfig, "config.yaml")
 	if err != nil {
 		return "", fmt.Errorf("failed to initialize subordinate workflow: %w", err)
 	}
-	
+
 	if subordinateServerManager != nil {
 		// Subordinate workflow has its own skills
 		subOrchestrator.executor.SetServerManager(subordinateServerManager)
@@ -225,31 +225,31 @@ func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.Wo
 		// No skills in subordinate - inherit parent's server manager
 		subOrchestrator.executor.SetServerManager(le.serverManager)
 	}
-	
+
 	subOrchestrator.SetAppConfigForWorkflows(le.appConfig)
-	
+
 	// Create fresh embedding service for child workflow (like standalone workflows do)
 	// This makes child workflows fully independent with their own services
 	configService := infraConfig.NewService()
-	
+
 	// Load configuration so embedding service can access provider configs
 	if _, loadErr := configService.LoadConfig("config.yaml"); loadErr != nil {
 		return "", fmt.Errorf("failed to load config for child workflow: %w", loadErr)
 	}
-	
+
 	providerFactory := ai.NewProviderFactory()
 	childEmbeddingService := embeddings.NewService(configService, providerFactory)
 	subOrchestrator.SetEmbeddingService(childEmbeddingService)
-	
+
 	// Copy loop variables to sub-workflow's interpolator
 	le.interpolator.CopyLoopVars(subOrchestrator.interpolator)
-	
+
 	// Execute
 	err = subOrchestrator.Execute(ctx, inputData)
 	if err != nil {
 		return "", err
 	}
-	
+
 	// Get final result
 	if len(workflow.Steps) > 0 {
 		lastStepName := workflow.Steps[len(workflow.Steps)-1].Name
@@ -257,10 +257,9 @@ func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.Wo
 			return output, nil
 		}
 	}
-	
+
 	return "", fmt.Errorf("no output from workflow")
 }
-
 
 // evaluateCondition uses LLM to evaluate exit condition
 func (le *LoopExecutor) evaluateCondition(ctx context.Context, condition string, output string) (bool, error) {
@@ -269,7 +268,7 @@ func (le *LoopExecutor) evaluateCondition(ctx context.Context, condition string,
 	if err != nil {
 		return false, fmt.Errorf("failed to interpolate condition: %w", err)
 	}
-	
+
 	// Build evaluation prompt
 	prompt := fmt.Sprintf(
 		"Evaluate if this condition is satisfied. Answer only YES or NO.\n\n"+
@@ -279,20 +278,20 @@ func (le *LoopExecutor) evaluateCondition(ctx context.Context, condition string,
 		interpolatedCondition,
 		truncate(output, 2000),
 	)
-	
+
 	// Use executor's provider creation for evaluation
 	// Get default provider from app config
 	providerName := "deepseek" // Fallback
 	if le.appConfig.AI != nil && le.appConfig.AI.DefaultProvider != "" {
 		providerName = le.appConfig.AI.DefaultProvider
 	}
-	
+
 	// Create provider
 	provider, err := le.executor.createProvider(providerName, "")
 	if err != nil {
 		return false, fmt.Errorf("failed to create provider for condition evaluation: %w", err)
 	}
-	
+
 	// Execute
 	request := &domain.CompletionRequest{
 		Messages: []domain.Message{
@@ -300,16 +299,16 @@ func (le *LoopExecutor) evaluateCondition(ctx context.Context, condition string,
 		},
 		Temperature: 0,
 	}
-	
+
 	response, err := provider.CreateCompletion(ctx, request)
 	if err != nil {
 		return false, fmt.Errorf("failed to evaluate condition: %w", err)
 	}
-	
+
 	// Check response
 	answer := strings.ToUpper(strings.TrimSpace(response.Response))
 	le.logger.Info("Condition evaluation: '%s' -> %s", condition, answer)
-	
+
 	return strings.Contains(answer, "YES"), nil
 }
 
@@ -318,13 +317,13 @@ func (le *LoopExecutor) storeLoopResult(loop *config.LoopV2, result *LoopResult)
 	// Store as loop.output
 	le.interpolator.SetStepResult("loop.output", result.FinalOutput)
 	le.interpolator.SetStepResult("loop.iteration", fmt.Sprintf("%d", result.Iterations))
-	
+
 	// Store with custom name if specified
 	if loop.Accumulate != "" {
 		history := strings.Join(result.AllOutputs, "\n---\n")
 		le.interpolator.SetStepResult(loop.Accumulate, history)
 	}
-	
+
 	// Store loop name result
 	le.interpolator.SetStepResult(loop.Name, result.FinalOutput)
 }
@@ -335,14 +334,14 @@ func (le *LoopExecutor) ExecuteLoopParallel(ctx context.Context, loop *config.Lo
 	if maxWorkers <= 0 {
 		maxWorkers = 3 // Default: 3 concurrent workers
 	}
-	
-	le.logger.Info("Starting parallel loop: %s (max %d iterations, %d workers)", 
+
+	le.logger.Info("Starting parallel loop: %s (max %d iterations, %d workers)",
 		loop.Name, loop.MaxIterations, maxWorkers)
-	
+
 	result := &LoopResult{
 		AllOutputs: make([]string, loop.MaxIterations),
 	}
-	
+
 	// Channel for results
 	type iterationResult struct {
 		iteration int
@@ -350,29 +349,29 @@ func (le *LoopExecutor) ExecuteLoopParallel(ctx context.Context, loop *config.Lo
 		err       error
 	}
 	results := make(chan iterationResult, loop.MaxIterations)
-	
+
 	// Semaphore for worker pool
 	sem := make(chan struct{}, maxWorkers)
-	
+
 	// WaitGroup to track all iterations
 	var wg sync.WaitGroup
-	
+
 	// Launch all iterations as goroutines
 	for iteration := 1; iteration <= loop.MaxIterations; iteration++ {
 		wg.Add(1)
-		
+
 		go func(iter int) {
 			defer wg.Done()
-			
+
 			// Acquire worker slot
 			sem <- struct{}{}
 			defer func() { <-sem }() // Release slot when done
-			
+
 			le.logger.Debug("Starting parallel iteration %d", iter)
-			
+
 			// Set loop variables for this iteration
 			le.interpolator.SetLoopVars(iter, "", nil)
-			
+
 			// Prepare input
 			inputData, err := le.prepareLoopInput(loop, iter, "")
 			if err != nil {
@@ -384,7 +383,7 @@ func (le *LoopExecutor) ExecuteLoopParallel(ctx context.Context, loop *config.Lo
 				results <- iterationResult{iteration: iter, output: "", err: nil}
 				return
 			}
-			
+
 			// Execute workflow
 			output, err := le.executeWorkflow(ctx, workflow, inputData)
 			if err != nil {
@@ -396,22 +395,22 @@ func (le *LoopExecutor) ExecuteLoopParallel(ctx context.Context, loop *config.Lo
 				results <- iterationResult{iteration: iter, output: "", err: nil}
 				return
 			}
-			
+
 			le.logger.Info("Parallel iteration %d completed", iter)
 			results <- iterationResult{iteration: iter, output: output, err: nil}
 		}(iteration)
 	}
-	
+
 	// Close results channel when all goroutines complete
 	go func() {
 		wg.Wait()
 		close(results)
 	}()
-	
+
 	// Collect results
 	successCount := 0
 	var firstError error
-	
+
 	for res := range results {
 		if res.err != nil && firstError == nil {
 			firstError = res.err
@@ -420,27 +419,27 @@ func (le *LoopExecutor) ExecuteLoopParallel(ctx context.Context, loop *config.Lo
 				return result, fmt.Errorf("parallel iteration %d failed: %w", res.iteration, res.err)
 			}
 		}
-		
+
 		if res.err == nil && res.output != "" {
 			result.AllOutputs[res.iteration-1] = res.output
 			result.FinalOutput = res.output // Last successful output
 			successCount++
 		}
 	}
-	
+
 	result.Iterations = successCount
 	result.ExitReason = "max_iterations"
-	
-	le.logger.Info("Parallel loop completed: %d/%d iterations successful", 
+
+	le.logger.Info("Parallel loop completed: %d/%d iterations successful",
 		successCount, loop.MaxIterations)
-	
+
 	// Store result
 	le.storeLoopResult(loop, result)
-	
+
 	if firstError != nil && loop.OnFailure == "halt" {
 		return result, firstError
 	}
-	
+
 	return result, nil
 }
 

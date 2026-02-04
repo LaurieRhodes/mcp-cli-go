@@ -8,9 +8,9 @@ const (
 	AnthropicNative  InterfaceType = "anthropic_native"
 	OllamaNative     InterfaceType = "ollama_native"
 	GeminiNative     InterfaceType = "gemini_native"
-	AzureOpenAI      InterfaceType = "azure_openai"      // Azure OpenAI Service
-	AWSBedrock       InterfaceType = "aws_bedrock"       // AWS Bedrock
-	GCPVertexAI      InterfaceType = "gcp_vertex_ai"     // GCP Vertex AI
+	AzureOpenAI      InterfaceType = "azure_openai"  // Azure OpenAI Service
+	AWSBedrock       InterfaceType = "aws_bedrock"   // AWS Bedrock
+	GCPVertexAI      InterfaceType = "gcp_vertex_ai" // GCP Vertex AI
 )
 
 // AIConfig represents the AI configuration
@@ -49,17 +49,17 @@ type ProviderConfig struct {
 	ReserveTokens         int                             `yaml:"reserve_tokens,omitempty"`
 	EmbeddingModels       map[string]EmbeddingModelConfig `yaml:"embedding_models,omitempty"`
 	DefaultEmbeddingModel string                          `yaml:"default_embedding_model,omitempty"`
-	
+
 	// AWS Bedrock specific fields
-	AWSRegion           string `yaml:"aws_region,omitempty"`
-	AWSAccessKeyID      string `yaml:"aws_access_key_id,omitempty"`
-	AWSSecretAccessKey  string `yaml:"aws_secret_access_key,omitempty"`
-	AWSSessionToken     string `yaml:"aws_session_token,omitempty"`
-	
+	AWSRegion          string `yaml:"aws_region,omitempty"`
+	AWSAccessKeyID     string `yaml:"aws_access_key_id,omitempty"`
+	AWSSecretAccessKey string `yaml:"aws_secret_access_key,omitempty"`
+	AWSSessionToken    string `yaml:"aws_session_token,omitempty"`
+
 	// GCP Vertex AI specific fields
-	ProjectID        string `yaml:"project_id,omitempty"`
-	Location         string `yaml:"location,omitempty"`
-	CredentialsPath  string `yaml:"credentials_path,omitempty"`
+	ProjectID       string `yaml:"project_id,omitempty"`
+	Location        string `yaml:"location,omitempty"`
+	CredentialsPath string `yaml:"credentials_path,omitempty"`
 }
 
 // EmbeddingModelConfig represents configuration for a specific embedding model

@@ -24,14 +24,14 @@ type WorkflowWorkerPool struct {
 	notifyCompletion chan string
 
 	// Error handling
-	errorPolicy    string // cancel_all, complete_running, continue
-	cancelFunc     context.CancelFunc
-	acceptingWork  bool
-	workMu         sync.Mutex
+	errorPolicy   string // cancel_all, complete_running, continue
+	cancelFunc    context.CancelFunc
+	acceptingWork bool
+	workMu        sync.Mutex
 
 	// Execution context
 	orchestrator *Orchestrator
-	
+
 	// Observability (Phase 3)
 	bufferedLogger *BufferedLogger
 	timeline       *ExecutionTimeline
@@ -42,7 +42,7 @@ func NewWorkerPool(maxWorkers int, errorPolicy string, orchestrator *Orchestrato
 	if maxWorkers <= 0 {
 		maxWorkers = 3 // Default from assessment
 	}
-	
+
 	if errorPolicy == "" {
 		errorPolicy = "cancel_all" // Safe default
 	}
@@ -77,7 +77,7 @@ func (p *WorkflowWorkerPool) SubmitStep(ctx context.Context, step *config.StepV2
 	p.workMu.Unlock()
 
 	p.wg.Add(1)
-	
+
 	// Acquire worker slot (blocks if pool is full)
 	select {
 	case p.semaphore <- struct{}{}:
@@ -130,7 +130,7 @@ func (p *WorkflowWorkerPool) SubmitStep(ctx context.Context, step *config.StepV2
 		select {
 		case p.notifyCompletion <- s.Name:
 		case <-ctx.Done():
-			// Context cancelled, don't block
+			// Context canceled, don't block
 		}
 	}(step)
 
@@ -147,7 +147,7 @@ func (p *WorkflowWorkerPool) SubmitLoop(ctx context.Context, loop *config.LoopV2
 	p.workMu.Unlock()
 
 	p.wg.Add(1)
-	
+
 	// Acquire worker slot (blocks if pool is full)
 	select {
 	case p.semaphore <- struct{}{}:
@@ -200,7 +200,7 @@ func (p *WorkflowWorkerPool) SubmitLoop(ctx context.Context, loop *config.LoopV2
 		select {
 		case p.notifyCompletion <- l.Name:
 		case <-ctx.Done():
-			// Context cancelled, don't block
+			// Context canceled, don't block
 		}
 	}(loop)
 
@@ -214,11 +214,11 @@ func (p *WorkflowWorkerPool) handleError(stepName string, err error) {
 	switch p.errorPolicy {
 	case "cancel_all":
 		// Cancel all in-flight steps
-		p.orchestrator.logger.Info("Error policy: cancel_all - Cancelling all in-flight steps")
+		p.orchestrator.logger.Info("Error policy: cancel_all - Canceling all in-flight steps")
 		p.workMu.Lock()
 		p.acceptingWork = false
 		p.workMu.Unlock()
-		
+
 		if p.cancelFunc != nil {
 			p.cancelFunc()
 		}
@@ -270,7 +270,7 @@ func (p *WorkflowWorkerPool) IsCompleted(stepName string) bool {
 func (p *WorkflowWorkerPool) GetAllResults() map[string]string {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-	
+
 	results := make(map[string]string)
 	for k, v := range p.stepResults {
 		results[k] = v
@@ -282,7 +282,7 @@ func (p *WorkflowWorkerPool) GetAllResults() map[string]string {
 func (p *WorkflowWorkerPool) GetAllErrors() map[string]error {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-	
+
 	errors := make(map[string]error)
 	for k, v := range p.stepErrors {
 		errors[k] = v
@@ -294,7 +294,7 @@ func (p *WorkflowWorkerPool) GetAllErrors() map[string]error {
 func (p *WorkflowWorkerPool) GetCompleted() map[string]bool {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-	
+
 	completed := make(map[string]bool)
 	for k, v := range p.completed {
 		completed[k] = v

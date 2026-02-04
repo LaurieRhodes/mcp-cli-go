@@ -10,8 +10,8 @@ import (
 type Format string
 
 const (
-	FormatJSON Format = "json"
-	FormatText Format = "text"
+	FormatJSON   Format = "json"
+	FormatText   Format = "text"
 	FormatPretty Format = "pretty"
 )
 
@@ -66,12 +66,12 @@ func (f *Formatter) formatPretty(data interface{}) error {
 		// Fall back to text format
 		return f.formatText(data)
 	}
-	
+
 	_, err = f.writer.Write(jsonData)
 	if err != nil {
 		return err
 	}
-	
+
 	_, err = f.writer.Write([]byte("\n"))
 	return err
 }

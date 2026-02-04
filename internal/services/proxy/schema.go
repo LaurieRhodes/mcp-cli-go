@@ -36,7 +36,7 @@ func (g *SchemaGenerator) generateFromTemplate(tool *runas.ToolExposure) (map[st
 	if workflow, exists := g.appConfig.Workflows[tool.Template]; exists {
 		return g.generateFromWorkflowV2(workflow, tool)
 	}
-	
+
 	return nil, "", fmt.Errorf("workflow not found: %s", tool.Template)
 }
 
@@ -53,11 +53,11 @@ func (g *SchemaGenerator) generateFromWorkflowV2(template *config.WorkflowV2, to
 		},
 		"required": []string{"input_data"},
 	}
-	
+
 	description := template.Description
 	if description == "" {
 		description = fmt.Sprintf("Execute workflow: %s", template.Name)
 	}
-	
+
 	return schema, description, nil
 }

@@ -10,11 +10,11 @@ import (
 
 // ExecutionTimeline tracks step execution timing for visualization
 type ExecutionTimeline struct {
-	mu          sync.RWMutex
-	events      []TimelineEvent
-	startTime   time.Time
-	endTime     time.Time
-	maxWorkers  int
+	mu         sync.RWMutex
+	events     []TimelineEvent
+	startTime  time.Time
+	endTime    time.Time
+	maxWorkers int
 }
 
 // TimelineEvent represents a step start or end
@@ -58,7 +58,7 @@ func (et *ExecutionTimeline) End() {
 func (et *ExecutionTimeline) RecordStepStart(stepName string) {
 	et.mu.Lock()
 	defer et.mu.Unlock()
-	
+
 	et.events = append(et.events, TimelineEvent{
 		stepName:  stepName,
 		eventType: "start",
@@ -70,7 +70,7 @@ func (et *ExecutionTimeline) RecordStepStart(stepName string) {
 func (et *ExecutionTimeline) RecordStepEnd(stepName string) {
 	et.mu.Lock()
 	defer et.mu.Unlock()
-	
+
 	et.events = append(et.events, TimelineEvent{
 		stepName:  stepName,
 		eventType: "end",
@@ -220,7 +220,7 @@ func (et *ExecutionTimeline) GenerateASCIITimeline() string {
 	for i, b := range buckets {
 		elapsed := time.Duration(i) * bucketDuration
 		timeStr := fmt.Sprintf("T+%-5s", elapsed.Round(100*time.Millisecond).String())
-		
+
 		if len(b.steps) > 0 {
 			stepsStr := strings.Join(b.steps, ", ")
 			if len(stepsStr) > 50 {
@@ -233,7 +233,7 @@ func (et *ExecutionTimeline) GenerateASCIITimeline() string {
 	sb.WriteString("\n")
 	sb.WriteString("───────────────────────────────────────────────────────\n")
 	sb.WriteString(fmt.Sprintf("Total Duration: %v\n", totalDuration.Round(time.Millisecond)))
-	sb.WriteString(fmt.Sprintf("Max Parallelism: %d steps (limit: %d)\n", 
+	sb.WriteString(fmt.Sprintf("Max Parallelism: %d steps (limit: %d)\n",
 		et.GetParallelismLevel(), et.maxWorkers))
 	sb.WriteString("═══════════════════════════════════════════════════════\n")
 
@@ -261,7 +261,7 @@ func (et *ExecutionTimeline) GenerateGanttChart() string {
 	}
 
 	chartWidth := 50
-	
+
 	// Find longest step name for padding
 	maxNameLen := 0
 	for _, exec := range executions {
@@ -275,7 +275,7 @@ func (et *ExecutionTimeline) GenerateGanttChart() string {
 		relativeStart := exec.startTime.Sub(globalStart)
 		startPos := int((float64(relativeStart) / float64(totalDuration)) * float64(chartWidth))
 		barLen := int((float64(exec.duration) / float64(totalDuration)) * float64(chartWidth))
-		
+
 		if barLen < 1 {
 			barLen = 1
 		}
@@ -292,7 +292,7 @@ func (et *ExecutionTimeline) GenerateGanttChart() string {
 			}
 		}
 
-		sb.WriteString(fmt.Sprintf("%-*s |%s| %v\n", 
+		sb.WriteString(fmt.Sprintf("%-*s |%s| %v\n",
 			maxNameLen, exec.stepName, string(lineBytes), exec.duration.Round(time.Millisecond)))
 	}
 
@@ -307,11 +307,11 @@ func (et *ExecutionTimeline) GenerateGanttChart() string {
 func (et *ExecutionTimeline) GetSequentialEstimate() time.Duration {
 	executions := et.GetStepExecutions()
 	total := time.Duration(0)
-	
+
 	for _, exec := range executions {
 		total += exec.duration
 	}
-	
+
 	return total
 }
 
@@ -319,10 +319,10 @@ func (et *ExecutionTimeline) GetSequentialEstimate() time.Duration {
 func (et *ExecutionTimeline) GetSpeedup() float64 {
 	parallel := et.GetTotalDuration()
 	sequential := et.GetSequentialEstimate()
-	
+
 	if parallel == 0 {
 		return 0
 	}
-	
+
 	return float64(sequential) / float64(parallel)
 }

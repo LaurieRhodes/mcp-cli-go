@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/host"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/services/rag"
-	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/services/rag"
+	"github.com/spf13/cobra"
 )
 
 // RAG command flags
@@ -80,19 +80,19 @@ Output:
   - Matched document identifiers and text
   - Similarity scores (higher = more relevant)
   - Total results and execution time`,
-	Args:  cobra.ExactArgs(1),
-	RunE:  executeRagSearch,
+	Args: cobra.ExactArgs(1),
+	RunE: executeRagSearch,
 }
 
 func init() {
 	RagConfigCmd.Flags().BoolVar(&ragShowConfig, "verbose", false, "Show detailed configuration")
-	
+
 	RagSearchCmd.Flags().StringVar(&ragServer, "server", "", "RAG server to use (default from config)")
 	RagSearchCmd.Flags().StringSliceVar(&ragStrategies, "strategies", []string{"default"}, "Strategies to use")
 	RagSearchCmd.Flags().IntVar(&ragTopK, "top-k", 5, "Number of results")
 	RagSearchCmd.Flags().StringVar(&ragFusion, "fusion", "", "Fusion method (rrf, weighted, max, avg)")
 	RagSearchCmd.Flags().BoolVar(&ragExpandQuery, "expand", false, "Enable query expansion")
-	
+
 	RagCmd.AddCommand(RagConfigCmd)
 	RagCmd.AddCommand(RagSearchCmd)
 }
@@ -100,30 +100,30 @@ func init() {
 func executeRagConfig(cmd *cobra.Command, args []string) error {
 	// Initialize config service
 	configService := config.NewService()
-	
+
 	// Load configuration
 	_, err := configService.LoadConfig(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
-	
+
 	// Load RAG configuration
 	ragConfig := configService.GetRagConfig()
-	
+
 	// Display configuration
 	fmt.Println("=== RAG Configuration ===")
 	fmt.Printf("Default Server: %s\n", ragConfig.DefaultServer)
 	fmt.Printf("Default Fusion: %s\n", ragConfig.DefaultFusion)
 	fmt.Printf("Default Top-K: %d\n", ragConfig.DefaultTopK)
 	fmt.Println()
-	
+
 	fmt.Println("=== Configured Servers ===")
 	if len(ragConfig.Servers) == 0 {
 		fmt.Println("No servers configured. Create config/rag.yaml to configure RAG.")
 		fmt.Println("See config/rag.yaml.example for template.")
 		return nil
 	}
-	
+
 	for name, srv := range ragConfig.Servers {
 		fmt.Printf("\n%s:\n", name)
 		fmt.Printf("  MCP Server: %s\n", srv.MCPServer)
@@ -132,7 +132,7 @@ func executeRagConfig(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Printf("  Table: %s\n", srv.Table)
 		fmt.Printf("  Strategies: %d configured\n", len(srv.Strategies))
-		
+
 		if ragShowConfig {
 			for _, strategy := range srv.Strategies {
 				fmt.Printf("    - %s (column: %s, weight: %.2f, threshold: %.2f)\n",
@@ -140,7 +140,7 @@ func executeRagConfig(cmd *cobra.Command, args []string) error {
 			}
 		}
 	}
-	
+
 	fmt.Println()
 	fmt.Println("=== Query Expansion ===")
 	fmt.Printf("Enabled: %v\n", ragConfig.QueryExpansion.Enabled)
@@ -153,29 +153,29 @@ func executeRagConfig(cmd *cobra.Command, args []string) error {
 			fmt.Printf("Acronyms: %s\n", ragConfig.QueryExpansion.AcronymsFile)
 		}
 	}
-	
+
 	fmt.Println()
 	logging.Info("✓ RAG configuration loaded successfully")
-	
+
 	return nil
 }
 
 func executeRagSearch(cmd *cobra.Command, args []string) error {
 	query := args[0]
-	
+
 	// Load config
 	configService := config.NewService()
 	_, err := configService.LoadConfig(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
-	
+
 	// Get RAG configuration
 	ragConfig := configService.GetRagConfig()
 	if ragConfig == nil {
 		return fmt.Errorf("no RAG configuration found")
 	}
-	
+
 	// Determine server
 	serverName := ragServer
 	if serverName == "" {
@@ -184,26 +184,26 @@ func executeRagSearch(cmd *cobra.Command, args []string) error {
 	if serverName == "" {
 		return fmt.Errorf("no server specified and no default server in config")
 	}
-	
+
 	var searchErr error
-	
+
 	// Determine which servers to connect
 	servers := []string{serverName}
 	userSpecifiedServers := make(map[string]bool)
 	userSpecifiedServers[serverName] = true
-	
+
 	// Run with host server connections
 	err = host.RunCommandWithOptions(func(conns []*host.ServerConnection) error {
 		// Create server manager
 		serverManager := NewHostServerManager(conns)
-		
+
 		// Create embedding service
 		providerFactory := ai.NewProviderFactory()
 		embeddingService := embeddings.NewService(configService, providerFactory)
-		
+
 		// Create RAG service with embedding service
 		ragService := rag.NewServiceWithConfig(ragConfig, serverManager, embeddingService)
-		
+
 		// Create search request
 		req := rag.SearchRequest{
 			Query:       query,
@@ -213,51 +213,51 @@ func executeRagSearch(cmd *cobra.Command, args []string) error {
 			Fusion:      ragFusion,
 			ExpandQuery: ragExpandQuery,
 		}
-		
+
 		// Execute search
 		logging.Info("🔍 Searching: %s", query)
 		startTime := time.Now()
-		
+
 		ctx := context.Background()
 		response, err := ragService.Search(ctx, req)
 		if err != nil {
 			searchErr = fmt.Errorf("search failed: %w", err)
 			return searchErr
 		}
-		
+
 		elapsed := time.Since(startTime)
-		
+
 		// Display results
 		fmt.Println()
 		fmt.Printf("Found %d results in %v\n", response.TotalResults, elapsed)
 		fmt.Println()
-		
+
 		if response.TotalResults == 0 {
 			fmt.Println("No results found.")
 			return nil
 		}
-		
+
 		// Format as JSON
 		output, err := json.MarshalIndent(response, "", "  ")
 		if err != nil {
 			searchErr = fmt.Errorf("failed to format results: %w", err)
 			return searchErr
 		}
-		
+
 		fmt.Println(string(output))
-		
+
 		return nil
 	}, configFile, servers, userSpecifiedServers, &host.CommandOptions{
-		
+
 		SuppressConsole: false,
 	})
-	
+
 	if err != nil {
 		return err
 	}
 	if searchErr != nil {
 		return searchErr
 	}
-	
+
 	return nil
 }

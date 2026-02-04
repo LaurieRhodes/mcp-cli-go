@@ -99,11 +99,11 @@ func NewGCPVertexAIOpenAIClient(providerType domain.ProviderType, cfg *config.Pr
 
 	// Create modified config for OpenAI client
 	openaiConfig := &config.ProviderConfig{
-		APIKey:         wrapper.accessToken, // Will be updated before each request
-		APIEndpoint:    openaiEndpoint,
-		DefaultModel:   model, // Now in "google/gemini-2.5-flash" format
-		TimeoutSeconds: cfg.TimeoutSeconds,
-		MaxRetries:     cfg.MaxRetries,
+		APIKey:          wrapper.accessToken, // Will be updated before each request
+		APIEndpoint:     openaiEndpoint,
+		DefaultModel:    model, // Now in "google/gemini-2.5-flash" format
+		TimeoutSeconds:  cfg.TimeoutSeconds,
+		MaxRetries:      cfg.MaxRetries,
 		EmbeddingModels: cfg.EmbeddingModels,
 	}
 
@@ -289,7 +289,7 @@ func (c *GCPVertexAIOpenAIClient) refreshClientToken() error {
 
 	// Update the OpenAI client's API key with fresh token
 	c.openaiClient.apiKey = c.accessToken
-	
+
 	return nil
 }
 
@@ -392,7 +392,7 @@ func (c *GCPVertexAIOpenAIClient) loadServiceAccount(path string) error {
 	}
 
 	c.serviceAccount = &sa
-	
+
 	logging.Info("Loaded service account: %s", sa.ClientEmail)
 
 	return nil

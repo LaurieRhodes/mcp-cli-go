@@ -25,13 +25,13 @@ You can query server information, list available tools and resources, and more.`
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Process configuration options - pass configFile
 		serverNames, userSpecified := host.ProcessOptions(configFile, serverName, disableFilesystem, providerName, modelName)
-		
+
 		// Display the start message
 		bold := color.New(color.Bold)
 		bold.Printf("Starting interactive mode with server: %s, provider: %s, model: %s\n\n", serverName, providerName, modelName)
-		
+
 		logging.Info("Starting interactive mode")
-		
+
 		// Run the interactive command
 		err := host.RunCommand(runInteractiveMode, configFile, serverNames, userSpecified)
 		if err != nil {
@@ -39,7 +39,7 @@ You can query server information, list available tools and resources, and more.`
 			fmt.Fprintf(os.Stderr, "Error in interactive mode: %v\n", err)
 			return err
 		}
-		
+
 		return nil
 	},
 }
@@ -47,17 +47,17 @@ You can query server information, list available tools and resources, and more.`
 // runInteractiveMode is the function that runs when the interactive command is executed
 func runInteractiveMode(connections []*host.ServerConnection) error {
 	logging.Info("Entering interactive mode with %d server connections", len(connections))
-	
+
 	fmt.Println("Connected to servers:")
 	for _, conn := range connections {
 		fmt.Printf("  - %s (%s v%s)\n", conn.Name, conn.ServerInfo.Name, conn.ServerInfo.Version)
 	}
-	
+
 	// Simple interactive loop
 	fmt.Println("\nInteractive Mode - Type '/help' for available commands or '/exit' to quit")
-	
+
 	reader := bufio.NewReader(os.Stdin)
-	
+
 	for {
 		// Get user input
 		fmt.Print("> ")
@@ -67,23 +67,23 @@ func runInteractiveMode(connections []*host.ServerConnection) error {
 			fmt.Fprintf(os.Stderr, "Error reading input: %v\n", err)
 			continue
 		}
-		
+
 		input = strings.TrimSpace(input)
 		logging.Debug("Received input: %s", input)
-		
+
 		// Check for empty input
 		if input == "" {
 			continue
 		}
-		
+
 		// Check for exit command
-		if strings.EqualFold(input, "/exit") || strings.EqualFold(input, "/quit") || 
-		   strings.EqualFold(input, "exit") || strings.EqualFold(input, "quit") {
+		if strings.EqualFold(input, "/exit") || strings.EqualFold(input, "/quit") ||
+			strings.EqualFold(input, "exit") || strings.EqualFold(input, "quit") {
 			logging.Info("Exiting interactive mode")
 			fmt.Println("Exiting interactive mode.")
 			break
 		}
-		
+
 		// Process commands
 		if strings.HasPrefix(input, "/") {
 			handleInteractiveCommand(input, connections)
@@ -92,7 +92,7 @@ func runInteractiveMode(connections []*host.ServerConnection) error {
 			fmt.Println("Unknown input. Type '/help' for available commands.")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -101,9 +101,9 @@ func handleInteractiveCommand(command string, connections []*host.ServerConnecti
 	// Split the command into parts
 	parts := strings.SplitN(command, " ", 3)
 	cmd := strings.ToLower(parts[0])
-	
+
 	logging.Debug("Processing command: %s", cmd)
-	
+
 	// Handle different commands
 	switch cmd {
 	case "/help":
@@ -129,9 +129,9 @@ func handleInteractiveCommand(command string, connections []*host.ServerConnecti
 			fmt.Println("Then enter JSON on multiple lines, end with a line containing only '###'")
 			return
 		}
-		
+
 		serverName := parts[1]
-		
+
 		// Check if we have a complete command or need to enter multi-line mode
 		if len(parts) == 2 {
 			// Multi-line mode
@@ -146,8 +146,8 @@ func handleInteractiveCommand(command string, connections []*host.ServerConnecti
 			}
 			toolName := remaining[0]
 			argsStr := remaining[1]
-			
-			logging.Debug("Executing call command: server=%s, tool=%s, args=%s", 
+
+			logging.Debug("Executing call command: server=%s, tool=%s, args=%s",
 				serverName, toolName, argsStr)
 			callTool(connections, serverName, toolName, argsStr)
 		}
@@ -164,7 +164,7 @@ func handleInteractiveCommand(command string, connections []*host.ServerConnecti
 // handleMultiLineCall handles multi-line JSON input for the /call command
 func handleMultiLineCall(serverName string, connections []*host.ServerConnection) {
 	reader := bufio.NewReader(os.Stdin)
-	
+
 	// Prompt for tool name
 	fmt.Print("Enter tool name: ")
 	toolName, err := reader.ReadString('\n')
@@ -174,15 +174,15 @@ func handleMultiLineCall(serverName string, connections []*host.ServerConnection
 		return
 	}
 	toolName = strings.TrimSpace(toolName)
-	
+
 	if toolName == "" {
 		fmt.Println("Tool name cannot be empty.")
 		return
 	}
-	
+
 	// Prompt for JSON arguments
 	fmt.Println("Enter JSON arguments (end with a line containing only '###'):")
-	
+
 	var jsonLines []string
 	for {
 		line, err := reader.ReadString('\n')
@@ -191,20 +191,20 @@ func handleMultiLineCall(serverName string, connections []*host.ServerConnection
 			fmt.Printf("Error reading JSON input: %v\n", err)
 			return
 		}
-		
+
 		line = strings.TrimSpace(line)
-		
+
 		// Check for end marker
 		if line == "###" {
 			break
 		}
-		
+
 		jsonLines = append(jsonLines, line)
 	}
-	
+
 	// Combine JSON lines
 	jsonStr := strings.Join(jsonLines, "\n")
-	
+
 	// Validate JSON
 	var args map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonStr), &args); err != nil {
@@ -212,8 +212,8 @@ func handleMultiLineCall(serverName string, connections []*host.ServerConnection
 		fmt.Printf("Invalid JSON: %v\n", err)
 		return
 	}
-	
-	logging.Debug("Executing call command: server=%s, tool=%s, args=%s", 
+
+	logging.Debug("Executing call command: server=%s, tool=%s, args=%s",
 		serverName, toolName, jsonStr)
 	callTool(connections, serverName, toolName, jsonStr)
 }
@@ -238,7 +238,7 @@ func listTools(connections []*host.ServerConnection) {
 	for _, conn := range connections {
 		fmt.Printf("Tools from server %s:\n", conn.Name)
 		logging.Debug("Listing tools from server: %s", conn.Name)
-		
+
 		// Get the tools list from the server
 		// Type assert to stdio client
 		stdioClient := conn.GetStdioClient()
@@ -251,7 +251,7 @@ func listTools(connections []*host.ServerConnection) {
 			fmt.Printf("  Error: %v\n", err)
 			continue
 		}
-		
+
 		// Display the tools
 		if len(result.Tools) == 0 {
 			logging.Debug("No tools available from server: %s", conn.Name)
@@ -271,7 +271,7 @@ func listToolsDetailed(connections []*host.ServerConnection) {
 	for _, conn := range connections {
 		fmt.Printf("Tools from server %s:\n", conn.Name)
 		logging.Debug("Listing detailed tools from server: %s", conn.Name)
-		
+
 		// Get the tools list from the server
 		// Type assert to stdio client
 		stdioClient := conn.GetStdioClient()
@@ -284,7 +284,7 @@ func listToolsDetailed(connections []*host.ServerConnection) {
 			fmt.Printf("  Error: %v\n", err)
 			continue
 		}
-		
+
 		// Display the tools with detailed information
 		if len(result.Tools) == 0 {
 			logging.Debug("No tools available from server: %s", conn.Name)
@@ -295,7 +295,7 @@ func listToolsDetailed(connections []*host.ServerConnection) {
 				fmt.Printf("  - %s:\n", tool.Name)
 				fmt.Printf("    Description: %s\n", tool.Description)
 				fmt.Println("    Parameters:")
-				
+
 				// Display input schema
 				if schema, ok := tool.InputSchema["properties"].(map[string]interface{}); ok {
 					for paramName, paramDetails := range schema {
@@ -320,7 +320,7 @@ func listToolsRaw(connections []*host.ServerConnection) {
 	for _, conn := range connections {
 		fmt.Printf("Raw tools from server %s:\n", conn.Name)
 		logging.Debug("Listing raw tools from server: %s", conn.Name)
-		
+
 		// Get the tools list from the server
 		// Type assert to stdio client
 		stdioClient := conn.GetStdioClient()
@@ -333,7 +333,7 @@ func listToolsRaw(connections []*host.ServerConnection) {
 			fmt.Printf("  Error: %v\n", err)
 			continue
 		}
-		
+
 		// Display the raw tool definitions
 		jsonData, err := json.MarshalIndent(result, "", "  ")
 		if err != nil {
@@ -341,7 +341,7 @@ func listToolsRaw(connections []*host.ServerConnection) {
 			fmt.Printf("  Error marshaling to JSON: %v\n", err)
 			continue
 		}
-		
+
 		// Print the JSON with syntax highlighting
 		printSyntaxHighlightedJSON(string(jsonData))
 		fmt.Println()
@@ -358,13 +358,13 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 			break
 		}
 	}
-	
+
 	if targetConn == nil {
 		logging.Error("Server not found: %s", serverName)
 		fmt.Printf("Error: Server '%s' not found\n", serverName)
 		return
 	}
-	
+
 	// Parse the arguments
 	var args map[string]interface{}
 	if err := json.Unmarshal([]byte(argsStr), &args); err != nil {
@@ -372,7 +372,7 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 		fmt.Printf("Error: Failed to parse arguments: %v\n", err)
 		return
 	}
-	
+
 	// Fetch tool definition to validate against schema
 	toolDef, err := getToolDefinition(targetConn, toolName)
 	if err != nil {
@@ -380,7 +380,7 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 		fmt.Printf("Error: Failed to get tool definition: %v\n", err)
 		return
 	}
-	
+
 	// Validate arguments against tool schema
 	validationErrors := validateToolArguments(args, toolDef)
 	if len(validationErrors) > 0 {
@@ -391,20 +391,20 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 		}
 		return
 	}
-	
+
 	// Call the tool
-	logging.Info("Calling tool %s on server %s with arguments: %+v", 
+	logging.Info("Calling tool %s on server %s with arguments: %+v",
 		toolName, serverName, args)
-	
+
 	fmt.Printf("Calling tool '%s' on server '%s'...\n", toolName, serverName)
-	
+
 	// Type assert to stdio client
 	stdioClient := targetConn.GetStdioClient()
 	if stdioClient == nil {
 		fmt.Printf("Error: Server does not support stdio protocol\n")
 		return
 	}
-	
+
 	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), toolName, args)
 	if err != nil {
 		logging.Error("Error calling tool: %v", err)
@@ -417,12 +417,12 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 		color.Red("Tool execution failed: %s\n", result.Error)
 		return
 	}
-	
+
 	// Display the result
 	logging.Info("Tool execution successful")
 	color.Green("Tool execution successful!\n")
 	fmt.Println("Result:")
-	
+
 	// Format the result for display
 	printFormattedResult(result.Content)
 }
@@ -430,40 +430,40 @@ func callTool(connections []*host.ServerConnection, serverName, toolName, argsSt
 // getToolDefinition fetches the tool definition from the server
 func getToolDefinition(conn *host.ServerConnection, toolName string) (*tools.Tool, error) {
 	logging.Debug("Fetching tool definition for: %s", toolName)
-	
+
 	// Get the tools list from the server
 	// Type assert to stdio client
 	stdioClient := conn.GetStdioClient()
 	if stdioClient == nil {
 		return nil, fmt.Errorf("server does not support stdio protocol")
 	}
-	
+
 	result, err := tools.SendToolsList(stdioClient, []string{toolName})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tool definition: %w", err)
 	}
-	
+
 	// Find the requested tool
 	for _, tool := range result.Tools {
 		if tool.Name == toolName {
 			return &tool, nil
 		}
 	}
-	
+
 	return nil, fmt.Errorf("tool '%s' not found on server", toolName)
 }
 
 // validateToolArguments validates tool arguments against the tool's schema
 func validateToolArguments(args map[string]interface{}, tool *tools.Tool) []string {
 	var errors []string
-	
+
 	// Get the properties from the input schema
 	properties, ok := tool.InputSchema["properties"].(map[string]interface{})
 	if !ok {
 		logging.Error("Invalid input schema for tool: %s", tool.Name)
 		return []string{"Tool has invalid input schema"}
 	}
-	
+
 	// Get the required properties
 	var required []string
 	if req, ok := tool.InputSchema["required"].([]interface{}); ok {
@@ -473,14 +473,14 @@ func validateToolArguments(args map[string]interface{}, tool *tools.Tool) []stri
 			}
 		}
 	}
-	
+
 	// Check for required properties
 	for _, req := range required {
 		if _, exists := args[req]; !exists {
 			errors = append(errors, fmt.Sprintf("Missing required parameter: %s", req))
 		}
 	}
-	
+
 	// Validate each provided argument
 	for name, value := range args {
 		// Check if this parameter exists in the schema
@@ -489,25 +489,25 @@ func validateToolArguments(args map[string]interface{}, tool *tools.Tool) []stri
 			errors = append(errors, fmt.Sprintf("Unknown parameter: %s", name))
 			continue
 		}
-		
+
 		// Get the parameter definition
 		propMap, ok := propDef.(map[string]interface{})
 		if !ok {
 			continue // Skip if parameter definition is invalid
 		}
-		
+
 		// Get the parameter type
 		typeValue, hasType := propMap["type"]
 		if !hasType {
 			continue // Skip if no type information
 		}
-		
+
 		// Validate the parameter type
 		typeStr, ok := typeValue.(string)
 		if !ok {
 			continue // Skip if type is not a string
 		}
-		
+
 		// Validate based on type
 		switch typeStr {
 		case "string":
@@ -556,7 +556,7 @@ func validateToolArguments(args map[string]interface{}, tool *tools.Tool) []stri
 				}
 			}
 		}
-		
+
 		// Validate enum values if specified
 		if enumValues, hasEnum := propMap["enum"].([]interface{}); hasEnum && value != nil {
 			valid := false
@@ -571,7 +571,7 @@ func validateToolArguments(args map[string]interface{}, tool *tools.Tool) []stri
 			}
 		}
 	}
-	
+
 	return errors
 }
 
@@ -588,15 +588,15 @@ func printFormattedResult(content interface{}) {
 			// Plain string
 			fmt.Println(v)
 		}
-		
+
 	case []interface{}:
 		// Array
 		printArray(v)
-		
+
 	case map[string]interface{}:
 		// Object
 		printObject(v)
-		
+
 	default:
 		// For other types, pretty print as JSON
 		printJSON(content)
@@ -610,7 +610,7 @@ func printJSON(data interface{}) {
 		fmt.Printf("%v\n", data)
 		return
 	}
-	
+
 	// Print formatted JSON with syntax highlighting
 	printSyntaxHighlightedJSON(string(jsonBytes))
 }
@@ -621,7 +621,7 @@ func printArray(arr []interface{}) {
 		fmt.Println("[]")
 		return
 	}
-	
+
 	fmt.Println("[")
 	for i, item := range arr {
 		switch v := item.(type) {
@@ -650,7 +650,7 @@ func printObject(obj map[string]interface{}) {
 		fmt.Println("{}")
 		return
 	}
-	
+
 	fmt.Println("{")
 	for key, val := range obj {
 		fmt.Printf("  %s: ", key)
@@ -663,7 +663,7 @@ func printObject(obj map[string]interface{}) {
 // printValue formats and prints a value with proper indentation
 func printValue(val interface{}, indent int) {
 	indentStr := strings.Repeat(" ", indent)
-	
+
 	switch v := val.(type) {
 	case string:
 		color.Green("%q", v)
@@ -684,7 +684,7 @@ func printValue(val interface{}, indent int) {
 			fmt.Print("[]")
 			return
 		}
-		
+
 		fmt.Printf("[\n%s  ", indentStr)
 		for i, item := range v {
 			printValue(item, indent+2)
@@ -698,14 +698,14 @@ func printValue(val interface{}, indent int) {
 			fmt.Print("{}")
 			return
 		}
-		
+
 		fmt.Printf("{\n")
 		keys := make([]string, 0, len(v))
 		for k := range v {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
-		
+
 		for i, k := range keys {
 			fmt.Printf("%s  %s: ", indentStr, k)
 			printValue(v[k], indent+2)
@@ -725,21 +725,21 @@ func printValue(val interface{}, indent int) {
 func printSyntaxHighlightedJSON(jsonStr string) {
 	// Split by newlines to process each line
 	lines := strings.Split(jsonStr, "\n")
-	
+
 	for _, line := range lines {
 		// Process each part of the line
 		if strings.TrimSpace(line) == "" {
 			fmt.Println()
 			continue
 		}
-		
+
 		// Check for different JSON elements
 		if strings.Contains(line, ":") {
 			// Key-value pair
 			parts := strings.SplitN(line, ":", 2)
 			key := parts[0]
 			value := parts[1]
-			
+
 			// Highlight key
 			keyParts := strings.Split(key, "\"")
 			if len(keyParts) >= 3 {
@@ -749,14 +749,14 @@ func printSyntaxHighlightedJSON(jsonStr string) {
 			} else {
 				fmt.Print(key + ":")
 			}
-			
+
 			// Highlight value
 			highlightJSONValue(value)
 		} else {
 			// Single element (brackets, braces, etc.)
 			highlightJSONValue(line)
 		}
-		
+
 		fmt.Println()
 	}
 }
@@ -764,7 +764,7 @@ func printSyntaxHighlightedJSON(jsonStr string) {
 // highlightJSONValue applies color highlighting to a JSON value
 func highlightJSONValue(value string) {
 	value = strings.TrimSpace(value)
-	
+
 	// Determine value type and highlight accordingly
 	switch {
 	case value == "{" || value == "}" || value == "[" || value == "]" || value == "," || value == "":

@@ -161,19 +161,18 @@ func (d *ErrorDetector) GetErrorMessageFromMap(result map[string]interface{}) (s
 	return "", false
 }
 
-
 // ExtractTextFromContent extracts text content from various MCP response formats
 // Handles both array format [{"text": "...", "type": "text"}] and string format
 func (d *ErrorDetector) ExtractTextFromContent(content interface{}) string {
 	if content == nil {
 		return ""
 	}
-	
+
 	// Handle string content
 	if str, ok := content.(string); ok {
 		return str
 	}
-	
+
 	// Handle array of content items (MCP standard format)
 	if contentArray, ok := content.([]interface{}); ok {
 		for _, item := range contentArray {
@@ -185,14 +184,14 @@ func (d *ErrorDetector) ExtractTextFromContent(content interface{}) string {
 			}
 		}
 	}
-	
+
 	// Handle map format
 	if contentMap, ok := content.(map[string]interface{}); ok {
 		if text, ok := contentMap["text"].(string); ok && text != "" {
 			return text
 		}
 	}
-	
+
 	return ""
 }
 
@@ -205,7 +204,7 @@ func (d *ErrorDetector) LogErrorDetails(result *tools.ToolsCallResult) {
 	logging.Debug("=== MCP Tool Result Error Analysis ===")
 	logging.Debug("Top-level IsError: %v", result.IsError)
 	logging.Debug("Top-level Error message: %s", result.Error)
-	
+
 	if result.Content != nil {
 		logging.Debug("Content type: %T", result.Content)
 		if contentMap, ok := result.Content.(map[string]interface{}); ok {
@@ -215,10 +214,10 @@ func (d *ErrorDetector) LogErrorDetails(result *tools.ToolsCallResult) {
 			}
 		}
 	}
-	
+
 	isError := d.IsMCPError(result)
 	errorMsg, hasMsg := d.GetErrorMessage(result)
-	
+
 	logging.Debug("Error detected: %v", isError)
 	if hasMsg {
 		logging.Debug("Error message: %s", errorMsg)

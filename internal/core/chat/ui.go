@@ -20,26 +20,26 @@ import (
 type UI struct {
 	// Readline instance for input with history
 	rl *readline.Instance
-	
+
 	// Output colors
 	userColor      *color.Color
 	assistantColor *color.Color
 	systemColor    *color.Color
 	toolColor      *color.Color
 	errorColor     *color.Color
-	
+
 	// Glamour renderer for markdown
 	glamourRenderer *glamour.TermRenderer
 	noColor         bool
-	
+
 	// Stream state tracking
 	streamStarted bool
 	streamEmpty   bool
 	streamMutex   sync.Mutex
-	
+
 	// Buffer for content chunks
 	contentBuffer string
-	
+
 	// Multiline input buffer
 	multilineBuffer strings.Builder
 }
@@ -48,7 +48,7 @@ type UI struct {
 func NewUI() *UI {
 	// Check if colors are disabled
 	noColor := os.Getenv("NO_COLOR") != ""
-	
+
 	// Initialize glamour renderer
 	var renderer *glamour.TermRenderer
 	if !noColor {
@@ -65,10 +65,10 @@ func NewUI() *UI {
 			logging.Debug("Initialized glamour renderer with dracula style")
 		}
 	}
-	
+
 	// Get history file path
 	historyFile := getHistoryFilePath()
-	
+
 	// Create readline configuration
 	config := &readline.Config{
 		Prompt:                 color.New(color.FgGreen, color.Bold).Sprint("You: "),
@@ -80,14 +80,14 @@ func NewUI() *UI {
 		HistorySearchFold:      true,
 		VimMode:                false,
 	}
-	
+
 	// Create readline instance
 	rl, err := readline.NewEx(config)
 	if err != nil {
 		logging.Warn("Failed to initialize readline: %v, falling back to basic input", err)
 		rl = nil
 	}
-	
+
 	return &UI{
 		rl:              rl,
 		userColor:       color.New(color.FgGreen, color.Bold),
@@ -124,14 +124,14 @@ func getHistoryFilePath() string {
 		}
 		configDir = filepath.Join(homeDir, ".config")
 	}
-	
+
 	// Create mcp-cli directory if it doesn't exist
 	mcpDir := filepath.Join(configDir, "mcp-cli")
 	if err := os.MkdirAll(mcpDir, 0755); err != nil {
 		logging.Warn("Failed to create config directory: %v", err)
 		return ".mcp_cli_history"
 	}
-	
+
 	return filepath.Join(mcpDir, "chat_history")
 }
 
@@ -141,7 +141,7 @@ func (u *UI) ReadUserInput() (string, error) {
 		// Fallback to basic input if readline failed
 		return u.readBasicInput()
 	}
-	
+
 	// Read a line
 	line, err := u.rl.Readline()
 	if err != nil {
@@ -153,46 +153,46 @@ func (u *UI) ReadUserInput() (string, error) {
 		}
 		return "", fmt.Errorf("error reading input: %w", err)
 	}
-	
+
 	// Check for multiline continuation with backslash
 	if strings.HasSuffix(strings.TrimSpace(line), "\\") {
 		// Start multiline mode
 		u.multilineBuffer.Reset()
 		u.multilineBuffer.WriteString(strings.TrimSuffix(strings.TrimSpace(line), "\\"))
-		
+
 		// Read additional lines
 		for {
 			u.rl.SetPrompt(color.New(color.FgGreen).Sprint("  ... "))
 			nextLine, err := u.rl.Readline()
 			if err != nil {
 				if err == readline.ErrInterrupt {
-					fmt.Println("(multiline cancelled)")
+					fmt.Println("(multiline canceled)")
 					u.rl.SetPrompt(color.New(color.FgGreen, color.Bold).Sprint("You: "))
 					return u.ReadUserInput() // Start over
 				}
 				return "", err
 			}
-			
+
 			// Check if this line also continues
 			if strings.HasSuffix(strings.TrimSpace(nextLine), "\\") {
 				u.multilineBuffer.WriteString("\n")
 				u.multilineBuffer.WriteString(strings.TrimSuffix(strings.TrimSpace(nextLine), "\\"))
 				continue
 			}
-			
+
 			// Final line
 			u.multilineBuffer.WriteString("\n")
 			u.multilineBuffer.WriteString(nextLine)
 			break
 		}
-		
+
 		// Reset prompt and return multiline result
 		u.rl.SetPrompt(color.New(color.FgGreen, color.Bold).Sprint("You: "))
 		result := u.multilineBuffer.String()
 		u.multilineBuffer.Reset()
 		return result, nil
 	}
-	
+
 	// Single line - return immediately
 	return line, nil
 }
@@ -200,20 +200,20 @@ func (u *UI) ReadUserInput() (string, error) {
 // readBasicInput provides fallback input without readline
 func (u *UI) readBasicInput() (string, error) {
 	fmt.Print(u.userColor.Sprint("You: "))
-	
+
 	var line string
 	_, err := fmt.Scanln(&line)
 	if err != nil && err != io.EOF {
 		return "", fmt.Errorf("error reading input: %w", err)
 	}
-	
+
 	return line, nil
 }
 
 // PrintAssistantResponse prints the assistant's response with markdown rendering
 func (u *UI) PrintAssistantResponse(response string) {
 	u.assistantColor.Println("\nAssistant:")
-	
+
 	// Render with Glamour if available
 	if u.glamourRenderer != nil && !u.noColor {
 		rendered, err := u.glamourRenderer.Render(response)
@@ -228,7 +228,7 @@ func (u *UI) PrintAssistantResponse(response string) {
 		// Plain text output
 		fmt.Println(response)
 	}
-	
+
 	fmt.Println()
 }
 
@@ -236,18 +236,18 @@ func (u *UI) PrintAssistantResponse(response string) {
 func (u *UI) StreamAssistantResponse(chunk string) {
 	u.streamMutex.Lock()
 	defer u.streamMutex.Unlock()
-	
+
 	// Print non-empty chunks
 	if chunk != "" {
 		// If this is the first non-empty chunk, mark the stream as non-empty
 		u.streamEmpty = false
-		
+
 		// Add to buffer
 		u.contentBuffer += chunk
-		
+
 		// Log the chunk for debugging
 		logging.Debug("Received content chunk: %s", chunk)
-		
+
 		// For streaming, we collect chunks but don't print them yet
 		// We'll render the complete markdown at the end
 		// This prevents seeing raw markdown syntax during streaming
@@ -258,12 +258,12 @@ func (u *UI) StreamAssistantResponse(chunk string) {
 func (u *UI) StartStreamingResponse() {
 	u.streamMutex.Lock()
 	defer u.streamMutex.Unlock()
-	
+
 	u.streamStarted = true
 	u.streamEmpty = true
 	u.contentBuffer = ""
 	u.assistantColor.Println("\nAssistant:")
-	
+
 	// Show a subtle indicator that we're collecting the response
 	if !u.noColor {
 		fmt.Print(lipgloss.NewStyle().
@@ -277,7 +277,7 @@ func (u *UI) StartStreamingResponse() {
 func (u *UI) EndStreamingResponse() {
 	u.streamMutex.Lock()
 	defer u.streamMutex.Unlock()
-	
+
 	// If we didn't actually receive any content but did get tool calls,
 	// print a message to explain what's happening
 	if u.streamEmpty {
@@ -287,7 +287,7 @@ func (u *UI) EndStreamingResponse() {
 		if !u.noColor {
 			fmt.Print("\r\033[K") // Clear the current line
 		}
-		
+
 		// Render the complete content with Glamour
 		if u.glamourRenderer != nil && !u.noColor && len(u.contentBuffer) > 0 {
 			// Render the complete markdown content
@@ -304,13 +304,13 @@ func (u *UI) EndStreamingResponse() {
 			fmt.Print(u.contentBuffer)
 		}
 	}
-	
+
 	// Add a newline at the end
 	fmt.Println()
-	
+
 	// Reset stream status
 	u.streamStarted = false
-	
+
 	// Log the complete content for verification
 	if len(u.contentBuffer) > 0 {
 		logging.Debug("Complete assistant response: %s", u.contentBuffer)
@@ -323,17 +323,17 @@ func (u *UI) PrintToolExecution(toolName, serverName string) {
 		fmt.Printf("\n⚡ Executing: %s on %s\n", toolName, serverName)
 		return
 	}
-	
+
 	// Use lipgloss for better formatting
 	toolStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("226")). // Yellow
 		Bold(true)
-	
+
 	serverStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("243")). // Gray
 		Italic(true)
-	
-	fmt.Printf("\n%s %s %s\n", 
+
+	fmt.Printf("\n%s %s %s\n",
 		toolStyle.Render("⚡ Executing:"),
 		toolStyle.Render(toolName),
 		serverStyle.Render("on "+serverName),
@@ -344,13 +344,13 @@ func (u *UI) PrintToolExecution(toolName, serverName string) {
 func (u *UI) PrintToolResult(result string) {
 	// First check if this is JSON and try to format it
 	formattedResult := u.formatToolResultForDisplay(result)
-	
+
 	// Check if this looks like markdown documentation
-	isMarkdown := strings.Contains(formattedResult, "##") || 
-		          strings.Contains(formattedResult, "```") ||
-		          strings.Contains(formattedResult, "**") ||
-		          strings.HasPrefix(strings.TrimSpace(formattedResult), "# ")
-	
+	isMarkdown := strings.Contains(formattedResult, "##") ||
+		strings.Contains(formattedResult, "```") ||
+		strings.Contains(formattedResult, "**") ||
+		strings.HasPrefix(strings.TrimSpace(formattedResult), "# ")
+
 	// For markdown content, use glamour to render it beautifully
 	if isMarkdown && u.glamourRenderer != nil && !u.noColor {
 		rendered, err := u.glamourRenderer.Render(formattedResult)
@@ -360,17 +360,17 @@ func (u *UI) PrintToolResult(result string) {
 			u.printPlainToolResult(formattedResult)
 			return
 		}
-		
+
 		// Display rendered markdown with subtle separators
 		separatorStyle := lipgloss.NewStyle().
 			Foreground(lipgloss.Color("240"))
-		
+
 		fmt.Println(separatorStyle.Render(strings.Repeat("─", 80)))
 		fmt.Print(rendered)
 		fmt.Println(separatorStyle.Render(strings.Repeat("─", 80)))
 		return
 	}
-	
+
 	// For non-markdown or when glamour unavailable, use plain display
 	u.printPlainToolResult(formattedResult)
 }
@@ -378,26 +378,26 @@ func (u *UI) PrintToolResult(result string) {
 // printPlainToolResult displays tool results in a plain format with optional truncation
 func (u *UI) printPlainToolResult(formattedResult string) {
 	const maxChars = 2000
-	
+
 	var displayResult string
 	if len(formattedResult) > maxChars {
 		displayResult = formattedResult[:maxChars] + "\n... (truncated, full result sent to assistant)"
 	} else {
 		displayResult = formattedResult
 	}
-	
+
 	if u.noColor {
 		fmt.Printf("%s\n", displayResult)
 		return
 	}
-	
+
 	// Use lipgloss box for non-markdown results
 	resultStyle := lipgloss.NewStyle().
 		PaddingLeft(2).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderLeft(true).
 		BorderForeground(lipgloss.Color("240"))
-	
+
 	fmt.Println(resultStyle.Render(displayResult))
 }
 
@@ -405,12 +405,12 @@ func (u *UI) printPlainToolResult(formattedResult string) {
 // This helps especially with Anthropic responses where we want to extract formatted text
 func (u *UI) formatToolResultForDisplay(result string) string {
 	// Check if this is JSON
-	if !strings.HasPrefix(strings.TrimSpace(result), "[") && 
-	   !strings.HasPrefix(strings.TrimSpace(result), "{") {
+	if !strings.HasPrefix(strings.TrimSpace(result), "[") &&
+		!strings.HasPrefix(strings.TrimSpace(result), "{") {
 		// Not JSON, return as is
 		return result
 	}
-	
+
 	// Try to unmarshal the result to see if it's Anthropic-formatted JSON
 	var jsonObj []map[string]interface{}
 	if err := json.Unmarshal([]byte(result), &jsonObj); err == nil {
@@ -424,7 +424,7 @@ func (u *UI) formatToolResultForDisplay(result string) string {
 			}
 		}
 	}
-	
+
 	// Try to unmarshal as a single object
 	var singleObj map[string]interface{}
 	if err := json.Unmarshal([]byte(result), &singleObj); err == nil {
@@ -443,13 +443,13 @@ func (u *UI) formatToolResultForDisplay(result string) string {
 			}
 		}
 	}
-	
+
 	// If all else fails, pretty-print the JSON
 	prettyJson, err := json.MarshalIndent(json.RawMessage(result), "", "  ")
 	if err == nil {
 		return string(prettyJson)
 	}
-	
+
 	// Fallback to original
 	return result
 }
@@ -493,16 +493,16 @@ func (u *UI) PrintWelcome() {
 		fmt.Println()
 		return
 	}
-	
+
 	// Create styled welcome box
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("86")). // Cyan
 		Padding(0, 1)
-	
+
 	infoStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("243")) // Gray
-	
+
 	fmt.Println()
 	fmt.Println(titleStyle.Render("Welcome to MCP CLI Chat Mode!"))
 	fmt.Println(infoStyle.Render("Type your messages and press Enter to send."))
@@ -516,7 +516,7 @@ func (u *UI) PrintConnectedServers(connections []string) {
 	if len(connections) == 0 {
 		return
 	}
-	
+
 	if u.noColor {
 		fmt.Println("Connected to servers:")
 		for _, conn := range connections {
@@ -525,15 +525,15 @@ func (u *UI) PrintConnectedServers(connections []string) {
 		fmt.Println()
 		return
 	}
-	
+
 	// Styled server list
 	headerStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("226")) // Yellow
-	
+
 	serverStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("82")) // Green
-	
+
 	fmt.Println(headerStyle.Render("Connected to servers:"))
 	for _, conn := range connections {
 		fmt.Printf("  %s %s\n", serverStyle.Render("•"), conn)
@@ -546,7 +546,7 @@ func (u *UI) PrintEnabledSkills(skills []string) {
 	if len(skills) == 0 {
 		return // Don't print if no skills enabled
 	}
-	
+
 	if u.noColor {
 		fmt.Println("Skills enabled:")
 		for _, skill := range skills {
@@ -555,15 +555,15 @@ func (u *UI) PrintEnabledSkills(skills []string) {
 		fmt.Println()
 		return
 	}
-	
+
 	// Styled skills list
 	headerStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("226")) // Yellow
-	
+
 	skillStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("141")) // Purple
-	
+
 	fmt.Println(headerStyle.Render("Skills enabled:"))
 	for _, skill := range skills {
 		fmt.Printf("  %s %s\n", skillStyle.Render("•"), skill)

@@ -119,7 +119,7 @@ func TestToolCreation(t *testing.T) {
 
 func TestToolCallCreation(t *testing.T) {
 	args := `{"param1": "value1"}`
-	
+
 	toolCall := ToolCall{
 		ID:   "call-123",
 		Type: ToolTypeFunction,

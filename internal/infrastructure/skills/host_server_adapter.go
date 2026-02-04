@@ -55,7 +55,7 @@ func (hsm *HostServerManager) ListServers() map[string]domain.MCPServer {
 
 func (hsm *HostServerManager) GetAvailableTools() ([]domain.Tool, error) {
 	var toolsList []domain.Tool
-	
+
 	for _, conn := range hsm.connections {
 		adapter := &HostServerAdapter{connection: conn}
 		serverTools, err := adapter.GetTools()
@@ -65,7 +65,7 @@ func (hsm *HostServerManager) GetAvailableTools() ([]domain.Tool, error) {
 		}
 		toolsList = append(toolsList, serverTools...)
 	}
-	
+
 	return toolsList, nil
 }
 
@@ -76,11 +76,11 @@ func (hsm *HostServerManager) ExecuteTool(ctx context.Context, toolName string, 
 		if err != nil {
 			continue
 		}
-		
+
 		// Check both prefixed and unprefixed tool names
 		serverPrefix := conn.Name + "_"
 		serverPrefixUnderscore := strings.ReplaceAll(conn.Name, "-", "_") + "_"
-		
+
 		for _, tool := range toolsList {
 			// Extract original tool name (strip server prefix if present)
 			originalName := tool.Function.Name
@@ -89,14 +89,14 @@ func (hsm *HostServerManager) ExecuteTool(ctx context.Context, toolName string, 
 			} else if strings.HasPrefix(originalName, serverPrefixUnderscore) {
 				originalName = strings.TrimPrefix(originalName, serverPrefixUnderscore)
 			}
-			
+
 			// Match against both original name and prefixed name
 			if tool.Function.Name == toolName || originalName == toolName {
 				return adapter.ExecuteTool(ctx, toolName, arguments)
 			}
 		}
 	}
-	
+
 	return "", fmt.Errorf("tool '%s' not found on any server", toolName)
 }
 
@@ -127,10 +127,10 @@ func formatToolNameForOpenAI(serverName, toolName string) string {
 	serverName = strings.ReplaceAll(serverName, ".", "_")
 	serverName = strings.ReplaceAll(serverName, " ", "_")
 	serverName = strings.ReplaceAll(serverName, "-", "_")
-	
+
 	toolName = strings.ReplaceAll(toolName, ".", "_")
 	toolName = strings.ReplaceAll(toolName, " ", "_")
-	
+
 	return fmt.Sprintf("%s_%s", serverName, toolName)
 }
 
@@ -144,7 +144,7 @@ func (hsa *HostServerAdapter) GetTools() ([]domain.Tool, error) {
 	if stdioClient == nil {
 		return nil, fmt.Errorf("server %s does not support stdio protocol", hsa.connection.Name)
 	}
-	
+
 	result, err := tools.SendToolsList(stdioClient, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tools from MCP server %s: %w", hsa.connection.Name, err)
@@ -153,7 +153,7 @@ func (hsa *HostServerAdapter) GetTools() ([]domain.Tool, error) {
 	var domainTools []domain.Tool
 	for _, tool := range result.Tools {
 		formattedName := formatToolNameForOpenAI(hsa.connection.Name, tool.Name)
-		
+
 		domainTool := domain.Tool{
 			Type: "function",
 			Function: domain.ToolFunction{
@@ -176,7 +176,7 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 	actualToolName := toolName
 	serverPrefix := hsa.connection.Name + "_"
 	serverPrefixUnderscore := strings.ReplaceAll(hsa.connection.Name, "-", "_") + "_"
-	
+
 	if strings.HasPrefix(toolName, serverPrefix) {
 		actualToolName = strings.TrimPrefix(toolName, serverPrefix)
 	} else if strings.HasPrefix(toolName, serverPrefixUnderscore) {
@@ -190,7 +190,7 @@ func (hsa *HostServerAdapter) ExecuteTool(ctx context.Context, toolName string, 
 	if stdioClient == nil {
 		return "", fmt.Errorf("server %s does not support stdio protocol", hsa.connection.Name)
 	}
-	
+
 	result, err := tools.SendToolsCall(stdioClient, stdioClient.GetDispatcher(), actualToolName, arguments)
 	if err != nil {
 		return "", fmt.Errorf("MCP tool execution failed for %s: %w", actualToolName, err)

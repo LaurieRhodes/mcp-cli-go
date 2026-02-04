@@ -16,37 +16,37 @@ func unmarshalStrict(data []byte, v interface{}) error {
 	decoder := yaml.NewDecoder(bytes.NewReader(data))
 	decoder.KnownFields(true) // Enable strict mode - reject unknown fields
 	err := decoder.Decode(v)
-	
+
 	if err != nil {
 		// Enhance error message with helpful suggestions
 		return enhanceValidationError(err, v)
 	}
-	
+
 	return nil
 }
 
 // enhanceValidationError adds helpful context to YAML validation errors
 func enhanceValidationError(err error, v interface{}) error {
 	errMsg := err.Error()
-	
+
 	// Check if it's an unknown field error
 	if !strings.Contains(errMsg, "field") || !strings.Contains(errMsg, "not found") {
 		return err // Not a field validation error, return as-is
 	}
-	
+
 	// Common mistakes and suggestions
 	suggestions := map[string]string{
-		"pass_env":     "Use 'with:' to pass parameters to child workflows",
-		"input":        "Use 'items:' for iterate mode or 'with:' for parameters. 'input' is only valid at step level",
-		"inputs":       "Not a valid workflow field. Use 'env:' for environment variables or step-level 'input'",
-		"output":       "Not a valid workflow field. Output is returned automatically from steps",
-		"outputs":      "Not a valid workflow field. Use step names to reference outputs",
-		"output_var":   "Not a valid field. Step outputs are accessible via step names",
-		"execution":    "Cannot be nested inside loop. Set execution at workflow or step level",
-		"workfow":      "Typo: should be 'workflow'",
+		"pass_env":      "Use 'with:' to pass parameters to child workflows",
+		"input":         "Use 'items:' for iterate mode or 'with:' for parameters. 'input' is only valid at step level",
+		"inputs":        "Not a valid workflow field. Use 'env:' for environment variables or step-level 'input'",
+		"output":        "Not a valid workflow field. Output is returned automatically from steps",
+		"outputs":       "Not a valid workflow field. Use step names to reference outputs",
+		"output_var":    "Not a valid field. Step outputs are accessible via step names",
+		"execution":     "Cannot be nested inside loop. Set execution at workflow or step level",
+		"workfow":       "Typo: should be 'workflow'",
 		"max_iteration": "Typo: should be 'max_iterations' (plural)",
 	}
-	
+
 	// Try to extract field name from error
 	var fieldName string
 	if strings.Contains(errMsg, "field ") {
@@ -58,14 +58,14 @@ func enhanceValidationError(err error, v interface{}) error {
 			}
 		}
 	}
-	
+
 	// Build enhanced error message
 	enhanced := fmt.Sprintf("%s\n\n", errMsg)
-	
+
 	if suggestion, ok := suggestions[fieldName]; ok {
 		enhanced += fmt.Sprintf("💡 Suggestion: %s\n\n", suggestion)
 	}
-	
+
 	// Add valid fields for common types
 	if strings.Contains(errMsg, "type config.WorkflowV2") {
 		enhanced += "Valid workflow-level fields:\n"
@@ -106,7 +106,7 @@ func enhanceValidationError(err error, v interface{}) error {
 		enhanced += "  - needs (dependencies)\n"
 		enhanced += "  - if (conditional)\n"
 	}
-	
+
 	return fmt.Errorf("%s", enhanced)
 }
 
@@ -135,11 +135,11 @@ type IncludeDirectives struct {
 
 // MainConfigFile represents the main config file with optional includes
 type MainConfigFile struct {
-	Includes   *IncludeDirectives `yaml:"includes,omitempty"`
+	Includes *IncludeDirectives `yaml:"includes,omitempty"`
 	// Legacy fields for backward compatibility with old monolithic configs
-	Servers    map[string]ServerConfig      `yaml:"servers,omitempty"`
-	AI         *AIConfig                    `yaml:"ai,omitempty"`
-	Embeddings *EmbeddingsConfig            `yaml:"embeddings,omitempty"`
+	Servers    map[string]ServerConfig `yaml:"servers,omitempty"`
+	AI         *AIConfig               `yaml:"ai,omitempty"`
+	Embeddings *EmbeddingsConfig       `yaml:"embeddings,omitempty"`
 }
 
 // Load loads configuration from a single file or detects modular structure
@@ -201,10 +201,10 @@ func (l *Loader) loadModular(includes *IncludeDirectives) (*ApplicationConfig, e
 // loadMonolithic loads configuration from a single file
 func (l *Loader) loadMonolithic(mainConfig *MainConfigFile) (*ApplicationConfig, error) {
 	result := &ApplicationConfig{
-		Servers:   mainConfig.Servers,
-		AI:        mainConfig.AI,
+		Servers:    mainConfig.Servers,
+		AI:         mainConfig.AI,
 		Embeddings: mainConfig.Embeddings,
-		Workflows: make(map[string]*WorkflowV2),
+		Workflows:  make(map[string]*WorkflowV2),
 	}
 
 	// Initialize maps if nil
@@ -377,8 +377,8 @@ func (l *Loader) loadEmbeddings(pattern string, result *ApplicationConfig) error
 		}
 
 		var embedding struct {
-			InterfaceType InterfaceType         `yaml:"interface_type"`
-			ProviderName  string                `yaml:"provider_name"`
+			InterfaceType InterfaceType           `yaml:"interface_type"`
+			ProviderName  string                  `yaml:"provider_name"`
 			Config        EmbeddingProviderConfig `yaml:"config"`
 		}
 
@@ -414,7 +414,6 @@ func (l *Loader) loadEmbeddings(pattern string, result *ApplicationConfig) error
 
 	return nil
 }
-
 
 // loadServers loads server configurations from files
 func (l *Loader) loadServers(pattern string, result *ApplicationConfig) error {
@@ -457,13 +456,13 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 		basePattern = pattern[:idx]
 	}
 	baseWorkflowDir := filepath.Clean(basePattern)
-	
+
 	// CRITICAL: If pattern is relative, join with loader's baseDir first
 	// This ensures we resolve relative to the config file's location, not cwd
 	if !filepath.IsAbs(baseWorkflowDir) && l.baseDir != "" {
 		baseWorkflowDir = filepath.Join(l.baseDir, baseWorkflowDir)
 	}
-	
+
 	// Now convert to absolute (should already be absolute after the join above)
 	if !filepath.IsAbs(baseWorkflowDir) {
 		var err error
@@ -472,7 +471,7 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 			return fmt.Errorf("failed to get absolute path for workflow directory: %w", err)
 		}
 	}
-	
+
 	// Use workflow loader for validation
 	workflowLoader := NewWorkflowLoader()
 
@@ -486,7 +485,7 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 				return fmt.Errorf("failed to get absolute path for workflow file %s: %w", file, err)
 			}
 		}
-		
+
 		data, err := os.ReadFile(file)
 		if err != nil {
 			return fmt.Errorf("failed to read workflow file %s: %w", file, err)
@@ -522,10 +521,10 @@ func (l *Loader) loadWorkflows(pattern string, result *ApplicationConfig) error 
 			// Remove .yaml extension
 			relPath = strings.TrimSuffix(relPath, ".yaml")
 			relPath = strings.TrimSuffix(relPath, ".yml")
-			
+
 			// If the file is in a subdirectory, use subdirectory/workflowname format
 			dir := filepath.Dir(relPath)
-			
+
 			if dir != "." {
 				// Use forward slashes for consistency across platforms
 				workflowKey := filepath.ToSlash(filepath.Join(dir, workflow.Name))

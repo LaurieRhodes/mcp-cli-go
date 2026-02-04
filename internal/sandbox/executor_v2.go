@@ -17,10 +17,10 @@ func (c *ExecutorConfig) GetResourceLimitsForSkill(skillLibsDir string) (int64, 
 	defaultMemory := int64(256 * 1024 * 1024) // 256MB
 	defaultCPU := 0.5
 	defaultTimeout := 60 * time.Second
-	
+
 	// TODO: Check if mapping supports V2 and extract resource limits
 	// For now, return defaults (will implement full resolution in next phase)
-	
+
 	// V1 config or error - use defaults
 	return defaultMemory, defaultCPU, defaultTimeout
 }

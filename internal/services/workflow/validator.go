@@ -41,12 +41,12 @@ func NewWorkflowValidator(workflow *config.WorkflowV2) *WorkflowValidator {
 func (v *WorkflowValidator) Validate() error {
 	// Validate execution context (workflow-level settings)
 	v.validateExecutionContext()
-	
+
 	// Validate each step
 	for i := range v.workflow.Steps {
 		v.validateStep(&v.workflow.Steps[i])
 	}
-	
+
 	// Check for circular dependencies (only if parallel execution is enabled)
 	if v.workflow.Execution.Parallel {
 		v.validateNoCycles()
@@ -67,12 +67,12 @@ func (v *WorkflowValidator) validateNoCycles() {
 	for i := range v.workflow.Steps {
 		deps[v.workflow.Steps[i].Name] = v.workflow.Steps[i].Needs
 	}
-	
+
 	// Check each step for cycles
 	for _, step := range v.workflow.Steps {
 		visited := make(map[string]bool)
 		recStack := make(map[string]bool)
-		
+
 		if cycle := v.detectCycle(step.Name, deps, visited, recStack, []string{}); len(cycle) > 0 {
 			cycleStr := strings.Join(cycle, " → ")
 			v.addError("workflow", "dependencies",
@@ -88,7 +88,7 @@ func (v *WorkflowValidator) detectCycle(node string, deps map[string][]string, v
 	visited[node] = true
 	recStack[node] = true
 	path = append(path, node)
-	
+
 	for _, dep := range deps[node] {
 		if !visited[dep] {
 			if cycle := v.detectCycle(dep, deps, visited, recStack, path); len(cycle) > 0 {
@@ -108,7 +108,7 @@ func (v *WorkflowValidator) detectCycle(node string, deps map[string][]string, v
 			}
 		}
 	}
-	
+
 	recStack[node] = false
 	return nil
 }
@@ -116,18 +116,18 @@ func (v *WorkflowValidator) detectCycle(node string, deps map[string][]string, v
 // validateExecutionContext validates workflow-level execution settings
 func (v *WorkflowValidator) validateExecutionContext() {
 	exec := &v.workflow.Execution
-	
+
 	// Validate max_workers
 	if exec.MaxWorkers < 0 {
 		v.addError("execution", "max_workers", "max_workers cannot be negative",
 			"Set max_workers to a positive integer (recommended: 3-10)")
 	}
-	
+
 	if exec.MaxWorkers > 100 {
 		v.addError("execution", "max_workers", "max_workers is too high (max: 100)",
 			"High values (>20) may cause resource exhaustion. Recommended: 3-10")
 	}
-	
+
 	// Validate on_error (only if set)
 	// Note: on_error serves as default for step-level on_failure in non-parallel workflows
 	if exec.OnError != "" {
@@ -137,24 +137,24 @@ func (v *WorkflowValidator) validateExecutionContext() {
 			"continue":         true,
 			"halt":             true, // Synonym for cancel_all (sequential workflows)
 		}
-		
+
 		if !validPolicies[exec.OnError] {
-			v.addError("execution", "on_error", 
+			v.addError("execution", "on_error",
 				fmt.Sprintf("invalid error policy '%s'", exec.OnError),
 				"Valid values: 'halt', 'cancel_all', 'complete_running', 'continue'")
 		}
 	}
-	
+
 	// Warn if parallel is disabled but max_workers is set
 	if !exec.Parallel {
 		if exec.MaxWorkers > 0 {
-			v.addError("execution", "max_workers", 
+			v.addError("execution", "max_workers",
 				"max_workers is set but parallel execution is disabled",
 				"Set 'parallel: true' to enable parallel execution")
 		}
 		// Note: on_error is allowed in non-parallel workflows as a default for step-level on_failure
 	}
-	
+
 	// Validate logging level (only if set)
 	if exec.Logging != "" {
 		validLevels := map[string]bool{
@@ -167,7 +167,7 @@ func (v *WorkflowValidator) validateExecutionContext() {
 			"verbose": true,
 			"noisy":   true,
 		}
-		
+
 		if !validLevels[exec.Logging] {
 			v.addError("execution", "logging",
 				fmt.Sprintf("invalid log level '%s'", exec.Logging),
@@ -180,7 +180,7 @@ func (v *WorkflowValidator) validateExecutionContext() {
 func (v *WorkflowValidator) validateStep(step *config.StepV2) {
 	// Check that step has an execution mode
 	executionModes := v.countExecutionModes(step)
-	
+
 	if executionModes == 0 {
 		v.addError(step.Name, "", "no execution mode specified",
 			"Steps must have ONE of: run, template, rag, embeddings, consensus, or loop")
@@ -251,7 +251,7 @@ func (v *WorkflowValidator) validateLoopMode(step *config.StepV2) {
 		v.addError(step.Name, "loop.workflow", "loop workflow name is required",
 			"Example: loop:\n  workflow: child_workflow\n  max_iterations: 5")
 	}
-	
+
 	if step.Loop.MaxIterations <= 0 {
 		v.addError(step.Name, "loop.max_iterations", "max_iterations must be > 0",
 			"Set a reasonable limit like max_iterations: 10")
@@ -262,7 +262,7 @@ func (v *WorkflowValidator) validateLoopMode(step *config.StepV2) {
 		v.addError(step.Name, "loop.max_workers", "max_workers must be > 0 when parallel is true",
 			"Set max_workers to control concurrency (e.g., max_workers: 3)")
 	}
-	
+
 	// Validate variable syntax in items
 	if step.Loop.Items != "" {
 		v.validateVariableSyntax(step, "loop.items", step.Loop.Items)
@@ -294,7 +294,7 @@ func (v *WorkflowValidator) validateRagMode(step *config.StepV2) {
 		v.addError(step.Name, "rag.query", "RAG query is required",
 			"Specify the search query for RAG retrieval")
 	}
-	
+
 	// Validate variable syntax in query
 	v.validateVariableSyntax(step, "rag.query", step.Rag.Query)
 	v.validateRagVariables(step)
@@ -318,18 +318,18 @@ func (v *WorkflowValidator) validateDependencies(step *config.StepV2) {
 	// Check each dependency exists
 	for _, dep := range step.Needs {
 		if !allNames[dep] {
-			v.addError(step.Name, "needs", 
+			v.addError(step.Name, "needs",
 				fmt.Sprintf("dependency '%s' does not exist", dep),
-				"Available steps/loops: " + v.getAvailableNames())
+				"Available steps/loops: "+v.getAvailableNames())
 		}
 	}
-	
+
 	// Check for self-dependency
 	for _, dep := range step.Needs {
 		if dep == step.Name {
 			v.addError(step.Name, "needs",
 				"step cannot depend on itself",
-				"Remove '" + step.Name + "' from the needs array")
+				"Remove '"+step.Name+"' from the needs array")
 		}
 	}
 }
@@ -343,11 +343,11 @@ func (v *WorkflowValidator) getAvailableNames() string {
 	for _, l := range v.workflow.Loops {
 		names = append(names, l.Name)
 	}
-	
+
 	if len(names) == 0 {
 		return "(none defined)"
 	}
-	
+
 	return strings.Join(names, ", ")
 }
 
@@ -364,16 +364,16 @@ func (v *WorkflowValidator) addError(step, field, message, hint string) {
 // formatErrors formats all errors into a single error message
 func (v *WorkflowValidator) formatErrors() error {
 	var sb strings.Builder
-	
+
 	sb.WriteString(fmt.Sprintf("Workflow validation failed with %d error(s):\n\n", len(v.errors)))
-	
+
 	for i, err := range v.errors {
 		sb.WriteString(fmt.Sprintf("%d. %s\n", i+1, err.Error()))
 		if i < len(v.errors)-1 {
 			sb.WriteString("\n")
 		}
 	}
-	
+
 	sb.WriteString("\n═══════════════════════════════════════════════════════════\n")
 	sb.WriteString("Valid step execution modes:\n")
 	sb.WriteString("  • run: \"LLM query with {{variables}}\"\n")
@@ -402,7 +402,7 @@ func (v *WorkflowValidator) formatErrors() error {
 	sb.WriteString("  • No self-dependencies\n")
 	sb.WriteString("  • Variables used must be in needs array\n")
 	sb.WriteString("═══════════════════════════════════════════════════════════\n")
-	
+
 	return fmt.Errorf("%s", sb.String())
 }
 

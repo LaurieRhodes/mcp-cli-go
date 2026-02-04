@@ -19,7 +19,7 @@ func init() {
 	cmd.Version = Version
 	cmd.BuildTime = BuildTime
 	cmd.GitCommit = GitCommit
-	
+
 	// Note: Signal handling removed - Go runtime handles Ctrl-C naturally
 	// and properly executes deferred cleanup functions (including terminal reset)
 }
@@ -27,7 +27,7 @@ func init() {
 func main() {
 	// Commands are automatically set up in their respective init() functions
 	// and registered in cmd/root.go
-	
+
 	// Execute the root command
 	if err := cmd.RootCmd.Execute(); err != nil {
 		fmt.Println(err)

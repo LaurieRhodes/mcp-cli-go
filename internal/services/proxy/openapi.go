@@ -35,7 +35,7 @@ type OpenAPIComponents struct {
 // generateOpenAPISpec generates the OpenAPI specification for all tools
 func (s *ProxyServer) generateOpenAPISpec() *OpenAPISpec {
 	proxyConfig := s.config.ProxyConfig
-	
+
 	spec := &OpenAPISpec{
 		OpenAPI: "3.0.0",
 		Info: OpenAPIInfo{
@@ -48,15 +48,15 @@ func (s *ProxyServer) generateOpenAPISpec() *OpenAPISpec {
 			Schemas: make(map[string]interface{}),
 			SecuritySchemes: map[string]interface{}{
 				"ApiKeyAuth": map[string]interface{}{
-					"type": "apiKey",
-					"in":   "header",
-					"name": "Authorization",
+					"type":        "apiKey",
+					"in":          "header",
+					"name":        "Authorization",
 					"description": "API key authentication. Use 'Bearer <your-api-key>' or just '<your-api-key>'",
 				},
 			},
 		},
 	}
-	
+
 	// Add server URL if we can determine it
 	port := proxyConfig.Port
 	if port == 0 {
@@ -68,7 +68,7 @@ func (s *ProxyServer) generateOpenAPISpec() *OpenAPISpec {
 			Description: "Local development server",
 		},
 	}
-	
+
 	// Add health endpoint
 	spec.Paths["/health"] = map[string]interface{}{
 		"get": map[string]interface{}{
@@ -94,7 +94,7 @@ func (s *ProxyServer) generateOpenAPISpec() *OpenAPISpec {
 			},
 		},
 	}
-	
+
 	// Add tools list endpoint
 	spec.Paths["/tools"] = map[string]interface{}{
 		"get": map[string]interface{}{
@@ -132,19 +132,19 @@ func (s *ProxyServer) generateOpenAPISpec() *OpenAPISpec {
 			},
 		},
 	}
-	
+
 	// Add each tool as a path
 	for _, tool := range s.config.Tools {
 		path := fmt.Sprintf("/%s", tool.Name)
-		
+
 		// Use the input schema directly - MCP servers provide complete JSON Schema objects
 		// The inputSchema already contains type, properties, and required fields
 		requestSchema := tool.InputSchema
-		
+
 		// Store schema in components for reuse
 		schemaName := fmt.Sprintf("%sRequest", tool.Name)
 		spec.Components.Schemas[schemaName] = requestSchema
-		
+
 		// Create response schema
 		responseSchema := map[string]interface{}{
 			"type": "object",
@@ -163,10 +163,10 @@ func (s *ProxyServer) generateOpenAPISpec() *OpenAPISpec {
 				},
 			},
 		}
-		
+
 		responseSchemaName := fmt.Sprintf("%sResponse", tool.Name)
 		spec.Components.Schemas[responseSchemaName] = responseSchema
-		
+
 		// Add path operation
 		spec.Paths[path] = map[string]interface{}{
 			"post": map[string]interface{}{
@@ -211,14 +211,14 @@ func (s *ProxyServer) generateOpenAPISpec() *OpenAPISpec {
 			},
 		}
 	}
-	
+
 	return spec
 }
 
 // generateSwaggerUIHTML generates the HTML for Swagger UI
 func (s *ProxyServer) generateSwaggerUIHTML() string {
 	basePath := s.config.ProxyConfig.BasePath
-	
+
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>

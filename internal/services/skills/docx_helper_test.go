@@ -11,37 +11,37 @@ func TestExecuteCodeWithDocxHelperLibraries(t *testing.T) {
 	t.Log("\n" + strings.Repeat("=", 70))
 	t.Log("HELPER LIBRARY TEST: Import and Use Skill Helper Libraries")
 	t.Log(strings.Repeat("=", 70))
-	
+
 	// Initialize service
 	service := NewService()
-	
+
 	skillsDir := "../../../config/skills"
 	executionMode := skills.ExecutionModeAuto
-	
+
 	err := service.Initialize(skillsDir, executionMode)
 	if err != nil {
 		t.Fatalf("Failed to initialize: %v", err)
 	}
-	
+
 	t.Logf("\n✅ Initialized with %d skills", len(service.ListSkills()))
-	
+
 	// Use test-execution skill (simpler, no external deps)
 	skill, exists := service.GetSkill("test-execution")
 	if !exists {
 		t.Fatal("❌ test-execution skill not found")
 	}
-	
+
 	t.Logf("✅ Found skill: %s", skill.Name)
 	t.Logf("   Skill directory: %s", skill.DirectoryPath)
 	t.Logf("   Has scripts: %v", skill.HasScripts)
-	
+
 	// Skip if Docker/Podman not available
 	if service.executor == nil {
 		t.Skip("⚠️  Docker/Podman not available, skipping execution test")
 	}
-	
+
 	t.Logf("✅ Executor available: %s", service.executor.GetInfo())
-	
+
 	// Test: Import and use helper library
 	t.Log("\n📝 Test: Import and use helper library from skill/scripts/")
 	t.Log("   This tests the CORE capability that matches Anthropic's design:")
@@ -49,7 +49,7 @@ func TestExecuteCodeWithDocxHelperLibraries(t *testing.T) {
 	t.Log("   - Code imports helper libraries from /skill")
 	t.Log("   - Helper libraries provide reusable primitives")
 	t.Log("")
-	
+
 	code := `
 import sys
 print("=" * 60)
@@ -128,38 +128,38 @@ except ImportError as e:
             print(f"   /skill/scripts: {os.listdir('/skill/scripts')}")
     sys.exit(1)
 `
-	
+
 	request := &skills.CodeExecutionRequest{
 		SkillName: "test-execution",
 		Language:  "python",
 		Code:      code,
 		Files:     nil,
 	}
-	
+
 	result, err := service.ExecuteCode(request)
 	if err != nil {
 		t.Fatalf("❌ Test failed: %v\nOutput:\n%s", err, result.Output)
 	}
-	
+
 	t.Logf("\n✅ Test passed in %dms", result.Duration)
 	t.Log("\n📄 Output:")
 	t.Log("────────────────────────────────────────────────────────────")
 	t.Log(result.Output)
 	t.Log("────────────────────────────────────────────────────────────")
-	
+
 	// Verify import and usage succeeded
 	if !strings.Contains(result.Output, "SUCCESS: Imported helper library") {
 		t.Errorf("❌ Expected successful import message not found")
 	}
-	
+
 	if !strings.Contains(result.Output, "ALL TESTS PASSED") {
 		t.Errorf("❌ Expected success confirmation not found")
 	}
-	
+
 	if !strings.Contains(result.Output, "Result: Hello, World!") {
 		t.Errorf("❌ Expected greeting result not found")
 	}
-	
+
 	// Final summary
 	t.Log("\n" + strings.Repeat("=", 70))
 	t.Log("🎉 HELPER LIBRARY TEST PASSED!")

@@ -10,14 +10,14 @@ import (
 
 // ChatUI handles chat interface display
 type ChatUI struct {
-	writer  io.Writer
+	writer   io.Writer
 	showMeta bool
 }
 
 // NewChatUI creates a new chat UI
 func NewChatUI(writer io.Writer) *ChatUI {
 	return &ChatUI{
-		writer:  writer,
+		writer:   writer,
 		showMeta: true,
 	}
 }
@@ -51,7 +51,7 @@ func (cui *ChatUI) displayUserMessage(msg models.Message) {
 func (cui *ChatUI) displayAssistantMessage(msg models.Message) {
 	fmt.Fprintf(cui.writer, "\n%s\n", Bold(Green("Assistant:")))
 	fmt.Fprintf(cui.writer, "%s\n", msg.Content)
-	
+
 	// Display tool calls if present
 	if len(msg.ToolCalls) > 0 {
 		cui.displayToolCalls(msg.ToolCalls)
@@ -66,7 +66,7 @@ func (cui *ChatUI) displaySystemMessage(msg models.Message) {
 // displayToolMessage displays a tool result message
 func (cui *ChatUI) displayToolMessage(msg models.Message) {
 	fmt.Fprintf(cui.writer, "\n%s\n", Dim("[Tool Result]"))
-	
+
 	// Try to format JSON content
 	if strings.HasPrefix(msg.Content, "{") || strings.HasPrefix(msg.Content, "[") {
 		fmt.Fprintf(cui.writer, "%s\n", Dim(msg.Content))
@@ -78,14 +78,14 @@ func (cui *ChatUI) displayToolMessage(msg models.Message) {
 // displayToolCalls displays tool calls
 func (cui *ChatUI) displayToolCalls(toolCalls []models.ToolCall) {
 	fmt.Fprintf(cui.writer, "\n%s\n", Yellow("Calling tools:"))
-	
+
 	for _, tc := range toolCalls {
 		fmt.Fprintf(cui.writer, "  • %s", Bold(tc.Function.Name))
-		
+
 		if len(tc.Function.Arguments) > 0 {
 			fmt.Fprintf(cui.writer, " %s", Dim(string(tc.Function.Arguments)))
 		}
-		
+
 		fmt.Fprintln(cui.writer)
 	}
 }
@@ -95,7 +95,7 @@ func (cui *ChatUI) DisplayUsage(usage models.Usage) {
 	if !cui.showMeta {
 		return
 	}
-	
+
 	fmt.Fprintf(cui.writer, "\n%s\n", Dim(fmt.Sprintf(
 		"Tokens: %d prompt + %d completion = %d total",
 		usage.PromptTokens,
@@ -155,7 +155,7 @@ func (cui *ChatUI) DisplaySeparator() {
 func (cui *ChatUI) DisplayHistory(messages []models.Message) {
 	fmt.Fprintln(cui.writer, Bold("Conversation History:"))
 	fmt.Fprintln(cui.writer)
-	
+
 	for _, msg := range messages {
 		cui.DisplayMessage(msg)
 	}

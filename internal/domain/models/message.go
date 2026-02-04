@@ -8,11 +8,11 @@ type Message struct {
 	Role      Role      `json:"role"`
 	Content   string    `json:"content,omitempty"`
 	Timestamp time.Time `json:"timestamp,omitempty"`
-	
+
 	// Tool-related fields
 	ToolCalls  []ToolCall `json:"tool_calls,omitempty"`
 	ToolCallID string     `json:"tool_call_id,omitempty"`
-	
+
 	// Optional metadata
 	Name     string                 `json:"name,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty"`

@@ -30,7 +30,7 @@ var DefaultClientInfo = ClientInfo{
 // SendInitialize sends an initialize request to the server and returns the result
 func SendInitialize(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatcher) (*InitializeResult, error) {
 	logging.Info("Initializing MCP server connection")
-	
+
 	// Create initialize parameters
 	params := InitializeParams{
 		ProtocolVersion: CurrentProtocolVersion,
@@ -41,8 +41,8 @@ func SendInitialize(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatc
 			SupportsCancellation:        true,
 		},
 	}
-	
-	logging.Debug("Initialize parameters: protocolVersion=%s, clientInfo=%s/%s", 
+
+	logging.Debug("Initialize parameters: protocolVersion=%s, clientInfo=%s/%s",
 		params.ProtocolVersion, params.ClientInfo.Name, params.ClientInfo.Version)
 
 	// Create the request message
@@ -52,7 +52,7 @@ func SendInitialize(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatc
 		logging.Error("Failed to create initialize request: %v", err)
 		return nil, fmt.Errorf("failed to create initialize request: %w", err)
 	}
-	
+
 	logging.Debug("Created initialize request with ID: %s", requestID)
 
 	// Register with dispatcher BEFORE sending request
@@ -71,7 +71,7 @@ func SendInitialize(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatc
 	select {
 	case response := <-responseCh:
 		logging.Debug("Received initialize response")
-		
+
 		// Check for errors
 		if response.Error != nil {
 			logging.Error("Server returned error: %s (code: %d)", response.Error.Message, response.Error.Code)
@@ -84,11 +84,11 @@ func SendInitialize(client *stdio.StdioClient, dispatcher *stdio.ResponseDispatc
 			logging.Error("Failed to parse initialize result: %v", err)
 			return nil, fmt.Errorf("failed to parse initialize result: %w", err)
 		}
-		
-		logging.Info("Server initialized successfully: %s v%s (protocol: %s)", 
+
+		logging.Info("Server initialized successfully: %s v%s (protocol: %s)",
 			result.ServerInfo.Name, result.ServerInfo.Version, result.ServerInfo.ProtocolVersion)
 		logging.Debug("Server capabilities: tools=%v, prompts=%v, resources=%v",
-			result.Capabilities.ProvidesTools, result.Capabilities.ProvidesPrompts, 
+			result.Capabilities.ProvidesTools, result.Capabilities.ProvidesPrompts,
 			result.Capabilities.ProvidesResources)
 
 		return &result, nil

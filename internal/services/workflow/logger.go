@@ -10,12 +10,12 @@ import (
 type LogLevel int
 
 const (
-	LogError LogLevel = iota // Errors only
-	LogWarn                  // + warnings
-	LogInfo                  // + info
-	LogSteps                 // + step-level workflow events (clean, semantic output)
-	LogDebug                 // + debug messages
-	LogVerbose               // + all internal operations (noisy)
+	LogError   LogLevel = iota // Errors only
+	LogWarn                    // + warnings
+	LogInfo                    // + info
+	LogSteps                   // + step-level workflow events (clean, semantic output)
+	LogDebug                   // + debug messages
+	LogVerbose                 // + all internal operations (noisy)
 )
 
 // Logger handles workflow logging at different verbosity levels
@@ -28,7 +28,7 @@ type Logger struct {
 // If levelStr is empty and cliVerbose is true, uses verbose level
 func NewLogger(levelStr string, cliVerbose bool) *Logger {
 	var level LogLevel
-	
+
 	// Parse level string
 	if levelStr != "" {
 		switch levelStr {
@@ -38,7 +38,7 @@ func NewLogger(levelStr string, cliVerbose bool) *Logger {
 			level = LogWarn
 		case "info":
 			level = LogInfo
-		case "step", "steps":  // Accept both singular and plural
+		case "step", "steps": // Accept both singular and plural
 			level = LogSteps
 		case "debug":
 			level = LogDebug

@@ -52,7 +52,7 @@ func NewAzureOpenAIClient(providerType domain.ProviderType, cfg *config.Provider
 
 	// Default API version
 	apiVersion := "2024-02-15-preview"
-	
+
 	// Clean endpoint
 	apiEndpoint := strings.TrimSuffix(cfg.APIEndpoint, "/")
 
@@ -313,21 +313,21 @@ func (c *AzureOpenAIClient) Close() error {
 // buildAzureURL constructs Azure-specific URL with deployment and API version
 func (c *AzureOpenAIClient) buildAzureURL(endpoint string) string {
 	baseURL := c.apiEndpoint
-	
+
 	// Build: {endpoint}/openai/deployments/{deployment-id}{endpoint}?api-version={version}
 	if !strings.Contains(baseURL, "/openai/deployments/") {
 		baseURL = baseURL + "/openai/deployments/" + c.deploymentID
 	}
-	
+
 	url := baseURL + endpoint
-	
+
 	// Add API version
 	separator := "?"
 	if strings.Contains(url, "?") {
 		separator = "&"
 	}
 	url = url + separator + "api-version=" + c.apiVersion
-	
+
 	return url
 }
 
@@ -442,7 +442,7 @@ func (c *AzureOpenAIClient) processStreamingResponse(resp *http.Response, writer
 		if len(delta.ToolCalls) > 0 {
 			for _, tc := range delta.ToolCalls {
 				idx := 0
-				
+
 				if _, exists := toolCallMap[idx]; !exists {
 					toolCallMap[idx] = &openaiToolCall{
 						ID:   tc.ID,

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,21 +23,21 @@ func (l *Loader) Load(path string) (*RunAsConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read runas config file: %w", err)
 	}
-	
+
 	// Parse YAML
 	var config RunAsConfig
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to parse runas config YAML: %w", err)
 	}
-	
+
 	// Expand environment variables in proxy config
 	l.expandEnvVars(&config)
-	
+
 	// Validate
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid runas config: %w", err)
 	}
-	
+
 	return &config, nil
 }
 
@@ -54,13 +54,13 @@ func (l *Loader) expandEnvVars(config *RunAsConfig) {
 // Only expands if the string looks like an environment variable reference
 func expandEnvVar(s string) string {
 	// Check if string contains environment variable patterns
-	hasEnvPattern := strings.Contains(s, "${") || 
+	hasEnvPattern := strings.Contains(s, "${") ||
 		(strings.Contains(s, "$") && len(s) > 1 && (s[0] == '$' || strings.Contains(s, " $")))
-	
+
 	if !hasEnvPattern {
 		return s
 	}
-	
+
 	return os.ExpandEnv(s)
 }
 
@@ -71,7 +71,7 @@ func (l *Loader) LoadOrDefault(path string) (*RunAsConfig, bool, error) {
 	if err == nil {
 		return config, false, nil
 	}
-	
+
 	// If file doesn't exist, create example
 	if os.IsNotExist(err) {
 		example := l.CreateExample()
@@ -80,7 +80,7 @@ func (l *Loader) LoadOrDefault(path string) (*RunAsConfig, bool, error) {
 		}
 		return example, true, nil
 	}
-	
+
 	// Other error
 	return nil, false, err
 }
@@ -91,18 +91,18 @@ func (l *Loader) Save(config *RunAsConfig, path string) error {
 	if err := config.Validate(); err != nil {
 		return fmt.Errorf("cannot save invalid config: %w", err)
 	}
-	
+
 	// Marshal to YAML
 	data, err := yaml.Marshal(config)
 	if err != nil {
 		return fmt.Errorf("failed to marshal config to YAML: %w", err)
 	}
-	
+
 	// Write file
 	if err := os.WriteFile(path, data, 0644); err != nil {
 		return fmt.Errorf("failed to write config file: %w", err)
 	}
-	
+
 	return nil
 }
 

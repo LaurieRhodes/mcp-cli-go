@@ -4,11 +4,11 @@ import "fmt"
 
 // ANSI color codes
 const (
-	ColorReset   = "\033[0m"
-	ColorBold    = "\033[1m"
-	ColorDim     = "\033[2m"
-	ColorItalic  = "\033[3m"
-	
+	ColorReset  = "\033[0m"
+	ColorBold   = "\033[1m"
+	ColorDim    = "\033[2m"
+	ColorItalic = "\033[3m"
+
 	// Foreground colors
 	ColorBlack   = "\033[30m"
 	ColorRed     = "\033[31m"
@@ -18,7 +18,7 @@ const (
 	ColorMagenta = "\033[35m"
 	ColorCyan    = "\033[36m"
 	ColorWhite   = "\033[37m"
-	
+
 	// Bright foreground colors
 	ColorBrightBlack   = "\033[90m"
 	ColorBrightRed     = "\033[91m"

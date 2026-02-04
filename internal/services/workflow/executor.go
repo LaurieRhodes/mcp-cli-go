@@ -15,12 +15,12 @@ import (
 
 // Executor executes workflow steps with provider fallback
 type Executor struct {
-	workflow        *config.WorkflowV2
-	resolver        *PropertyResolver
-	logger          *Logger
-	appConfig       *config.ApplicationConfig
-	configService   interface{} // infraConfig.Service
-	serverManager   domain.MCPServerManager
+	workflow      *config.WorkflowV2
+	resolver      *PropertyResolver
+	logger        *Logger
+	appConfig     *config.ApplicationConfig
+	configService interface{} // infraConfig.Service
+	serverManager domain.MCPServerManager
 }
 
 // NewExecutor creates a new workflow executor
@@ -56,7 +56,7 @@ func (e *ProviderError) Error() string {
 func (e *Executor) ExecuteStep(ctx context.Context, step *config.StepV2) (*StepResult, error) {
 	// Resolve provider chain
 	providers := e.resolver.ResolveProviders(step)
-	
+
 	if len(providers) == 0 {
 		return nil, fmt.Errorf("no providers configured for step %s", step.Name)
 	}
@@ -98,7 +98,7 @@ func (e *Executor) executeWithProvider(
 ) (*StepResult, error) {
 	// ARCHITECTURAL FIX: Delegate to query service instead of reimplementing
 	// This ensures workflows behave identically to `mcp-cli query` calls
-	
+
 	// Create provider for this specific execution
 	provider, err := e.createProvider(pc.Provider, pc.Model)
 	if err != nil {
@@ -111,7 +111,7 @@ func (e *Executor) executeWithProvider(
 
 	// Resolve configuration
 	maxIterations := e.resolver.ResolveMaxIterations(step)
-	
+
 	// Build AI options (minimal - provider already configured)
 	aiOptions := &host.AIOptions{
 		Provider: pc.Provider,
@@ -158,14 +158,13 @@ The /outputs/ directory is the ONLY location where files persist after execution
 		systemPrompt,
 	)
 
-	
 	// Set max iterations
 	handler.SetMaxFollowUpAttempts(maxIterations)
 
 	// Execute query
-	e.logger.Debug("Executing step via query service: %s/%s with max_iterations=%d", 
+	e.logger.Debug("Executing step via query service: %s/%s with max_iterations=%d",
 		pc.Provider, pc.Model, maxIterations)
-	
+
 	queryResult, err := handler.Execute(step.Run)
 	if err != nil {
 		return nil, &ProviderError{
@@ -177,13 +176,13 @@ The /outputs/ directory is the ONLY location where files persist after execution
 
 	// Check for failure indicators in the response
 	failed := e.detectStepFailure(queryResult.Response, nil)
-	
+
 	// Convert query result to step result
 	result := &StepResult{
-		Output:       queryResult.Response,
-		Messages:     nil, // Query service doesn't expose message history
-		ToolsUsed:    len(queryResult.ToolCalls) > 0,
-		Success:      !failed,
+		Output:    queryResult.Response,
+		Messages:  nil, // Query service doesn't expose message history
+		ToolsUsed: len(queryResult.ToolCalls) > 0,
+		Success:   !failed,
 	}
 
 	e.logger.Debug("Step result: %s", result.Output)
@@ -220,12 +219,12 @@ func (e *Executor) createProvider(providerName, modelName string) (domain.LLMPro
 	if modelName != "" {
 		configCopy.DefaultModel = modelName
 	}
-	
+
 	// For failover chains: disable retries at provider level
 	// The executor handles retries by trying the next provider
-	configCopy.MaxRetries = 0  // No retries - fail fast for failover
-	
-	e.logger.Debug("Creating provider %s with model=%s, max_retries=0 (failover mode)", 
+	configCopy.MaxRetries = 0 // No retries - fail fast for failover
+
+	e.logger.Debug("Creating provider %s with model=%s, max_retries=0 (failover mode)",
 		providerName, configCopy.DefaultModel)
 
 	// Create provider
@@ -257,7 +256,7 @@ func (e *Executor) SetServerManager(serverManager domain.MCPServerManager) {
 // detectStepFailure analyzes LLM output and tool results for failure indicators
 func (e *Executor) detectStepFailure(output string, messages []domain.Message) bool {
 	outputLower := strings.ToLower(output)
-	
+
 	// Check for explicit failure phrases in output
 	failureIndicators := []string{
 		"failed to",
@@ -273,14 +272,14 @@ func (e *Executor) detectStepFailure(output string, messages []domain.Message) b
 		"file not found",
 		"permission denied",
 	}
-	
+
 	for _, indicator := range failureIndicators {
 		if strings.Contains(outputLower, indicator) {
 			e.logger.Debug("Detected failure indicator: '%s'", indicator)
 			return true
 		}
 	}
-	
+
 	// Check tool results for errors
 	for _, msg := range messages {
 		if msg.Role == "tool" {
@@ -290,14 +289,14 @@ func (e *Executor) detectStepFailure(output string, messages []domain.Message) b
 			}
 		}
 	}
-	
+
 	return false
 }
 
 // isToolErrorResponse checks if a tool response indicates an error
 func (e *Executor) isToolErrorResponse(toolOutput string) bool {
 	lowerOutput := strings.ToLower(toolOutput)
-	
+
 	errorIndicators := []string{
 		"error:",
 		"exception:",
@@ -313,23 +312,23 @@ func (e *Executor) isToolErrorResponse(toolOutput string) bool {
 		"no such file",
 		"permission denied",
 	}
-	
+
 	for _, indicator := range errorIndicators {
 		if strings.Contains(lowerOutput, indicator) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
 // extractFailureReason extracts a concise failure reason from output
 func (e *Executor) extractFailureReason(output string) string {
 	lines := strings.Split(output, "\n")
-	
+
 	// Look for lines containing error indicators
 	errorIndicators := []string{"error:", "exception:", "traceback:", "failed:"}
-	
+
 	for idx, line := range lines {
 		lineLower := strings.ToLower(line)
 		for _, indicator := range errorIndicators {
@@ -339,7 +338,7 @@ func (e *Executor) extractFailureReason(output string) string {
 				if trimmed == "" {
 					continue
 				}
-				
+
 				// Get the error line plus a few lines of context
 				reason := []string{trimmed}
 				for i := idx + 1; i < len(lines) && i < idx+3; i++ {
@@ -351,7 +350,7 @@ func (e *Executor) extractFailureReason(output string) string {
 			}
 		}
 	}
-	
+
 	// Fallback: return first 200 chars
 	if len(output) > 200 {
 		return output[:200] + "..."

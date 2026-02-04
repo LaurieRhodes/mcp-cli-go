@@ -18,7 +18,7 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
-	
+
 	// Convert ApplicationConfig to EnhancedConfig for backward compatibility
 	enhancedConfig := &EnhancedConfig{
 		Servers: make(map[string]ServerConfig),
@@ -26,7 +26,7 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 			Interfaces: make(map[InterfaceType]InterfaceConfig),
 		},
 	}
-	
+
 	// Copy servers
 	for name, domainServer := range appConfig.Servers {
 		// Convert ServerSettings if present
@@ -37,7 +37,7 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 				// RawDataOverride is not in domain config, leave as default (false)
 			}
 		}
-		
+
 		enhancedConfig.Servers[name] = ServerConfig{
 			Command:      domainServer.Command,
 			Args:         domainServer.Args,
@@ -46,11 +46,11 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 			Settings:     settings,
 		}
 	}
-	
+
 	// Copy AI config
 	if appConfig.AI != nil {
 		enhancedConfig.AI.DefaultProvider = appConfig.AI.DefaultProvider
-		
+
 		// Copy interfaces - convert domain types to infrastructure types
 		for domainInterfaceType, domainInterfaceConfig := range appConfig.AI.Interfaces {
 			// Convert interface type
@@ -68,7 +68,7 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 			default:
 				infraInterfaceType = InterfaceType(domainInterfaceType)
 			}
-			
+
 			// Convert providers
 			infraProviders := make(map[string]ProviderConfig)
 			for providerName, domainProvider := range domainInterfaceConfig.Providers {
@@ -81,7 +81,7 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 					MaxRetries:      domainProvider.MaxRetries,
 				}
 			}
-			
+
 			// Merge into existing interface if it already exists (e.g., gemini merging into openai_compatible)
 			if existing, ok := enhancedConfig.AI.Interfaces[infraInterfaceType]; ok {
 				for name, provider := range infraProviders {
@@ -94,7 +94,7 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 				}
 			}
 		}
-		
+
 		// Copy legacy providers if any
 		if appConfig.AI.Providers != nil {
 			enhancedConfig.AI.Providers = make(map[string]ProviderConfig)
@@ -110,7 +110,7 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 			}
 		}
 	}
-	
+
 	return enhancedConfig, nil
 }
 
@@ -118,10 +118,10 @@ func LoadEnhancedConfig(file string) (*EnhancedConfig, error) {
 func SaveEnhancedConfig(config *EnhancedConfig, file string) error {
 	var data []byte
 	var err error
-	
+
 	// Detect format by file extension
 	ext := strings.ToLower(filepath.Ext(file))
-	
+
 	if ext == ".yaml" || ext == ".yml" {
 		// Save as YAML
 		data, err = yaml.Marshal(config)
@@ -151,10 +151,10 @@ func MigrateConfigFile(file string) error {
 	if err != nil {
 		return fmt.Errorf("failed to load legacy config: %w", err)
 	}
-	
+
 	// Generate the enhanced config
 	enhancedConfig := GenerateNewConfig(legacyConfig)
-	
+
 	// Save the enhanced config
 	return SaveEnhancedConfig(enhancedConfig, file)
 }
@@ -164,14 +164,14 @@ func GetProviderFromEnhancedConfig(config *EnhancedConfig, providerName string) 
 	if config == nil || config.AI == nil || config.AI.Interfaces == nil {
 		return ProviderConfig{}, "", fmt.Errorf("AI interfaces configuration not found")
 	}
-	
+
 	// Look for the provider in each interface
 	for interfaceType, interfaceConfig := range config.AI.Interfaces {
 		if providerConfig, ok := interfaceConfig.Providers[providerName]; ok {
 			return providerConfig, interfaceType, nil
 		}
 	}
-	
+
 	// If not found in interfaces, check the legacy providers
 	if config.AI.Providers != nil {
 		if providerConfig, ok := config.AI.Providers[providerName]; ok {
@@ -187,11 +187,11 @@ func GetProviderFromEnhancedConfig(config *EnhancedConfig, providerName string) 
 			default:
 				interfaceType = OpenAICompatible // Default
 			}
-			
+
 			return providerConfig, interfaceType, nil
 		}
 	}
-	
+
 	return ProviderConfig{}, "", fmt.Errorf("provider %s not found in configuration", providerName)
 }
 
@@ -200,7 +200,7 @@ func GetDefaultProviderFromEnhancedConfig(config *EnhancedConfig) (string, Provi
 	if config == nil || config.AI == nil {
 		return "", ProviderConfig{}, "", fmt.Errorf("AI configuration not found")
 	}
-	
+
 	providerName := config.AI.DefaultProvider
 	if providerName == "" {
 		// Look for the first provider in any interface
@@ -209,7 +209,7 @@ func GetDefaultProviderFromEnhancedConfig(config *EnhancedConfig) (string, Provi
 				return name, config, interfaceType, nil
 			}
 		}
-		
+
 		// If no interfaces, check legacy providers
 		if config.AI.Providers != nil {
 			for name, config := range config.AI.Providers {
@@ -227,15 +227,15 @@ func GetDefaultProviderFromEnhancedConfig(config *EnhancedConfig) (string, Provi
 				return name, config, interfaceType, nil
 			}
 		}
-		
+
 		return "", ProviderConfig{}, "", fmt.Errorf("no providers found in configuration")
 	}
-	
+
 	// Get the provider config
 	providerConfig, interfaceType, err := GetProviderFromEnhancedConfig(config, providerName)
 	if err != nil {
 		return "", ProviderConfig{}, "", err
 	}
-	
+
 	return providerName, providerConfig, interfaceType, nil
 }

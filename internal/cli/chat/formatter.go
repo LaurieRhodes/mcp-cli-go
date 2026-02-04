@@ -18,7 +18,7 @@ type TerminalFormatter struct {
 func NewTerminalFormatter(noColor bool) (*TerminalFormatter, error) {
 	var renderer *glamour.TermRenderer
 	var err error
-	
+
 	if !noColor {
 		renderer, err = glamour.NewTermRenderer(
 			glamour.WithAutoStyle(),
@@ -28,7 +28,7 @@ func NewTerminalFormatter(noColor bool) (*TerminalFormatter, error) {
 			return nil, err
 		}
 	}
-	
+
 	return &TerminalFormatter{
 		glamourRenderer: renderer,
 		noColor:         noColor,
@@ -40,11 +40,11 @@ func (f *TerminalFormatter) FormatUserPrompt(text string) string {
 	if f.noColor {
 		return "You: " + text
 	}
-	
+
 	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("36")). // Cyan
 		Bold(true)
-	
+
 	return style.Render("You: ") + text
 }
 
@@ -53,11 +53,11 @@ func (f *TerminalFormatter) FormatThinking() string {
 	if f.noColor {
 		return "⏳ Thinking..."
 	}
-	
+
 	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("243")). // Dim gray
 		Italic(true)
-	
+
 	return style.Render("⏳ Thinking...")
 }
 
@@ -67,14 +67,14 @@ func (f *TerminalFormatter) FormatAssistantResponse(markdown string) string {
 		// Fallback: just strip markdown fences
 		return f.stripMarkdownFences(markdown)
 	}
-	
+
 	// Render with Glamour
 	rendered, err := f.glamourRenderer.Render(markdown)
 	if err != nil {
 		// Fallback on error
 		return f.stripMarkdownFences(markdown)
 	}
-	
+
 	return strings.TrimSpace(rendered)
 }
 
@@ -83,11 +83,11 @@ func (f *TerminalFormatter) FormatToolExecution(toolName string, args map[string
 	if f.noColor {
 		return "⚡ Executing: " + toolName
 	}
-	
+
 	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("226")). // Yellow
 		Bold(true)
-	
+
 	return style.Render("⚡ " + toolName)
 }
 
@@ -96,14 +96,14 @@ func (f *TerminalFormatter) FormatToolResult(result string) string {
 	if f.noColor {
 		return result
 	}
-	
+
 	// Add subtle indent and border
 	style := lipgloss.NewStyle().
 		PaddingLeft(2).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderLeft(true).
 		BorderForeground(lipgloss.Color("240"))
-	
+
 	return style.Render(result)
 }
 
@@ -112,11 +112,11 @@ func (f *TerminalFormatter) FormatSuccess(text string) string {
 	if f.noColor {
 		return "✓ " + text
 	}
-	
+
 	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("82")). // Green
 		Bold(true)
-	
+
 	return style.Render("✓ " + text)
 }
 
@@ -125,11 +125,11 @@ func (f *TerminalFormatter) FormatError(text string) string {
 	if f.noColor {
 		return "✗ " + text
 	}
-	
+
 	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("196")). // Red
 		Bold(true)
-	
+
 	return style.Render("✗ " + text)
 }
 
@@ -147,9 +147,9 @@ func (f *TerminalFormatter) FormatSeparator() string {
 	if f.noColor {
 		return strings.Repeat("─", 60)
 	}
-	
+
 	style := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("240"))
-	
+
 	return style.Render(strings.Repeat("─", 60))
 }
