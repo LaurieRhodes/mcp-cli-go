@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-260",
+  "entities": [
+    {
+      "id": "Data Remanence in Semiconductor Devices paper",
+      "type": "CONCEPT",
+      "text": "Paper on data recoverability from volatile media"
+    },
+    {
+      "id": "MemTest86",
+      "type": "TOOL",
+      "text": "RAM testing tool"
+    },
+    {
+      "id": "PassMark Software",
+      "type": "ACTOR",
+      "text": "Software company"
+    },
+    {
+      "id": "MemtestG80",
+      "type": "TOOL",
+      "text": "Graphics card RAM testing tool"
+    },
+    {
+      "id": "MemtestCL",
+      "type": "TOOL",
+      "text": "Graphics card RAM testing tool"
+    },
+    {
+      "id": "GitHub projects",
+      "type": "PLATFORM",
+      "text": "Code hosting platform"
+    },
+    {
+      "id": "HDDerase",
+      "type": "TOOL",
+      "text": "Data erasure tool"
+    },
+    {
+      "id": "Center for Memory and Recording Research at the University of California San Diego",
+      "type": "ACTOR",
+      "text": "Research center at UCSD"
+    },
+    {
+      "id": "Reliably Erasing Data From Flash-Based Solid State Drives paper",
+      "type": "CONCEPT",
+      "text": "Paper on SSD data erasure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Data Remanence in Semiconductor Devices paper",
+      "to": "Further information on recoverability of data from volatile media",
+      "type": "DEFINES"
+    },
+    {
+      "from": "MemTest86",
+      "to": "PassMark Software",
+      "type": "SOURCE"
+    },
+    {
+      "from": "MemtestG80",
+      "to": "GitHub projects",
+      "type": "SOURCE"
+    },
+    {
+      "from": "MemtestCL",
+      "to": "GitHub projects",
+      "type": "SOURCE"
+    },
+    {
+      "from": "HDDerase",
+      "to": "Center for Memory and Recording Research at the University of California San Diego",
+      "type": "SOURCE"
+    },
+    {
+      "from": "Reliably Erasing Data From Flash-Based Solid State Drives paper",
+      "to": "Further information on reliably erasing data from solid state drives",
+      "type": "DEFINES"
+    }
+  ]
+}

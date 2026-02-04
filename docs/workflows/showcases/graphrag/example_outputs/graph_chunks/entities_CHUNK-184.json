@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-184",
+  "entities": [
+    {
+      "id": "Bluetooth Secure Connections",
+      "type": "CONCEPT",
+      "text": "Security functionality using Elliptic Curve Diffie-Hellman cryptography"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Users who pair mobile devices with Bluetooth devices"
+    },
+    {
+      "id": "Bluetooth Pairing Process",
+      "type": "PROCESS",
+      "text": "Procedure for connecting Bluetooth devices"
+    },
+    {
+      "id": "OFFICIAL/PROTECTED mobile devices",
+      "type": "CONCEPT",
+      "text": "Mobile devices with specific security classifications"
+    },
+    {
+      "id": "SECRET/TOP SECRET mobile devices",
+      "type": "CONCEPT",
+      "text": "Higher security classification mobile devices"
+    },
+    {
+      "id": "ISM Controls",
+      "type": "CONCEPT",
+      "text": "Information Security Manual controls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Bluetooth Secure Connections",
+      "to": "Personnel",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Bluetooth Pairing Process",
+      "to": "Bluetooth Pairing Process",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "chunk_id": "CHUNK-407",
+  "entities": [
+    {
+      "id": "wireless networks",
+      "type": "CONCEPT",
+      "text": "Network security technology"
+    },
+    {
+      "id": "gateways",
+      "type": "CONCEPT",
+      "text": "Network infrastructure component"
+    },
+    {
+      "id": "encrypting communications",
+      "type": "PROCESS",
+      "text": "Security process"
+    },
+    {
+      "id": "network segmentation and segregation",
+      "type": "PROCESS",
+      "text": "Network security process"
+    },
+    {
+      "id": "network security zones",
+      "type": "CONCEPT",
+      "text": "Network security architecture"
+    },
+    {
+      "id": "system administration",
+      "type": "PROCESS",
+      "text": "IT management process"
+    },
+    {
+      "id": "functional separation of servers using virtualisation",
+      "type": "PROCESS",
+      "text": "Virtualization security"
+    },
+    {
+      "id": "event logging",
+      "type": "PROCESS",
+      "text": "Security monitoring"
+    },
+    {
+      "id": "blocking anonymity network traffic",
+      "type": "PROCESS",
+      "text": "Network security control"
+    },
+    {
+      "id": "Domain Name System services",
+      "type": "CONCEPT",
+      "text": "Network infrastructure"
+    },
+    {
+      "id": "protective DNS service",
+      "type": "CONCEPT",
+      "text": "Security service"
+    },
+    {
+      "id": "network design and configuration",
+      "type": "PROCESS",
+      "text": "Network architecture"
+    },
+    {
+      "id": "cyber supply chain risk management",
+      "type": "PROCESS",
+      "text": "Security governance"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "wireless networks",
+      "to": "wireless networks section of guidelines",
+      "type": "DEFINES"
+    },
+    {
+      "from": "gateways",
+      "to": "Guidelines for Gateways",
+      "type": "DEFINES"
+    },
+    {
+      "from": "encrypting communications",
+      "to": "cryptographic fundamentals section",
+      "type": "DEFINES"
+    },
+    {
+      "from": "network segmentation and segregation",
+      "to": "ACSC's Implementing Network Segmentation and Segregation publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "network security zones",
+      "to": "Canadian Centre for Cyber Security's Baseline Security Requirements",
+      "type": "DEFINES"
+    },
+    {
+      "from": "system administration",
+      "to": "system administration section of Guidelines for System Management",
+      "type": "DEFINES"
+    },
+    {
+      "from": "functional separation of servers using virtualisation",
+      "to": "virtualisation hardening section of Guidelines for System Hardening",
+      "type": "DEFINES"
+    },
+    {
+      "from": "event logging",
+      "to": "event logging and monitoring section of Guidelines for System Monitoring",
+      "type": "DEFINES"
+    },
+    {
+      "from": "blocking anonymity network traffic",
+      "to": "ACSC's Defending Against the Malicious Use of the Tor Network publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Domain Name System services",
+      "to": "ACSC's Domain Name System Security publications",
+      "type": "DEFINES"
+    },
+    {
+      "from": "protective DNS service",
+      "to": "NSA & CISA's Selecting a Protective DNS Service publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "network design and configuration",
+      "to": "NSA's Network Infrastructure Security Guide",
+      "type": "DEFINES"
+    },
+    {
+      "from": "cyber supply chain risk management",
+      "to": "cyber supply chain risk management section of Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    }
+  ]
+}

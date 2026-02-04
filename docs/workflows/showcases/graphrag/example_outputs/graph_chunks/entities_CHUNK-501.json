@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-501",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cyber supply chain risk management concept"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Document containing procurement and outsourcing guidelines"
+    },
+    {
+      "id": "evaluated products",
+      "type": "CONCEPT",
+      "text": "Evaluated products concept"
+    },
+    {
+      "id": "Guidelines for Evaluated Products",
+      "type": "DOCUMENT",
+      "text": "Document containing evaluated product guidelines"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "evaluated products",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for Procurement and Outsourcing",
+      "to": "Guidelines for Evaluated Products",
+      "type": "DEFINES"
+    }
+  ]
+}

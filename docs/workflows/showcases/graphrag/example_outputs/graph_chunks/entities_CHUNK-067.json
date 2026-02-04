@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-067",
+  "entities": [
+    {
+      "id": "Cyber security strategy",
+      "type": "CONCEPT",
+      "text": "Sets guiding principles, objectives and priorities for cyber security"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity that develops and implements security strategy"
+    },
+    {
+      "id": "ISM-0039 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring cyber security strategy"
+    },
+    {
+      "id": "Cyber security program",
+      "type": "PROCESS",
+      "text": "Includes security initiatives and investments"
+    },
+    {
+      "id": "Threat environment",
+      "type": "CONCEPT",
+      "text": "Environmental factors affecting security posture"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cyber security strategy",
+      "to": "Organisation",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Organisation",
+      "to": "Cyber security strategy",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Cyber security strategy",
+      "to": "Cyber security program",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "Cyber security strategy",
+      "to": "Threat environment",
+      "type": "COVERS"
+    },
+    {
+      "from": "ISM-0039 control",
+      "to": "Cyber security strategy",
+      "type": "MANDATES"
+    }
+  ]
+}

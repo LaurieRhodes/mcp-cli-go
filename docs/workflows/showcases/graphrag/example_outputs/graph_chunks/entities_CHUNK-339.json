@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-339",
+  "entities": [
+    {
+      "id": "Security Information and Event Management",
+      "type": "SOLUTION",
+      "text": "Security Information and Event Management solution"
+    },
+    {
+      "id": "SIEM",
+      "type": "ACRONYM",
+      "text": "Acronym for SIEM"
+    },
+    {
+      "id": "centralised facility",
+      "type": "FACILITY",
+      "text": "Centralised logging facility"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-339",
+      "to": "CHUNK-339",
+      "type": "ACHIEVED_BY"
+    },
+    {
+      "from": "CHUNK-339",
+      "to": "CHUNK-339",
+      "type": "STANDS_FOR"
+    },
+    {
+      "from": "CHUNK-339",
+      "to": "CHUNK-339",
+      "type": "IMPLEMENTED_AS"
+    }
+  ]
+}

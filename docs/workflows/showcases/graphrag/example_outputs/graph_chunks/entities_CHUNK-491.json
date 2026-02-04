@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-491",
+  "entities": [
+    {
+      "id": "Transfer CDSs",
+      "type": "CONCEPT",
+      "text": "Cross Domain Solutions that facilitate data transfer between security domains"
+    },
+    {
+      "id": "Access CDSs",
+      "type": "CONCEPT",
+      "text": "Cross Domain Solutions that provide access to multiple security domains from a single device"
+    },
+    {
+      "id": "Vendors",
+      "type": "ACTOR",
+      "text": "Companies that describe, sell, and offer CDS solutions"
+    },
+    {
+      "id": "Security Domains",
+      "type": "CONCEPT",
+      "text": "Different security environments or networks"
+    },
+    {
+      "id": "Data Transfer",
+      "type": "PROCESS",
+      "text": "Movement of data between security domains"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Transfer CDSs",
+      "to": "Data Transfer",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Access CDSs",
+      "to": "Security Domains",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "Vendors",
+      "to": "Transfer CDSs",
+      "type": "OFFER"
+    },
+    {
+      "from": "Transfer CDSs",
+      "to": "Security Domains",
+      "type": "TRANSFERS_BETWEEN"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-523",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Risk management for cyber supply chains"
+    },
+    {
+      "id": "evaluated products",
+      "type": "CONCEPT",
+      "text": "Products that have been evaluated for security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Further information",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "REFERENCED_IN"
+    },
+    {
+      "from": "Further information",
+      "to": "Guidelines for Evaluated Products",
+      "type": "REFERENCED_IN"
+    }
+  ]
+}

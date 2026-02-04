@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-266",
+  "entities": [
+    {
+      "id": "degaussing magnetic media",
+      "type": "PROCESS",
+      "text": "Process of destroying data on magnetic media by altering magnetic properties"
+    },
+    {
+      "id": "degausser",
+      "type": "TOOL/DEVICE",
+      "text": "Device used for degaussing magnetic media"
+    },
+    {
+      "id": "magnetic field strength",
+      "type": "PROPERTY",
+      "text": "Strength of magnetic field required for effective degaussing"
+    },
+    {
+      "id": "magnetic orientation",
+      "type": "PROPERTY",
+      "text": "Orientation of magnetic field (perpendicular vs longitudinal)"
+    },
+    {
+      "id": "perpendicular magnetic media",
+      "type": "MEDIA_TYPE",
+      "text": "Modern magnetic media type with perpendicular magnetic orientation"
+    },
+    {
+      "id": "longitudinal magnetic media",
+      "type": "MEDIA_TYPE",
+      "text": "Older magnetic media type with longitudinal magnetic orientation"
+    },
+    {
+      "id": "degausser manufacturers",
+      "type": "ACTOR",
+      "text": "Companies that produce degaussing equipment"
+    },
+    {
+      "id": "internal platters",
+      "type": "COMPONENT",
+      "text": "Physical components inside magnetic media that store data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "degaussing magnetic media",
+      "to": "degausser",
+      "type": "degausser"
+    },
+    {
+      "from": "degausser",
+      "to": "magnetic field strength",
+      "type": "magnetic orientation"
+    }
+  ]
+}

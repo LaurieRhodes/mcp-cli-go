@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-466",
+  "entities": [
+    {
+      "id": "SSH connections without passphrase",
+      "type": "CONCEPT",
+      "text": "Automated remote access without authentication passphrase"
+    },
+    {
+      "id": "Forced command option",
+      "type": "PROCESS",
+      "text": "SSH configuration option to restrict command execution"
+    },
+    {
+      "id": "Parameter checking",
+      "type": "PROCESS",
+      "text": "Security validation of input parameters"
+    },
+    {
+      "id": "ISM-0487",
+      "type": "CONCEPT",
+      "text": "Security control for automated remote access"
+    },
+    {
+      "id": "ISM-0488",
+      "type": "CONCEPT",
+      "text": "Security control for SSH connections without passphrase"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "SSH connections without passphrase",
+      "to": "Forced command option",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "SSH connections without passphrase",
+      "to": "Parameter checking",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Forced command option",
+      "to": "ISM-0487",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Parameter checking",
+      "to": "ISM-0487",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "SSH connections without passphrase",
+      "to": "ISM-0488",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

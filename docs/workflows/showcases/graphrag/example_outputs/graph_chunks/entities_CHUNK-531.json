@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-531",
+  "entities": [
+    {
+      "id": "manual data transfers",
+      "type": "PROCESS",
+      "text": "Manual data transfer process"
+    },
+    {
+      "id": "removable media",
+      "type": "CONCEPT",
+      "text": "Removable storage devices"
+    },
+    {
+      "id": "Guidelines for Media",
+      "type": "DOCUMENT",
+      "text": "Policy document for media usage"
+    },
+    {
+      "id": "data transfers",
+      "type": "PROCESS",
+      "text": "Data transfer process"
+    },
+    {
+      "id": "gateways",
+      "type": "CONCEPT",
+      "text": "Network gateways"
+    },
+    {
+      "id": "CDSs",
+      "type": "CONCEPT",
+      "text": "Content Delivery Systems"
+    },
+    {
+      "id": "Guidelines for Gateways",
+      "type": "DOCUMENT",
+      "text": "Policy document for gateways"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "manual data transfers",
+      "to": "removable media",
+      "type": "USES"
+    },
+    {
+      "from": "data transfers",
+      "to": "gateways",
+      "type": "USES"
+    },
+    {
+      "from": "data transfers",
+      "to": "CDSs",
+      "type": "USES"
+    },
+    {
+      "from": "Guidelines for Media",
+      "to": "removable media",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for Gateways",
+      "to": "gateways",
+      "type": "DEFINES"
+    }
+  ]
+}

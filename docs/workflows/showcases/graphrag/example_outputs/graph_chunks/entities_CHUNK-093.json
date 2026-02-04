@@ -1,0 +1,207 @@
+{
+  "chunk_id": "CHUNK-093",
+  "entities": [
+    {
+      "id": "telephone system usage",
+      "type": "CONCEPT",
+      "text": "Information on telephone system usage"
+    },
+    {
+      "id": "fax machine and multifunction device usage",
+      "type": "CONCEPT",
+      "text": "Information on fax machine and multifunction device usage"
+    },
+    {
+      "id": "mobile device usage",
+      "type": "CONCEPT",
+      "text": "Information on mobile device usage"
+    },
+    {
+      "id": "removable media usage",
+      "type": "CONCEPT",
+      "text": "Information on removable media usage"
+    },
+    {
+      "id": "email usage",
+      "type": "CONCEPT",
+      "text": "Information on email usage"
+    },
+    {
+      "id": "web usage",
+      "type": "CONCEPT",
+      "text": "Information on web usage"
+    },
+    {
+      "id": "detecting socially engineered messages",
+      "type": "CONCEPT",
+      "text": "Information on detecting socially engineered messages"
+    },
+    {
+      "id": "business email compromise",
+      "type": "CONCEPT",
+      "text": "Information on business email compromise"
+    },
+    {
+      "id": "social media usage",
+      "type": "CONCEPT",
+      "text": "Information on social media usage"
+    },
+    {
+      "id": "document sanitisation",
+      "type": "CONCEPT",
+      "text": "Information on document sanitisation"
+    },
+    {
+      "id": "cybercrime incident reporting",
+      "type": "CONCEPT",
+      "text": "Information on cybercrime incident reporting"
+    },
+    {
+      "id": "cyber security incident reporting",
+      "type": "CONCEPT",
+      "text": "Information on cyber security incident reporting"
+    },
+    {
+      "id": "Guidelines for Communications Systems",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for communications systems"
+    },
+    {
+      "id": "Guidelines for Enterprise Mobility",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for enterprise mobility"
+    },
+    {
+      "id": "Guidelines for Media",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for media usage"
+    },
+    {
+      "id": "Guidelines for Email",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for email usage"
+    },
+    {
+      "id": "Guidelines for Gateways",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for gateways"
+    },
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ORGANIZATION",
+      "text": "Australian government cybersecurity organization"
+    },
+    {
+      "id": "Detecting Socially Engineered Messages",
+      "type": "PUBLICATION",
+      "text": "ACSC publication on detecting socially engineered messages"
+    },
+    {
+      "id": "Protecting Against Business Email Compromise",
+      "type": "PUBLICATION",
+      "text": "ACSC publication on protecting against business email compromise"
+    },
+    {
+      "id": "Security Tips for Social Media and Messaging Apps",
+      "type": "PUBLICATION",
+      "text": "ACSC publication on security tips for social media"
+    },
+    {
+      "id": "An Examination of the Redaction Functionality of Adobe Acrobat Pro DC 2017",
+      "type": "PUBLICATION",
+      "text": "ACSC publication on document redaction functionality"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "telephone system usage",
+      "to": "Guidelines for Communications Systems",
+      "type": "DEFINES"
+    },
+    {
+      "from": "fax machine and multifunction device usage",
+      "to": "Guidelines for Communications Systems",
+      "type": "DEFINES"
+    },
+    {
+      "from": "mobile device usage",
+      "to": "Guidelines for Enterprise Mobility",
+      "type": "DEFINES"
+    },
+    {
+      "from": "removable media usage",
+      "to": "Guidelines for Media",
+      "type": "DEFINES"
+    },
+    {
+      "from": "email usage",
+      "to": "Guidelines for Email",
+      "type": "DEFINES"
+    },
+    {
+      "from": "web usage",
+      "to": "Guidelines for Gateways",
+      "type": "DEFINES"
+    },
+    {
+      "from": "detecting socially engineered messages",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "business email compromise",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "social media usage",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "document sanitisation",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "cybercrime incident reporting",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "cyber security incident reporting",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "detecting socially engineered messages",
+      "to": "Detecting Socially Engineered Messages",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "business email compromise",
+      "to": "Protecting Against Business Email Compromise",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "social media usage",
+      "to": "Security Tips for Social Media and Messaging Apps",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "document sanitisation",
+      "to": "An Examination of the Redaction Functionality of Adobe Acrobat Pro DC 2017",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "cybercrime incident reporting",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "cyber security incident reporting",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "PROVIDES"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-201",
+  "entities": [
+    {
+      "id": "Protection Profile",
+      "type": "CONCEPT",
+      "text": "Technology-specific document defining security functionality"
+    },
+    {
+      "id": "Common Criteria evaluated product",
+      "type": "CONCEPT",
+      "text": "Product evaluated against Common Criteria standards"
+    },
+    {
+      "id": "CCRA scheme",
+      "type": "ACTOR",
+      "text": "Recognised scheme that can publish PPs"
+    },
+    {
+      "id": "CCRA body",
+      "type": "ACTOR",
+      "text": "Body that publishes collaborative PPs"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "National Information Assurance Partnership",
+      "type": "ACTOR",
+      "text": "US organization listing national PPs"
+    },
+    {
+      "id": "Evaluation Assurance Level",
+      "type": "CONCEPT",
+      "text": "Assurance level for evaluations"
+    },
+    {
+      "id": "EAL2+",
+      "type": "CONCEPT",
+      "text": "Maximum acceptable EAL level"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Protection Profile",
+      "to": "CCRA body",
+      "type": "ACSC"
+    },
+    {
+      "from": "Common Criteria evaluated product",
+      "to": "Protection Profile",
+      "type": "Protection Profile"
+    }
+  ]
+}

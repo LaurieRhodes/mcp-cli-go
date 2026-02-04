@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-204",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "entity that sources products"
+    },
+    {
+      "id": "evaluated products",
+      "type": "PRODUCT",
+      "text": "products that have been evaluated"
+    },
+    {
+      "id": "ACSC",
+      "type": "ORGANIZATION",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "high assurance ICT equipment",
+      "type": "EQUIPMENT",
+      "text": "high assurance ICT equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Delivery of evaluated products",
+      "to": "Delivery of evaluated products",
+      "type": "SOURCE"
+    },
+    {
+      "from": "Delivery of evaluated products",
+      "to": "Delivery of evaluated products",
+      "type": "PROCURE"
+    },
+    {
+      "from": "Delivery of evaluated products",
+      "to": "Delivery of evaluated products",
+      "type": "CONTACT"
+    },
+    {
+      "from": "Delivery of evaluated products",
+      "to": "Delivery of evaluated products",
+      "type": "PROCURE"
+    }
+  ]
+}

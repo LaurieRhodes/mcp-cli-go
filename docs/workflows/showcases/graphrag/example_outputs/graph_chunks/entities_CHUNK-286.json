@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-286",
+  "entities": [
+    {
+      "id": "user applications",
+      "type": "CONCEPT",
+      "text": "Applications installed on user workstations"
+    },
+    {
+      "id": "office productivity suites",
+      "type": "CONCEPT",
+      "text": "Software suites for office work"
+    },
+    {
+      "id": "web browsers",
+      "type": "CONCEPT",
+      "text": "Software for accessing the web"
+    },
+    {
+      "id": "email clients",
+      "type": "CONCEPT",
+      "text": "Software for managing email"
+    },
+    {
+      "id": "PDF software",
+      "type": "CONCEPT",
+      "text": "Software for Portable Document Format files"
+    },
+    {
+      "id": "security products",
+      "type": "CONCEPT",
+      "text": "Security software products"
+    },
+    {
+      "id": "server applications",
+      "type": "CONCEPT",
+      "text": "Applications running on servers"
+    },
+    {
+      "id": "server application hardening",
+      "type": "PROCESS",
+      "text": "Security hardening process for server applications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "user applications",
+      "to": "user applications",
+      "type": "user applications"
+    },
+    {
+      "from": "office productivity suites",
+      "to": "web browsers",
+      "type": "email clients"
+    }
+  ]
+}

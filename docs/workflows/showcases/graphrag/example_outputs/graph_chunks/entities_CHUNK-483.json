@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-483",
+  "entities": [
+    {
+      "id": "system administrators for gateways",
+      "type": "ACTOR",
+      "text": "Individuals responsible for gateway administration"
+    },
+    {
+      "id": "gateways",
+      "type": "CONCEPT",
+      "text": "Network security components connecting different networks"
+    },
+    {
+      "id": "employment screening",
+      "type": "PROCESS",
+      "text": "Security vetting process for personnel"
+    },
+    {
+      "id": "security clearance",
+      "type": "CONCEPT",
+      "text": "Authorization level based on sensitivity"
+    },
+    {
+      "id": "privileged accounts",
+      "type": "CONCEPT",
+      "text": "Administrative accounts with elevated access"
+    },
+    {
+      "id": "principle of least privilege",
+      "type": "CONCEPT",
+      "text": "Security principle granting minimum necessary access"
+    },
+    {
+      "id": "separation of duties",
+      "type": "CONCEPT",
+      "text": "Security principle dividing responsibilities among personnel"
+    },
+    {
+      "id": "formal training",
+      "type": "PROCESS",
+      "text": "Education process for gateway operation"
+    },
+    {
+      "id": "privileged user training",
+      "type": "PROCESS",
+      "text": "Specific training for users with privileged access"
+    },
+    {
+      "id": "Australian nationals",
+      "type": "ACTOR",
+      "text": "Australian citizens required for certain networks"
+    },
+    {
+      "id": "seconded foreign nationals",
+      "type": "ACTOR",
+      "text": "Foreign nationals seconded for specific networks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "system administrators for gateways",
+      "to": "employment screening",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "system administrators for gateways",
+      "to": "security clearance",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "system administrators for gateways",
+      "to": "privileged accounts",
+      "type": "USES"
+    },
+    {
+      "from": "privileged accounts",
+      "to": "principle of least privilege",
+      "type": "FOLLOWS"
+    },
+    {
+      "from": "privileged accounts",
+      "to": "separation of duties",
+      "type": "FOLLOWS"
+    },
+    {
+      "from": "system administrators for gateways",
+      "to": "formal training",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "formal training",
+      "to": "privileged user training",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "system administrators for gateways",
+      "to": "Australian nationals",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "system administrators for gateways",
+      "to": "seconded foreign nationals",
+      "type": "ALLOWS"
+    }
+  ]
+}

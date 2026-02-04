@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-040",
+  "entities": [
+    {
+      "id": "Cyber resilience",
+      "type": "CONCEPT",
+      "text": "Ability to adapt to disruptions while maintaining operations"
+    },
+    {
+      "id": "Cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security incidents causing disruptions"
+    },
+    {
+      "id": "Business operations",
+      "type": "CONCEPT",
+      "text": "Continuous business operations"
+    },
+    {
+      "id": "Detection",
+      "type": "PROCESS",
+      "text": "Process of identifying incidents"
+    },
+    {
+      "id": "Management",
+      "type": "PROCESS",
+      "text": "Process of handling incidents"
+    },
+    {
+      "id": "Recovery",
+      "type": "PROCESS",
+      "text": "Process of restoring operations"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cyber resilience",
+      "to": "Cyber security incidents",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Cyber resilience",
+      "to": "Business operations",
+      "type": "MAINTAINS"
+    },
+    {
+      "from": "Cyber resilience",
+      "to": "Detection",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "Cyber resilience",
+      "to": "Management",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "Cyber resilience",
+      "to": "Recovery",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "Cyber security incidents",
+      "to": "Business operations",
+      "type": "DISRUPTS"
+    }
+  ]
+}

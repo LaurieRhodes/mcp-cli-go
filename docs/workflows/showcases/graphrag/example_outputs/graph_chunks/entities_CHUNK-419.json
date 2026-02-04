@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-419",
+  "entities": [
+    {
+      "id": "802.1X authentication",
+      "type": "CONCEPT",
+      "text": "Authentication protocol for network access"
+    },
+    {
+      "id": "Pairwise Master Key (PMK)",
+      "type": "CONCEPT",
+      "text": "Shared secret key generated upon successful authentication"
+    },
+    {
+      "id": "PMK caching",
+      "type": "PROCESS",
+      "text": "Process of caching PMK for faster roaming"
+    },
+    {
+      "id": "wireless access points",
+      "type": "ACTOR",
+      "text": "Network devices that provide wireless connectivity"
+    },
+    {
+      "id": "fast roaming",
+      "type": "PROCESS",
+      "text": "Process of moving between wireless access points without full re-authentication"
+    },
+    {
+      "id": "pre-authentication",
+      "type": "PROCESS",
+      "text": "Process of authenticating devices to neighboring access points in advance"
+    },
+    {
+      "id": "ISM-1330",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for PMK caching period"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "802.1X authentication",
+      "to": "Pairwise Master Key (PMK)",
+      "type": "GENERATES"
+    },
+    {
+      "from": "Pairwise Master Key (PMK)",
+      "to": "PMK caching",
+      "type": "ENABLES"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-117",
+  "entities": [
+    {
+      "id": "Cables",
+      "type": "CONCEPT",
+      "text": "Physical network cables"
+    },
+    {
+      "id": "Labelling process",
+      "type": "PROCESS",
+      "text": "Process of applying labels to cables"
+    },
+    {
+      "id": "Source details",
+      "type": "CONCEPT",
+      "text": "Information about cable origin"
+    },
+    {
+      "id": "Destination details",
+      "type": "CONCEPT",
+      "text": "Information about cable termination"
+    },
+    {
+      "id": "ISM-1096",
+      "type": "STANDARD",
+      "text": "Information Security Manual control 1096"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Labelling process",
+      "to": "Cables",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "Labelling process",
+      "to": "Source details",
+      "type": "USES"
+    },
+    {
+      "from": "Labelling process",
+      "to": "Destination details",
+      "type": "USES"
+    },
+    {
+      "from": "ISM-1096",
+      "to": "Labelling process",
+      "type": "DEFINES"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-418",
+  "entities": [
+    {
+      "id": "certificates",
+      "type": "CONCEPT",
+      "text": "Digital certificates for authentication"
+    },
+    {
+      "id": "devices",
+      "type": "DEVICE",
+      "text": "Computing devices accessing networks"
+    },
+    {
+      "id": "users",
+      "type": "USER",
+      "text": "Individuals accessing networks"
+    },
+    {
+      "id": "smart cards",
+      "type": "DEVICE",
+      "text": "Physical security tokens with certificates"
+    },
+    {
+      "id": "wireless networks",
+      "type": "NETWORK",
+      "text": "Wireless communication networks"
+    },
+    {
+      "id": "malicious code",
+      "type": "THREAT",
+      "text": "Harmful software that steals credentials"
+    },
+    {
+      "id": "multi-factor authentication",
+      "type": "SECURITY_MECHANISM",
+      "text": "Authentication requiring multiple factors"
+    },
+    {
+      "id": "personal identification numbers",
+      "type": "CREDENTIAL",
+      "text": "PIN codes for smart card authentication"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1324",
+      "to": "ISM-1327",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1323",
+      "to": "ISM-1327",
+      "type": "ACCESSES"
+    },
+    {
+      "from": "ISM-1327",
+      "to": "ISM-1327",
+      "type": "ACCESSES"
+    },
+    {
+      "from": "ISM-1327",
+      "to": "ISM-1327",
+      "type": "STORES"
+    },
+    {
+      "from": "ISM-1327",
+      "to": "ISM-1327",
+      "type": "ACCESSED_BY"
+    },
+    {
+      "from": "ISM-1324",
+      "to": "ISM-1327",
+      "type": "COMPROMISES"
+    },
+    {
+      "from": "ISM-1327",
+      "to": "ISM-1327",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "ISM-1327",
+      "to": "ISM-1327",
+      "type": "AUTHENTICATES"
+    }
+  ]
+}

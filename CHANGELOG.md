@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.0] - 2026-01-24
+## [2.3.0] - 2026-02-04
 
 ### Added
 
@@ -17,16 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Zero-configuration auto-detection**: No manual configuration needed - works automatically when environment variables are set
   - **Resolves workflow deadlocks**: Workflows executed via bash tool no longer hang due to stdio conflicts
   - **Secure by default**: Unix sockets created with 0600 permissions (owner-only access)
-  
-  **Problem solved:** When Claude Desktop used the bash tool to execute `mcp-cli --workflow`, both the bash server and skills server tried to use stdin/stdout simultaneously, causing a deadlock. Workflows would hang indefinitely.
-  
-  **Solution:** Server mode now supports dual listeners (stdio + Unix socket). When workflows detect nested execution via `MCP_NESTED=1`, they automatically connect via Unix socket instead of stdio, eliminating the conflict.
-  
-  **Performance improvement:**
-  
-  - Before: Workflows hung indefinitely (∞)
-  - After: Workflows complete successfully (~46 seconds)
-  - Success rate: 0% → 100%
   
   **Configuration:**
   
@@ -45,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     }
   }
   ```
+
+### Fixed
+
+- **Skills Internal Server** - Race condition with MCP tools and fast LLM
 
 ## [2.2.0] - 2026-01-24
 
@@ -83,11 +77,13 @@ mcp-cli is now one of the **first MCP servers with full Tasks SEP-1686 support**
 **Problem Solved:** Long-running workflows (30+ minutes) previously failed due to client timeouts. With Tasks SEP, clients receive task ID immediately and poll for completion.
 
 **Real-World Performance:**
+
 - RLM extraction workflow: 0% success → 100% success
 - Execution time: ∞ (timeout) → 13 minutes (complete)
 - User experience: blocking → non-blocking
 
 **Technical Details:**
+
 - Task manager: `internal/infrastructure/tasks/manager.go`
 - Domain types: `internal/domain/task.go`  
 - Server handlers: `internal/services/server/service.go`

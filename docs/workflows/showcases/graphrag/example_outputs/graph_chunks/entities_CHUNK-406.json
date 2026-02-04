@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-406",
+  "entities": [
+    {
+      "id": "Network devices",
+      "type": "CONCEPT",
+      "text": "Physical or virtual devices that form network infrastructure"
+    },
+    {
+      "id": "Restart process",
+      "type": "PROCESS",
+      "text": "Procedure of rebooting network devices"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting to compromise network devices"
+    },
+    {
+      "id": "ISM-1801",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control for device restarting"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Network devices",
+      "to": "Restart process",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Restart process",
+      "to": "Adversary",
+      "type": "REMOVES"
+    },
+    {
+      "from": "Restart process",
+      "to": "Adversary",
+      "type": "COMPROMISES"
+    },
+    {
+      "from": "ISM-1801",
+      "to": "Restart process",
+      "type": "REQUIRES"
+    }
+  ]
+}

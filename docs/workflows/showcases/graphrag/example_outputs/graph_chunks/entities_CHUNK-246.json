@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-246",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Risk management process for cyber supply chains"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Policy document for procurement and outsourcing"
+    },
+    {
+      "id": "Protective Security Policy Framework",
+      "type": "DOCUMENT",
+      "text": "Security framework by Attorney-General's Department"
+    },
+    {
+      "id": "Guidelines for Physical Security",
+      "type": "DOCUMENT",
+      "text": "Policy document for physical security"
+    },
+    {
+      "id": "Guidelines for Cryptography",
+      "type": "DOCUMENT",
+      "text": "Policy document for cryptography"
+    },
+    {
+      "id": "Guidelines for Data Transfers",
+      "type": "DOCUMENT",
+      "text": "Policy document for data transfers"
+    },
+    {
+      "id": "Attorney-General's Department",
+      "type": "ACTOR",
+      "text": "Government department responsible for protective security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "protection of media",
+      "type": "securing media when not in use"
+    },
+    {
+      "from": "Guidelines for Procurement and Outsourcing",
+      "to": "Protective Security Policy Framework",
+      "type": "Guidelines for Physical Security"
+    }
+  ]
+}

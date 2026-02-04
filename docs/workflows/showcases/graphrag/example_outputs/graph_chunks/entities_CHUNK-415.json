@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-415",
+  "entities": [
+    {
+      "id": "wireless networks",
+      "type": "CONCEPT",
+      "text": "Wireless communication networks"
+    },
+    {
+      "id": "wireless network traffic",
+      "type": "CONCEPT",
+      "text": "Data transmitted over wireless networks"
+    },
+    {
+      "id": "cryptographic protection",
+      "type": "CONCEPT",
+      "text": "Security measures using encryption"
+    },
+    {
+      "id": "Wi-Fi Protected Access 3 (WPA3)",
+      "type": "CONCEPT",
+      "text": "Latest Wi-Fi security standard"
+    },
+    {
+      "id": "Wi-Fi Protected Access 2 (WPA2)",
+      "type": "CONCEPT",
+      "text": "Previous Wi-Fi security standard"
+    },
+    {
+      "id": "WPA3-Enterprise",
+      "type": "CONCEPT",
+      "text": "Enterprise version of WPA3"
+    },
+    {
+      "id": "WPA3-Enterprise 192-bit mode",
+      "type": "CONCEPT",
+      "text": "Most secure WPA3-Enterprise mode"
+    },
+    {
+      "id": "Authentication and Key Management suite 00-0F-AC:1",
+      "type": "CONCEPT",
+      "text": "Specific authentication suite to disable in non-192-bit modes"
+    },
+    {
+      "id": "ISM-1332",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control for wireless network security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "wireless network traffic",
+      "to": "cryptographic protection",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "WPA3",
+      "to": "cryptographic protection",
+      "type": "DEFINES"
+    },
+    {
+      "from": "WPA3-Enterprise 192-bit mode",
+      "to": "wireless network traffic",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "ISM-1332",
+      "to": "wireless network security",
+      "type": "GOVERNS"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-220",
+  "entities": [
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "High assurance ICT equipment",
+      "type": "CONCEPT",
+      "text": "High assurance ICT equipment"
+    },
+    {
+      "id": "Maintenance/repairs",
+      "type": "PROCESS",
+      "text": "Maintenance or repair activities"
+    },
+    {
+      "id": "ISM-1079",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control ISM-1079"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ACSC",
+      "to": "Maintenance/repairs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Maintenance/repairs",
+      "to": "High assurance ICT equipment",
+      "type": "APPLIES TO"
+    }
+  ]
+}

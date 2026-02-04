@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-084",
+  "entities": [
+    {
+      "id": "Attorney-General's Department",
+      "type": "ACTOR",
+      "text": "Australian government department responsible for protective security"
+    },
+    {
+      "id": "Protective Security Policy Framework",
+      "type": "DOCUMENT",
+      "text": "Government security policy framework"
+    },
+    {
+      "id": "Entity facilities policy",
+      "type": "DOCUMENT",
+      "text": "Policy document for entity facilities"
+    },
+    {
+      "id": "Physical security for entity resources policy",
+      "type": "DOCUMENT",
+      "text": "Policy document for physical security of entity resources"
+    },
+    {
+      "id": "Guidelines for Communications Infrastructure",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for communications infrastructure"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "ASSET",
+      "text": "Information and communications technology equipment"
+    },
+    {
+      "id": "RF devices",
+      "type": "ASSET",
+      "text": "Radio frequency devices"
+    },
+    {
+      "id": "SECRET areas",
+      "type": "ZONE",
+      "text": "Security classification zone for sensitive information"
+    },
+    {
+      "id": "TOP SECRET areas",
+      "type": "ZONE",
+      "text": "Highest security classification zone"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Attorney-General's Department",
+      "to": "Protective Security Policy Framework",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Protective Security Policy Framework",
+      "to": "Entity facilities policy",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Protective Security Policy Framework",
+      "to": "Physical security for entity resources policy",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Protective Security Policy Framework",
+      "to": "Guidelines for Communications Infrastructure",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Attorney-General's Department",
+      "to": "ICT equipment",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "Physical security for entity resources policy",
+      "to": "RF devices",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "Guidelines for Communications Infrastructure",
+      "to": "SECRET areas",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "SECRET areas",
+      "to": "TOP SECRET areas",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "TOP SECRET areas",
+      "to": "Guidelines for Communications Infrastructure",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

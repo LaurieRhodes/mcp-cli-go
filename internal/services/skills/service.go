@@ -757,11 +757,14 @@ func validateCodePaths(code string) error {
 					// Allow:
 					// - /outputs/ or /outputs (for writing results)
 					// - /workspace/ or /workspace (for reading inputs)
+					// - /skill/ or /skill (for reading helper libraries)
 					if strings.HasPrefix(path, "/") && 
 					   !strings.HasPrefix(path, "/outputs/") && 
 					   path != "/outputs" &&
 					   !strings.HasPrefix(path, "/workspace/") &&
-					   path != "/workspace" {
+					   path != "/workspace" &&
+					   !strings.HasPrefix(path, "/skill/") &&
+					   path != "/skill" {
 						invalidPaths = append(invalidPaths, fmt.Sprintf("Line %d: %s", i+1, trimmed))
 					}
 				}
@@ -984,6 +987,7 @@ func (s *Service) ExecuteCode(request *skills.CodeExecutionRequest) (*skills.Exe
 	
 	return result, nil
 }
+
 
 // LoadAsActive loads skill in active mode (executes workflow)
 func (s *Service) LoadAsActive(skill *skills.Skill, request *skills.SkillLoadRequest) (*skills.SkillLoadResult, error) {
@@ -1368,4 +1372,83 @@ func (s *Service) ExecuteTool(ctx context.Context, toolName string, arguments ma
 	}
 	
 	return result.Content, nil
+}
+
+// RunHelperScript executes a pre-written helper script from a skill's scripts/ directory
+// This is more efficient than ExecuteCode for running existing scripts
+func (s *Service) RunHelperScript(request *skills.HelperScriptRequest) (*skills.ExecutionResult, error) {
+	// Validate request
+	if request.SkillName == "" {
+		return nil, fmt.Errorf("skill_name is required")
+	}
+	if request.ScriptName == "" {
+		return nil, fmt.Errorf("script_name is required")
+	}
+	
+	// Get skill
+	skill, exists := s.GetSkill(request.SkillName)
+	if !exists {
+		return nil, fmt.Errorf("skill not found: %s", request.SkillName)
+	}
+	
+	// Check if executor available
+	if s.executor == nil {
+		return nil, fmt.Errorf("script execution not available (Docker/Podman not found)")
+	}
+	
+	// Validate script exists
+	scriptPath := filepath.Join(skill.DirectoryPath, "scripts", request.ScriptName)
+	if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("script not found: %s (looked in %s)", request.ScriptName, scriptPath)
+	}
+	
+	// Determine language from script extension
+	var language string
+	if strings.HasSuffix(request.ScriptName, ".py") {
+		language = "python"
+	} else if strings.HasSuffix(request.ScriptName, ".sh") {
+		language = "bash"
+	} else {
+		return nil, fmt.Errorf("unsupported script type: %s (must be .py or .sh)", request.ScriptName)
+	}
+	
+	logging.Info("Running helper script: %s/%s with %d args", skill.Name, request.ScriptName, len(request.Args))
+	
+	// Build script path for container (relative to /skill/)
+	containerScriptPath := fmt.Sprintf("/skill/scripts/%s", request.ScriptName)
+	
+	// Create execution context with timeout (default 120 seconds)
+	timeout := 120 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	
+	startTime := time.Now()
+	
+	// Execute the script based on language
+	var output string
+	var err error
+	
+	if language == "python" {
+		output, err = s.executor.ExecutePython(ctx, skill.DirectoryPath, containerScriptPath, request.Args)
+	} else {
+		output, err = s.executor.ExecuteBash(ctx, skill.DirectoryPath, containerScriptPath, request.Args)
+	}
+	
+	duration := time.Since(startTime).Milliseconds()
+	
+	result := &skills.ExecutionResult{
+		Output:   output,
+		ExitCode: 0,
+		Error:    err,
+		Duration: duration,
+	}
+	
+	if err != nil {
+		result.ExitCode = 1
+		logging.Warn("Helper script execution failed after %dms: %v", duration, err)
+		return result, fmt.Errorf("script execution failed: %w", err)
+	}
+	
+	logging.Info("Helper script executed successfully in %dms", duration)
+	return result, nil
 }

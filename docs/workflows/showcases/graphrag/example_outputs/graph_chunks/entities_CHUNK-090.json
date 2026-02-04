@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-090",
+  "entities": [
+    {
+      "id": "Personnel",
+      "type": "PERSON",
+      "text": "People who work for an organization"
+    },
+    {
+      "id": "work information",
+      "type": "INFORMATION",
+      "text": "Information related to work activities"
+    },
+    {
+      "id": "online services",
+      "type": "SERVICE",
+      "text": "Digital platforms accessible via internet"
+    },
+    {
+      "id": "social media",
+      "type": "PLATFORM",
+      "text": "Social networking platforms"
+    },
+    {
+      "id": "personal accounts",
+      "type": "ACCOUNT",
+      "text": "User accounts for accessing services"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-090",
+      "to": "CHUNK-090",
+      "type": "ADVISED_TO"
+    },
+    {
+      "from": "CHUNK-090",
+      "to": "CHUNK-090",
+      "type": "POST_TO"
+    },
+    {
+      "from": "CHUNK-090",
+      "to": "CHUNK-090",
+      "type": "MAINTAIN"
+    },
+    {
+      "from": "CHUNK-090",
+      "to": "CHUNK-090",
+      "type": "USE"
+    },
+    {
+      "from": "CHUNK-090",
+      "to": "CHUNK-090",
+      "type": "SEPARATE"
+    }
+  ]
+}

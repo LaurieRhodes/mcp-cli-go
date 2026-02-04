@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-462",
+  "entities": [
+    {
+      "id": "TLS",
+      "type": "CONCEPT",
+      "text": "Transport Layer Security"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Implementing Certificates, TLS, HTTPS and Opportunistic TLS publication",
+      "type": "DOCUMENT",
+      "text": "ACSC publication on certificates and TLS"
+    },
+    {
+      "id": "TLS filtering",
+      "type": "PROCESS",
+      "text": "Process of filtering TLS traffic"
+    },
+    {
+      "id": "Gateways",
+      "type": "SYSTEM",
+      "text": "Network gateway systems"
+    },
+    {
+      "id": "web content filters",
+      "type": "COMPONENT",
+      "text": "Web content filtering component"
+    },
+    {
+      "id": "Guidelines for Gateways",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for gateways"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ACSC",
+      "to": "Implementing Certificates, TLS, HTTPS and Opportunistic TLS publication",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "TLS filtering",
+      "to": "Gateways",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "TLS filtering",
+      "to": "web content filters",
+      "type": "PART_OF"
+    },
+    {
+      "from": "web content filters",
+      "to": "Guidelines for Gateways",
+      "type": "DEFINED_IN"
+    }
+  ]
+}

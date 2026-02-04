@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-209",
+  "entities": [
+    {
+      "id": "Product evaluation",
+      "type": "CONCEPT",
+      "text": "Process of assessing product security"
+    },
+    {
+      "id": "Security functionality",
+      "type": "CONCEPT",
+      "text": "Capabilities for protecting systems"
+    },
+    {
+      "id": "Evaluated configuration",
+      "type": "CONCEPT",
+      "text": "Validated setup for secure operation"
+    },
+    {
+      "id": "Security risks",
+      "type": "CONCEPT",
+      "text": "Potential threats to system security"
+    },
+    {
+      "id": "ISM-0289",
+      "type": "CONTROL",
+      "text": "Control for evaluated products"
+    },
+    {
+      "id": "ISM-0290",
+      "type": "CONTROL",
+      "text": "Control for high assurance ICT equipment"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Vendor",
+      "type": "ACTOR",
+      "text": "Product manufacturer"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Product evaluation",
+      "to": "Security functionality",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Product evaluation",
+      "to": "Evaluated configuration",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Unevaluated configuration",
+      "to": "Security risks",
+      "type": "INTRODUCES"
+    },
+    {
+      "from": "ISM-0289",
+      "to": "Evaluated products",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0290",
+      "to": "High assurance ICT equipment",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Evaluated products",
+      "to": "Vendor guidance",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "High assurance ICT equipment",
+      "to": "ACSC guidance",
+      "type": "REQUIRES"
+    }
+  ]
+}

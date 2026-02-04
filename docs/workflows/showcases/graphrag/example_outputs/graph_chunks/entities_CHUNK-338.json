@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-338",
+  "entities": [
+    {
+      "id": "Event log",
+      "type": "CONCEPT",
+      "text": "A system for recording security events"
+    },
+    {
+      "id": "ISM-0585",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for event logging"
+    },
+    {
+      "id": "Event details",
+      "type": "CONCEPT",
+      "text": "Required information for logged events"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Event log",
+      "to": "ISM-0585",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-0585",
+      "to": "Event details",
+      "type": "REQUIRES"
+    }
+  ]
+}

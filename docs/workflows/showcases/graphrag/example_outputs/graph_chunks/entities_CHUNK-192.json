@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-192",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "CONCEPT",
+      "text": "Portable electronic devices that can be easily lost or stolen"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Individuals responsible for mobile device security"
+    },
+    {
+      "id": "supervision",
+      "type": "PROCESS",
+      "text": "Ongoing monitoring and oversight of mobile devices"
+    },
+    {
+      "id": "encryption",
+      "type": "CONCEPT",
+      "text": "Data protection technology for mobile devices"
+    },
+    {
+      "id": "security briefcase",
+      "type": "CONCEPT",
+      "text": "Secure container for transporting mobile devices"
+    },
+    {
+      "id": "satchel/pouch/transit bag",
+      "type": "CONCEPT",
+      "text": "Approved containers for secure mobile device transport"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "personnel",
+      "to": "mobile devices",
+      "type": "mobile devices"
+    },
+    {
+      "from": "mobile devices",
+      "to": "encryption",
+      "type": "security briefcase"
+    }
+  ]
+}

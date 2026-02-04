@@ -1,0 +1,117 @@
+{
+  "chunk_id": "CHUNK-429",
+  "entities": [
+    {
+      "id": "denial-of-service attacks",
+      "type": "ATTACK_TYPE",
+      "text": "Attacks designed to disrupt or degrade online services"
+    },
+    {
+      "id": "cloud service providers",
+      "type": "SERVICE_PROVIDER",
+      "text": "Providers of cloud services that organizations should discuss DoS mitigation with"
+    },
+    {
+      "id": "online services",
+      "type": "SERVICE",
+      "text": "Services such as websites, email, and DNS that can be targeted"
+    },
+    {
+      "id": "Domain Name System services",
+      "type": "SERVICE",
+      "text": "DNS services that can be targeted by DoS attacks"
+    },
+    {
+      "id": "registrar locking",
+      "type": "SECURITY_CONTROL",
+      "text": "Security control to protect domain names from unauthorized transfers"
+    },
+    {
+      "id": "Domain registration details",
+      "type": "SECURITY_CONTROL",
+      "text": "Ensuring domain registration information is accurate and up-to-date"
+    },
+    {
+      "id": "critical online services",
+      "type": "SERVICE",
+      "text": "Online services that are essential and should be segregated from others"
+    },
+    {
+      "id": "mitigation strategies",
+      "type": "SECURITY_STRATEGY",
+      "text": "Strategies to prepare for and reduce impact of DoS attacks"
+    },
+    {
+      "id": "ISM-1431",
+      "type": "CONTROL_ID",
+      "text": "ISM control for discussing DoS mitigation with cloud providers"
+    },
+    {
+      "id": "ISM-1436",
+      "type": "CONTROL_ID",
+      "text": "ISM control for segregating critical online services"
+    },
+    {
+      "id": "ISM-1432",
+      "type": "CONTROL_ID",
+      "text": "ISM control for protecting domain names via registrar locking"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "DESCRIBES"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "DISCUSSED_WITH"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "TARGETED_BY"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "TARGETED_BY"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "SEGREGATED_FROM"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "IMPLEMENTED_FOR"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "CHUNK-429",
+      "to": "CHUNK-429",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

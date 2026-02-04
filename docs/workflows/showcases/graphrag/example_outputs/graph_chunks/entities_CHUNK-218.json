@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-218",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Hardware that processes information"
+    },
+    {
+      "id": "Sensitive/classified data",
+      "type": "CONCEPT",
+      "text": "Data requiring protection"
+    },
+    {
+      "id": "Encryption",
+      "type": "PROCESS",
+      "text": "Process of encoding data"
+    },
+    {
+      "id": "Cryptographic equipment/software",
+      "type": "CONCEPT",
+      "text": "Tools for implementing encryption"
+    },
+    {
+      "id": "Handling procedures",
+      "type": "PROCESS",
+      "text": "Methods for managing equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "Encryption",
+      "type": "Cryptographic equipment/software"
+    },
+    {
+      "from": "Sensitive/classified data",
+      "to": "ICT equipment",
+      "type": "Encryption"
+    }
+  ]
+}

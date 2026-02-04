@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-173",
+  "entities": [
+    {
+      "id": "MFDs",
+      "type": "DEVICE",
+      "text": "Multifunction Devices"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Personnel using MFDs"
+    },
+    {
+      "id": "documents",
+      "type": "ARTIFACT",
+      "text": "Documents being scanned/copied"
+    },
+    {
+      "id": "networks",
+      "type": "INFRASTRUCTURE",
+      "text": "Computer networks"
+    },
+    {
+      "id": "data spill",
+      "type": "EVENT",
+      "text": "Unauthorized data exposure"
+    },
+    {
+      "id": "non-volatile memory",
+      "type": "STORAGE",
+      "text": "Persistent storage within devices"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "MFDs",
+      "to": "documents",
+      "type": "PROCESSES"
+    },
+    {
+      "from": "documents",
+      "to": "networks",
+      "type": "EXCEEDS"
+    }
+  ]
+}

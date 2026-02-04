@@ -1,0 +1,227 @@
+{
+  "chunk_id": "CHUNK-295",
+  "entities": [
+    {
+      "id": "server applications",
+      "type": "CONCEPT",
+      "text": "Server software applications"
+    },
+    {
+      "id": "default state",
+      "type": "CONCEPT",
+      "text": "Default deployment configuration"
+    },
+    {
+      "id": "insecure operating environment",
+      "type": "CONCEPT",
+      "text": "Unsecure operational environment"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor"
+    },
+    {
+      "id": "initial foothold",
+      "type": "CONCEPT",
+      "text": "Initial network access point"
+    },
+    {
+      "id": "networks",
+      "type": "CONCEPT",
+      "text": "Computer networks"
+    },
+    {
+      "id": "configuration settings",
+      "type": "CONCEPT",
+      "text": "Configuration parameters"
+    },
+    {
+      "id": "secure state",
+      "type": "CONCEPT",
+      "text": "Secure configuration state"
+    },
+    {
+      "id": "ACSC",
+      "type": "ORGANIZATION",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "vendors",
+      "type": "ORGANIZATION",
+      "text": "Software vendors"
+    },
+    {
+      "id": "hardening guidance",
+      "type": "CONCEPT",
+      "text": "Security configuration recommendations"
+    },
+    {
+      "id": "default accounts",
+      "type": "CONCEPT",
+      "text": "Default user accounts"
+    },
+    {
+      "id": "credentials",
+      "type": "CONCEPT",
+      "text": "Authentication credentials"
+    },
+    {
+      "id": "pre-configured accounts",
+      "type": "CONCEPT",
+      "text": "Pre-configured user accounts"
+    },
+    {
+      "id": "unneeded accounts",
+      "type": "CONCEPT",
+      "text": "Unnecessary user accounts"
+    },
+    {
+      "id": "components",
+      "type": "CONCEPT",
+      "text": "Software components"
+    },
+    {
+      "id": "services",
+      "type": "CONCEPT",
+      "text": "Background services"
+    },
+    {
+      "id": "functionality",
+      "type": "CONCEPT",
+      "text": "Application features"
+    },
+    {
+      "id": "temporary installation files",
+      "type": "CONCEPT",
+      "text": "Temporary installation files"
+    },
+    {
+      "id": "logs",
+      "type": "CONCEPT",
+      "text": "Installation log files"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "server applications",
+      "to": "insecure operating environment",
+      "type": "LEADS_TO"
+    },
+    {
+      "from": "default state",
+      "to": "adversary",
+      "type": "ALLOWS"
+    },
+    {
+      "from": "default state",
+      "to": "initial foothold",
+      "type": "RESULTS_IN"
+    },
+    {
+      "from": "insecure operating environment",
+      "to": "networks",
+      "type": "TARGETS"
+    },
+    {
+      "from": "server applications",
+      "to": "configuration settings",
+      "type": "ENABLE"
+    },
+    {
+      "from": "adversary",
+      "to": "secure state",
+      "type": "ACHIEVES"
+    },
+    {
+      "from": "insecure operating environment",
+      "to": "ACSC",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "initial foothold",
+      "to": "vendors",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "initial foothold",
+      "to": "hardening guidance",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "networks",
+      "to": "default accounts",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "configuration settings",
+      "to": "credentials",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "secure state",
+      "to": "pre-configured accounts",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ACSC",
+      "to": "unneeded accounts",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "vendors",
+      "to": "components",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "hardening guidance",
+      "to": "services",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "default accounts",
+      "to": "functionality",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "credentials",
+      "to": "temporary installation files",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "pre-configured accounts",
+      "to": "logs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "unneeded accounts",
+      "to": "server applications",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "components",
+      "to": "server applications",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "services",
+      "to": "server applications",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "functionality",
+      "to": "server applications",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "temporary installation files",
+      "to": "server applications",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "logs",
+      "to": "server applications",
+      "type": "RELATED_TO"
+    }
+  ]
+}

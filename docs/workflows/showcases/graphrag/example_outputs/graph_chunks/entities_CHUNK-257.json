@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-257",
+  "entities": [
+    {
+      "id": "wear levelling",
+      "type": "CONCEPT",
+      "text": "A technique that ensures writes are distributed evenly across memory blocks"
+    },
+    {
+      "id": "non-volatile flash memory media",
+      "type": "CONCEPT",
+      "text": "Type of memory storage media that retains data without power"
+    },
+    {
+      "id": "ISM-0359",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for media sanitisation"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of securely erasing data from media"
+    },
+    {
+      "id": "overwriting",
+      "type": "PROCESS",
+      "text": "Method of writing data over existing data to erase it"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "wear levelling",
+      "to": "non-volatile flash memory media",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "non-volatile flash memory media",
+      "to": "sanitisation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "non-volatile flash memory media",
+      "to": "overwriting",
+      "type": "USES"
+    },
+    {
+      "from": "sanitisation",
+      "to": "overwriting",
+      "type": "USES"
+    },
+    {
+      "from": "ISM-0359",
+      "to": "sanitisation",
+      "type": "DEFINES"
+    },
+    {
+      "from": "sanitisation",
+      "to": "overwriting",
+      "type": "USES"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-199",
+  "entities": [
+    {
+      "id": "Australian Certification Authority",
+      "type": "ACTOR",
+      "text": "Certifies product evaluations"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Licensed commercial facilities",
+      "type": "ACTOR",
+      "text": "Conduct product evaluations"
+    },
+    {
+      "id": "Common Criteria",
+      "type": "CONCEPT",
+      "text": "International security evaluation standards"
+    },
+    {
+      "id": "ISO/IEC 15408 series",
+      "type": "CONCEPT",
+      "text": "Technical standard series"
+    },
+    {
+      "id": "AISEP",
+      "type": "PROCESS",
+      "text": "Australian Information Security Evaluation Program"
+    },
+    {
+      "id": "Certified Products List",
+      "type": "CONCEPT",
+      "text": "List of evaluated products"
+    },
+    {
+      "id": "CCRA",
+      "type": "CONCEPT",
+      "text": "Common Criteria Recognition Arrangement"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Certification Authority",
+      "to": "ACSC",
+      "type": "PART_OF"
+    },
+    {
+      "from": "Australian Certification Authority",
+      "to": "Licensed commercial facilities",
+      "type": "CERTIFIES"
+    },
+    {
+      "from": "Australian Certification Authority",
+      "to": "Common Criteria",
+      "type": "ALIGNS_WITH"
+    },
+    {
+      "from": "Common Criteria",
+      "to": "ISO/IEC 15408 series",
+      "type": "EQUIVALENT_TO"
+    },
+    {
+      "from": "Australian Certification Authority",
+      "to": "AISEP",
+      "type": "PART_OF"
+    },
+    {
+      "from": "Common Criteria",
+      "to": "Certified Products List",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Common Criteria",
+      "to": "CCRA",
+      "type": "ALIGNS_WITH"
+    }
+  ]
+}

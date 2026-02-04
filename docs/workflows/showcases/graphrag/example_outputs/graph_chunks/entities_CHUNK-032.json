@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-032",
+  "entities": [
+    {
+      "id": "cyber security awareness training program",
+      "type": "PROCESS",
+      "text": "Training program for security awareness"
+    },
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Organization staff members"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "cyber security awareness training program",
+      "type": "OVERSEES"
+    },
+    {
+      "from": "cyber security awareness training program",
+      "to": "personnel",
+      "type": "TRAINS"
+    }
+  ]
+}

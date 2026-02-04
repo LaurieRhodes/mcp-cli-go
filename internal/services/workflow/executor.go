@@ -125,18 +125,24 @@ func (e *Executor) executeWithProvider(
 		systemPrompt = `You are a helpful assistant that answers questions concisely and accurately. You have access to tools and should use them when necessary to answer the question.
 
 IMPORTANT - Using Skills:
-Skills provide specialized capabilities through code execution. There are two ways to use skills:
+Skills provide specialized capabilities through code execution. There are three ways to use skills:
 
 1. PASSIVE MODE - Load documentation and reference materials:
    Call the skill tool directly (e.g., 'docx', 'pdf', 'pptx', 'xlsx')
    Use this to learn about a skill's capabilities before using it.
 
-2. ACTIVE MODE - Execute code to perform tasks:
+2. RUN HELPER SCRIPT - Execute pre-written scripts (RECOMMENDED):
+   Call 'run_helper_script' with skill_name, script_name, and args parameters
+   Use this for direct execution of existing scripts in the skill's scripts/ directory
+   This is the most efficient method - no code generation needed
+
+3. EXECUTE CUSTOM CODE - Write and execute custom code:
    Call 'execute_skill_code' with skill_name parameter
-   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything.
+   Use this to CREATE, MODIFY, PROCESS, or GENERATE anything with custom logic
+   Use when you need flexibility beyond what helper scripts provide
 
 CRITICAL - File Paths:
-When writing code, ALL output files MUST be saved to /outputs/ directory:
+When working with files, ALL output files MUST be saved to /outputs/ directory:
    doc.save('/outputs/result.docx')  ✅ CORRECT - File persists to host
    doc.save('/workspace/result.docx') ❌ WRONG - File deleted when container exits
    doc.save('result.docx') ❌ WRONG - Defaults to /workspace/
@@ -151,6 +157,7 @@ The /outputs/ directory is the ONLY location where files persist after execution
 		aiOptions,
 		systemPrompt,
 	)
+
 	
 	// Set max iterations
 	handler.SetMaxFollowUpAttempts(maxIterations)

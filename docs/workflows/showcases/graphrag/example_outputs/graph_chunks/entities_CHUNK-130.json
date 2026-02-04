@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-130",
+  "entities": [
+    {
+      "id": "TOP SECRET cables",
+      "type": "CONCEPT",
+      "text": "Classified communication cables requiring highest security protection"
+    },
+    {
+      "id": "party walls",
+      "type": "CONCEPT",
+      "text": "Walls shared between different facilities or tenants"
+    },
+    {
+      "id": "shared facilities",
+      "type": "CONCEPT",
+      "text": "Buildings or spaces used by multiple organizations"
+    },
+    {
+      "id": "inner wall",
+      "type": "CONCEPT",
+      "text": "Separate internal wall structure within a facility"
+    },
+    {
+      "id": "cable inspection",
+      "type": "PROCESS",
+      "text": "Process of examining cables for security compliance"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TOP SECRET cables",
+      "to": "TOP SECRET cables",
+      "type": "PROHIBITED_IN"
+    },
+    {
+      "from": "party walls",
+      "to": "inner wall",
+      "type": "PERMITTED_IN"
+    }
+  ]
+}

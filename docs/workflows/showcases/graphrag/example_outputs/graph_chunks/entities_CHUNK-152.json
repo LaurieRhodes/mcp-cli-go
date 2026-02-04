@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-152",
+  "entities": [
+    {
+      "id": "cordless telephone handsets",
+      "type": "DEVICE",
+      "text": "Wireless communication devices susceptible to interception"
+    },
+    {
+      "id": "cordless telephone headsets",
+      "type": "DEVICE",
+      "text": "Wireless audio devices susceptible to interception"
+    },
+    {
+      "id": "encryption",
+      "type": "SECURITY_MECHANISM",
+      "text": "Cryptographic protection for communications"
+    },
+    {
+      "id": "adversary",
+      "type": "THREAT_ACTOR",
+      "text": "Malicious actor attempting to intercept communications"
+    },
+    {
+      "id": "sensitive conversations",
+      "type": "CONVERSATION_TYPE",
+      "text": "Confidential discussions requiring protection"
+    },
+    {
+      "id": "classified conversations",
+      "type": "CONVERSATION_TYPE",
+      "text": "Government or defense-related discussions requiring highest protection"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cordless telephone systems",
+      "to": "ISM-0233",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "Cordless telephone systems",
+      "to": "ISM-0233",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "Cordless telephone systems",
+      "to": "ISM-0233",
+      "type": "PROTECTS_AGAINST"
+    },
+    {
+      "from": "Cordless telephone systems",
+      "to": "ISM-0233",
+      "type": "THREATENS"
+    },
+    {
+      "from": "Cordless telephone systems",
+      "to": "ISM-0233",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Cordless telephone systems",
+      "to": "ISM-0233",
+      "type": "REQUIRES"
+    }
+  ]
+}

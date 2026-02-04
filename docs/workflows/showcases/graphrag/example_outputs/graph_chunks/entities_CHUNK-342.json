@@ -1,0 +1,162 @@
+{
+  "chunk_id": "CHUNK-342",
+  "entities": [
+    {
+      "id": "Event Logging",
+      "type": "CONCEPT",
+      "text": "The process of recording security events"
+    },
+    {
+      "id": "Intrusion Activity",
+      "type": "CONCEPT",
+      "text": "Unauthorized access attempts"
+    },
+    {
+      "id": "Cross Domain Solutions",
+      "type": "CONCEPT",
+      "text": "Systems connecting different security domains"
+    },
+    {
+      "id": "Databases",
+      "type": "CONCEPT",
+      "text": "Data storage systems"
+    },
+    {
+      "id": "Gateways",
+      "type": "CONCEPT",
+      "text": "Network entry/exit points"
+    },
+    {
+      "id": "Multifunction Devices",
+      "type": "CONCEPT",
+      "text": "Devices with multiple functions (fax, print, scan)"
+    },
+    {
+      "id": "Operating Systems",
+      "type": "CONCEPT",
+      "text": "Core system software"
+    },
+    {
+      "id": "Application-based Security Services",
+      "type": "CONCEPT",
+      "text": "Security services at application layer"
+    },
+    {
+      "id": "Network-based Security Services",
+      "type": "CONCEPT",
+      "text": "Security services at network layer"
+    },
+    {
+      "id": "Server Applications",
+      "type": "CONCEPT",
+      "text": "Applications running on servers"
+    },
+    {
+      "id": "System Access",
+      "type": "CONCEPT",
+      "text": "Access to computer systems"
+    },
+    {
+      "id": "User Applications",
+      "type": "CONCEPT",
+      "text": "End-user applications"
+    },
+    {
+      "id": "Web Applications",
+      "type": "CONCEPT",
+      "text": "Browser-based applications"
+    },
+    {
+      "id": "Web Proxies",
+      "type": "CONCEPT",
+      "text": "Intermediary servers for web traffic"
+    },
+    {
+      "id": "Australian Cyber Security Centre",
+      "type": "ACTOR",
+      "text": "Australian cybersecurity agency"
+    },
+    {
+      "id": "Windows Event Logging and Forwarding",
+      "type": "CONCEPT",
+      "text": "Microsoft Windows logging system"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Event Logging",
+      "to": "Intrusion Activity",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Cross Domain Solutions",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Databases",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Gateways",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Multifunction Devices",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Operating Systems",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Application-based Security Services",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Network-based Security Services",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Server Applications",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "System Access",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "User Applications",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Web Applications",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Web Proxies",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Event Logging",
+      "to": "Windows Event Logging and Forwarding",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Australian Cyber Security Centre",
+      "to": "Windows Event Logging and Forwarding",
+      "type": "DEFINES"
+    }
+  ]
+}

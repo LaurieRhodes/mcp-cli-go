@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-346",
+  "entities": [
+    {
+      "id": "Software Bill of Materials",
+      "type": "CONCEPT",
+      "text": "List of open source and commercial software components"
+    },
+    {
+      "id": "Software Components",
+      "type": "CONCEPT",
+      "text": "Individual software components used by applications"
+    },
+    {
+      "id": "Consumers",
+      "type": "ACTOR",
+      "text": "End users of software"
+    },
+    {
+      "id": "Application Development",
+      "type": "PROCESS",
+      "text": "Process of creating software applications"
+    },
+    {
+      "id": "Cyber Supply Chain",
+      "type": "CONCEPT",
+      "text": "Chain of software dependencies and suppliers"
+    },
+    {
+      "id": "Security Risks",
+      "type": "CONCEPT",
+      "text": "Potential vulnerabilities in software components"
+    },
+    {
+      "id": "ISM-1730 Control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring SBOM"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Software Bill of Materials",
+      "to": "Software Components",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Software Bill of Materials",
+      "to": "Application Development",
+      "type": "USED_IN"
+    },
+    {
+      "from": "Software Bill of Materials",
+      "to": "Cyber Supply Chain",
+      "type": "PROVIDES_TRANSPARENCY"
+    },
+    {
+      "from": "Software Bill of Materials",
+      "to": "Security Risks",
+      "type": "MANAGES"
+    },
+    {
+      "from": "Software Bill of Materials",
+      "to": "Consumers",
+      "type": "MADE_AVAILABLE_TO"
+    },
+    {
+      "from": "ISM-1730 Control",
+      "to": "Software Bill of Materials",
+      "type": "REQUIRES"
+    }
+  ]
+}

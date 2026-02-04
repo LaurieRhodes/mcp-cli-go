@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-151",
+  "entities": [
+    {
+      "id": "sensitive conversations",
+      "type": "CONCEPT",
+      "text": "Discussions involving sensitive information"
+    },
+    {
+      "id": "classified conversations",
+      "type": "CONCEPT",
+      "text": "Discussions involving classified information"
+    },
+    {
+      "id": "telephone systems",
+      "type": "SYSTEM",
+      "text": "Communication systems for voice calls"
+    },
+    {
+      "id": "encryption",
+      "type": "PROCESS",
+      "text": "Process of encoding information to protect it"
+    },
+    {
+      "id": "ISM-0232",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for telephone encryption"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "sensitive conversations",
+      "to": "telephone systems",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "classified conversations",
+      "to": "encryption",
+      "type": "REQUIRES"
+    }
+  ]
+}

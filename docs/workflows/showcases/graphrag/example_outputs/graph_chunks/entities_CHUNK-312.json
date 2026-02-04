@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-312",
+  "entities": [
+    {
+      "id": "Session and screen locking",
+      "type": "CONCEPT",
+      "text": "Security mechanism to prevent unauthorized access"
+    },
+    {
+      "id": "Unauthorised access",
+      "type": "CONCEPT",
+      "text": "Illegal or unauthorized system access"
+    },
+    {
+      "id": "System",
+      "type": "CONCEPT",
+      "text": "Computer system or device"
+    },
+    {
+      "id": "User",
+      "type": "ACTOR",
+      "text": "Person who authenticates to system"
+    },
+    {
+      "id": "ISM-0428",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control identifier"
+    },
+    {
+      "id": "Session lock",
+      "type": "PROCESS",
+      "text": "Process of locking user session"
+    },
+    {
+      "id": "Screen lock",
+      "type": "PROCESS",
+      "text": "Process of locking screen display"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Session and screen locking",
+      "to": "Unauthorised access",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Session and screen locking",
+      "to": "System",
+      "type": "DEFINES"
+    },
+    {
+      "from": "User",
+      "to": "System",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0428",
+      "to": "Session lock",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0428",
+      "to": "Screen lock",
+      "type": "REQUIRES"
+    }
+  ]
+}

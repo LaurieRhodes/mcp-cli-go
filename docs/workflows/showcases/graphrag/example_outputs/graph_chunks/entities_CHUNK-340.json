@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-340",
+  "entities": [
+    {
+      "id": "Event log monitoring",
+      "type": "CONCEPT",
+      "text": "Monitoring of system event logs for security"
+    },
+    {
+      "id": "Event logs",
+      "type": "CONCEPT",
+      "text": "System logs recording activities"
+    },
+    {
+      "id": "Cyber security events",
+      "type": "CONCEPT",
+      "text": "Security-related system occurrences"
+    },
+    {
+      "id": "Cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Confirmed security breaches"
+    },
+    {
+      "id": "ISM-0109",
+      "type": "CONTROL",
+      "text": "ISM control requiring event log analysis"
+    },
+    {
+      "id": "ISM-1228",
+      "type": "CONTROL",
+      "text": "ISM control requiring cyber event analysis"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Event log monitoring",
+      "to": "Event logs",
+      "type": "USES"
+    },
+    {
+      "from": "Event logs",
+      "to": "Cyber security events",
+      "type": "DETECTS"
+    },
+    {
+      "from": "Cyber security events",
+      "to": "Cyber security incidents",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "ISM-0109",
+      "to": "Event logs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1228",
+      "to": "Cyber security events",
+      "type": "REQUIRES"
+    }
+  ]
+}

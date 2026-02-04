@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-214",
+  "entities": [
+    {
+      "id": "ICT equipment register",
+      "type": "CONCEPT",
+      "text": "System for tracking ICT equipment"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing and using the register"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Hardware devices like workstations, servers, network devices"
+    },
+    {
+      "id": "Authorised ICT equipment",
+      "type": "CONCEPT",
+      "text": "Legitimate, approved ICT equipment"
+    },
+    {
+      "id": "Unauthorised ICT equipment",
+      "type": "CONCEPT",
+      "text": "Unauthorized or rogue ICT equipment"
+    },
+    {
+      "id": "ISM-0336",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "ICT equipment register",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "ICT equipment register",
+      "to": "ICT equipment",
+      "type": "TRACKS"
+    }
+  ]
+}

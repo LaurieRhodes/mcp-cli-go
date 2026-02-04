@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-250",
+  "entities": [
+    {
+      "id": "volatile media",
+      "type": "MEDIA_TYPE",
+      "text": "Media that loses data when power is removed"
+    },
+    {
+      "id": "ISM-0351",
+      "type": "CONTROL",
+      "text": "Control for volatile media sanitisation"
+    },
+    {
+      "id": "ISM-0352",
+      "type": "CONTROL",
+      "text": "Control for SECRET/TOP SECRET volatile media"
+    },
+    {
+      "id": "sanitising",
+      "type": "PROCESS",
+      "text": "Process of cleaning volatile media"
+    },
+    {
+      "id": "overwriting",
+      "type": "PROCESS",
+      "text": "Process of writing over data with random patterns"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-250",
+      "to": "CHUNK-250",
+      "type": "MENTIONS"
+    },
+    {
+      "from": "CHUNK-250",
+      "to": "CHUNK-250",
+      "type": "MENTIONS"
+    },
+    {
+      "from": "CHUNK-250",
+      "to": "CHUNK-250",
+      "type": "MENTIONS"
+    },
+    {
+      "from": "CHUNK-250",
+      "to": "CHUNK-250",
+      "type": "MENTIONS"
+    },
+    {
+      "from": "CHUNK-250",
+      "to": "CHUNK-250",
+      "type": "MENTIONS"
+    }
+  ]
+}

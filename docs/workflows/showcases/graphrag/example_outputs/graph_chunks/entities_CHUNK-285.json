@@ -1,0 +1,147 @@
+{
+  "chunk_id": "CHUNK-285",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "GUIDELINE",
+      "text": "Cyber supply chain risk management guidance"
+    },
+    {
+      "id": "patching or updating operating systems",
+      "type": "GUIDELINE",
+      "text": "Operating system patching guidance"
+    },
+    {
+      "id": "securely configuring Microsoft Windows operating systems",
+      "type": "GUIDELINE",
+      "text": "Microsoft Windows security configuration guidance"
+    },
+    {
+      "id": "securely configuring Linux workstations and servers",
+      "type": "GUIDELINE",
+      "text": "Linux security configuration guidance"
+    },
+    {
+      "id": "exploit protection functionality within Microsoft Windows",
+      "type": "GUIDELINE",
+      "text": "Microsoft Windows exploit protection guidance"
+    },
+    {
+      "id": "implementing application control",
+      "type": "GUIDELINE",
+      "text": "Application control implementation guidance"
+    },
+    {
+      "id": "Microsoft's 'recommended block rules' and 'recommended driver block rules'",
+      "type": "GUIDELINE",
+      "text": "Microsoft block rules guidance"
+    },
+    {
+      "id": "use of PowerShell",
+      "type": "GUIDELINE",
+      "text": "PowerShell security guidance"
+    },
+    {
+      "id": "use of PowerShell by blue teams",
+      "type": "GUIDELINE",
+      "text": "PowerShell blue team guidance"
+    },
+    {
+      "id": "obtaining greater visibility through PowerShell logging",
+      "type": "GUIDELINE",
+      "text": "PowerShell logging guidance"
+    },
+    {
+      "id": "independent testing of security products' ability to detect or prevent various stages of network intrusions",
+      "type": "GUIDELINE",
+      "text": "Security product testing guidance"
+    },
+    {
+      "id": "independent testing of antivirus software",
+      "type": "GUIDELINE",
+      "text": "Antivirus software testing guidance"
+    },
+    {
+      "id": "use of removable media",
+      "type": "GUIDELINE",
+      "text": "Removable media usage guidance"
+    },
+    {
+      "id": "event logging",
+      "type": "GUIDELINE",
+      "text": "Event logging guidance"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Further information",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Guidelines for System Management",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "ACSC's Hardening Microsoft Windows 10 version 21H1 Workstations publication",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "ACSC's Hardening Linux Workstations and Servers publication",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Microsoft",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "ACSC's Implementing Application Control publication",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Microsoft",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "ACSC's Securing PowerShell in the Enterprise publication",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Microsoft",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Mandiant",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "The MITRE Corporation",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "AV-Comparatives and AV-TEST",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Guidelines for Media",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Guidelines for System Monitoring",
+      "type": "REFERENCES"
+    }
+  ]
+}

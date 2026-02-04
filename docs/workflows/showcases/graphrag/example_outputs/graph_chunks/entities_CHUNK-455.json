@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-455",
+  "entities": [
+    {
+      "id": "United States' Commercial National Security Algorithm Suite",
+      "type": "CONCEPT",
+      "text": "US government cryptographic standards suite"
+    },
+    {
+      "id": "United States' National Security Agency",
+      "type": "ACTOR",
+      "text": "US intelligence agency responsible for cryptographic standards"
+    },
+    {
+      "id": "ACSC's Planning for Post-Quantum Cryptography publication",
+      "type": "DOCUMENT",
+      "text": "Australian Cyber Security Centre publication on post-quantum cryptography"
+    },
+    {
+      "id": "post-quantum cryptographic algorithms",
+      "type": "CONCEPT",
+      "text": "Cryptographic algorithms resistant to quantum computing attacks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "United States' Commercial National Security Algorithm Suite",
+      "to": "post-quantum cryptographic algorithms",
+      "type": "MANAGED_BY"
+    },
+    {
+      "from": "United States' National Security Agency",
+      "to": "ACSC's Planning for Post-Quantum Cryptography publication",
+      "type": "DOCUMENTED_IN"
+    }
+  ]
+}

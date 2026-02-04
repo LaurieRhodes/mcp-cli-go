@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-482",
+  "entities": [
+    {
+      "id": "gateways",
+      "type": "CONCEPT",
+      "text": "Network security devices that connect different networks"
+    },
+    {
+      "id": "demilitarised zone",
+      "type": "CONCEPT",
+      "text": "Protected network segment for external-facing services"
+    },
+    {
+      "id": "data flows",
+      "type": "CONCEPT",
+      "text": "Network traffic between systems"
+    },
+    {
+      "id": "IP source address spoofing",
+      "type": "CONCEPT",
+      "text": "Malicious technique to falsify IP source addresses"
+    },
+    {
+      "id": "transport layer",
+      "type": "CONCEPT",
+      "text": "Layer 4 of OSI model for end-to-end communication"
+    },
+    {
+      "id": "network layers",
+      "type": "CONCEPT",
+      "text": "Network protocol layers (transport and above)"
+    },
+    {
+      "id": "external parties",
+      "type": "ACTOR",
+      "text": "Third-party organizations requiring network access"
+    },
+    {
+      "id": "security domains",
+      "type": "CONCEPT",
+      "text": "Different security classification zones"
+    },
+    {
+      "id": "public network infrastructure",
+      "type": "CONCEPT",
+      "text": "Public internet and communication infrastructure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "gateways",
+      "to": "gateways",
+      "type": "gateways"
+    },
+    {
+      "from": "demilitarised zone",
+      "to": "data flows",
+      "type": "IP source address spoofing"
+    }
+  ]
+}

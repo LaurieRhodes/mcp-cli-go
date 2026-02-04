@@ -1,0 +1,117 @@
+{
+  "chunk_id": "CHUNK-272",
+  "entities": [
+    {
+      "id": "media",
+      "type": "CONCEPT",
+      "text": "Media that needs disposal"
+    },
+    {
+      "id": "sanitised",
+      "type": "ACTION",
+      "text": "Process of removing sensitive information"
+    },
+    {
+      "id": "destroyed",
+      "type": "ACTION",
+      "text": "Process of physically destroying media"
+    },
+    {
+      "id": "declassified",
+      "type": "ACTION",
+      "text": "Process of changing classification level"
+    },
+    {
+      "id": "labels",
+      "type": "OBJECT",
+      "text": "Labels attached to media"
+    },
+    {
+      "id": "markings",
+      "type": "OBJECT",
+      "text": "Markings on media"
+    },
+    {
+      "id": "owner",
+      "type": "ATTRIBUTE",
+      "text": "Owner of the media"
+    },
+    {
+      "id": "sensitivity",
+      "type": "ATTRIBUTE",
+      "text": "Sensitivity level of media"
+    },
+    {
+      "id": "classification",
+      "type": "ATTRIBUTE",
+      "text": "Classification level of media"
+    },
+    {
+      "id": "public domain",
+      "type": "DOMAIN",
+      "text": "Public domain where media is released"
+    },
+    {
+      "id": "formal administrative decision",
+      "type": "PROCESS",
+      "text": "Formal decision-making process"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "media",
+      "to": "sanitised",
+      "type": "NEEDS"
+    },
+    {
+      "from": "media",
+      "to": "destroyed",
+      "type": "NEEDS"
+    },
+    {
+      "from": "media",
+      "to": "declassified",
+      "type": "NEEDS"
+    },
+    {
+      "from": "media",
+      "to": "public domain",
+      "type": "RELEASED_TO"
+    },
+    {
+      "from": "media",
+      "to": "removed",
+      "type": "HAS"
+    },
+    {
+      "from": "media",
+      "to": "removed",
+      "type": "HAS"
+    },
+    {
+      "from": "media",
+      "to": "removed",
+      "type": "HAS"
+    },
+    {
+      "from": "media",
+      "to": "removed",
+      "type": "HAS"
+    },
+    {
+      "from": "media",
+      "to": "removed",
+      "type": "HAS"
+    },
+    {
+      "from": "media",
+      "to": "released",
+      "type": "RELEASED_TO"
+    },
+    {
+      "from": "media",
+      "to": "made",
+      "type": "REQUIRES"
+    }
+  ]
+}

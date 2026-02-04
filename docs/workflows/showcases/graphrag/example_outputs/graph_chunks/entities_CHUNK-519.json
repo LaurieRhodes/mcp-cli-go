@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-519",
+  "entities": [
+    {
+      "id": "content sanitisation",
+      "type": "PROCESS",
+      "text": "Process of rendering files safe by removing or altering active content"
+    },
+    {
+      "id": "files",
+      "type": "OBJECT",
+      "text": "Documents that need to be sanitized"
+    },
+    {
+      "id": "gateways/CDSs",
+      "type": "SYSTEM",
+      "text": "Network entry/exit points for file transfer"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "content sanitisation",
+      "to": "files",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "content sanitisation",
+      "to": "gateways/CDSs",
+      "type": "OCCURS_AT"
+    }
+  ]
+}

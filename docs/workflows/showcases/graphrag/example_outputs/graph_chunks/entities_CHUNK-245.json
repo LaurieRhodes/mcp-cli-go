@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-245",
+  "entities": [
+    {
+      "id": "write-once media",
+      "type": "CONCEPT",
+      "text": "Media that cannot be rewritten after initial data writing"
+    },
+    {
+      "id": "destination system",
+      "type": "SYSTEM",
+      "text": "System receiving transferred data"
+    },
+    {
+      "id": "data transfer",
+      "type": "PROCESS",
+      "text": "Process of moving data between systems"
+    },
+    {
+      "id": "security domains",
+      "type": "CONCEPT",
+      "text": "Different security classification levels"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of securely erasing data"
+    },
+    {
+      "id": "read-only access",
+      "type": "CONCEPT",
+      "text": "Access restriction preventing write operations"
+    },
+    {
+      "id": "non-volatile flash memory media",
+      "type": "CONCEPT",
+      "text": "Flash-based storage media that retains data without power"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "write-once media",
+      "to": "data transfer",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "data transfer",
+      "to": "destination system",
+      "type": "INVOLVES"
+    }
+  ]
+}

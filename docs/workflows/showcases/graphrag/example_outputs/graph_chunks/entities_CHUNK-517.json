@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-517",
+  "entities": [
+    {
+      "id": "content validation",
+      "type": "PROCESS",
+      "text": "Ensuring files conform to defined specifications"
+    },
+    {
+      "id": "file format checks",
+      "type": "PROCESS",
+      "text": "Verification of file format compliance"
+    },
+    {
+      "id": "malicious code",
+      "type": "THREAT",
+      "text": "Unauthorized or harmful software designed to exploit vulnerabilities"
+    },
+    {
+      "id": "operating systems",
+      "type": "SYSTEM",
+      "text": "Computer operating systems"
+    },
+    {
+      "id": "applications",
+      "type": "SYSTEM",
+      "text": "Software applications"
+    },
+    {
+      "id": "gateways",
+      "type": "SYSTEM",
+      "text": "Network gateways"
+    },
+    {
+      "id": "CDSs",
+      "type": "SYSTEM",
+      "text": "Content Delivery Systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "content validation",
+      "to": "file format checks",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "file format checks",
+      "to": "malicious code",
+      "type": "DETECTS"
+    }
+  ]
+}

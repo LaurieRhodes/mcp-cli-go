@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-197",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "DEVICE",
+      "text": "Mobile devices used in classified areas"
+    },
+    {
+      "id": "security briefcases",
+      "type": "EQUIPMENT",
+      "text": "Security briefcases for classified information"
+    },
+    {
+      "id": "multi-use satchels",
+      "type": "EQUIPMENT",
+      "text": "Approved containers for classified materials"
+    },
+    {
+      "id": "travelling overseas",
+      "type": "ACTIVITY",
+      "text": "Traveling with electronic devices overseas"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Further information",
+      "to": "Guidelines for Physical Security",
+      "type": "REFERENCED_IN"
+    },
+    {
+      "from": "Further information",
+      "to": "Security Equipment Guide-005",
+      "type": "REFERENCED_IN"
+    },
+    {
+      "from": "Further information",
+      "to": "Security Equipment Evaluated Products List",
+      "type": "REFERENCED_IN"
+    },
+    {
+      "from": "Further information",
+      "to": "Travelling Overseas With Electronic Devices",
+      "type": "REFERENCED_IN"
+    }
+  ]
+}

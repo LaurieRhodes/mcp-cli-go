@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-010",
+  "entities": [
+    {
+      "id": "controls",
+      "type": "CONCEPT",
+      "text": "Security measures implemented for systems"
+    },
+    {
+      "id": "system",
+      "type": "CONCEPT",
+      "text": "The IT system requiring protection"
+    },
+    {
+      "id": "operating environment",
+      "type": "CONCEPT",
+      "text": "The environment where the system operates"
+    },
+    {
+      "id": "authorising officer",
+      "type": "ACTOR",
+      "text": "Person approving controls"
+    },
+    {
+      "id": "system security plan annex",
+      "type": "CONCEPT",
+      "text": "Documentation for control implementation details"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "controls",
+      "to": "system",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "controls",
+      "to": "operating environment",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "authorising officer",
+      "to": "controls",
+      "type": "APPROVES"
+    },
+    {
+      "from": "system",
+      "to": "system security plan annex",
+      "type": "DOCUMENTS"
+    }
+  ]
+}

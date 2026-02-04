@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-305",
+  "entities": [
+    {
+      "id": "credential cracking tools",
+      "type": "CONCEPT",
+      "text": "Tools used to crack credentials"
+    },
+    {
+      "id": "multi-factor authentication",
+      "type": "CONCEPT",
+      "text": "Authentication requiring multiple factors"
+    },
+    {
+      "id": "single-factor authentication",
+      "type": "CONCEPT",
+      "text": "Authentication using single factor"
+    },
+    {
+      "id": "passphrases",
+      "type": "CONCEPT",
+      "text": "Random word sequences for authentication"
+    },
+    {
+      "id": "passwords",
+      "type": "CONCEPT",
+      "text": "Traditional character-based authentication"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting access"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Organization implementing security measures"
+    },
+    {
+      "id": "credential compromise",
+      "type": "PROCESS",
+      "text": "Process of unauthorized credential access"
+    },
+    {
+      "id": "authentication implementation",
+      "type": "PROCESS",
+      "text": "Process of implementing authentication methods"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "credential cracking tools",
+      "to": "multi-factor authentication",
+      "type": "single-factor authentication"
+    },
+    {
+      "from": "multi-factor authentication",
+      "to": "single-factor authentication",
+      "type": "passphrases"
+    }
+  ]
+}

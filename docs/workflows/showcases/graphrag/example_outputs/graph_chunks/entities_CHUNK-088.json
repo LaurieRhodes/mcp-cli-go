@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-088",
+  "entities": [
+    {
+      "id": "Business Email Compromise",
+      "type": "CONCEPT",
+      "text": "Financial fraud using compromised email accounts"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor conducting BEC attacks"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Employees handling banking and payment requests"
+    },
+    {
+      "id": "Invoice Fraud",
+      "type": "PROCESS",
+      "text": "Fraud method using compromised vendor invoices"
+    },
+    {
+      "id": "Employee Impersonation",
+      "type": "PROCESS",
+      "text": "Fraud method using compromised employee accounts"
+    },
+    {
+      "id": "Company Impersonation",
+      "type": "PROCESS",
+      "text": "Fraud method using domain impersonation"
+    },
+    {
+      "id": "ISM-1740 Control",
+      "type": "CONCEPT",
+      "text": "Security control for BEC awareness training"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Business Email Compromise",
+      "to": "Adversary",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Adversary",
+      "to": "Invoice Fraud",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Adversary",
+      "to": "Employee Impersonation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Adversary",
+      "to": "Company Impersonation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Personnel",
+      "to": "Business Email Compromise",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1740 Control",
+      "to": "Personnel",
+      "type": "REQUIRES"
+    }
+  ]
+}

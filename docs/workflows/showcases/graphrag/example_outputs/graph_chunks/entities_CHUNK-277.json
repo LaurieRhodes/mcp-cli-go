@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-277",
+  "entities": [
+    {
+      "id": "unprivileged users",
+      "type": "ACTOR",
+      "text": "users without administrative privileges"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "malicious actor using social engineering"
+    },
+    {
+      "id": "malicious application",
+      "type": "CONCEPT",
+      "text": "harmful software"
+    },
+    {
+      "id": "approved applications",
+      "type": "CONCEPT",
+      "text": "authorized software"
+    },
+    {
+      "id": "organisation-managed software repositories",
+      "type": "CONCEPT",
+      "text": "company-controlled software sources"
+    },
+    {
+      "id": "trusted application marketplaces",
+      "type": "CONCEPT",
+      "text": "verified software distribution platforms"
+    },
+    {
+      "id": "system administrators",
+      "type": "ACTOR",
+      "text": "IT administrators"
+    },
+    {
+      "id": "security functionality",
+      "type": "CONCEPT",
+      "text": "security features and controls"
+    },
+    {
+      "id": "system functionality",
+      "type": "CONCEPT",
+      "text": "operational system capabilities"
+    },
+    {
+      "id": "ISM-1592",
+      "type": "CONCEPT",
+      "text": "security control for software installation"
+    },
+    {
+      "id": "ISM-0382",
+      "type": "CONCEPT",
+      "text": "security control for software uninstallation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "unprivileged users",
+      "to": "adversary",
+      "type": "CAN_BE_EXPLOITED_BY"
+    },
+    {
+      "from": "adversary",
+      "to": "malicious application",
+      "type": "USES_SOCIAL_ENGINEERING_TO_INSTALL"
+    },
+    {
+      "from": "unprivileged users",
+      "to": "approved applications",
+      "type": "CAN_INSTALL_FROM"
+    },
+    {
+      "from": "approved applications",
+      "to": "organisation-managed software repositories",
+      "type": "SOURCED_FROM"
+    },
+    {
+      "from": "approved applications",
+      "to": "trusted application marketplaces",
+      "type": "SOURCED_FROM"
+    },
+    {
+      "from": "unprivileged users",
+      "to": "security functionality",
+      "type": "SHOULD_NOT_REMOVE"
+    },
+    {
+      "from": "unprivileged users",
+      "to": "system functionality",
+      "type": "SHOULD_NOT_BREAK"
+    },
+    {
+      "from": "ISM-1592",
+      "to": "unprivileged users",
+      "type": "CONTROLS_ABILITY_TO_INSTALL"
+    },
+    {
+      "from": "ISM-0382",
+      "to": "unprivileged users",
+      "type": "CONTROLS_ABILITY_TO_UNINSTALL"
+    }
+  ]
+}

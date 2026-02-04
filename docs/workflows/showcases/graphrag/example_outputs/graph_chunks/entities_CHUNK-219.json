@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-219",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cyber supply chain risk management topic"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for procurement and outsourcing"
+    },
+    {
+      "id": "ACSC's IoT Code of Practice \u2013 Guidance for Manufacturers",
+      "type": "DOCUMENT",
+      "text": "ACSC IoT Code of Practice for manufacturers"
+    },
+    {
+      "id": "Guidelines for Physical Security",
+      "type": "DOCUMENT",
+      "text": "Guidelines for physical security"
+    },
+    {
+      "id": "Guidelines for Cryptography",
+      "type": "DOCUMENT",
+      "text": "Guidelines for cryptography"
+    },
+    {
+      "id": "Attorney-General's Department's Protective Security Policy Framework, Physical security for entity resources policy",
+      "type": "DOCUMENT",
+      "text": "Attorney-General's Department Protective Security Policy Framework"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Further information",
+      "to": "cyber supply chain risk management section",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Further information",
+      "to": "IoT Code of Practice",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "ICT equipment and media section",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Further information",
+      "to": "cryptographic fundamentals section",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Further information",
+      "to": "Physical security for entity resources policy",
+      "type": "CONTAINS"
+    }
+  ]
+}

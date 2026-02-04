@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-319",
+  "entities": [
+    {
+      "id": "system administration",
+      "type": "PROCESS",
+      "text": "Management and oversight of IT systems"
+    },
+    {
+      "id": "cloud services",
+      "type": "SERVICE",
+      "text": "Computing services delivered over the internet"
+    },
+    {
+      "id": "on-premises assets",
+      "type": "ASSET",
+      "text": "Physical IT infrastructure located within an organization's premises"
+    },
+    {
+      "id": "service providers",
+      "type": "ACTOR",
+      "text": "Companies offering cloud computing services"
+    },
+    {
+      "id": "customers",
+      "type": "ACTOR",
+      "text": "Organizations using cloud services"
+    },
+    {
+      "id": "control plane",
+      "type": "SYSTEM",
+      "text": "Interface for managing cloud resources"
+    },
+    {
+      "id": "security domain",
+      "type": "DOMAIN",
+      "text": "Logical boundary for security controls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "system administration",
+      "to": "cloud services",
+      "type": "COMPARED_TO"
+    },
+    {
+      "from": "cloud services",
+      "to": "on-premises assets",
+      "type": "DIFFERS_FROM"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-383",
+  "entities": [
+    {
+      "id": "SPF",
+      "type": "CONCEPT",
+      "text": "Sender Policy Framework - email authentication protocol"
+    },
+    {
+      "id": "email servers",
+      "type": "ACTOR",
+      "text": "Servers authorized to send emails on behalf of a domain"
+    },
+    {
+      "id": "IP addresses",
+      "type": "CONCEPT",
+      "text": "Internet Protocol addresses used for sending emails"
+    },
+    {
+      "id": "domain owners",
+      "type": "ACTOR",
+      "text": "Owners of domain names who configure SPF records"
+    },
+    {
+      "id": "organisations",
+      "type": "ACTOR",
+      "text": "Entities that control domains and email infrastructure"
+    },
+    {
+      "id": "SPF verification",
+      "type": "PROCESS",
+      "text": "Process of checking if email server is authorized"
+    },
+    {
+      "id": "hard fail SPF record",
+      "type": "CONCEPT",
+      "text": "SPF record configuration that strictly rejects unauthorized emails"
+    },
+    {
+      "id": "incoming emails",
+      "type": "PROCESS",
+      "text": "Process of authenticating received emails using SPF"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "SPF",
+      "to": "SPF",
+      "type": "DEFINES"
+    },
+    {
+      "from": "SPF",
+      "to": "email servers",
+      "type": "SPECIFIES"
+    }
+  ]
+}

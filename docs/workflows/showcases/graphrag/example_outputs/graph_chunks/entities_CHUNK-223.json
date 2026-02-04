@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-223",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and Communication Technology equipment"
+    },
+    {
+      "id": "Maintenance activities",
+      "type": "PROCESS",
+      "text": "Repair and maintenance procedures"
+    },
+    {
+      "id": "Software configuration",
+      "type": "CONCEPT",
+      "text": "Approved software setup"
+    },
+    {
+      "id": "Unauthorised modifications",
+      "type": "CONCEPT",
+      "text": "Unauthorized changes made to systems"
+    },
+    {
+      "id": "Technicians",
+      "type": "ACTOR",
+      "text": "Technical personnel performing maintenance"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "Maintenance activities",
+      "type": "UNDERGOES"
+    },
+    {
+      "from": "Maintenance activities",
+      "to": "Software configuration",
+      "type": "AFFECTS"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "chunk_id": "CHUNK-303",
+  "entities": [
+    {
+      "id": "Authentication methods",
+      "type": "CONCEPT",
+      "text": "Methods for verifying user identity"
+    },
+    {
+      "id": "LAN Manager",
+      "type": "ACTOR",
+      "text": "Legacy Microsoft authentication protocol"
+    },
+    {
+      "id": "NT LAN Manager",
+      "type": "ACTOR",
+      "text": "Newer Microsoft authentication protocol"
+    },
+    {
+      "id": "NTLMv1",
+      "type": "PROCESS",
+      "text": "First version of NTLM protocol"
+    },
+    {
+      "id": "NTLMv2",
+      "type": "PROCESS",
+      "text": "Second version of NTLM protocol"
+    },
+    {
+      "id": "NTLM2",
+      "type": "PROCESS",
+      "text": "NTLM version 2"
+    },
+    {
+      "id": "Kerberos",
+      "type": "PROCESS",
+      "text": "Secure network authentication protocol"
+    },
+    {
+      "id": "Microsoft Windows environments",
+      "type": "SYSTEM",
+      "text": "Windows operating system environments"
+    },
+    {
+      "id": "ISM-1603",
+      "type": "CONTROL",
+      "text": "ISM control for authentication methods"
+    },
+    {
+      "id": "ISM-1055",
+      "type": "CONTROL",
+      "text": "ISM control for replay attack protection"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Authentication methods",
+      "to": "LAN Manager",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Authentication methods",
+      "to": "NT LAN Manager",
+      "type": "DEFINES"
+    },
+    {
+      "from": "LAN Manager",
+      "to": "NTLMv1",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "LAN Manager",
+      "to": "NTLMv2",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "LAN Manager",
+      "to": "NTLM2",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "Authentication methods",
+      "to": "Kerberos",
+      "type": "RECOMMENDS"
+    },
+    {
+      "from": "Kerberos",
+      "to": "Microsoft Windows environments",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "ISM-1603",
+      "to": "Authentication methods",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "ISM-1055",
+      "to": "Authentication methods",
+      "type": "GOVERNS"
+    }
+  ]
+}

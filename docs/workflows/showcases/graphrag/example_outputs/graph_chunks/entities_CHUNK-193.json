@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-193",
+  "entities": [
+    {
+      "id": "mobile device emergency sanitisation",
+      "type": "PROCESS",
+      "text": "Processes for sanitizing mobile devices in emergency situations"
+    },
+    {
+      "id": "remote wipe capability",
+      "type": "CAPABILITY",
+      "text": "Ability to remotely erase device data"
+    },
+    {
+      "id": "cryptographic key zeroise",
+      "type": "FUNCTION",
+      "text": "Function to zeroize or sanitize cryptographic keys"
+    },
+    {
+      "id": "ISM-0701",
+      "type": "CONTROL",
+      "text": "ISM control for mobile device emergency sanitisation"
+    },
+    {
+      "id": "ISM-0702",
+      "type": "CONTROL",
+      "text": "ISM control for cryptographic zeroise function usage"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "mobile device emergency sanitisation",
+      "to": "mobile device emergency sanitisation",
+      "type": "DEFINES"
+    },
+    {
+      "from": "mobile device emergency sanitisation",
+      "to": "remote wipe capability",
+      "type": "USES"
+    }
+  ]
+}

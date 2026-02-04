@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-441",
+  "entities": [
+    {
+      "id": "cryptographic equipment",
+      "type": "CONCEPT",
+      "text": "Hardware/software for encryption/decryption"
+    },
+    {
+      "id": "keying material",
+      "type": "CONCEPT",
+      "text": "Cryptographic keys and related materials"
+    },
+    {
+      "id": "Chief Information Security Officer",
+      "type": "ACTOR",
+      "text": "Senior security official responsible for information security"
+    },
+    {
+      "id": "cyber security incident",
+      "type": "EVENT",
+      "text": "Security breach or compromise event"
+    },
+    {
+      "id": "confidentiality",
+      "type": "CONCEPT",
+      "text": "Protection of information from unauthorized access"
+    },
+    {
+      "id": "integrity",
+      "type": "CONCEPT",
+      "text": "Protection of information from unauthorized modification"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cryptographic equipment",
+      "to": "cryptographic equipment",
+      "type": "keying material"
+    },
+    {
+      "from": "keying material",
+      "to": "cyber security incident",
+      "type": "cyber security incident"
+    }
+  ]
+}

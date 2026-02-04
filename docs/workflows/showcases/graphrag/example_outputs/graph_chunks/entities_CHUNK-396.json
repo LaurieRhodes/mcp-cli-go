@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-396",
+  "entities": [
+    {
+      "id": "functional separation",
+      "type": "CONCEPT",
+      "text": "Separation of server functions to reduce security risks"
+    },
+    {
+      "id": "servers",
+      "type": "SYSTEM",
+      "text": "Computer systems that provide services"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting to compromise systems"
+    },
+    {
+      "id": "security risk",
+      "type": "RISK",
+      "text": "Potential for harm from security breaches"
+    },
+    {
+      "id": "communications",
+      "type": "ACTIVITY",
+      "text": "Data exchange between systems"
+    },
+    {
+      "id": "network",
+      "type": "INFRASTRUCTURE",
+      "text": "Network infrastructure for communication"
+    },
+    {
+      "id": "file system",
+      "type": "INFRASTRUCTURE",
+      "text": "File storage and access infrastructure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0385",
+      "to": "ISM-0385",
+      "type": "REDUCES"
+    },
+    {
+      "from": "ISM-0385",
+      "to": "ISM-0385",
+      "type": "TARGETS"
+    },
+    {
+      "from": "ISM-0385",
+      "to": "ISM-0385",
+      "type": "POSES"
+    },
+    {
+      "from": "ISM-0385",
+      "to": "ISM-0385",
+      "type": "MINIMISES"
+    },
+    {
+      "from": "ISM-1479",
+      "to": "ISM-1479",
+      "type": "USES"
+    },
+    {
+      "from": "ISM-1479",
+      "to": "ISM-1479",
+      "type": "USES"
+    },
+    {
+      "from": "ISM-1479",
+      "to": "ISM-1479",
+      "type": "RELATED_TO"
+    }
+  ]
+}

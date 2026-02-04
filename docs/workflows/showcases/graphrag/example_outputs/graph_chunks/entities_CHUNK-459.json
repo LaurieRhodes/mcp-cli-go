@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-459",
+  "entities": [
+    {
+      "id": "AACPs",
+      "type": "CONCEPT",
+      "text": "Australian Approved Cryptographic Protocols"
+    },
+    {
+      "id": "Wi-Fi Protected Access 2",
+      "type": "CONCEPT",
+      "text": "Wireless security protocol version 2"
+    },
+    {
+      "id": "Wi-Fi Protected Access 3",
+      "type": "CONCEPT",
+      "text": "Wireless security protocol version 3"
+    },
+    {
+      "id": "wireless networks",
+      "type": "CONCEPT",
+      "text": "Network infrastructure using wireless technology"
+    },
+    {
+      "id": "Guidelines for Networking",
+      "type": "DOCUMENT",
+      "text": "Official guidance document for networking"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "AACPs",
+      "to": "Wi-Fi Protected Access 2",
+      "type": "Wi-Fi Protected Access 3"
+    },
+    {
+      "from": "Guidelines for Networking",
+      "to": "wireless networks",
+      "type": "wireless networks"
+    }
+  ]
+}

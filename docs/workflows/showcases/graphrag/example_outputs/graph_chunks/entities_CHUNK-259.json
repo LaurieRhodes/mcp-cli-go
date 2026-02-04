@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-259",
+  "entities": [
+    {
+      "id": "sanitisation processes",
+      "type": "PROCESS",
+      "text": "Processes to remove data from media"
+    },
+    {
+      "id": "faulty or damaged media",
+      "type": "CONCEPT",
+      "text": "Media that cannot be sanitized due to faults or damage"
+    },
+    {
+      "id": "destruction process",
+      "type": "PROCESS",
+      "text": "Process of destroying media before disposal"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "sanitisation processes",
+      "to": "faulty or damaged media",
+      "type": "FAILS_TO"
+    },
+    {
+      "from": "faulty or damaged media",
+      "to": "destruction process",
+      "type": "REQUIRES"
+    }
+  ]
+}

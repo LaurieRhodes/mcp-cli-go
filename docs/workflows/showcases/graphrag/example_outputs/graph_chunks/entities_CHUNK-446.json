@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-446",
+  "entities": [
+    {
+      "id": "DH",
+      "type": "CONCEPT",
+      "text": "Diffie-Hellman algorithm"
+    },
+    {
+      "id": "DSA",
+      "type": "CONCEPT",
+      "text": "Digital Signature Algorithm"
+    },
+    {
+      "id": "ECDH",
+      "type": "CONCEPT",
+      "text": "Elliptic Curve Diffie-Hellman"
+    },
+    {
+      "id": "ECDSA",
+      "type": "CONCEPT",
+      "text": "Elliptic Curve Digital Signature Algorithm"
+    },
+    {
+      "id": "ISM-0994",
+      "type": "PROCESS",
+      "text": "ISM security control 0994"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ECDH",
+      "to": "DH",
+      "type": "PREFERRED_OVER"
+    },
+    {
+      "from": "ECDSA",
+      "to": "DSA",
+      "type": "PREFERRED_OVER"
+    }
+  ]
+}

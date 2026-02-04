@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-434",
+  "entities": [
+    {
+      "id": "High Assurance Cryptographic Equipment (HACE)",
+      "type": "CONCEPT",
+      "text": "Cryptographic equipment for high assurance security"
+    },
+    {
+      "id": "Australian Signals Directorate (ASD)",
+      "type": "ACTOR",
+      "text": "Australian government signals intelligence agency"
+    },
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "Australian government cyber security center"
+    },
+    {
+      "id": "SECRET data",
+      "type": "CONCEPT",
+      "text": "Classified information at SECRET level"
+    },
+    {
+      "id": "TOP SECRET data",
+      "type": "CONCEPT",
+      "text": "Classified information at TOP SECRET level"
+    },
+    {
+      "id": "Australian Communications Security Instructions",
+      "type": "CONCEPT",
+      "text": "Security instructions for communications"
+    },
+    {
+      "id": "ISM-1802",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control 1802"
+    },
+    {
+      "id": "ISM-0499",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control 0499"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "High Assurance Cryptographic Equipment (HACE)",
+      "to": "Australian Signals Directorate (ASD)",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Australian Signals Directorate (ASD)",
+      "to": "SECRET data",
+      "type": "PROCESSES"
+    },
+    {
+      "from": "High Assurance Cryptographic Equipment (HACE)",
+      "to": "TOP SECRET data",
+      "type": "PROCESSES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "High Assurance Cryptographic Equipment (HACE)",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Australian Communications Security Instructions",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "High Assurance Cryptographic Equipment (HACE)",
+      "to": "ISM-1802",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "High Assurance Cryptographic Equipment (HACE)",
+      "to": "ISM-0499",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

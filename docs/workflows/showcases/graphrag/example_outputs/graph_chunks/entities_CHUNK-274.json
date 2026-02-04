@@ -1,0 +1,132 @@
+{
+  "chunk_id": "CHUNK-274",
+  "entities": [
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "Software platforms that run applications and manage hardware"
+    },
+    {
+      "id": "security functionality",
+      "type": "CONCEPT",
+      "text": "Security features and capabilities built into systems"
+    },
+    {
+      "id": "64-bit versions",
+      "type": "CONCEPT",
+      "text": "Operating system versions with 64-bit architecture"
+    },
+    {
+      "id": "32-bit versions",
+      "type": "CONCEPT",
+      "text": "Operating system versions with 32-bit architecture"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting to compromise systems"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Organization using operating systems"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Companies that develop and maintain operating systems"
+    },
+    {
+      "id": "exploits",
+      "type": "PROCESS",
+      "text": "Malicious code targeting security weaknesses"
+    },
+    {
+      "id": "vulnerabilities",
+      "type": "PROCESS",
+      "text": "Security weaknesses that can be exploited"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "operating systems",
+      "to": "security functionality",
+      "type": "HAS"
+    },
+    {
+      "from": "security functionality",
+      "to": "operating systems",
+      "type": "IMPROVES"
+    },
+    {
+      "from": "operating systems",
+      "to": "64-bit versions",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "64-bit versions",
+      "to": "operating systems",
+      "type": "HAS"
+    },
+    {
+      "from": "operating systems",
+      "to": "32-bit versions",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "32-bit versions",
+      "to": "operating systems",
+      "type": "HAS"
+    },
+    {
+      "from": "adversary",
+      "to": "exploits",
+      "type": "CRAFTS"
+    },
+    {
+      "from": "exploits",
+      "to": "security functionality",
+      "type": "TARGETS"
+    },
+    {
+      "from": "adversary",
+      "to": "vulnerabilities",
+      "type": "DISCOVERS"
+    },
+    {
+      "from": "vulnerabilities",
+      "to": "security functionality",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "organisation",
+      "to": "vulnerabilities",
+      "type": "EXPOSED_TO"
+    },
+    {
+      "from": "vulnerabilities",
+      "to": "exploitation",
+      "type": "ENABLES"
+    },
+    {
+      "from": "vendors",
+      "to": "operating systems",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "operating systems",
+      "to": "support",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "64-bit versions",
+      "to": "security functionality",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "security functionality",
+      "to": "additional security",
+      "type": "RELATED_TO"
+    }
+  ]
+}

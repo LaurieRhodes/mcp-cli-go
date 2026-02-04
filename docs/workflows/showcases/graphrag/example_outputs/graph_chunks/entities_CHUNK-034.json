@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-034",
+  "entities": [
+    {
+      "id": "System owners",
+      "type": "ACTOR",
+      "text": "Responsible for secure system operation"
+    },
+    {
+      "id": "System managers",
+      "type": "ACTOR",
+      "text": "Manages day-to-day system operations"
+    },
+    {
+      "id": "Systems",
+      "type": "CONCEPT",
+      "text": "IT systems requiring ownership"
+    },
+    {
+      "id": "Authorising officer",
+      "type": "ACTOR",
+      "text": "Officer authorizing system registration"
+    },
+    {
+      "id": "ISM-1071",
+      "type": "CONTROL",
+      "text": "Control defining system owner responsibilities"
+    },
+    {
+      "id": "ISM-1525",
+      "type": "CONTROL",
+      "text": "Control requiring designated system owners"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "System owners",
+      "to": "System managers",
+      "type": "DELEGATES_TO"
+    },
+    {
+      "from": "System owners",
+      "to": "Systems",
+      "type": "ENSURES_OPERATION_OF"
+    },
+    {
+      "from": "System owners",
+      "to": "Authorising officer",
+      "type": "REGISTERS_WITH"
+    },
+    {
+      "from": "ISM-1071",
+      "to": "System owners",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1525",
+      "to": "System owners",
+      "type": "REQUIRES"
+    }
+  ]
+}

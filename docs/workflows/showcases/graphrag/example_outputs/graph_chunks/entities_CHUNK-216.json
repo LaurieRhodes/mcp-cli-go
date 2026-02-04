@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-216",
+  "entities": [
+    {
+      "id": "High assurance ICT equipment",
+      "type": "CONCEPT",
+      "text": "ICT equipment with high security assurance"
+    },
+    {
+      "id": "Tamper-evident seals",
+      "type": "CONCEPT",
+      "text": "Seals that show evidence of tampering"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Organization implementing security controls"
+    },
+    {
+      "id": "Labels",
+      "type": "CONCEPT",
+      "text": "Identification markers applied to equipment"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "ISM-0296",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control 0296"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "High assurance ICT equipment",
+      "to": "Organisation",
+      "type": "ACSC"
+    },
+    {
+      "from": "Organisation",
+      "to": "Labels",
+      "type": "Labels"
+    }
+  ]
+}

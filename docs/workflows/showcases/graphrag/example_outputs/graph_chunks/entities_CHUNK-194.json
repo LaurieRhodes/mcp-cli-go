@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-194",
+  "entities": [
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "People traveling overseas"
+    },
+    {
+      "id": "Mobile devices",
+      "type": "CONCEPT",
+      "text": "Devices carried overseas"
+    },
+    {
+      "id": "Overseas travel",
+      "type": "PROCESS",
+      "text": "Traveling abroad"
+    },
+    {
+      "id": "Security risks",
+      "type": "CONCEPT",
+      "text": "Risks faced when traveling"
+    },
+    {
+      "id": "Privacy risks",
+      "type": "CONCEPT",
+      "text": "Privacy concerns when leaving Australia"
+    },
+    {
+      "id": "High/extreme risk countries",
+      "type": "CONCEPT",
+      "text": "Dangerous travel destinations"
+    },
+    {
+      "id": "Australian borders",
+      "type": "CONCEPT",
+      "text": "Geographical boundary of Australia"
+    },
+    {
+      "id": "Precautions",
+      "type": "PROCESS",
+      "text": "Security measures to take"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Personnel",
+      "to": "Personnel",
+      "type": "Overseas travel"
+    },
+    {
+      "from": "Mobile devices",
+      "to": "Overseas travel",
+      "type": "Security risks"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "chunk_id": "CHUNK-300",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cyber supply chain risk management concept"
+    },
+    {
+      "id": "patching or updating server applications",
+      "type": "PROCESS",
+      "text": "Process of patching or updating server applications"
+    },
+    {
+      "id": "privileged accounts",
+      "type": "CONCEPT",
+      "text": "Privileged accounts concept"
+    },
+    {
+      "id": "Microsoft AD DS",
+      "type": "ACTOR",
+      "text": "Microsoft Active Directory Domain Services technology"
+    },
+    {
+      "id": "event logging",
+      "type": "PROCESS",
+      "text": "Event logging process"
+    },
+    {
+      "id": "database servers",
+      "type": "ACTOR",
+      "text": "Database servers technology"
+    },
+    {
+      "id": "email servers",
+      "type": "ACTOR",
+      "text": "Email servers technology"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for procurement and outsourcing"
+    },
+    {
+      "id": "Guidelines for System Management",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for system management"
+    },
+    {
+      "id": "Guidelines for Personnel Security",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for personnel security"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for system monitoring"
+    },
+    {
+      "id": "Guidelines for Database Systems",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for database systems"
+    },
+    {
+      "id": "Guidelines for Email",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for email"
+    },
+    {
+      "id": "Microsoft's Best Practices for Securing Active Directory",
+      "type": "DOCUMENT",
+      "text": "Microsoft publication on securing Active Directory"
+    },
+    {
+      "id": "Microsoft's Events to monitor",
+      "type": "DOCUMENT",
+      "text": "Microsoft publication on events to monitor"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    },
+    {
+      "from": "patching or updating server applications",
+      "to": "Guidelines for System Management",
+      "type": "DEFINES"
+    },
+    {
+      "from": "privileged accounts",
+      "to": "Guidelines for Personnel Security",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Microsoft AD DS",
+      "to": "Microsoft's Best Practices for Securing Active Directory",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Microsoft AD DS",
+      "to": "Microsoft's Events to monitor",
+      "type": "DEFINES"
+    },
+    {
+      "from": "event logging",
+      "to": "Guidelines for System Monitoring",
+      "type": "DEFINES"
+    },
+    {
+      "from": "database servers",
+      "to": "Guidelines for Database Systems",
+      "type": "DEFINES"
+    },
+    {
+      "from": "email servers",
+      "to": "Guidelines for Email",
+      "type": "DEFINES"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-324",
+  "entities": [
+    {
+      "id": "patch management processes",
+      "type": "PROCESS",
+      "text": "Formal processes for managing patches"
+    },
+    {
+      "id": "patch management procedures",
+      "type": "PROCESS",
+      "text": "Supporting procedures for patch management"
+    },
+    {
+      "id": "centralized managed approach",
+      "type": "PROCESS",
+      "text": "Structured approach for patch application"
+    },
+    {
+      "id": "applications",
+      "type": "CONCEPT",
+      "text": "Software applications requiring patches"
+    },
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "OS requiring patches"
+    },
+    {
+      "id": "drivers",
+      "type": "CONCEPT",
+      "text": "Hardware drivers requiring patches"
+    },
+    {
+      "id": "firmware",
+      "type": "CONCEPT",
+      "text": "Firmware requiring patches"
+    },
+    {
+      "id": "ISM-1143",
+      "type": "CONCEPT",
+      "text": "Control for patch management processes"
+    },
+    {
+      "id": "ISM-0298",
+      "type": "CONCEPT",
+      "text": "Control for centralized patch approach"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "patch management processes",
+      "to": "patch management procedures",
+      "type": "DEFINES"
+    },
+    {
+      "from": "centralized managed approach",
+      "to": "applications",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1143",
+      "to": "operating systems",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-0298",
+      "to": "drivers",
+      "type": "DEFINES"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+$schema: "workflow/v2.0"
+name: production_graphrag_531
+version: 1.0.0
+description: Production GraphRAG with DeepSeek R1 - 531 chunks, 20 workers
+
+execution:
+  provider: openrouter
+  model: deepseek/deepseek-r1
+  timeout: 45m
+  on_error: halt
+
+env:
+  project_name: "rlm_poc"
+  chunks_file: "chunks.json"  # Full 531 chunks
+
+steps:
+  - name: extract_entities
+    loop:
+      workflow: rlm_poc/workflows/extract_graph_chunk
+      mode: iterate
+      items: file:///outputs/{{env.project_name}}/{{env.chunks_file}}
+      parallel: true
+      max_workers: 20
+      max_iterations: 531
+      on_failure: continue
+
+  - name: build_graph
+    needs: [extract_entities]
+    skills: [python-context-builder]
+    max_iterations: 2
+    run: |
+      Call skills_run_helper_script tool.
+      Parameters:
+      {
+        "skill_name": "python-context-builder",
+        "script_name": "build_knowledge_graph.py",
+        "args": [
+          "/outputs/{{env.project_name}}/graph_chunks",
+          "/outputs/{{env.project_name}}/knowledge_graph"
+        ]
+      }
+
+  - name: query_contexts
+    needs: [build_graph]
+    loop:
+      workflow: rlm_poc/workflows/query_graph_chunk
+      mode: iterate
+      items: file:///outputs/{{env.project_name}}/{{env.chunks_file}}
+      parallel: true
+      max_workers: 20
+      max_iterations: 531
+      on_failure: continue

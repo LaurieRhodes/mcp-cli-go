@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-070",
+  "entities": [
+    {
+      "id": "Security documentation",
+      "type": "CONCEPT",
+      "text": "Documentation containing security policies and procedures"
+    },
+    {
+      "id": "Stakeholders",
+      "type": "ACTOR",
+      "text": "All parties who need to be aware of security documentation"
+    },
+    {
+      "id": "Communication process",
+      "type": "PROCESS",
+      "text": "Process of publishing and communicating security documentation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Security documentation",
+      "to": "Communication process",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Communication process",
+      "to": "Stakeholders",
+      "type": "REQUIRES"
+    }
+  ]
+}

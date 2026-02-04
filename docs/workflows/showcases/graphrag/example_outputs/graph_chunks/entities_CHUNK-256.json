@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-256",
+  "entities": [
+    {
+      "id": "EPROM",
+      "type": "CONCEPT",
+      "text": "Erasable Programmable Read-Only Memory"
+    },
+    {
+      "id": "EEPROM",
+      "type": "CONCEPT",
+      "text": "Electrically Erasable Programmable Read-Only Memory"
+    },
+    {
+      "id": "SECRET",
+      "type": "CONCEPT",
+      "text": "Security classification level"
+    },
+    {
+      "id": "TOP SECRET",
+      "type": "CONCEPT",
+      "text": "Higher security classification level"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of removing data"
+    },
+    {
+      "id": "classification",
+      "type": "CONCEPT",
+      "text": "Security classification assignment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "EPROM",
+      "to": "EEPROM",
+      "type": "SANITISATION_PROCESS"
+    },
+    {
+      "from": "sanitisation",
+      "to": "sanitisation",
+      "type": "SANITISATION_PROCESS"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-103",
+  "entities": [
+    {
+      "id": "temporary access",
+      "type": "CONCEPT",
+      "text": "Access granted under strict circumstances to systems/applications/data repositories"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Individuals who may lack appropriate security clearance or briefing"
+    },
+    {
+      "id": "access controls",
+      "type": "PROCESS",
+      "text": "Mechanisms to restrict access to only required data"
+    },
+    {
+      "id": "ISM-0441",
+      "type": "CONCEPT",
+      "text": "Control for temporary access with data restriction requirements"
+    },
+    {
+      "id": "ISM-0443",
+      "type": "CONCEPT",
+      "text": "Control for temporary access to S/TS systems"
+    },
+    {
+      "id": "caveated information",
+      "type": "CONCEPT",
+      "text": "Sensitive compartmented information that cannot be accessed temporarily"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "temporary access",
+      "to": "personnel",
+      "type": "GRANTS"
+    },
+    {
+      "from": "personnel",
+      "to": "access controls",
+      "type": "SUBJECT_TO"
+    },
+    {
+      "from": "temporary access",
+      "to": "ISM-0441",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "temporary access",
+      "to": "ISM-0443",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "temporary access",
+      "to": "caveated information",
+      "type": "EXCLUDES"
+    }
+  ]
+}

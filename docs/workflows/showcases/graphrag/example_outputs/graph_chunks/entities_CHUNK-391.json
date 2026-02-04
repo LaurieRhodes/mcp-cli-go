@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-391",
+  "entities": [
+    {
+      "id": "network infrastructure",
+      "type": "Infrastructure",
+      "text": "Network communication infrastructure"
+    },
+    {
+      "id": "unencrypted data",
+      "type": "Data",
+      "text": "Data without encryption protection"
+    },
+    {
+      "id": "encrypted data",
+      "type": "Data",
+      "text": "Data protected by encryption"
+    },
+    {
+      "id": "protocols",
+      "type": "Protocol",
+      "text": "Communication protocols"
+    },
+    {
+      "id": "alternative protocols",
+      "type": "Protocol",
+      "text": "Protocols that support encryption"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-391",
+      "to": "CHUNK-391",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CHUNK-391",
+      "to": "CHUNK-391",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CHUNK-391",
+      "to": "CHUNK-391",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CHUNK-391",
+      "to": "CHUNK-391",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CHUNK-391",
+      "to": "CHUNK-391",
+      "type": "DEFINES"
+    }
+  ]
+}

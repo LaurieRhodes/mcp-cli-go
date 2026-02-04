@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-229",
+  "entities": [
+    {
+      "id": "high assurance ICT equipment",
+      "type": "CONCEPT",
+      "text": "ICT equipment requiring high security assurance"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of removing sensitive data from equipment"
+    },
+    {
+      "id": "destruction",
+      "type": "PROCESS",
+      "text": "Physical destruction of equipment prior to disposal"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "high assurance ICT equipment",
+      "to": "high assurance ICT equipment",
+      "type": "INSUFFICIENT_FOR"
+    },
+    {
+      "from": "sanitisation",
+      "to": "destruction",
+      "type": "REQUIRES"
+    }
+  ]
+}

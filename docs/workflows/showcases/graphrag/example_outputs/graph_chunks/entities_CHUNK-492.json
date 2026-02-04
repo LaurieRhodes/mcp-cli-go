@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-492",
+  "entities": [
+    {
+      "id": "SECRET networks",
+      "type": "CONCEPT",
+      "text": "Classified networks at SECRET level"
+    },
+    {
+      "id": "TOP SECRET networks",
+      "type": "CONCEPT",
+      "text": "Classified networks at TOP SECRET level"
+    },
+    {
+      "id": "CDSs",
+      "type": "PROCESS",
+      "text": "Cross Domain Solutions for connecting networks across security domains"
+    },
+    {
+      "id": "ISM-0626",
+      "type": "CONTROL",
+      "text": "Information Security Manual control 0626"
+    },
+    {
+      "id": "Different security domains",
+      "type": "CONCEPT",
+      "text": "Networks with different security classifications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "SECRET networks",
+      "to": "CDSs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "TOP SECRET networks",
+      "to": "Different security domains",
+      "type": "CONNECTS"
+    }
+  ]
+}

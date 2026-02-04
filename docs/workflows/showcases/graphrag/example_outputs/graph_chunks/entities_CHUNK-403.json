@@ -1,0 +1,92 @@
+{
+  "chunk_id": "CHUNK-403",
+  "entities": [
+    {
+      "id": "network devices",
+      "type": "CONCEPT",
+      "text": "Physical network infrastructure devices"
+    },
+    {
+      "id": "trusted firmware",
+      "type": "CONCEPT",
+      "text": "Authenticated and verified firmware code"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Hardware/software providers"
+    },
+    {
+      "id": "cyber supply chain risks",
+      "type": "CONCEPT",
+      "text": "Security threats in supply chain"
+    },
+    {
+      "id": "malicious firmware",
+      "type": "CONCEPT",
+      "text": "Compromised or malicious firmware code"
+    },
+    {
+      "id": "cyber supply chain interdiction attack",
+      "type": "PROCESS",
+      "text": "Attack targeting supply chain"
+    },
+    {
+      "id": "vendor development environment",
+      "type": "CONCEPT",
+      "text": "Vendor's software development systems"
+    },
+    {
+      "id": "source code repository",
+      "type": "CONCEPT",
+      "text": "Code storage and version control system"
+    },
+    {
+      "id": "ISM-1800",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "network devices",
+      "to": "trusted firmware",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "trusted firmware",
+      "to": "vendors",
+      "type": "OBTAINS_FROM"
+    },
+    {
+      "from": "trusted firmware",
+      "to": "cyber supply chain risks",
+      "type": "REDUCES"
+    },
+    {
+      "from": "vendors",
+      "to": "malicious firmware",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "network devices",
+      "to": "cyber supply chain interdiction attack",
+      "type": "RESULTS_FROM"
+    },
+    {
+      "from": "cyber supply chain risks",
+      "to": "vendor development environment",
+      "type": "RESULTS_FROM"
+    },
+    {
+      "from": "cyber supply chain risks",
+      "to": "source code repository",
+      "type": "RESULTS_FROM"
+    },
+    {
+      "from": "malicious firmware",
+      "to": "ISM-1800",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

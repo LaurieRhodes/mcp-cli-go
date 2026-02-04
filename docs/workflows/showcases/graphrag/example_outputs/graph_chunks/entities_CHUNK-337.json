@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-337",
+  "entities": [
+    {
+      "id": "event logging policy",
+      "type": "CONCEPT",
+      "text": "A policy for logging system events"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The entity implementing the policy"
+    },
+    {
+      "id": "service providers",
+      "type": "ACTOR",
+      "text": "External service providers"
+    },
+    {
+      "id": "customers",
+      "type": "ACTOR",
+      "text": "End users or clients"
+    },
+    {
+      "id": "malicious behaviour",
+      "type": "CONCEPT",
+      "text": "Harmful activities on systems"
+    },
+    {
+      "id": "event logs",
+      "type": "PROCESS",
+      "text": "The actual logged events"
+    },
+    {
+      "id": "ISM-0580",
+      "type": "CONCEPT",
+      "text": "Control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "event logging policy",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "event logging policy",
+      "to": "malicious behaviour",
+      "type": "DETECTS"
+    }
+  ]
+}

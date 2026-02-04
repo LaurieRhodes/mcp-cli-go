@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-162",
+  "entities": [
+    {
+      "id": "Video conferencing traffic",
+      "type": "CONCEPT",
+      "text": "Video conferencing communication traffic"
+    },
+    {
+      "id": "IP telephony traffic",
+      "type": "CONCEPT",
+      "text": "IP-based telephone communication traffic"
+    },
+    {
+      "id": "Data traffic",
+      "type": "CONCEPT",
+      "text": "General network data traffic"
+    },
+    {
+      "id": "Workstations",
+      "type": "DEVICE",
+      "text": "Computer workstations"
+    },
+    {
+      "id": "Video conferencing units",
+      "type": "DEVICE",
+      "text": "Video conferencing equipment"
+    },
+    {
+      "id": "IP phones",
+      "type": "DEVICE",
+      "text": "IP telephone devices"
+    },
+    {
+      "id": "Virtual Local Area Networks",
+      "type": "TECHNOLOGY",
+      "text": "Network segmentation technology"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Video conferencing traffic",
+      "to": "Video conferencing traffic",
+      "type": "IP telephony traffic"
+    },
+    {
+      "from": "IP telephony traffic",
+      "to": "Data traffic",
+      "type": "Data traffic"
+    }
+  ]
+}

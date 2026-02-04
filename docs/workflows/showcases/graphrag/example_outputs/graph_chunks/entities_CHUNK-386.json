@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-386",
+  "entities": [
+    {
+      "id": "email content filtering",
+      "type": "CONTROL",
+      "text": "Email content filtering implementation"
+    },
+    {
+      "id": "content filtering",
+      "type": "TECHNIQUE",
+      "text": "Filtering of email bodies and attachments"
+    },
+    {
+      "id": "defence-in-depth",
+      "type": "CONCEPT",
+      "text": "Layered security approach"
+    },
+    {
+      "id": "malicious code",
+      "type": "THREAT",
+      "text": "Harmful software"
+    },
+    {
+      "id": "networks",
+      "type": "SYSTEM",
+      "text": "Network infrastructure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1234",
+      "to": "Dec-22",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Email content filtering",
+      "to": "Email content filtering",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "Content filtering",
+      "to": "Defence-in-depth",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "Email bodies and attachments",
+      "to": "Networks",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "Networks",
+      "to": "Networks",
+      "type": "PROTECTS"
+    }
+  ]
+}

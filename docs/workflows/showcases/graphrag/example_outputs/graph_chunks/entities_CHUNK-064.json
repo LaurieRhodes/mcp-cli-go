@@ -1,0 +1,17 @@
+{
+  "chunk_id": "CHUNK-064",
+  "entities": [
+    {
+      "id": "test",
+      "type": "test",
+      "text": "test"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "test",
+      "to": "test",
+      "type": "test"
+    }
+  ]
+}

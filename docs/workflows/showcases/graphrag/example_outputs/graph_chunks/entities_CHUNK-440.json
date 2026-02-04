@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-440",
+  "entities": [
+    {
+      "id": "cryptographic equipment",
+      "type": "CONCEPT",
+      "text": "Hardware used for encryption/decryption operations"
+    },
+    {
+      "id": "keying material",
+      "type": "CONCEPT",
+      "text": "Sensitive data used for cryptographic operations"
+    },
+    {
+      "id": "transportation",
+      "type": "PROCESS",
+      "text": "Process of moving equipment from one location to another"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cryptographic equipment",
+      "to": "cryptographic equipment",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "keying material",
+      "to": "transportation",
+      "type": "INVOLVES"
+    }
+  ]
+}

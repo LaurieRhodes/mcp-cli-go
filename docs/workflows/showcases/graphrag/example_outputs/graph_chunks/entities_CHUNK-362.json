@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-362",
+  "entities": [
+    {
+      "id": "database servers",
+      "type": "CONCEPT",
+      "text": "Database servers that store and manage data"
+    },
+    {
+      "id": "user workstations",
+      "type": "CONCEPT",
+      "text": "User workstations used by end-users"
+    },
+    {
+      "id": "network segment",
+      "type": "CONCEPT",
+      "text": "Logical division of a network"
+    },
+    {
+      "id": "network access controls",
+      "type": "CONCEPT",
+      "text": "Controls that restrict network communications"
+    },
+    {
+      "id": "database management system software",
+      "type": "CONCEPT",
+      "text": "Software for managing databases"
+    },
+    {
+      "id": "localhost interface",
+      "type": "CONCEPT",
+      "text": "Network interface for local-only access"
+    },
+    {
+      "id": "ISM-1270",
+      "type": "CONTROL",
+      "text": "ISM control requiring database servers on different network segment"
+    },
+    {
+      "id": "ISM-1271",
+      "type": "CONTROL",
+      "text": "ISM control requiring network access controls"
+    },
+    {
+      "id": "ISM-1272",
+      "type": "CONTROL",
+      "text": "ISM control requiring disabling networking when only local access needed"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "database servers",
+      "to": "user workstations",
+      "type": "network access controls"
+    },
+    {
+      "from": "network segment",
+      "to": "network segment",
+      "type": "database servers"
+    }
+  ]
+}

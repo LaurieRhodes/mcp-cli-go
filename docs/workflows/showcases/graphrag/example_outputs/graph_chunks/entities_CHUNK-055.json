@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-055",
+  "entities": [
+    {
+      "id": "Cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Management of cyber risks in supply chain"
+    },
+    {
+      "id": "Procurement",
+      "type": "PROCESS",
+      "text": "Acquisition process for systems and services"
+    },
+    {
+      "id": "Applications",
+      "type": "ASSET",
+      "text": "Software programs and tools"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "ASSET",
+      "text": "Information and communication technology hardware"
+    },
+    {
+      "id": "Services",
+      "type": "ASSET",
+      "text": "Professional and technical services"
+    },
+    {
+      "id": "Suppliers",
+      "type": "ACTOR",
+      "text": "Organizations providing products/services"
+    },
+    {
+      "id": "Security risks",
+      "type": "CONCEPT",
+      "text": "Potential threats to system security"
+    },
+    {
+      "id": "Jurisdictional risks",
+      "type": "CONCEPT",
+      "text": "Risks from different legal jurisdictions"
+    },
+    {
+      "id": "Governance risks",
+      "type": "CONCEPT",
+      "text": "Risks related to oversight and control"
+    },
+    {
+      "id": "Privacy risks",
+      "type": "CONCEPT",
+      "text": "Risks to personal data protection"
+    },
+    {
+      "id": "Foreign countries",
+      "type": "ACTOR",
+      "text": "Nations with different legal systems"
+    },
+    {
+      "id": "Offshore services",
+      "type": "ASSET",
+      "text": "Services located outside home country"
+    },
+    {
+      "id": "Shared responsibility model",
+      "type": "CONCEPT",
+      "text": "Framework defining security responsibilities"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cyber supply chain risk management",
+      "to": "Cyber supply chain risk management",
+      "type": "Cyber supply chain risk management"
+    },
+    {
+      "from": "Procurement",
+      "to": "Applications",
+      "type": "ICT equipment"
+    }
+  ]
+}

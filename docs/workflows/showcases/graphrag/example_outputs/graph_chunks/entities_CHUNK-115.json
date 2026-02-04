@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-115",
+  "entities": [
+    {
+      "id": "floor plan diagrams",
+      "type": "CONCEPT",
+      "text": "Scaled diagrams showing floor layouts"
+    },
+    {
+      "id": "cabling infrastructure",
+      "type": "CONCEPT",
+      "text": "Physical components for network connectivity"
+    },
+    {
+      "id": "computer-aided design and drafting software",
+      "type": "TOOL",
+      "text": "Software for creating technical drawings"
+    },
+    {
+      "id": "alphanumeric grid referencing",
+      "type": "METHOD",
+      "text": "Grid system for location referencing"
+    },
+    {
+      "id": "installers",
+      "type": "ACTOR",
+      "text": "Personnel who install cabling"
+    },
+    {
+      "id": "inspectors",
+      "type": "ACTOR",
+      "text": "Personnel who verify compliance"
+    },
+    {
+      "id": "ISM-1645",
+      "type": "CONTROL",
+      "text": "Control requiring regular verification"
+    },
+    {
+      "id": "ISM-1646",
+      "type": "CONTROL",
+      "text": "Control specifying diagram content"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "floor plan diagrams",
+      "to": "floor plan diagrams",
+      "type": "floor plan diagrams"
+    },
+    {
+      "from": "cabling infrastructure",
+      "to": "computer-aided design and drafting software",
+      "type": "alphanumeric grid referencing"
+    }
+  ]
+}

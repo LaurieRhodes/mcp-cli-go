@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-526",
+  "entities": [
+    {
+      "id": "data transfer",
+      "type": "PROCESS",
+      "text": "Movement of data between systems"
+    },
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "Individuals performing data transfers"
+    },
+    {
+      "id": "systems",
+      "type": "SYSTEM",
+      "text": "Computer systems or networks"
+    },
+    {
+      "id": "malicious code",
+      "type": "THREAT",
+      "text": "Harmful software introduced unintentionally"
+    },
+    {
+      "id": "accountability",
+      "type": "CONCEPT",
+      "text": "Responsibility for actions"
+    },
+    {
+      "id": "ISM-0661",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for data transfer accountability"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "users",
+      "to": "data transfer",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "data transfer",
+      "to": "systems",
+      "type": "INVOLVES"
+    }
+  ]
+}

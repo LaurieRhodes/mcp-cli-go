@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-025",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "senior executive",
+      "type": "ACTOR",
+      "text": "Organization's senior leadership"
+    },
+    {
+      "id": "Board",
+      "type": "ACTOR",
+      "text": "Governing board of organization"
+    },
+    {
+      "id": "cyber security matters",
+      "type": "CONCEPT",
+      "text": "Cybersecurity issues and incidents"
+    },
+    {
+      "id": "operational risks",
+      "type": "CONCEPT",
+      "text": "Risks affecting daily operations"
+    },
+    {
+      "id": "financial risks",
+      "type": "CONCEPT",
+      "text": "Financial impact risks"
+    },
+    {
+      "id": "legal risks",
+      "type": "CONCEPT",
+      "text": "Legal compliance and liability risks"
+    },
+    {
+      "id": "business functions",
+      "type": "CONCEPT",
+      "text": "Organizational divisions by function"
+    },
+    {
+      "id": "regions",
+      "type": "CONCEPT",
+      "text": "Geographical divisions"
+    },
+    {
+      "id": "legal entities",
+      "type": "CONCEPT",
+      "text": "Separate legal structures"
+    },
+    {
+      "id": "security risks",
+      "type": "CONCEPT",
+      "text": "Cybersecurity threat landscape"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "CISO",
+      "type": "CISO"
+    },
+    {
+      "from": "senior executive",
+      "to": "Board",
+      "type": "cyber security matters"
+    }
+  ]
+}

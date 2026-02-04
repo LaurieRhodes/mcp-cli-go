@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-109",
+  "entities": [
+    {
+      "id": "cable",
+      "type": "CONCEPT",
+      "text": "any fibre optic or copper material housed within a protective sheath for transmitting data or control signals"
+    },
+    {
+      "id": "structured cabling system",
+      "type": "CONCEPT",
+      "text": "system that cables form part of, requiring compliance with Australian Standards"
+    },
+    {
+      "id": "Australian Standards",
+      "type": "CONCEPT",
+      "text": "standards that structured cabling systems must comply with"
+    },
+    {
+      "id": "network communications",
+      "type": "CONCEPT",
+      "text": "type of system using structured cabling"
+    },
+    {
+      "id": "data systems",
+      "type": "CONCEPT",
+      "text": "type of system using structured cabling"
+    },
+    {
+      "id": "building management",
+      "type": "CONCEPT",
+      "text": "type of structured cabling system found in facilities"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cable",
+      "to": "structured cabling system",
+      "type": "DEFINES"
+    },
+    {
+      "from": "structured cabling system",
+      "to": "Australian Standards",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "structured cabling system",
+      "to": "network communications",
+      "type": "DEFINES"
+    },
+    {
+      "from": "structured cabling system",
+      "to": "data systems",
+      "type": "DEFINES"
+    },
+    {
+      "from": "structured cabling system",
+      "to": "building management",
+      "type": "DEFINES"
+    }
+  ]
+}

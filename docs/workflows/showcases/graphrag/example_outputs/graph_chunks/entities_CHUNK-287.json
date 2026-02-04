@@ -1,0 +1,137 @@
+{
+  "chunk_id": "CHUNK-287",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity performing software selection"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Software providers being evaluated"
+    },
+    {
+      "id": "user applications",
+      "type": "CONCEPT",
+      "text": "Software being selected"
+    },
+    {
+      "id": "secure-by-design principles",
+      "type": "CONCEPT",
+      "text": "Security methodology focusing on design"
+    },
+    {
+      "id": "secure-by-default principles",
+      "type": "CONCEPT",
+      "text": "Security methodology with default settings"
+    },
+    {
+      "id": "memory-safe programming languages",
+      "type": "CONCEPT",
+      "text": "Programming languages with safety features"
+    },
+    {
+      "id": "secure programming practices",
+      "type": "CONCEPT",
+      "text": "Development methodologies for security"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Software weaknesses that can be exploited"
+    },
+    {
+      "id": "patches",
+      "type": "CONCEPT",
+      "text": "Security fixes for vulnerabilities"
+    },
+    {
+      "id": "updates",
+      "type": "CONCEPT",
+      "text": "Software improvements and fixes"
+    },
+    {
+      "id": "vendor mitigations",
+      "type": "CONCEPT",
+      "text": "Vendor-provided security solutions"
+    },
+    {
+      "id": "ISM-0938",
+      "type": "CONTROL",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "vendors",
+      "type": "SELECTS"
+    },
+    {
+      "from": "vendors",
+      "to": "user applications",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "vendors",
+      "to": "secure-by-design principles",
+      "type": "DEMONSTRATES"
+    },
+    {
+      "from": "vendors",
+      "to": "secure-by-default principles",
+      "type": "DEMONSTRATES"
+    },
+    {
+      "from": "vendors",
+      "to": "memory-safe programming languages",
+      "type": "USES"
+    },
+    {
+      "from": "vendors",
+      "to": "secure programming practices",
+      "type": "FOLLOWS"
+    },
+    {
+      "from": "vendors",
+      "to": "security of products",
+      "type": "MAINTAINS"
+    },
+    {
+      "from": "secure-by-design principles",
+      "to": "security vulnerabilities",
+      "type": "REDUCES"
+    },
+    {
+      "from": "memory-safe programming languages",
+      "to": "security vulnerabilities",
+      "type": "REDUCES"
+    },
+    {
+      "from": "secure programming practices",
+      "to": "security vulnerabilities",
+      "type": "REDUCES"
+    },
+    {
+      "from": "patches",
+      "to": "security vulnerabilities",
+      "type": "REMEDIATES"
+    },
+    {
+      "from": "updates",
+      "to": "security vulnerabilities",
+      "type": "REMEDIATES"
+    },
+    {
+      "from": "vendor mitigations",
+      "to": "security vulnerabilities",
+      "type": "REMEDIATES"
+    },
+    {
+      "from": "ISM-0938",
+      "to": "user applications",
+      "type": "GOVERNS"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-476",
+  "entities": [
+    {
+      "id": "IKE version 2",
+      "type": "CONCEPT",
+      "text": "Internet Key Exchange version 2 protocol"
+    },
+    {
+      "id": "PRF",
+      "type": "CONCEPT",
+      "text": "Pseudorandom Function"
+    },
+    {
+      "id": "HMAC-SHA256",
+      "type": "CONCEPT",
+      "text": "Hash-based Message Authentication Code with SHA-256"
+    },
+    {
+      "id": "HMAC-SHA384",
+      "type": "CONCEPT",
+      "text": "Hash-based Message Authentication Code with SHA-384"
+    },
+    {
+      "id": "HMAC-SHA512",
+      "type": "CONCEPT",
+      "text": "Hash-based Message Authentication Code with SHA-512"
+    },
+    {
+      "id": "ISM-1772",
+      "type": "CONTROL",
+      "text": "Information Security Manual control 1772"
+    },
+    {
+      "id": "IPsec",
+      "type": "CONCEPT",
+      "text": "Internet Protocol Security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "IKE version 2",
+      "to": "PRF",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "PRF",
+      "to": "HMAC-SHA256",
+      "type": "USES"
+    },
+    {
+      "from": "PRF",
+      "to": "HMAC-SHA384",
+      "type": "USES"
+    },
+    {
+      "from": "PRF",
+      "to": "HMAC-SHA512",
+      "type": "USES"
+    },
+    {
+      "from": "ISM-1772",
+      "to": "PRF",
+      "type": "DEFINES"
+    },
+    {
+      "from": "IPsec",
+      "to": "PRF_HMAC_SHA2_256",
+      "type": "USES"
+    },
+    {
+      "from": "IPsec",
+      "to": "PRF_HMAC_SHA2_384",
+      "type": "USES"
+    },
+    {
+      "from": "IPsec",
+      "to": "PRF_HMAC_SHA2_512",
+      "type": "USES"
+    }
+  ]
+}

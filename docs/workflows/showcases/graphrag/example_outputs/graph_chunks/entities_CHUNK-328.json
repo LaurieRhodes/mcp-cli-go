@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-328",
+  "entities": [
+    {
+      "id": "applications",
+      "type": "CONCEPT",
+      "text": "Software programs"
+    },
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "Core software managing hardware resources"
+    },
+    {
+      "id": "network devices",
+      "type": "CONCEPT",
+      "text": "Hardware for network connectivity"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and Communication Technology devices"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Software/hardware providers"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Business entity"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Security weaknesses"
+    },
+    {
+      "id": "patches",
+      "type": "CONCEPT",
+      "text": "Software fixes"
+    },
+    {
+      "id": "updates",
+      "type": "CONCEPT",
+      "text": "Software improvements"
+    },
+    {
+      "id": "support",
+      "type": "CONCEPT",
+      "text": "Technical assistance"
+    },
+    {
+      "id": "cessation date",
+      "type": "CONCEPT",
+      "text": "End of support date"
+    },
+    {
+      "id": "compensating controls",
+      "type": "CONCEPT",
+      "text": "Alternative security measures"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "applications",
+      "to": "operating systems",
+      "type": "network devices"
+    },
+    {
+      "from": "vendors",
+      "to": "vendors",
+      "type": "vendors"
+    }
+  ]
+}

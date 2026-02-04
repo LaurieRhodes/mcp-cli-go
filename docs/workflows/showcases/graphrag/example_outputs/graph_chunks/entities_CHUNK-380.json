@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-380",
+  "entities": [
+    {
+      "id": "backup email gateway",
+      "type": "SYSTEM",
+      "text": "Poorly maintained backup email systems"
+    },
+    {
+      "id": "alternative email gateway",
+      "type": "SYSTEM",
+      "text": "Poorly maintained alternative email systems"
+    },
+    {
+      "id": "primary email gateway",
+      "type": "SYSTEM",
+      "text": "Primary email gateway system"
+    },
+    {
+      "id": "adversary",
+      "type": "THREAT_ACTOR",
+      "text": "Threat actor exploiting vulnerabilities"
+    },
+    {
+      "id": "malicious emails",
+      "type": "THREAT",
+      "text": "Malicious email content"
+    },
+    {
+      "id": "email content filtering",
+      "type": "SECURITY_CONTROL",
+      "text": "Filtering of email content"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "backup email gateway",
+      "to": "backup email gateway",
+      "type": "EXPLOITS"
+    },
+    {
+      "from": "alternative email gateway",
+      "to": "alternative email gateway",
+      "type": "EXPLOITS"
+    },
+    {
+      "from": "primary email gateway",
+      "to": "primary email gateway",
+      "type": "MAINTAINED_AT_SAME_STANDARD"
+    },
+    {
+      "from": "adversary",
+      "to": "adversary",
+      "type": "TARGETS"
+    },
+    {
+      "from": "malicious emails",
+      "to": "malicious emails",
+      "type": "SENT_TO"
+    },
+    {
+      "from": "email content filtering",
+      "to": "email content filtering",
+      "type": "APPLIED_TO"
+    }
+  ]
+}

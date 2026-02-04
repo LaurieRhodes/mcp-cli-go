@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-212",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Hardware and software technology components"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Companies providing ICT equipment"
+    },
+    {
+      "id": "secure-by-design principles",
+      "type": "CONCEPT",
+      "text": "Security approach integrating security from initial design"
+    },
+    {
+      "id": "memory-safe programming languages",
+      "type": "CONCEPT",
+      "text": "Programming languages that prevent memory-related vulnerabilities"
+    },
+    {
+      "id": "secure programming practices",
+      "type": "CONCEPT",
+      "text": "Development methodologies ensuring secure code"
+    },
+    {
+      "id": "product security",
+      "type": "CONCEPT",
+      "text": "Ongoing protection of software/hardware products"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Weaknesses that could be exploited in ICT systems"
+    },
+    {
+      "id": "patches and updates",
+      "type": "PROCESS",
+      "text": "Software fixes released to address security issues"
+    },
+    {
+      "id": "vendor mitigations",
+      "type": "PROCESS",
+      "text": "Remediation actions provided by equipment vendors"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "vendors",
+      "type": "vendors"
+    },
+    {
+      "from": "vendors",
+      "to": "secure-by-design principles",
+      "type": "memory-safe programming languages"
+    }
+  ]
+}

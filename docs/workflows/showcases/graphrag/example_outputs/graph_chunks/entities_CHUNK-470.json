@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-470",
+  "entities": [
+    {
+      "id": "S/MIME version 2.0",
+      "type": "SOFTWARE_VERSION",
+      "text": "S/MIME version 2.0 with weaker cryptography"
+    },
+    {
+      "id": "S/MIME version 3.0",
+      "type": "SOFTWARE_VERSION",
+      "text": "S/MIME version 3.0 approved for use as AACP"
+    },
+    {
+      "id": "ISM-0490",
+      "type": "CONTROL",
+      "text": "Information Security Manual control ISM-0490"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "content",
+      "to": "content",
+      "type": "EARLIER_THAN"
+    },
+    {
+      "from": "content",
+      "to": "content",
+      "type": "APPROVED_FOR"
+    },
+    {
+      "from": "content",
+      "to": "content",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

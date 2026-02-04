@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-166",
+  "entities": [
+    {
+      "id": "gateways",
+      "type": "CONCEPT",
+      "text": "Network security devices that control traffic flow"
+    },
+    {
+      "id": "firewalls",
+      "type": "CONCEPT",
+      "text": "Network security devices that filter traffic"
+    },
+    {
+      "id": "web conferencing solutions",
+      "type": "CONCEPT",
+      "text": "Remote meeting and collaboration tools"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "gateways",
+      "to": "web conferencing solutions",
+      "type": "DEFINES"
+    },
+    {
+      "from": "firewalls",
+      "to": "Australian Cyber Security Centre",
+      "type": "PUBLISHES"
+    }
+  ]
+}

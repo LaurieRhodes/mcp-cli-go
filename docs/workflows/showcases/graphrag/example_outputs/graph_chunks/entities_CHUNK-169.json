@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-169",
+  "entities": [
+    {
+      "id": "fax machine",
+      "type": "DEVICE",
+      "text": "Fax machine used for sending messages"
+    },
+    {
+      "id": "MFD",
+      "type": "DEVICE",
+      "text": "Multi-function device for faxing"
+    },
+    {
+      "id": "cryptographic equipment",
+      "type": "EQUIPMENT",
+      "text": "Equipment for encrypting/decrypting communications"
+    },
+    {
+      "id": "PSTN",
+      "type": "INFRASTRUCTURE",
+      "text": "Public Switched Telephone Network"
+    },
+    {
+      "id": "data spill",
+      "type": "EVENT",
+      "text": "Unauthorized disclosure of sensitive information"
+    },
+    {
+      "id": "ISM-1092",
+      "type": "CONTROL",
+      "text": "Control for separating fax machines"
+    },
+    {
+      "id": "ISM-0241",
+      "type": "CONTROL",
+      "text": "Control for encrypting fax messages"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "chunk",
+      "to": "chunk",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "chunk",
+      "to": "chunk",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "chunk",
+      "to": "chunk",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "chunk",
+      "to": "chunk",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "chunk",
+      "to": "chunk",
+      "type": "DESCRIBES"
+    },
+    {
+      "from": "chunk",
+      "to": "chunk",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "chunk",
+      "to": "chunk",
+      "type": "REFERENCES"
+    }
+  ]
+}

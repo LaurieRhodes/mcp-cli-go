@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-105",
+  "entities": [
+    {
+      "id": "AUSTEO data",
+      "type": "CONCEPT",
+      "text": "Australian Eyes Only data classification"
+    },
+    {
+      "id": "AGAO data",
+      "type": "CONCEPT",
+      "text": "Australian Government Access Only data classification"
+    },
+    {
+      "id": "Australian Government",
+      "type": "ACTOR",
+      "text": "Government entity"
+    },
+    {
+      "id": "Australian nationals",
+      "type": "ACTOR",
+      "text": "Individuals with Australian citizenship"
+    },
+    {
+      "id": "Systems processing/storing/communicating data",
+      "type": "PROCESS",
+      "text": "Information systems handling sensitive data"
+    },
+    {
+      "id": "ISM-0078",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "ISM-0854",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "AUSTEO data",
+      "to": "AGAO data",
+      "type": "Systems processing/storing/communicating data"
+    },
+    {
+      "from": "Australian Government",
+      "to": "Australian Government",
+      "type": "Australian nationals"
+    }
+  ]
+}

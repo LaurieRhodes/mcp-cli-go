@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-267",
+  "entities": [
+    {
+      "id": "media destruction",
+      "type": "PROCESS",
+      "text": "Process of destroying media to prevent unauthorized access"
+    },
+    {
+      "id": "supervision",
+      "type": "ACTOR",
+      "text": "Oversight of destruction activities by authorized personnel"
+    },
+    {
+      "id": "cleared personnel",
+      "type": "ACTOR",
+      "text": "Personnel with appropriate security clearance for media sensitivity"
+    },
+    {
+      "id": "destruction processes",
+      "type": "PROCESS",
+      "text": "Methods and procedures for destroying media"
+    },
+    {
+      "id": "ISM-0370",
+      "type": "CONTROL",
+      "text": "ISM control requiring supervision of media destruction"
+    },
+    {
+      "id": "ISM-0371",
+      "type": "CONTROL",
+      "text": "ISM control requiring supervision of media destruction"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "media destruction",
+      "to": "supervision",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "supervision",
+      "to": "cleared personnel",
+      "type": "PERFORMED_BY"
+    }
+  ]
+}

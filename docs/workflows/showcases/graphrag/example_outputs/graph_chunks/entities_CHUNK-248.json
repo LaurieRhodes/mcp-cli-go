@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-248",
+  "entities": [
+    {
+      "id": "solid state drives",
+      "type": "CONCEPT",
+      "text": "Type of storage device"
+    },
+    {
+      "id": "sanitising",
+      "type": "PROCESS",
+      "text": "Process of securely erasing data"
+    },
+    {
+      "id": "non-volatile flash memory media",
+      "type": "CONCEPT",
+      "text": "Type of memory storage technology"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "solid state drives",
+      "to": "sanitising",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "sanitising",
+      "to": "non-volatile flash memory media",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

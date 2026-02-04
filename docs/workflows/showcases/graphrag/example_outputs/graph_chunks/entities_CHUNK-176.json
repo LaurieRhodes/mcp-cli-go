@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-176",
+  "entities": [
+    {
+      "id": "encrypting communications",
+      "type": "CONCEPT",
+      "text": "Encryption of communications"
+    },
+    {
+      "id": "cryptographic fundamentals",
+      "type": "CONCEPT",
+      "text": "Fundamental cryptographic principles"
+    },
+    {
+      "id": "Guidelines for Cryptography",
+      "type": "DOCUMENT",
+      "text": "Document containing cryptography guidelines"
+    },
+    {
+      "id": "event logging",
+      "type": "CONCEPT",
+      "text": "Recording system events"
+    },
+    {
+      "id": "event logging and monitoring",
+      "type": "CONCEPT",
+      "text": "Monitoring and logging of events"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "DOCUMENT",
+      "text": "Document containing system monitoring guidelines"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "encrypting communications",
+      "to": "cryptographic fundamentals",
+      "type": "event logging"
+    },
+    {
+      "from": "cryptographic fundamentals",
+      "to": "Guidelines for Cryptography",
+      "type": "event logging and monitoring"
+    }
+  ]
+}

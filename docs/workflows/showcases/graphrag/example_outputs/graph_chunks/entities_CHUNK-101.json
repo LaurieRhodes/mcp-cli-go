@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-101",
+  "entities": [
+    {
+      "id": "Essential Eight: N/A",
+      "type": "COMPLIANCE_FRAMEWORK",
+      "text": "Australian Signals Directorate Essential Eight maturity level not applicable"
+    },
+    {
+      "id": "Essential Eight: ML2, ML3",
+      "type": "COMPLIANCE_FRAMEWORK",
+      "text": "Australian Signals Directorate Essential Eight maturity levels 2 and 3"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Essential Eight: N/A",
+      "to": "ISM-0430",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "Essential Eight: ML2, ML3",
+      "to": "ISM-1648",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

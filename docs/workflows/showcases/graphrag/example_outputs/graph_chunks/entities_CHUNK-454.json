@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-454",
+  "entities": [
+    {
+      "id": "Electronic Codebook Mode",
+      "type": "ENCRYPTION_MODE",
+      "text": "Block cipher mode allowing repeated patterns"
+    },
+    {
+      "id": "AES",
+      "type": "ENCRYPTION_ALGORITHM",
+      "text": "Symmetric encryption algorithm"
+    },
+    {
+      "id": "Cipher Block Chaining",
+      "type": "ENCRYPTION_MODE",
+      "text": "Block cipher mode preventing pattern attacks"
+    },
+    {
+      "id": "Cipher Feedback",
+      "type": "ENCRYPTION_MODE",
+      "text": "Block cipher mode preventing pattern attacks"
+    },
+    {
+      "id": "Galois/Counter Mode",
+      "type": "ENCRYPTION_MODE",
+      "text": "Block cipher mode preventing pattern attacks"
+    },
+    {
+      "id": "Output Feedback",
+      "type": "ENCRYPTION_MODE",
+      "text": "Block cipher mode preventing pattern attacks"
+    },
+    {
+      "id": "AES-128",
+      "type": "ENCRYPTION_ALGORITHM",
+      "text": "128-bit AES encryption"
+    },
+    {
+      "id": "AES-192",
+      "type": "ENCRYPTION_ALGORITHM",
+      "text": "192-bit AES encryption"
+    },
+    {
+      "id": "AES-256",
+      "type": "ENCRYPTION_ALGORITHM",
+      "text": "256-bit AES encryption"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1769",
+      "to": "ISM-0479",
+      "type": "PROHIBITED"
+    },
+    {
+      "from": "ISM-1770",
+      "to": "ISM-0479",
+      "type": "APPROVED"
+    },
+    {
+      "from": "ISM-1769",
+      "to": "ISM-0479",
+      "type": "RECOMMENDED"
+    },
+    {
+      "from": "ISM-1769",
+      "to": "ISM-0479",
+      "type": "RECOMMENDED"
+    },
+    {
+      "from": "ISM-1769",
+      "to": "ISM-0479",
+      "type": "RECOMMENDED"
+    },
+    {
+      "from": "ISM-1769",
+      "to": "ISM-0479",
+      "type": "RECOMMENDED"
+    },
+    {
+      "from": "ISM-1770",
+      "to": "ISM-0479",
+      "type": "ALLOWED"
+    },
+    {
+      "from": "ISM-1770",
+      "to": "ISM-0479",
+      "type": "ALLOWED"
+    },
+    {
+      "from": "ISM-1770",
+      "to": "ISM-0479",
+      "type": "PREFERRED"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-044",
+  "entities": [
+    {
+      "id": "trusted insider program",
+      "type": "PROCESS",
+      "text": "Program to detect and respond to trusted insider threats"
+    },
+    {
+      "id": "user activities logging",
+      "type": "PROCESS",
+      "text": "Monitoring and analysis of user activities for threat detection"
+    },
+    {
+      "id": "ISM-1625",
+      "type": "CONTROL",
+      "text": "Control requiring trusted insider program development"
+    },
+    {
+      "id": "ISM-1626",
+      "type": "CONTROL",
+      "text": "Control requiring legal advice for program development"
+    },
+    {
+      "id": "legal advice",
+      "type": "PROCESS",
+      "text": "Seeking legal counsel for program implementation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "trusted insider program",
+      "to": "trusted insider program",
+      "type": "DEFINES"
+    },
+    {
+      "from": "trusted insider program",
+      "to": "ISM-1625",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-424",
+  "entities": [
+    {
+      "id": "wireless access points",
+      "type": "CONCEPT",
+      "text": "Network hardware devices that provide wireless connectivity"
+    },
+    {
+      "id": "broadcast power",
+      "type": "CONCEPT",
+      "text": "Transmission strength of wireless signals"
+    },
+    {
+      "id": "RF shielding",
+      "type": "CONCEPT",
+      "text": "Physical barriers that block radio frequency signals"
+    },
+    {
+      "id": "wireless networks",
+      "type": "CONCEPT",
+      "text": "Computer networks using radio waves for communication"
+    },
+    {
+      "id": "service continuity",
+      "type": "CONCEPT",
+      "text": "Maintaining network availability during hardware failures"
+    },
+    {
+      "id": "footprint",
+      "type": "CONCEPT",
+      "text": "Coverage area of wireless networks"
+    },
+    {
+      "id": "jamming",
+      "type": "CONCEPT",
+      "text": "Intentional interference with wireless communications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "wireless access points",
+      "to": "broadcast power",
+      "type": "HAS"
+    },
+    {
+      "from": "broadcast power",
+      "to": "wireless networks",
+      "type": "AFFECTS"
+    },
+    {
+      "from": "wireless access points",
+      "to": "service continuity",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "RF shielding",
+      "to": "wireless networks",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "RF shielding",
+      "to": "jamming",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "wireless networks",
+      "to": "footprint",
+      "type": "DEFINES"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-019",
+  "entities": [
+    {
+      "id": "respond principles",
+      "type": "CONCEPT",
+      "text": "Framework for response activities"
+    },
+    {
+      "id": "principles",
+      "type": "CONCEPT",
+      "text": "Guidelines or rules for behavior"
+    },
+    {
+      "id": "respond",
+      "type": "PROCESS",
+      "text": "Action of responding to events"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "respond principles",
+      "to": "respond principles",
+      "type": "DEFINES"
+    },
+    {
+      "from": "principles",
+      "to": "respond",
+      "type": "REQUIRES"
+    }
+  ]
+}

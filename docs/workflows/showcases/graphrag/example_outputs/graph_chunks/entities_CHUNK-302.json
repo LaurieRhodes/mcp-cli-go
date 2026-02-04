@@ -1,0 +1,152 @@
+{
+  "chunk_id": "CHUNK-302",
+  "entities": [
+    {
+      "id": "User",
+      "type": "ACTOR",
+      "text": "Individual seeking access to systems"
+    },
+    {
+      "id": "System",
+      "type": "CONCEPT",
+      "text": "Computing system with resources"
+    },
+    {
+      "id": "Authentication",
+      "type": "PROCESS",
+      "text": "Verification of identity"
+    },
+    {
+      "id": "Multi-factor authentication",
+      "type": "PROCESS",
+      "text": "Authentication using multiple factors"
+    },
+    {
+      "id": "Single-factor authentication",
+      "type": "PROCESS",
+      "text": "Authentication using single factor"
+    },
+    {
+      "id": "Username",
+      "type": "CONCEPT",
+      "text": "User identifier"
+    },
+    {
+      "id": "Passphrase",
+      "type": "CONCEPT",
+      "text": "Secret word/phrase"
+    },
+    {
+      "id": "Security key",
+      "type": "CONCEPT",
+      "text": "Physical authentication device"
+    },
+    {
+      "id": "ISM-1546",
+      "type": "CONCEPT",
+      "text": "Security control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "User",
+      "to": "System",
+      "type": "ACCESSES"
+    },
+    {
+      "from": "System",
+      "to": "User",
+      "type": "IS_VERIFIED_BY"
+    },
+    {
+      "from": "Authentication",
+      "to": "User",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "User",
+      "to": "Authentication",
+      "type": "IS_TYPE_OF"
+    },
+    {
+      "from": "Multi-factor authentication",
+      "to": "Authentication",
+      "type": "IS_TYPE_OF"
+    },
+    {
+      "from": "Authentication",
+      "to": "Multi-factor authentication",
+      "type": "USES"
+    },
+    {
+      "from": "Single-factor authentication",
+      "to": "Single-factor authentication",
+      "type": "USES"
+    },
+    {
+      "from": "Authentication",
+      "to": "Username",
+      "type": "USES"
+    },
+    {
+      "from": "Multi-factor authentication",
+      "to": "Passphrase",
+      "type": "USES"
+    },
+    {
+      "from": "Username",
+      "to": "Security key",
+      "type": "USES"
+    },
+    {
+      "from": "Multi-factor authentication",
+      "to": "Username",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Passphrase",
+      "to": "Passphrase",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Multi-factor authentication",
+      "to": "Authentication",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Security key",
+      "to": "Authentication",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Single-factor authentication",
+      "to": "Authentication",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Username",
+      "to": "Authentication",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Single-factor authentication",
+      "to": "Authentication",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Passphrase",
+      "to": "Authentication",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ISM-1546",
+      "to": "Authentication",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Authentication",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-404",
+  "entities": [
+    {
+      "id": "Network devices",
+      "type": "CONCEPT",
+      "text": "Hardware components like routers, switches, wireless access points"
+    },
+    {
+      "id": "Default accounts",
+      "type": "CONCEPT",
+      "text": "Pre-configured user accounts with factory settings"
+    },
+    {
+      "id": "Credentials",
+      "type": "CONCEPT",
+      "text": "Authentication information like passwords"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Network devices",
+      "to": "Default accounts",
+      "type": "HAS"
+    },
+    {
+      "from": "Default accounts",
+      "to": "Credentials",
+      "type": "USES"
+    }
+  ]
+}

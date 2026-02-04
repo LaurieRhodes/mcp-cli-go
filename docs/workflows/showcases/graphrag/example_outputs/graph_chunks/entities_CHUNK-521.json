@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-521",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cybersecurity concept for managing risks in supply chains"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Policy document providing guidance on procurement and outsourcing"
+    },
+    {
+      "id": "data transfers",
+      "type": "PROCESS",
+      "text": "Process of transferring data between systems or organizations"
+    },
+    {
+      "id": "Guidelines for Data Transfers",
+      "type": "DOCUMENT",
+      "text": "Policy document providing guidance on data transfers"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    },
+    {
+      "from": "data transfers",
+      "to": "Guidelines for Data Transfers",
+      "type": "DEFINES"
+    }
+  ]
+}

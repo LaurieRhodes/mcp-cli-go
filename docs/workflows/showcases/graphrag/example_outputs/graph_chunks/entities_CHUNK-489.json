@@ -1,0 +1,142 @@
+{
+  "chunk_id": "CHUNK-489",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cyber security risk management for supply chains"
+    },
+    {
+      "id": "procurement of outsourced services",
+      "type": "PROCESS",
+      "text": "Acquisition of external services"
+    },
+    {
+      "id": "designing, configuring and managing networks",
+      "type": "PROCESS",
+      "text": "Network infrastructure design and management"
+    },
+    {
+      "id": "privileged access to systems",
+      "type": "CONCEPT",
+      "text": "Special system access permissions"
+    },
+    {
+      "id": "cyber security awareness training",
+      "type": "PROCESS",
+      "text": "Security training for personnel"
+    },
+    {
+      "id": "authenticating users",
+      "type": "PROCESS",
+      "text": "User identity verification"
+    },
+    {
+      "id": "authenticating ICT equipment",
+      "type": "PROCESS",
+      "text": "ICT equipment identity verification"
+    },
+    {
+      "id": "RPKI and ROA records",
+      "type": "CONCEPT",
+      "text": "Resource Public Key Infrastructure records"
+    },
+    {
+      "id": "event logging",
+      "type": "PROCESS",
+      "text": "System activity recording"
+    },
+    {
+      "id": "IRAP",
+      "type": "PROCESS",
+      "text": "Information Security Registered Assessors Program"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Document for procurement guidelines"
+    },
+    {
+      "id": "Guidelines for Networking",
+      "type": "DOCUMENT",
+      "text": "Document for network guidelines"
+    },
+    {
+      "id": "Guidelines for Personnel Security",
+      "type": "DOCUMENT",
+      "text": "Document for personnel security guidelines"
+    },
+    {
+      "id": "Guidelines for System Hardening",
+      "type": "DOCUMENT",
+      "text": "Document for system hardening guidelines"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "DOCUMENT",
+      "text": "Document for system monitoring guidelines"
+    },
+    {
+      "id": "Asia Pacific Network Information Centre",
+      "type": "ACTOR",
+      "text": "Regional internet registry for Asia Pacific"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    },
+    {
+      "from": "procurement of outsourced services",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    },
+    {
+      "from": "designing, configuring and managing networks",
+      "to": "Guidelines for Networking",
+      "type": "DEFINES"
+    },
+    {
+      "from": "privileged access to systems",
+      "to": "Guidelines for Personnel Security",
+      "type": "DEFINES"
+    },
+    {
+      "from": "cyber security awareness training",
+      "to": "Guidelines for Personnel Security",
+      "type": "DEFINES"
+    },
+    {
+      "from": "authenticating users",
+      "to": "Guidelines for System Hardening",
+      "type": "DEFINES"
+    },
+    {
+      "from": "authenticating ICT equipment",
+      "to": "Guidelines for Networking",
+      "type": "DEFINES"
+    },
+    {
+      "from": "RPKI and ROA records",
+      "to": "Asia Pacific Network Information Centre",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "event logging",
+      "to": "Guidelines for System Monitoring",
+      "type": "DEFINES"
+    },
+    {
+      "from": "IRAP",
+      "to": "ACSC",
+      "type": "PROVIDES"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "chunk_id": "CHUNK-290",
+  "entities": [
+    {
+      "id": "Microsoft Office macros",
+      "type": "CONCEPT",
+      "text": "Automation tools in Microsoft Office"
+    },
+    {
+      "id": "Visual Basic for Applications",
+      "type": "CONCEPT",
+      "text": "Programming language for Office macros"
+    },
+    {
+      "id": "Macro security",
+      "type": "CONCEPT",
+      "text": "Security measures for Office macros"
+    },
+    {
+      "id": "Trusted Locations",
+      "type": "CONCEPT",
+      "text": "Secure locations for macro files"
+    },
+    {
+      "id": "Trusted publishers",
+      "type": "CONCEPT",
+      "text": "Authorized macro signers"
+    },
+    {
+      "id": "Win32 API calls",
+      "type": "CONCEPT",
+      "text": "System-level function calls"
+    },
+    {
+      "id": "Macro event logs",
+      "type": "CONCEPT",
+      "text": "Records of macro execution"
+    },
+    {
+      "id": "Sandboxed environment",
+      "type": "CONCEPT",
+      "text": "Isolated execution environment"
+    },
+    {
+      "id": "Digital signatures",
+      "type": "CONCEPT",
+      "text": "Cryptographic verification of macro source"
+    },
+    {
+      "id": "Antivirus scanning",
+      "type": "CONCEPT",
+      "text": "Malware detection for macros"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Microsoft Office macros",
+      "to": "Visual Basic for Applications",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Macro security",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Trusted Locations",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Trusted publishers",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Win32 API calls",
+      "type": "BLOCKS"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Macro event logs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Sandboxed environment",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Digital signatures",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Microsoft Office macros",
+      "to": "Antivirus scanning",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-177",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "CONCEPT",
+      "text": "General category of mobile devices"
+    },
+    {
+      "id": "smartphones",
+      "type": "CONCEPT",
+      "text": "Type of mobile device"
+    },
+    {
+      "id": "tablets",
+      "type": "CONCEPT",
+      "text": "Type of mobile device"
+    },
+    {
+      "id": "laptops",
+      "type": "CONCEPT",
+      "text": "Type of mobile device"
+    },
+    {
+      "id": "Guidelines for System Hardening",
+      "type": "DOCUMENT",
+      "text": "Reference document for system hardening"
+    },
+    {
+      "id": "Guidelines for System Management",
+      "type": "DOCUMENT",
+      "text": "Reference document for system management"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "mobile devices",
+      "to": "smartphones",
+      "type": "DEFINES"
+    },
+    {
+      "from": "mobile devices",
+      "to": "tablets",
+      "type": "DEFINES"
+    },
+    {
+      "from": "mobile devices",
+      "to": "laptops",
+      "type": "DEFINES"
+    },
+    {
+      "from": "laptops",
+      "to": "Guidelines for System Hardening",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "laptops",
+      "to": "Guidelines for System Management",
+      "type": "REQUIRES"
+    }
+  ]
+}

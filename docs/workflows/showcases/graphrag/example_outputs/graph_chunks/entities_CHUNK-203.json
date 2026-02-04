@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-203",
+  "entities": [
+    {
+      "id": "Common Criteria evaluation",
+      "type": "EVALUATION_TYPE",
+      "text": "Traditional evaluation at specified Evaluation Assurance Level"
+    },
+    {
+      "id": "PP-based evaluation",
+      "type": "EVALUATION_TYPE",
+      "text": "Product evaluation against Protection Profile"
+    },
+    {
+      "id": "EAL-based evaluation",
+      "type": "EVALUATION_TYPE",
+      "text": "Product evaluation against Evaluation Assurance Level"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Common Criteria",
+      "to": "product",
+      "type": "CONDUCTS"
+    },
+    {
+      "from": "Common Criteria",
+      "to": "product",
+      "type": "CONDUCTS"
+    },
+    {
+      "from": "Common Criteria",
+      "to": "product",
+      "type": "CONDUCTS"
+    }
+  ]
+}

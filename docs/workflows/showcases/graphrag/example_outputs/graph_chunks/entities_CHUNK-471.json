@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-471",
+  "entities": [
+    {
+      "id": "ICT equipment/software",
+      "type": "CONCEPT",
+      "text": "Hardware or software implementing IPsec"
+    },
+    {
+      "id": "IPsec",
+      "type": "CONCEPT",
+      "text": "Internet Protocol Security protocol"
+    },
+    {
+      "id": "AACAs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Algorithms"
+    },
+    {
+      "id": "AACPs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Protocols"
+    },
+    {
+      "id": "ASD guidelines",
+      "type": "CONCEPT",
+      "text": "Australian Signals Directorate guidelines"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment/software",
+      "to": "IPsec",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "IPsec usage",
+      "to": "AACAs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "IPsec usage",
+      "to": "AACPs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "AACAs/AACPs",
+      "to": "ASD guidelines",
+      "type": "DEFINED_IN"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-330",
+  "entities": [
+    {
+      "id": "digital preservation policy",
+      "type": "CONCEPT",
+      "text": "Policy for preserving digital assets"
+    },
+    {
+      "id": "digital continuity planning",
+      "type": "PROCESS",
+      "text": "Planning for digital continuity"
+    },
+    {
+      "id": "important data",
+      "type": "CONCEPT",
+      "text": "Critical organizational data"
+    },
+    {
+      "id": "data degradation",
+      "type": "CONCEPT",
+      "text": "Loss of data quality over time"
+    },
+    {
+      "id": "removable media",
+      "type": "CONCEPT",
+      "text": "Portable storage devices"
+    },
+    {
+      "id": "hardware obsolescence",
+      "type": "CONCEPT",
+      "text": "Outdated hardware technology"
+    },
+    {
+      "id": "software obsolescence",
+      "type": "CONCEPT",
+      "text": "Outdated software technology"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "digital preservation policy",
+      "to": "digital continuity planning",
+      "type": "PART_OF"
+    },
+    {
+      "from": "digital preservation policy",
+      "to": "important data",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "digital preservation policy",
+      "to": "data degradation",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "digital preservation policy",
+      "to": "removable media",
+      "type": "CONSIDERS"
+    },
+    {
+      "from": "digital preservation policy",
+      "to": "hardware obsolescence",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "digital preservation policy",
+      "to": "software obsolescence",
+      "type": "MITIGATES"
+    }
+  ]
+}

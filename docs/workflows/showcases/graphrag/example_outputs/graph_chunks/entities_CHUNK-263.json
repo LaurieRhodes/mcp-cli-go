@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-263",
+  "entities": [
+    {
+      "id": "Security Construction and Equipment Committee",
+      "type": "ORGANIZATION",
+      "text": "Committee that approves security equipment"
+    },
+    {
+      "id": "Security Equipment Evaluated Products List",
+      "type": "DOCUMENT",
+      "text": "List of approved security equipment"
+    },
+    {
+      "id": "Australian Security Intelligence Organisation (ASIO)",
+      "type": "ORGANIZATION",
+      "text": "Australian intelligence agency"
+    },
+    {
+      "id": "Security Equipment Guide-009",
+      "type": "DOCUMENT",
+      "text": "Guide for optical media shredders"
+    },
+    {
+      "id": "Security Equipment Guide-018",
+      "type": "DOCUMENT",
+      "text": "Guide for destructors"
+    },
+    {
+      "id": "Protective Security Policy GovTEAMS community",
+      "type": "ORGANIZATION",
+      "text": "Government community for security policy"
+    },
+    {
+      "id": "United States' National Security Agency",
+      "type": "ORGANIZATION",
+      "text": "US intelligence agency"
+    },
+    {
+      "id": "NSA/CSS Evaluated Products List for Magnetic Degaussers",
+      "type": "DOCUMENT",
+      "text": "List of evaluated magnetic degaussers"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "APPROVES"
+    },
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "LISTED_IN"
+    },
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "AVAILABLE_FROM"
+    },
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "MAINTAINS"
+    },
+    {
+      "from": "Media destruction equipment",
+      "to": "Media destruction equipment",
+      "type": "MAINTAINS"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-505",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cyber supply chain risk management concept"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Document providing guidelines for procurement and outsourcing"
+    },
+    {
+      "id": "event logging",
+      "type": "CONCEPT",
+      "text": "Event logging concept"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "DOCUMENT",
+      "text": "Document providing guidelines for system monitoring"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    },
+    {
+      "from": "event logging",
+      "to": "Guidelines for System Monitoring",
+      "type": "DEFINES"
+    }
+  ]
+}

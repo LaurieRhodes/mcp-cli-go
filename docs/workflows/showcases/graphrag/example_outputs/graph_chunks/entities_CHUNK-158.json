@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-158",
+  "entities": [
+    {
+      "id": "Video conferencing infrastructure",
+      "type": "CONCEPT",
+      "text": "Communication systems for video meetings"
+    },
+    {
+      "id": "IP telephony infrastructure",
+      "type": "CONCEPT",
+      "text": "Voice over IP communication systems"
+    },
+    {
+      "id": "Session Initiation Protocol server",
+      "type": "SYSTEM",
+      "text": "Protocol server for initiating communication sessions"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Video conferencing infrastructure",
+      "to": "Session Initiation Protocol server",
+      "type": "HARDENS"
+    },
+    {
+      "from": "IP telephony infrastructure",
+      "to": "Video conferencing infrastructure",
+      "type": "REQUIRES"
+    }
+  ]
+}

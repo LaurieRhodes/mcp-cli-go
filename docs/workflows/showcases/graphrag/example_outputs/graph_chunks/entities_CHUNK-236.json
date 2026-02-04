@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-236",
+  "entities": [
+    {
+      "id": "security risk",
+      "type": "RISK",
+      "text": "Minor security risk"
+    },
+    {
+      "id": "prior use",
+      "type": "HISTORY",
+      "text": "Previous equipment usage"
+    },
+    {
+      "id": "undue attention",
+      "type": "CONCERN",
+      "text": "Unwanted attention after disposal"
+    },
+    {
+      "id": "requirements",
+      "type": "REQUIREMENT",
+      "text": "Disposal requirements"
+    },
+    {
+      "id": "formal administrative decision",
+      "type": "DECISION",
+      "text": "Formal administrative decision"
+    },
+    {
+      "id": "public domain release",
+      "type": "ACTION",
+      "text": "Release into public domain"
+    },
+    {
+      "id": "equipment disposal",
+      "type": "ACTION",
+      "text": "Disposal of ICT equipment"
+    },
+    {
+      "id": "sanitised equipment",
+      "type": "EQUIPMENT",
+      "text": "Sanitised ICT equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "public domain",
+      "type": "PRESENTS"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "disposal",
+      "type": "ASSOCIATED_WITH"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "disposal",
+      "type": "DRAWS"
+    },
+    {
+      "from": "disposal",
+      "to": "disposal",
+      "type": "RELATING_TO"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "public domain",
+      "type": "MADE_FOR"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "public domain",
+      "type": "AUTHORISES"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "public domain",
+      "type": "PART_OF"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "public domain",
+      "type": "PRESENTS"
+    }
+  ]
+}

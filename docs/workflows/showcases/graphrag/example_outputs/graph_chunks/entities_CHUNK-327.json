@@ -1,0 +1,127 @@
+{
+  "chunk_id": "CHUNK-327",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity that applies patches"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Entity that releases patches/updates"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "What needs patching"
+    },
+    {
+      "id": "patches/updates",
+      "type": "PROCESS",
+      "text": "Security fixes"
+    },
+    {
+      "id": "internet-facing services",
+      "type": "CONCEPT",
+      "text": "Priority systems that face internet"
+    },
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "System software"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "high assurance ICT equipment",
+      "type": "CONCEPT",
+      "text": "Specialized equipment requiring ACSC approval"
+    },
+    {
+      "id": "mitigation advice",
+      "type": "PROCESS",
+      "text": "Temporary protection when patches unavailable"
+    },
+    {
+      "id": "exploit",
+      "type": "CONCEPT",
+      "text": "Attack code that accelerates patching"
+    },
+    {
+      "id": "office productivity suites",
+      "type": "CONCEPT",
+      "text": "Software category: office tools"
+    },
+    {
+      "id": "web browsers",
+      "type": "CONCEPT",
+      "text": "Software category: web access"
+    },
+    {
+      "id": "email clients",
+      "type": "CONCEPT",
+      "text": "Software category: email software"
+    },
+    {
+      "id": "PDF software",
+      "type": "CONCEPT",
+      "text": "Software category: PDF readers"
+    },
+    {
+      "id": "security products",
+      "type": "CONCEPT",
+      "text": "Software category: security software"
+    },
+    {
+      "id": "workstations",
+      "type": "CONCEPT",
+      "text": "Hardware: user computers"
+    },
+    {
+      "id": "servers",
+      "type": "CONCEPT",
+      "text": "Hardware: data servers"
+    },
+    {
+      "id": "network devices",
+      "type": "CONCEPT",
+      "text": "Hardware: networking equipment"
+    },
+    {
+      "id": "drivers",
+      "type": "CONCEPT",
+      "text": "Low-level software"
+    },
+    {
+      "id": "firmware",
+      "type": "CONCEPT",
+      "text": "Embedded software"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "patches/updates",
+      "type": "APPLIES"
+    },
+    {
+      "from": "vendors",
+      "to": "patches/updates",
+      "type": "RELEASES"
+    },
+    {
+      "from": "ACSC",
+      "to": "patches/updates",
+      "type": "ASSESSES"
+    },
+    {
+      "from": "mitigation advice",
+      "to": "security vulnerabilities",
+      "type": "PROTECTS_UNTIL"
+    }
+  ]
+}

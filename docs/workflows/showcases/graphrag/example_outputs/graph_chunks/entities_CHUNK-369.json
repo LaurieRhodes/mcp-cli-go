@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-369",
+  "entities": [
+    {
+      "id": "SQL injection attacks",
+      "type": "CONCEPT",
+      "text": "Attacks that exploit SQL vulnerabilities to access databases"
+    },
+    {
+      "id": "dynamically generated queries",
+      "type": "CONCEPT",
+      "text": "Queries constructed at runtime with user input"
+    },
+    {
+      "id": "database contents",
+      "type": "CONCEPT",
+      "text": "Data stored in database systems"
+    },
+    {
+      "id": "web applications",
+      "type": "SYSTEM",
+      "text": "Applications accessed via web browsers"
+    },
+    {
+      "id": "parameterised queries",
+      "type": "TECHNIQUE",
+      "text": "Pre-compiled queries with parameters"
+    },
+    {
+      "id": "stored procedures",
+      "type": "TECHNIQUE",
+      "text": "Pre-defined database procedures"
+    },
+    {
+      "id": "error information",
+      "type": "CONCEPT",
+      "text": "Detailed technical information about database structure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "SQL injection attacks",
+      "to": "dynamically generated queries",
+      "type": "FACILITATES"
+    },
+    {
+      "from": "dynamically generated queries",
+      "to": "SQL injection attacks",
+      "type": "ENABLED_BY"
+    }
+  ]
+}

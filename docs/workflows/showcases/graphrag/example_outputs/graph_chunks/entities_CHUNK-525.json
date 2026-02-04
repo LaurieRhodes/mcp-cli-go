@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-525",
+  "entities": [
+    {
+      "id": "Data transfer processes",
+      "type": "PROCESS",
+      "text": "Processes for transferring data between systems"
+    },
+    {
+      "id": "Data transfer procedures",
+      "type": "PROCESS",
+      "text": "Detailed steps for executing data transfers"
+    },
+    {
+      "id": "AUSTEO data",
+      "type": "DATA_CLASSIFICATION",
+      "text": "Australian Eyes Only classified data"
+    },
+    {
+      "id": "AGAO data",
+      "type": "DATA_CLASSIFICATION",
+      "text": "Australian Government Access Only classified data"
+    },
+    {
+      "id": "REL data",
+      "type": "DATA_CLASSIFICATION",
+      "text": "Releasable To classified data"
+    },
+    {
+      "id": "Foreign systems",
+      "type": "SYSTEM",
+      "text": "External systems outside Australian control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Data transfer processes",
+      "to": "Data transfer processes",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Data transfer procedures",
+      "to": "AUSTEO data",
+      "type": "PREVENTS"
+    }
+  ]
+}

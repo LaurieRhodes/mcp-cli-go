@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-185",
+  "entities": [
+    {
+      "id": "mobile device security",
+      "type": "CONCEPT",
+      "text": "Maintaining mobile device security"
+    },
+    {
+      "id": "Essential Eight",
+      "type": "FRAMEWORK",
+      "text": "Essential Eight: N/A"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-185",
+      "to": "CHUNK-185",
+      "type": "DESCRIBES"
+    },
+    {
+      "from": "CHUNK-185",
+      "to": "CHUNK-185",
+      "type": "DESCRIBES"
+    }
+  ]
+}

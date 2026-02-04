@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-074",
+  "entities": [
+    {
+      "id": "incident response plan",
+      "type": "CONCEPT",
+      "text": "A documented plan for responding to cybersecurity incidents"
+    },
+    {
+      "id": "cyber security incident",
+      "type": "CONCEPT",
+      "text": "A security breach or attack on systems/data"
+    },
+    {
+      "id": "ISM-0043",
+      "type": "CONTROL",
+      "text": "Australian Information Security Manual control number"
+    },
+    {
+      "id": "response",
+      "type": "PROCESS",
+      "text": "The action taken to address a cybersecurity incident"
+    },
+    {
+      "id": "system/data",
+      "type": "ASSET",
+      "text": "IT systems and data that may be impacted"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "incident response plan",
+      "to": "cyber security incident",
+      "type": "ADDRESSES"
+    },
+    {
+      "from": "incident response plan",
+      "to": "response",
+      "type": "DEFINES"
+    },
+    {
+      "from": "response",
+      "to": "cyber security incident",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "ISM-0043",
+      "to": "incident response plan",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "response",
+      "to": "system/data",
+      "type": "RESTORES"
+    }
+  ]
+}

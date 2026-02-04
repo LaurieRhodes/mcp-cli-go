@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-409",
+  "entities": [
+    {
+      "id": "wireless devices",
+      "type": "CONCEPT",
+      "text": "Devices like wireless access points, adapters, and network cards"
+    },
+    {
+      "id": "Wi-Fi Alliance certification program",
+      "type": "PROCESS",
+      "text": "Certification program that validates wireless device compliance"
+    },
+    {
+      "id": "wireless standards",
+      "type": "CONCEPT",
+      "text": "Technical specifications for wireless communication"
+    },
+    {
+      "id": "interoperability",
+      "type": "CONCEPT",
+      "text": "Ability of devices to work together on wireless networks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "wireless devices",
+      "to": "wireless devices",
+      "type": "CERTIFIED_AGAINST"
+    },
+    {
+      "from": "Wi-Fi Alliance certification program",
+      "to": "wireless standards",
+      "type": "CONFORMS_TO"
+    }
+  ]
+}

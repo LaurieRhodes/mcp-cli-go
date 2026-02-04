@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-411",
+  "entities": [
+    {
+      "id": "Administrative interfaces",
+      "type": "CONCEPT",
+      "text": "Tools for modifying wireless access point settings"
+    },
+    {
+      "id": "Wireless access points",
+      "type": "CONCEPT",
+      "text": "Network devices providing wireless connectivity"
+    },
+    {
+      "id": "Users",
+      "type": "ACTOR",
+      "text": "Individuals interacting with administrative interfaces"
+    },
+    {
+      "id": "Attack surface",
+      "type": "CONCEPT",
+      "text": "Vulnerability exposure area"
+    },
+    {
+      "id": "ISM-1315",
+      "type": "CONCEPT",
+      "text": "Security control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Administrative interfaces",
+      "to": "Users",
+      "type": "Administrative interfaces"
+    },
+    {
+      "from": "Wireless access points",
+      "to": "Administrative interfaces",
+      "type": "Attack surface"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-310",
+  "entities": [
+    {
+      "id": "account lockout",
+      "type": "SECURITY_CONTROL",
+      "text": "Locking accounts after failed logon attempts"
+    },
+    {
+      "id": "credential spraying attacks",
+      "type": "ATTACK_VECTOR",
+      "text": "Adversarial attempts to guess credentials"
+    },
+    {
+      "id": "multi-factor authentication",
+      "type": "SECURITY_CONTROL",
+      "text": "Authentication requiring multiple verification methods"
+    },
+    {
+      "id": "rate limiting",
+      "type": "SECURITY_CONTROL",
+      "text": "Slowing down repeated failed attempts"
+    },
+    {
+      "id": "break glass accounts",
+      "type": "ACCOUNT_TYPE",
+      "text": "Emergency access accounts exempt from lockout"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1403",
+      "to": "Account lockouts",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "ISM-1403",
+      "to": "Account lockouts",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "ISM-1403",
+      "to": "Account lockouts",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "ISM-1403",
+      "to": "Account lockouts",
+      "type": "ALTERNATIVE_TO"
+    },
+    {
+      "from": "ISM-1403",
+      "to": "Account lockouts",
+      "type": "EXCEPTION_FOR"
+    }
+  ]
+}

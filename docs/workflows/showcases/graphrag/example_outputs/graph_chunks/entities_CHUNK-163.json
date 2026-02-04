@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-163",
+  "entities": [
+    {
+      "id": "IP phones in public areas",
+      "type": "CONCEPT",
+      "text": "Communication devices located in publicly accessible areas"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor seeking unauthorized access"
+    },
+    {
+      "id": "Data networks",
+      "type": "CONCEPT",
+      "text": "Network infrastructure carrying digital information"
+    },
+    {
+      "id": "Voicemail services",
+      "type": "CONCEPT",
+      "text": "Telephone message storage systems"
+    },
+    {
+      "id": "Directory services",
+      "type": "CONCEPT",
+      "text": "Systems providing contact information lookup"
+    },
+    {
+      "id": "ISM-0558",
+      "type": "PROCESS",
+      "text": "Security control requiring restriction of IP phone access"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "IP phones in public areas",
+      "to": "ENABLES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Adversary",
+      "to": "ACCESSES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "IP phones in public areas",
+      "to": "ACCESSES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Data networks",
+      "to": "ACCESSES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "IP phones in public areas",
+      "to": "RESTRICTS",
+      "type": "RELATED_TO"
+    }
+  ]
+}

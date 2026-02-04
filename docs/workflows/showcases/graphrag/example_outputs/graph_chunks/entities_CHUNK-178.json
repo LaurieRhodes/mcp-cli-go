@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-178",
+  "entities": [
+    {
+      "id": "Mobile device management policy",
+      "type": "CONCEPT",
+      "text": "Policy for managing mobile device security"
+    },
+    {
+      "id": "Mobile Device Management solution",
+      "type": "CONCEPT",
+      "text": "Solution to enforce mobile device policies"
+    },
+    {
+      "id": "Mobile devices",
+      "type": "ACTOR",
+      "text": "Portable computing devices"
+    },
+    {
+      "id": "Office environment",
+      "type": "CONCEPT",
+      "text": "Protected workplace environment"
+    },
+    {
+      "id": "ISM-1533",
+      "type": "PROCESS",
+      "text": "ISM control requiring mobile device policy"
+    },
+    {
+      "id": "ISM-1195",
+      "type": "PROCESS",
+      "text": "ISM control requiring MDM solution"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Mobile device management policy",
+      "to": "Mobile devices",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Mobile Device Management solution",
+      "to": "Mobile device management policy",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Mobile devices",
+      "to": "Office environment",
+      "type": "LEAVES"
+    },
+    {
+      "from": "ISM-1533",
+      "to": "Mobile device management policy",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1195",
+      "to": "Mobile Device Management solution",
+      "type": "DEFINES"
+    }
+  ]
+}

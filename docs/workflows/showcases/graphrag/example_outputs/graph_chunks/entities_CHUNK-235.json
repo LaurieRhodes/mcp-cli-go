@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-235",
+  "entities": [
+    {
+      "id": "ICT equipment disposal",
+      "type": "PROCESS",
+      "text": "Developing, implementing and maintaining processes and procedures for ICT equipment disposal"
+    },
+    {
+      "id": "processes and procedures",
+      "type": "PROCEDURE",
+      "text": "ICT equipment disposal processes, and supporting ICT equipment disposal procedures"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "ICT equipment disposal",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "organisation",
+      "to": "ICT equipment disposal",
+      "type": "GOVERNS"
+    }
+  ]
+}

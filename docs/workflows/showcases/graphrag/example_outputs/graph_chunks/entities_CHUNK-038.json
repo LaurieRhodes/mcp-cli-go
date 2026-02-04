@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-038",
+  "entities": [
+    {
+      "id": "cyber security event",
+      "type": "CONCEPT",
+      "text": "An occurrence indicating possible security issues"
+    },
+    {
+      "id": "system",
+      "type": "CONCEPT",
+      "text": "A computing system"
+    },
+    {
+      "id": "service",
+      "type": "CONCEPT",
+      "text": "A service component"
+    },
+    {
+      "id": "network",
+      "type": "CONCEPT",
+      "text": "A network infrastructure"
+    },
+    {
+      "id": "security policy",
+      "type": "CONCEPT",
+      "text": "Security rules and guidelines"
+    },
+    {
+      "id": "safeguards",
+      "type": "CONCEPT",
+      "text": "Protective measures"
+    },
+    {
+      "id": "security",
+      "type": "CONCEPT",
+      "text": "Overall security domain"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security event",
+      "to": "system",
+      "type": "INDICATES"
+    },
+    {
+      "from": "cyber security event",
+      "to": "service",
+      "type": "INDICATES"
+    },
+    {
+      "from": "cyber security event",
+      "to": "network",
+      "type": "INDICATES"
+    },
+    {
+      "from": "cyber security event",
+      "to": "security policy",
+      "type": "BREACHES"
+    },
+    {
+      "from": "cyber security event",
+      "to": "safeguards",
+      "type": "FAILS"
+    },
+    {
+      "from": "cyber security event",
+      "to": "security",
+      "type": "RELEVANT_TO"
+    }
+  ]
+}

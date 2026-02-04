@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-479",
+  "entities": [
+    {
+      "id": "Revision: 4",
+      "type": "CONTROL_REVISION",
+      "text": "Control revision number"
+    },
+    {
+      "id": "Updated: Mar-22",
+      "type": "CONTROL_UPDATE",
+      "text": "Control update date"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0498",
+      "to": "Security association lifetimes",
+      "type": "HAS_REVISION"
+    },
+    {
+      "from": "ISM-0498",
+      "to": "Security association lifetimes",
+      "type": "HAS_UPDATE"
+    }
+  ]
+}

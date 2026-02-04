@@ -1,0 +1,39 @@
+$schema: "workflow/v2.0"
+name: extract_graph_chunk
+version: 1.0.0
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  timeout: 3m
+
+steps:
+  - name: extract_and_save
+    skills: [python-context-builder]
+    max_iterations: 2
+    run: |
+      Read: {{input}}
+      Extract chunk_id, content.
+      
+      Identify entities (id|type|text) and relationships (from|to|type).
+      Generic - adapt to document type.
+      
+      Call skills_run_helper_script tool.
+      Parameters:
+      {
+        "skill_name": "python-context-builder",
+        "script_name": "save_graph_entities.py",
+        "args": [
+          "{{chunk_id}}",
+          "entity-id-1|entity-id-2|entity-id-3",
+          "CONCEPT|ACTOR|REQUIREMENT",
+          "description 1|description 2|description 3",
+          "entity-id-1|entity-id-2",
+          "entity-id-2|entity-id-3",
+          "DEFINES|REQUIRES"
+        ]
+      }
+      
+      Format: pipe-separated strings. Types: CONCEPT, ACTOR, REQUIREMENT, ARTIFACT, PROCESS.
+      
+      Reply: "Success"

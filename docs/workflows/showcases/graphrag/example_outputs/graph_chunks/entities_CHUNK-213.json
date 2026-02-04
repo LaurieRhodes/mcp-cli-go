@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-213",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and Communications Technology equipment"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Vendors",
+      "type": "ACTOR",
+      "text": "Equipment manufacturers"
+    },
+    {
+      "id": "Hardening guidance",
+      "type": "CONCEPT",
+      "text": "Security configuration recommendations"
+    },
+    {
+      "id": "Configuration settings",
+      "type": "CONCEPT",
+      "text": "System settings that can be adjusted"
+    },
+    {
+      "id": "Security risk",
+      "type": "CONCEPT",
+      "text": "Potential for security breaches"
+    },
+    {
+      "id": "Adversary foothold",
+      "type": "ACTOR",
+      "text": "Malicious actor seeking network access"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "ACSC",
+      "type": "Vendors"
+    },
+    {
+      "from": "Hardening guidance",
+      "to": "Hardening guidance",
+      "type": "Hardening guidance"
+    }
+  ]
+}

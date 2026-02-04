@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-271",
+  "entities": [
+    {
+      "id": "Media disposal processes",
+      "type": "PROCESS",
+      "text": "Processes for media disposal"
+    },
+    {
+      "id": "Media disposal procedures",
+      "type": "PROCESS",
+      "text": "Procedures supporting media disposal"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity carrying out media disposal"
+    },
+    {
+      "id": "ISM-0374 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control for media disposal"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "Media disposal processes",
+      "type": "ISM-0374 control"
+    },
+    {
+      "from": "Media disposal processes",
+      "to": "Media disposal procedures",
+      "type": "Media disposal processes"
+    }
+  ]
+}

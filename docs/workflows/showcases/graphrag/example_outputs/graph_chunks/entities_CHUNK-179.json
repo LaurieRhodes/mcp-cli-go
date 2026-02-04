@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-179",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "DEVICE",
+      "text": "Mobile devices that process SECRET/TOP SECRET data"
+    },
+    {
+      "id": "ASD",
+      "type": "ORGANIZATION",
+      "text": "Australian Signals Directorate"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "mobile devices",
+      "to": "ASD",
+      "type": "REQUIRES_APPROVAL"
+    },
+    {
+      "from": "ASD",
+      "to": "mobile devices",
+      "type": "GRANTS_APPROVAL"
+    }
+  ]
+}

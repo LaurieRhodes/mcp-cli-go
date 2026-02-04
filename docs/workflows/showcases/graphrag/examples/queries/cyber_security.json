@@ -1,0 +1,15 @@
+{
+  "query": "cyber security",
+  "description": "Broad query finding cyber security related concepts",
+  "expected_results": {
+    "matching_entities": 586,
+    "related_entities": 1390,
+    "relevant_chunks": 487
+  },
+  "sample_entities": [
+    "Information security control for email distribution",
+    "Individuals responsible for mobile device security",
+    "Security vulnerability remediation",
+    "Response to cyber security incidents"
+  ]
+}

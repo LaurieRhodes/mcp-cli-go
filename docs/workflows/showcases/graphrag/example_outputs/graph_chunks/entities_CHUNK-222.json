@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-222",
+  "entities": [
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity making decisions about ICT equipment"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Technology assets being maintained/repaired"
+    },
+    {
+      "id": "Off-site facilities",
+      "type": "CONCEPT",
+      "text": "Locations where maintenance/repair occurs"
+    },
+    {
+      "id": "Sanitisation process",
+      "type": "PROCESS",
+      "text": "Cleaning ICT equipment before transport"
+    },
+    {
+      "id": "ISM-0310 control",
+      "type": "CONCEPT",
+      "text": "Specific security control for off-site maintenance"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "ICT equipment",
+      "type": "CHOOSES"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "Off-site facilities",
+      "type": "TRANSPORTED_TO"
+    }
+  ]
+}

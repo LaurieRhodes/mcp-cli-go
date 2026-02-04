@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-053",
+  "entities": [
+    {
+      "id": "Evidence",
+      "type": "CONCEPT",
+      "text": "Digital or physical materials collected during cyber security investigations"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Government agency that assists with cyber security investigations"
+    },
+    {
+      "id": "Investigators",
+      "type": "ACTOR",
+      "text": "Personnel responsible for conducting cyber security investigations"
+    },
+    {
+      "id": "Cyber security incident",
+      "type": "CONCEPT",
+      "text": "Security breach or attack requiring investigation"
+    },
+    {
+      "id": "Evidence integrity",
+      "type": "CONCEPT",
+      "text": "Preservation of evidence without alteration or corruption"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Evidence integrity",
+      "to": "Investigators",
+      "type": "ACSC"
+    },
+    {
+      "from": "Evidence",
+      "to": "Evidence integrity",
+      "type": "Evidence integrity"
+    }
+  ]
+}

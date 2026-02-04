@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-198",
+  "entities": [
+    {
+      "id": "Evaluated product",
+      "type": "CONCEPT",
+      "text": "Product that has undergone security evaluation providing assurance"
+    },
+    {
+      "id": "Unevaluated product",
+      "type": "CONCEPT",
+      "text": "Product that has not undergone security evaluation"
+    },
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "Government agency performing product evaluations"
+    },
+    {
+      "id": "Product evaluation",
+      "type": "PROCESS",
+      "text": "Security assessment process performed by ACSC"
+    },
+    {
+      "id": "Security functionality",
+      "type": "CONCEPT",
+      "text": "Security features and capabilities of products"
+    },
+    {
+      "id": "Assurance",
+      "type": "CONCEPT",
+      "text": "Confidence in security functionality"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Evaluated product",
+      "to": "Security functionality",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Product evaluation",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "Product evaluation",
+      "to": "Assurance",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "Evaluated product",
+      "to": "Unevaluated product",
+      "type": "DIFFERS_FROM"
+    }
+  ]
+}

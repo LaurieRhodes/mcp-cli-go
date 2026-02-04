@@ -1,0 +1,147 @@
+{
+  "chunk_id": "CHUNK-023",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "Cyber Security Program",
+      "type": "PROCESS",
+      "text": "Organizational cyber security management system"
+    },
+    {
+      "id": "Cyber Security Policy",
+      "type": "CONCEPT",
+      "text": "Formal cyber security rules and guidelines"
+    },
+    {
+      "id": "Cyber Security Standards",
+      "type": "CONCEPT",
+      "text": "Technical and procedural standards"
+    },
+    {
+      "id": "Cyber Security Regulations",
+      "type": "CONCEPT",
+      "text": "Government-imposed cyber security rules"
+    },
+    {
+      "id": "Cyber Security Legislation",
+      "type": "CONCEPT",
+      "text": "Legal requirements for cyber security"
+    },
+    {
+      "id": "Chief Security Officer",
+      "type": "ACTOR",
+      "text": "Security leadership role"
+    },
+    {
+      "id": "Chief Information Officer",
+      "type": "ACTOR",
+      "text": "Information technology leadership role"
+    },
+    {
+      "id": "Senior Executives",
+      "type": "ACTOR",
+      "text": "High-level organizational leadership"
+    },
+    {
+      "id": "Cyber Security Measurement Metrics",
+      "type": "CONCEPT",
+      "text": "Quantitative measures for cyber security"
+    },
+    {
+      "id": "Key Performance Indicators",
+      "type": "CONCEPT",
+      "text": "Performance measurement indicators"
+    },
+    {
+      "id": "Cyber Threats",
+      "type": "CONCEPT",
+      "text": "Potential cyber attacks"
+    },
+    {
+      "id": "Business Opportunities",
+      "type": "CONCEPT",
+      "text": "Commercial growth possibilities"
+    },
+    {
+      "id": "Cyber Security Opportunities",
+      "type": "CONCEPT",
+      "text": "Cyber security improvement chances"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "Cyber Security Program",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber Security Policy",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber Security Standards",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber Security Regulations",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber Security Legislation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "CISO",
+      "to": "Chief Security Officer",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CISO",
+      "to": "Chief Information Officer",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CISO",
+      "to": "Senior Executives",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber Security Program",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber Security Measurement Metrics",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CISO",
+      "to": "Key Performance Indicators",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Cyber Security Program",
+      "to": "Cyber Threats",
+      "type": "ADDRESSES"
+    },
+    {
+      "from": "Cyber Security Program",
+      "to": "Business Opportunities",
+      "type": "HARNESSES"
+    },
+    {
+      "from": "Cyber Security Program",
+      "to": "Cyber Security Opportunities",
+      "type": "HARNESSES"
+    }
+  ]
+}

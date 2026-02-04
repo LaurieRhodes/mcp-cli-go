@@ -1,0 +1,127 @@
+{
+  "chunk_id": "CHUNK-293",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity selecting server applications"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Software providers demonstrating security commitments"
+    },
+    {
+      "id": "server applications",
+      "type": "CONCEPT",
+      "text": "Software being selected"
+    },
+    {
+      "id": "secure-by-design principles",
+      "type": "CONCEPT",
+      "text": "Security design approach"
+    },
+    {
+      "id": "secure-by-default principles",
+      "type": "CONCEPT",
+      "text": "Security configuration approach"
+    },
+    {
+      "id": "memory-safe programming languages",
+      "type": "CONCEPT",
+      "text": "Programming languages like C#, Go, Java, Ruby, Rust, Swift"
+    },
+    {
+      "id": "secure programming practices",
+      "type": "CONCEPT",
+      "text": "Development security practices"
+    },
+    {
+      "id": "product security maintenance",
+      "type": "PROCESS",
+      "text": "Ongoing security maintenance of products"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Software security flaws"
+    },
+    {
+      "id": "patches/updates",
+      "type": "PROCESS",
+      "text": "Security remediation activities"
+    },
+    {
+      "id": "ISM-1826",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "vendors",
+      "type": "SELECTS"
+    },
+    {
+      "from": "vendors",
+      "to": "server applications",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "vendors",
+      "to": "secure-by-design principles",
+      "type": "DEMONSTRATES"
+    },
+    {
+      "from": "vendors",
+      "to": "secure-by-default principles",
+      "type": "DEMONSTRATES"
+    },
+    {
+      "from": "vendors",
+      "to": "memory-safe programming languages",
+      "type": "USES"
+    },
+    {
+      "from": "vendors",
+      "to": "secure programming practices",
+      "type": "FOLLOWS"
+    },
+    {
+      "from": "vendors",
+      "to": "product security maintenance",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "vendors",
+      "to": "security vulnerabilities",
+      "type": "REDUCES"
+    },
+    {
+      "from": "secure-by-design principles",
+      "to": "security vulnerabilities",
+      "type": "REDUCES"
+    },
+    {
+      "from": "memory-safe programming languages",
+      "to": "security vulnerabilities",
+      "type": "REDUCES"
+    },
+    {
+      "from": "secure programming practices",
+      "to": "security vulnerabilities",
+      "type": "REDUCES"
+    },
+    {
+      "from": "vendors",
+      "to": "patches/updates",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "patches/updates",
+      "to": "security vulnerabilities",
+      "type": "REMEDIATES"
+    }
+  ]
+}

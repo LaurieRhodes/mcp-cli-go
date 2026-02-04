@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-225",
+  "entities": [
+    {
+      "id": "ICT equipment sanitisation processes",
+      "type": "PROCESS",
+      "text": "Processes for sanitising ICT equipment"
+    },
+    {
+      "id": "ICT equipment sanitisation procedures",
+      "type": "PROCESS",
+      "text": "Procedures supporting ICT equipment sanitisation"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity performing sanitisation activities"
+    },
+    {
+      "id": "ISM-0313 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring sanitisation processes"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "ICT equipment sanitisation processes",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "ICT equipment sanitisation processes",
+      "to": "ICT equipment sanitisation procedures",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "ISM-0313 control",
+      "to": "ICT equipment sanitisation processes",
+      "type": "REQUIRES"
+    }
+  ]
+}

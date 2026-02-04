@@ -1,0 +1,142 @@
+{
+  "chunk_id": "CHUNK-344",
+  "entities": [
+    {
+      "id": "development environments",
+      "type": "CONCEPT",
+      "text": "Environments where software development and modification occurs"
+    },
+    {
+      "id": "testing environments",
+      "type": "CONCEPT",
+      "text": "Environments where software testing is performed"
+    },
+    {
+      "id": "production environments",
+      "type": "CONCEPT",
+      "text": "Live operational environments running production software"
+    },
+    {
+      "id": "authoritative source for software",
+      "type": "CONCEPT",
+      "text": "Protected source repository for software code"
+    },
+    {
+      "id": "malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful code designed to compromise systems"
+    },
+    {
+      "id": "faulty code",
+      "type": "CONCEPT",
+      "text": "Defective code that may cause system failures"
+    },
+    {
+      "id": "software",
+      "type": "CONCEPT",
+      "text": "Computer programs and applications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "development environments",
+      "to": "testing environments",
+      "type": "SEGREGATED_FROM"
+    },
+    {
+      "from": "testing environments",
+      "to": "production environments",
+      "type": "SEGREGATED_FROM"
+    },
+    {
+      "from": "testing environments",
+      "to": "production environments",
+      "type": "SEGREGATED_FROM"
+    },
+    {
+      "from": "production environments",
+      "to": "development environments",
+      "type": "DATA_FLOW_RESTRICTED_TO"
+    },
+    {
+      "from": "development environments",
+      "to": "production environments",
+      "type": "DATA_FLOW_RESTRICTED_TO"
+    },
+    {
+      "from": "production environments",
+      "to": "testing environments",
+      "type": "DATA_FLOW_RESTRICTED_TO"
+    },
+    {
+      "from": "production environments",
+      "to": "development environments",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "development environments",
+      "to": "testing environments",
+      "type": "DEVELOPS_MODIFIES"
+    },
+    {
+      "from": "production environments",
+      "to": "development environments",
+      "type": "LIMITS_SPREAD_OF"
+    },
+    {
+      "from": "testing environments",
+      "to": "production environments",
+      "type": "MINIMIZES_LIKELIHOOD_OF"
+    },
+    {
+      "from": "authoritative source for software",
+      "to": "software",
+      "type": "PREVENTS_INTRODUCTION_OF"
+    },
+    {
+      "from": "software",
+      "to": "software",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "development environments",
+      "to": "software",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "software",
+      "to": "software",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "segregation",
+      "to": "malicious code",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "malicious code",
+      "to": "faulty code",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "segregation",
+      "to": "malicious code",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "faulty code",
+      "to": "faulty code",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "authoritative source protection",
+      "to": "malicious code",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "malicious code",
+      "to": "malicious code",
+      "type": "RELATED_TO"
+    }
+  ]
+}

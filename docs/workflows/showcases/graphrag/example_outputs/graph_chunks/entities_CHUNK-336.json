@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-336",
+  "entities": [
+    {
+      "id": "National Archives of Australia",
+      "type": "ACTOR",
+      "text": "Australian government agency for digital preservation and data retention"
+    },
+    {
+      "id": "Office of the Australian Information Commissioner",
+      "type": "ACTOR",
+      "text": "Australian privacy regulatory body"
+    },
+    {
+      "id": "Chief Information Security Officer",
+      "type": "ACTOR",
+      "text": "Security leadership role"
+    },
+    {
+      "id": "digital preservation planning",
+      "type": "PROCESS",
+      "text": "Process for preserving digital information"
+    },
+    {
+      "id": "data retention",
+      "type": "PROCESS",
+      "text": "Process of retaining data over time"
+    },
+    {
+      "id": "collection of personal information",
+      "type": "PROCESS",
+      "text": "Process of gathering personal data"
+    },
+    {
+      "id": "retention of personal information",
+      "type": "PROCESS",
+      "text": "Process of keeping personal data"
+    },
+    {
+      "id": "business continuity planning",
+      "type": "PROCESS",
+      "text": "Process for maintaining business operations"
+    },
+    {
+      "id": "disaster recovery planning",
+      "type": "PROCESS",
+      "text": "Process for recovering from disasters"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "National Archives of Australia",
+      "to": "digital preservation planning",
+      "type": "DEFINES"
+    },
+    {
+      "from": "National Archives of Australia",
+      "to": "data retention",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Office of the Australian Information Commissioner",
+      "to": "collection of personal information",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Office of the Australian Information Commissioner",
+      "to": "retention of personal information",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Chief Information Security Officer",
+      "to": "business continuity planning",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Chief Information Security Officer",
+      "to": "disaster recovery planning",
+      "type": "DEFINES"
+    }
+  ]
+}

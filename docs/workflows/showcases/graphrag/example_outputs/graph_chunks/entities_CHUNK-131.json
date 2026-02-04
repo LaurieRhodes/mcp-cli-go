@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-131",
+  "entities": [
+    {
+      "id": "TOP SECRET area",
+      "type": "CONCEPT",
+      "text": "High-security classified area"
+    },
+    {
+      "id": "Lower classified area",
+      "type": "CONCEPT",
+      "text": "Area with lower security classification"
+    },
+    {
+      "id": "TOP SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables carrying TOP SECRET information"
+    },
+    {
+      "id": "Conduit",
+      "type": "CONCEPT",
+      "text": "Protective casing for cables"
+    },
+    {
+      "id": "Sealing compound",
+      "type": "CONCEPT",
+      "text": "Material used to fill gaps"
+    },
+    {
+      "id": "Wall penetrations",
+      "type": "PROCESS",
+      "text": "The act of passing through walls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TOP SECRET area",
+      "to": "Lower classified area",
+      "type": "DEFINES"
+    },
+    {
+      "from": "TOP SECRET cables",
+      "to": "Conduit",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Conduit",
+      "to": "Sealing compound",
+      "type": "REQUIRES"
+    }
+  ]
+}

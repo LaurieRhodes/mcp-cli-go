@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-108",
+  "entities": [
+    {
+      "id": "common controls",
+      "type": "CONCEPT",
+      "text": "Existing security controls"
+    },
+    {
+      "id": "additional controls",
+      "type": "CONCEPT",
+      "text": "Supplementary security measures"
+    },
+    {
+      "id": "shared facilities",
+      "type": "CONCEPT",
+      "text": "Areas used by multiple tenants"
+    },
+    {
+      "id": "single floor",
+      "type": "CONCEPT",
+      "text": "A specific level in a building"
+    },
+    {
+      "id": "part of a floor",
+      "type": "CONCEPT",
+      "text": "Portion of a building level"
+    },
+    {
+      "id": "multi-tenanted building",
+      "type": "CONCEPT",
+      "text": "Building with multiple occupants"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "section",
+      "to": "additional controls",
+      "type": "DEFINES"
+    },
+    {
+      "from": "additional controls",
+      "to": "shared facilities",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "shared facilities",
+      "to": "single floor",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "shared facilities",
+      "to": "part of a floor",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "shared facilities",
+      "to": "multi-tenanted building",
+      "type": "LOCATED_IN"
+    }
+  ]
+}

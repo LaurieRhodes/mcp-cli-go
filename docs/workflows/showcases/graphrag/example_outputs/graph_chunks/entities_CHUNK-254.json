@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-254",
+  "entities": [
+    {
+      "id": "EPROM",
+      "type": "CONCEPT",
+      "text": "Non-volatile erasable programmable read-only memory"
+    },
+    {
+      "id": "Sanitisation process",
+      "type": "PROCESS",
+      "text": "Process for cleaning media"
+    },
+    {
+      "id": "Manufacturer's specification",
+      "type": "CONCEPT",
+      "text": "Manufacturer's specified parameters"
+    },
+    {
+      "id": "Ultraviolet erasure time",
+      "type": "CONCEPT",
+      "text": "Time required for UV erasure"
+    },
+    {
+      "id": "ISM-0357 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control for media sanitisation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "EPROM",
+      "to": "Sanitisation process",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Sanitisation process",
+      "to": "Manufacturer's specification",
+      "type": "USES"
+    },
+    {
+      "from": "Sanitisation process",
+      "to": "Ultraviolet erasure time",
+      "type": "APPLIES"
+    },
+    {
+      "from": "Sanitisation process",
+      "to": "ISM-0357 control",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-009",
+  "entities": [
+    {
+      "id": "Controls",
+      "type": "CONCEPT",
+      "text": "Security controls for risk mitigation"
+    },
+    {
+      "id": "ACSC",
+      "type": "ORGANIZATION",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "System",
+      "type": "SYSTEM",
+      "text": "System being secured"
+    },
+    {
+      "id": "Organisation",
+      "type": "ORGANIZATION",
+      "text": "Organization implementing controls"
+    },
+    {
+      "id": "Authorising officer",
+      "type": "ROLE",
+      "text": "Person approving control selection"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Select controls",
+      "to": "Select controls",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "Select controls",
+      "to": "Select controls",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "Select controls",
+      "to": "Select controls",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "Select controls",
+      "to": "Select controls",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "Select controls",
+      "to": "Select controls",
+      "type": "MENTIONED_IN"
+    }
+  ]
+}

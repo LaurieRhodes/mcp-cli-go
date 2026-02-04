@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-060",
+  "entities": [
+    {
+      "id": "Managed service providers",
+      "type": "ORGANIZATION",
+      "text": "Organizations that manage services on behalf of other organizations"
+    },
+    {
+      "id": "Managed service register",
+      "type": "DOCUMENT",
+      "text": "Register of managed services maintained by organizations"
+    },
+    {
+      "id": "ISM-1736",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for managed service register"
+    },
+    {
+      "id": "ISM-1737",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for managed service register content"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Managed services",
+      "to": "Managed services",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Managed services",
+      "to": "Managed services",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM",
+      "to": "ISM",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM",
+      "to": "ISM",
+      "type": "DEFINES"
+    }
+  ]
+}

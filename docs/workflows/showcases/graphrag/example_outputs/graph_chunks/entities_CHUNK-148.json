@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-148",
+  "entities": [
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Emanation Security Program",
+      "type": "PROGRAM",
+      "text": "Security program for emanation protection"
+    },
+    {
+      "id": "Certified emanation security providers",
+      "type": "ACTOR",
+      "text": "Organizations certified for emanation security services"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ACSC",
+      "to": "Emanation Security Program",
+      "type": "OPERATES"
+    },
+    {
+      "from": "Emanation Security Program",
+      "to": "Certified emanation security providers",
+      "type": "CERTIFIES"
+    }
+  ]
+}

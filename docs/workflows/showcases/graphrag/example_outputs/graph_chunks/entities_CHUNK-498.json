@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-498",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "An entity implementing network security measures"
+    },
+    {
+      "id": "public network infrastructure",
+      "type": "INFRASTRUCTURE",
+      "text": "External network infrastructure accessible to the public"
+    },
+    {
+      "id": "firewalls",
+      "type": "TECHNOLOGY",
+      "text": "Security devices that filter network traffic"
+    },
+    {
+      "id": "gateways",
+      "type": "PROCESS",
+      "text": "Connection points between different networks"
+    },
+    {
+      "id": "networks",
+      "type": "SYSTEM",
+      "text": "Interconnected systems for data communication"
+    },
+    {
+      "id": "security domains",
+      "type": "CONCEPT",
+      "text": "Areas with different security requirements"
+    },
+    {
+      "id": "encryption",
+      "type": "TECHNOLOGY",
+      "text": "Method to protect data confidentiality during transmission"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "organisation",
+      "type": "organisation"
+    },
+    {
+      "from": "firewalls",
+      "to": "gateways",
+      "type": "public network infrastructure"
+    }
+  ]
+}

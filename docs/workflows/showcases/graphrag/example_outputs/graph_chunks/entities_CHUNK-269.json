@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-269",
+  "entities": [
+    {
+      "id": "Accountable Material Media",
+      "type": "CONCEPT",
+      "text": "Media storing classified/accountable information"
+    },
+    {
+      "id": "Non-Accountable Material Media",
+      "type": "CONCEPT",
+      "text": "Media storing non-classified information"
+    },
+    {
+      "id": "NAID AAA Certified Destruction Service",
+      "type": "ACTOR",
+      "text": "Certified destruction service provider"
+    },
+    {
+      "id": "ASIO Protective Security Circular-167",
+      "type": "PROCESS",
+      "text": "Security policy document"
+    },
+    {
+      "id": "ISM-0839",
+      "type": "PROCESS",
+      "text": "Security control for accountable material"
+    },
+    {
+      "id": "ISM-0840",
+      "type": "PROCESS",
+      "text": "Security control for non-accountable material"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Accountable Material Media",
+      "to": "Non-Accountable Material Media",
+      "type": "NAID AAA Certified Destruction Service"
+    },
+    {
+      "from": "Non-Accountable Material Media",
+      "to": "NAID AAA Certified Destruction Service",
+      "type": "ASIO Protective Security Circular-167"
+    }
+  ]
+}

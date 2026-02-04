@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-472",
+  "entities": [
+    {
+      "id": "IPsec",
+      "type": "CONCEPT",
+      "text": "Network security protocol suite"
+    },
+    {
+      "id": "Tunnel mode",
+      "type": "PROCESS",
+      "text": "IPsec operation mode with full encapsulation"
+    },
+    {
+      "id": "Transport mode",
+      "type": "PROCESS",
+      "text": "IPsec operation mode with payload-only encapsulation"
+    },
+    {
+      "id": "ISM-0494",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for IPsec"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "IPsec",
+      "to": "Tunnel mode",
+      "type": "DEFINES"
+    },
+    {
+      "from": "IPsec",
+      "to": "Transport mode",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Tunnel mode",
+      "to": "Transport mode",
+      "type": "PREFERRED_OVER"
+    },
+    {
+      "from": "ISM-0494",
+      "to": "IPsec",
+      "type": "GOVERNS"
+    }
+  ]
+}

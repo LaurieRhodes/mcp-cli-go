@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-410",
+  "entities": [
+    {
+      "id": "public wireless network",
+      "type": "CONCEPT",
+      "text": "Wireless network provided for general public use"
+    },
+    {
+      "id": "organisation networks",
+      "type": "CONCEPT",
+      "text": "Internal networks belonging to an organization"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor targeting networks"
+    },
+    {
+      "id": "segregation",
+      "type": "PROCESS",
+      "text": "Separation/isolation process"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "public wireless network",
+      "to": "public wireless network",
+      "type": "CONNECTING_TO"
+    },
+    {
+      "from": "organisation networks",
+      "to": "segregation",
+      "type": "REQUIRES"
+    }
+  ]
+}

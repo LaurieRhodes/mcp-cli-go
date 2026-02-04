@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-297",
+  "entities": [
+    {
+      "id": "Microsoft AD DS domain controllers",
+      "type": "CONCEPT",
+      "text": "Servers holding sensitive data including hashed credentials"
+    },
+    {
+      "id": "Dedicated domain administrator user accounts",
+      "type": "ACTOR",
+      "text": "Accounts used exclusively for domain controller administration"
+    },
+    {
+      "id": "Security-related events",
+      "type": "CONCEPT",
+      "text": "Events for monitoring security posture and detecting malicious behavior"
+    },
+    {
+      "id": "Microsoft AD DS event logs",
+      "type": "CONCEPT",
+      "text": "Logs that should be captured and stored centrally"
+    },
+    {
+      "id": "Print Spooler service",
+      "type": "PROCESS",
+      "text": "Service that should be disabled on domain controllers"
+    },
+    {
+      "id": "Group Policy Preferences",
+      "type": "PROCESS",
+      "text": "Where passwords and cpasswords should not be used"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Microsoft AD DS domain controllers",
+      "to": "Microsoft AD DS domain controllers",
+      "type": "Security-related events"
+    },
+    {
+      "from": "Dedicated domain administrator user accounts",
+      "to": "Security-related events",
+      "type": "Microsoft AD DS event logs"
+    }
+  ]
+}

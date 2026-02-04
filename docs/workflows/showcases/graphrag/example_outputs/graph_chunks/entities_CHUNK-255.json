@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-255",
+  "entities": [
+    {
+      "id": "non-volatile EEPROM media",
+      "type": "CONCEPT",
+      "text": "Non-volatile electrically erasable programmable read-only memory media"
+    },
+    {
+      "id": "overwrite",
+      "type": "PROCESS",
+      "text": "Process of writing data over existing data"
+    },
+    {
+      "id": "random pattern",
+      "type": "CONCEPT",
+      "text": "Random data pattern used for sanitization"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "non-volatile EEPROM media",
+      "to": "overwrite",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "overwrite",
+      "to": "random pattern",
+      "type": "USES"
+    }
+  ]
+}

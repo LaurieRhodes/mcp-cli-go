@@ -1,0 +1,137 @@
+{
+  "chunk_id": "CHUNK-345",
+  "entities": [
+    {
+      "id": "secure-by-design",
+      "type": "CONCEPT",
+      "text": "Security design principle"
+    },
+    {
+      "id": "secure-by-default",
+      "type": "CONCEPT",
+      "text": "Security default principle"
+    },
+    {
+      "id": "memory-safe programming languages",
+      "type": "CONCEPT",
+      "text": "Languages like C#, Go, Java, Ruby, Rust, Swift"
+    },
+    {
+      "id": "secure programming practices",
+      "type": "CONCEPT",
+      "text": "Secure coding practices"
+    },
+    {
+      "id": "agile software development",
+      "type": "PROCESS",
+      "text": "Agile development methodology"
+    },
+    {
+      "id": "threat modelling",
+      "type": "PROCESS",
+      "text": "Threat analysis process"
+    },
+    {
+      "id": "application development",
+      "type": "PROCESS",
+      "text": "Software creation process"
+    },
+    {
+      "id": "software supply chain security",
+      "type": "CONCEPT",
+      "text": "Supply chain security activities"
+    },
+    {
+      "id": "SecDevOps",
+      "type": "PROCESS",
+      "text": "Security-focused DevOps"
+    },
+    {
+      "id": "digital signing",
+      "type": "PROCESS",
+      "text": "Digital signature process"
+    },
+    {
+      "id": "cryptographic checksums",
+      "type": "PROCESS",
+      "text": "Cryptographic verification"
+    },
+    {
+      "id": "secure configuration guidance",
+      "type": "PROCESS",
+      "text": "Secure setup documentation"
+    },
+    {
+      "id": "executable content",
+      "type": "CONCEPT",
+      "text": "Executable files"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "secure-by-design",
+      "to": "application development",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "secure-by-default",
+      "to": "application development",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "memory-safe programming languages",
+      "to": "application development",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "secure programming practices",
+      "to": "application development",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "agile software development",
+      "to": "application development",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "threat modelling",
+      "to": "application development",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "application development",
+      "to": "software supply chain security",
+      "type": "ASSISTS"
+    },
+    {
+      "from": "application development",
+      "to": "SecDevOps",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "application development",
+      "to": "digital signing",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "application development",
+      "to": "cryptographic checksums",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "application development",
+      "to": "secure configuration guidance",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "application development",
+      "to": "digital signing",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "executable content",
+      "to": "digital signing",
+      "type": "REQUIRES"
+    }
+  ]
+}

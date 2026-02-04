@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-485",
+  "entities": [
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "Human users who need authentication"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "ACTOR",
+      "text": "Information and communications technology devices"
+    },
+    {
+      "id": "networks",
+      "type": "CONCEPT",
+      "text": "Computer networks accessed via gateways"
+    },
+    {
+      "id": "gateways",
+      "type": "CONCEPT",
+      "text": "Network access points or interfaces"
+    },
+    {
+      "id": "authentication",
+      "type": "PROCESS",
+      "text": "Verification process for access control"
+    },
+    {
+      "id": "unauthorised access",
+      "type": "CONCEPT",
+      "text": "Security risk being mitigated"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "users",
+      "to": "authentication",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "authentication",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "authentication",
+      "to": "networks",
+      "type": "DEFINES"
+    },
+    {
+      "from": "authentication",
+      "to": "gateways",
+      "type": "DEFINES"
+    },
+    {
+      "from": "authentication",
+      "to": "unauthorised access",
+      "type": "DEFINES"
+    }
+  ]
+}

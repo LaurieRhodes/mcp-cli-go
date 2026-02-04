@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-253",
+  "entities": [
+    {
+      "id": "Non-volatile magnetic media",
+      "type": "CONCEPT",
+      "text": "Physical storage media"
+    },
+    {
+      "id": "Sanitisation processes",
+      "type": "PROCESS",
+      "text": "Security procedures for data removal"
+    },
+    {
+      "id": "SECRET classification",
+      "type": "CLASSIFICATION",
+      "text": "Security classification level"
+    },
+    {
+      "id": "TOP SECRET classification",
+      "type": "CLASSIFICATION",
+      "text": "Higher security classification level"
+    },
+    {
+      "id": "ISM-0356 control",
+      "type": "CONTROL",
+      "text": "Security control standard"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Non-volatile magnetic media",
+      "to": "Sanitisation processes",
+      "type": "UNDERGOES"
+    },
+    {
+      "from": "SECRET classification",
+      "to": "Non-volatile magnetic media",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "TOP SECRET classification",
+      "to": "Non-volatile magnetic media",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "ISM-0356 control",
+      "to": "Sanitisation processes",
+      "type": "GOVERNS"
+    }
+  ]
+}

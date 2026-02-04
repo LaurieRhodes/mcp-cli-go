@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-322",
+  "entities": [
+    {
+      "id": "administrative infrastructure",
+      "type": "CONCEPT",
+      "text": "Segregated network infrastructure for administration"
+    },
+    {
+      "id": "jump server",
+      "type": "CONCEPT",
+      "text": "Server used as intermediary for administrative access"
+    },
+    {
+      "id": "network management traffic",
+      "type": "CONCEPT",
+      "text": "Traffic related to network administration and management"
+    },
+    {
+      "id": "critical servers",
+      "type": "ASSET",
+      "text": "Servers with critical business functions"
+    },
+    {
+      "id": "high-value servers",
+      "type": "ASSET",
+      "text": "Servers with high business value"
+    },
+    {
+      "id": "regular servers",
+      "type": "ASSET",
+      "text": "Standard operational servers"
+    },
+    {
+      "id": "multi-factor authentication",
+      "type": "PROCESS",
+      "text": "Authentication requiring multiple verification methods"
+    },
+    {
+      "id": "administrative tools",
+      "type": "TOOL",
+      "text": "Software and utilities for system administration"
+    },
+    {
+      "id": "logging",
+      "type": "PROCESS",
+      "text": "Recording of system events and activities"
+    },
+    {
+      "id": "monitoring",
+      "type": "PROCESS",
+      "text": "Ongoing observation of system operations"
+    },
+    {
+      "id": "alerting",
+      "type": "PROCESS",
+      "text": "Notification of security events or issues"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "administrative infrastructure",
+      "to": "jump server",
+      "type": "administrative infrastructure"
+    },
+    {
+      "from": "jump server",
+      "to": "network management traffic",
+      "type": "critical servers"
+    }
+  ]
+}

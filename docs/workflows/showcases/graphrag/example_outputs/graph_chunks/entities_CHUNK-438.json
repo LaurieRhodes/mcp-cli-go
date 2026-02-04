@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-438",
+  "entities": [
+    {
+      "id": "encryption key",
+      "type": "CONCEPT",
+      "text": "A cryptographic key used for encrypting and decrypting data"
+    },
+    {
+      "id": "cryptographic equipment and software",
+      "type": "CONCEPT",
+      "text": "Tools and programs that implement cryptographic functions"
+    },
+    {
+      "id": "data recovery",
+      "type": "PROCESS",
+      "text": "The process of restoring access to encrypted data when keys are unavailable"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "encryption key",
+      "to": "cryptographic equipment and software",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "cryptographic equipment and software",
+      "to": "data recovery",
+      "type": "PROVIDES"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-133",
+  "entities": [
+    {
+      "id": "Wall outlet boxes",
+      "type": "CONCEPT",
+      "text": "Physical infrastructure boxes for network connections"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and communications technology devices"
+    },
+    {
+      "id": "Cables",
+      "type": "CONCEPT",
+      "text": "Physical wiring connections between systems"
+    },
+    {
+      "id": "Systems",
+      "type": "CONCEPT",
+      "text": "Logical groupings of related ICT components"
+    },
+    {
+      "id": "Connectors",
+      "type": "CONCEPT",
+      "text": "Physical interface points for cable connections"
+    },
+    {
+      "id": "ISM-1095",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for labelling requirements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Wall outlet boxes",
+      "to": "Wall outlet boxes",
+      "type": "Cables"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "Cables",
+      "type": "Systems"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-399",
+  "entities": [
+    {
+      "id": "Simple Network Management Protocol",
+      "type": "CONCEPT",
+      "text": "Protocol for monitoring network device status"
+    },
+    {
+      "id": "SNMP version 1",
+      "type": "CONCEPT",
+      "text": "Insecure SNMP version with trivial authentication"
+    },
+    {
+      "id": "SNMP version 2",
+      "type": "CONCEPT",
+      "text": "Insecure SNMP version with trivial authentication"
+    },
+    {
+      "id": "SNMP community strings",
+      "type": "CONCEPT",
+      "text": "Authentication strings used in SNMP"
+    },
+    {
+      "id": "network devices",
+      "type": "DEVICE",
+      "text": "Hardware components in a network"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Simple Network Management Protocol",
+      "to": "Simple Network Management Protocol",
+      "type": "HAS_VERSION"
+    },
+    {
+      "from": "SNMP version 1",
+      "to": "SNMP version 2",
+      "type": "HAS_VERSION"
+    }
+  ]
+}

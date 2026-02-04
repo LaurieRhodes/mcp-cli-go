@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-144",
+  "entities": [
+    {
+      "id": "Australian Cyber Security Centre",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre - Government cybersecurity agency"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "ACSC - Australian Cyber Security Centre"
+    },
+    {
+      "id": "SECRET systems",
+      "type": "CONCEPT",
+      "text": "SECRET classified systems"
+    },
+    {
+      "id": "TOP SECRET systems",
+      "type": "CONCEPT",
+      "text": "TOP SECRET classified systems"
+    },
+    {
+      "id": "OFFICIAL systems",
+      "type": "CONCEPT",
+      "text": "OFFICIAL classified systems"
+    },
+    {
+      "id": "PROTECTED systems",
+      "type": "CONCEPT",
+      "text": "PROTECTED classified systems"
+    },
+    {
+      "id": "Radio Frequency transmitters",
+      "type": "CONCEPT",
+      "text": "Radio Frequency transmitting devices"
+    },
+    {
+      "id": "shared facilities",
+      "type": "CONCEPT",
+      "text": "Shared facility environments"
+    },
+    {
+      "id": "system owners",
+      "type": "ACTOR",
+      "text": "System owners responsible for deployment"
+    },
+    {
+      "id": "emanation security threat assessment",
+      "type": "PROCESS",
+      "text": "Emanation security threat assessment process"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Cyber Security Centre",
+      "to": "system owners",
+      "type": "system owners"
+    },
+    {
+      "from": "ACSC",
+      "to": "Australian Cyber Security Centre",
+      "type": "SECRET systems"
+    }
+  ]
+}

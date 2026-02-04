@@ -1,0 +1,25 @@
+$schema: "workflow/v2.0"
+name: query_graphrag_simple
+version: 1.0.0
+description: Query the GraphRAG knowledge graph with a question
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  timeout: 2m
+
+steps:
+  - name: search_graph
+    skills: [python-context-builder]
+    max_iterations: 2
+    run: |
+      Question: {{input.question}}
+      
+      Search the knowledge graph and return relevant entities and chunks.
+      
+      Call skills_run_helper_script tool:
+      {
+        "skill_name": "python-context-builder",
+        "script_name": "query_graphrag.py",
+        "args": ["{{input.question}}", "10", "2"]
+      }

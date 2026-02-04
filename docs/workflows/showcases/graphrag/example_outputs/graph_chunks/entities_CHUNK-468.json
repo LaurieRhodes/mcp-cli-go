@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-468",
+  "entities": [
+    {
+      "id": "OpenSSH configuration",
+      "type": "CONCEPT",
+      "text": "Configuration process for OpenSSH software"
+    },
+    {
+      "id": "OpenSSH project",
+      "type": "ACTOR",
+      "text": "Organization that develops OpenSSH"
+    },
+    {
+      "id": "Information access",
+      "type": "PROCESS",
+      "text": "Process of obtaining information about OpenSSH configuration"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "OpenSSH project",
+      "to": "OpenSSH configuration",
+      "type": "DEFINES"
+    },
+    {
+      "from": "OpenSSH configuration",
+      "to": "Information access",
+      "type": "REQUIRES"
+    }
+  ]
+}

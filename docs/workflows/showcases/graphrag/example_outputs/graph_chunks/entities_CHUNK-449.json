@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-449",
+  "entities": [
+    {
+      "id": "elliptic curve algorithm",
+      "type": "CONCEPT",
+      "text": "Cryptographic algorithm using elliptic curves"
+    },
+    {
+      "id": "FIPS 186-4",
+      "type": "STANDARD",
+      "text": "Federal Information Processing Standard for digital signatures"
+    },
+    {
+      "id": "elliptic curve cryptography",
+      "type": "TECHNIQUE",
+      "text": "Cryptographic technique based on elliptic curve mathematics"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "elliptic curve algorithm",
+      "to": "elliptic curve cryptography",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "FIPS 186-4",
+      "to": "elliptic curve algorithm",
+      "type": "IMPLEMENTS"
+    }
+  ]
+}

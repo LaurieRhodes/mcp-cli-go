@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-423",
+  "entities": [
+    {
+      "id": "denial-of-service attack",
+      "type": "CONCEPT",
+      "text": "Type of cyber attack that disrupts service availability"
+    },
+    {
+      "id": "management frames",
+      "type": "CONCEPT",
+      "text": "Wireless network control packets used for network management"
+    },
+    {
+      "id": "802.11 standard",
+      "type": "CONCEPT",
+      "text": "Original wireless networking standard"
+    },
+    {
+      "id": "802.11w amendment",
+      "type": "CONCEPT",
+      "text": "Security amendment for protecting management frames"
+    },
+    {
+      "id": "WPA2",
+      "type": "CONCEPT",
+      "text": "Wi-Fi Protected Access 2 security protocol"
+    },
+    {
+      "id": "WPA3",
+      "type": "CONCEPT",
+      "text": "Wi-Fi Protected Access 3 security protocol"
+    },
+    {
+      "id": "wireless access points",
+      "type": "DEVICE",
+      "text": "Network devices that provide wireless connectivity"
+    },
+    {
+      "id": "ISM-1335",
+      "type": "CONTROL",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "denial-of-service attack",
+      "to": "management frames",
+      "type": "EXPLOITS"
+    },
+    {
+      "from": "802.11 standard",
+      "to": "management frames",
+      "type": "LACKS_PROTECTION_FOR"
+    },
+    {
+      "from": "802.11w amendment",
+      "to": "management frames",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "802.11w amendment",
+      "to": "WPA2",
+      "type": "SHOULD_BE_ENABLED_FOR"
+    },
+    {
+      "from": "WPA3",
+      "to": "802.11w amendment",
+      "type": "BUILT_INTO"
+    },
+    {
+      "from": "wireless access points",
+      "to": "802.11w amendment",
+      "type": "ENABLE_USE_OF"
+    },
+    {
+      "from": "ISM-1335",
+      "to": "802.11w amendment",
+      "type": "REQUIRES"
+    }
+  ]
+}

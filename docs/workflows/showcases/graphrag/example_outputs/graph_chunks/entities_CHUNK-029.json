@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-029",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "Vendor Management Processes",
+      "type": "PROCESS",
+      "text": "Processes for managing vendor relationships"
+    },
+    {
+      "id": "Cyber Supply Chain Risk Management",
+      "type": "PROCESS",
+      "text": "Management of risks in cyber supply chain"
+    },
+    {
+      "id": "Supplier Relationships",
+      "type": "CONCEPT",
+      "text": "Relationships with external suppliers"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Organizational staff members"
+    },
+    {
+      "id": "ISM-0731 Control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual Control 0731"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "Vendor Management Processes",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber Supply Chain Risk Management",
+      "type": "OVERSEES"
+    },
+    {
+      "from": "CISO",
+      "to": "Personnel",
+      "type": "ASSISTS"
+    },
+    {
+      "from": "Supplier Relationships",
+      "to": "Security Risks",
+      "type": "CREATES"
+    }
+  ]
+}

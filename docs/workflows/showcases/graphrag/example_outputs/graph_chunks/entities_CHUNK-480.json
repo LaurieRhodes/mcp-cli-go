@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-480",
+  "entities": [
+    {
+      "id": "PFS",
+      "type": "CONCEPT",
+      "text": "Perfect Forward Secrecy"
+    },
+    {
+      "id": "Security Association",
+      "type": "CONCEPT",
+      "text": "Security association between network entities"
+    },
+    {
+      "id": "ISM-1000",
+      "type": "CONTROL",
+      "text": "Information Security Manual Control 1000"
+    },
+    {
+      "id": "IPsec",
+      "type": "PROTOCOL",
+      "text": "Internet Protocol Security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "PFS",
+      "to": "PFS",
+      "type": "REDUCES_IMPACT"
+    },
+    {
+      "from": "Security Association",
+      "to": "IPsec",
+      "type": "USED_FOR"
+    }
+  ]
+}

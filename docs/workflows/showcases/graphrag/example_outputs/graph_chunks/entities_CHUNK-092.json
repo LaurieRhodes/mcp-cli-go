@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-092",
+  "entities": [
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "People who send and receive files"
+    },
+    {
+      "id": "unauthorised online services",
+      "type": "CONCEPT",
+      "text": "Messaging apps, social media that are not approved"
+    },
+    {
+      "id": "authorised online services",
+      "type": "CONCEPT",
+      "text": "Approved online services for file transfer"
+    },
+    {
+      "id": "malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful software that can compromise systems"
+    },
+    {
+      "id": "controls",
+      "type": "PROCESS",
+      "text": "Detection and quarantine mechanisms for security"
+    },
+    {
+      "id": "ISM-0824",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control 0824"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "personnel",
+      "to": "unauthorised online services",
+      "type": "personnel"
+    },
+    {
+      "from": "unauthorised online services",
+      "to": "controls",
+      "type": "authorised online services"
+    }
+  ]
+}

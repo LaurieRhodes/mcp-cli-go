@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-240",
+  "entities": [
+    {
+      "id": "Media",
+      "type": "CONCEPT",
+      "text": "Physical or digital storage devices requiring labeling"
+    },
+    {
+      "id": "Protective markings",
+      "type": "CONCEPT",
+      "text": "Labels indicating sensitivity or classification level"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Staff members responsible for handling media"
+    },
+    {
+      "id": "Marking scheme",
+      "type": "PROCESS",
+      "text": "System for applying protective markings to media"
+    },
+    {
+      "id": "ISM-0332",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Media",
+      "to": "Protective markings",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Personnel",
+      "to": "Marking scheme",
+      "type": "REQUIRES"
+    }
+  ]
+}

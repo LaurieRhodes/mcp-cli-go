@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-221",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and communications technology equipment"
+    },
+    {
+      "id": "cleared technician",
+      "type": "ACTOR",
+      "text": "Personnel with appropriate security clearance"
+    },
+    {
+      "id": "uncleared technician",
+      "type": "ACTOR",
+      "text": "Personnel without security clearance"
+    },
+    {
+      "id": "maintenance",
+      "type": "PROCESS",
+      "text": "Maintenance activities on ICT equipment"
+    },
+    {
+      "id": "repairs",
+      "type": "PROCESS",
+      "text": "Repair activities on ICT equipment"
+    },
+    {
+      "id": "data protection",
+      "type": "CONCEPT",
+      "text": "Protection of sensitive data during maintenance"
+    },
+    {
+      "id": "escort requirement",
+      "type": "REQUIREMENT",
+      "text": "Requirement for cleared personnel to escort uncleared technicians"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of removing sensitive data from ICT equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "ICT equipment",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "cleared technician",
+      "to": "uncleared technician",
+      "type": "REQUIRES"
+    }
+  ]
+}

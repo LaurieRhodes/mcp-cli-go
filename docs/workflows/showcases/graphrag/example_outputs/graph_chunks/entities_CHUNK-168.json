@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-168",
+  "entities": [
+    {
+      "id": "Fax machines",
+      "type": "CONCEPT",
+      "text": "Physical devices that can transmit documents"
+    },
+    {
+      "id": "Multifunction devices (MFDs)",
+      "type": "CONCEPT",
+      "text": "Devices combining printing, scanning, faxing capabilities"
+    },
+    {
+      "id": "Cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security breaches or attacks"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "The entity responsible for policy development"
+    },
+    {
+      "id": "Policy",
+      "type": "PROCESS",
+      "text": "Formal rules and guidelines"
+    },
+    {
+      "id": "ISM-0588",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Fax machines",
+      "to": "Multifunction devices (MFDs)",
+      "type": "Organisation"
+    },
+    {
+      "from": "Cyber security incidents",
+      "to": "Cyber security incidents",
+      "type": "Policy"
+    }
+  ]
+}

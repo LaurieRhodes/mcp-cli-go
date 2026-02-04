@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-156",
+  "entities": [
+    {
+      "id": "Internet Protocol telephony",
+      "type": "CONCEPT",
+      "text": "Communication technology using IP networks"
+    },
+    {
+      "id": "telephone systems",
+      "type": "CONCEPT",
+      "text": "Traditional communication systems"
+    },
+    {
+      "id": "controls",
+      "type": "PROCESS",
+      "text": "Regulatory or security requirements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Internet Protocol telephony",
+      "to": "Internet Protocol telephony",
+      "type": "EXTENDS"
+    },
+    {
+      "from": "telephone systems",
+      "to": "controls",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

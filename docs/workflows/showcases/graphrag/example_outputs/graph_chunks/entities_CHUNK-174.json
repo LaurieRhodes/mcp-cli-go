@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-174",
+  "entities": [
+    {
+      "id": "MFD event logs",
+      "type": "CONCEPT",
+      "text": "Security logging mechanism for multifunction devices"
+    },
+    {
+      "id": "Shadow copies",
+      "type": "CONCEPT",
+      "text": "Document copies captured for auditing purposes"
+    },
+    {
+      "id": "ISM-1855",
+      "type": "CONCEPT",
+      "text": "Security control requiring MFD use logging"
+    },
+    {
+      "id": "ISM-1856",
+      "type": "CONCEPT",
+      "text": "Security control requiring central log storage"
+    },
+    {
+      "id": "Central storage",
+      "type": "CONCEPT",
+      "text": "Centralized storage infrastructure for logs"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "MFD event logs",
+      "to": "Shadow copies",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1855",
+      "to": "ISM-1856",
+      "type": "REQUIRES"
+    }
+  ]
+}

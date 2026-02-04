@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-431",
+  "entities": [
+    {
+      "id": "cryptography",
+      "type": "CONCEPT",
+      "text": "The science and practice of securing information"
+    },
+    {
+      "id": "confidentiality",
+      "type": "CONCEPT",
+      "text": "Protection making data unreadable to unauthorized entities"
+    },
+    {
+      "id": "integrity",
+      "type": "CONCEPT",
+      "text": "Protection from accidental or deliberate manipulation"
+    },
+    {
+      "id": "authentication",
+      "type": "CONCEPT",
+      "text": "Verification of entity identity"
+    },
+    {
+      "id": "non-repudiation",
+      "type": "CONCEPT",
+      "text": "Proof that entity performed action"
+    },
+    {
+      "id": "data",
+      "type": "CONCEPT",
+      "text": "Information being protected"
+    },
+    {
+      "id": "entities",
+      "type": "ACTOR",
+      "text": "Authorized parties interacting with data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cryptography",
+      "to": "cryptography",
+      "type": "cryptography"
+    },
+    {
+      "from": "confidentiality",
+      "to": "integrity",
+      "type": "authentication"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-170",
+  "entities": [
+    {
+      "id": "fax machines",
+      "type": "CONCEPT",
+      "text": "communication devices"
+    },
+    {
+      "id": "MFDs",
+      "type": "CONCEPT",
+      "text": "communication devices with multiple functions"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "people involved in communication"
+    },
+    {
+      "id": "fax messages",
+      "type": "CONCEPT",
+      "text": "information being transmitted"
+    },
+    {
+      "id": "sender",
+      "type": "ACTOR",
+      "text": "person sending fax"
+    },
+    {
+      "id": "receiver",
+      "type": "ACTOR",
+      "text": "person receiving fax"
+    },
+    {
+      "id": "ISM-1075",
+      "type": "CONCEPT",
+      "text": "control standard"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "fax machines",
+      "to": "MFDs",
+      "type": "COMMUNICATES_WITH"
+    },
+    {
+      "from": "MFDs",
+      "to": "fax messages",
+      "type": "AWARE_OF"
+    },
+    {
+      "from": "personnel",
+      "to": "fax messages",
+      "type": "AWARE_OF"
+    },
+    {
+      "from": "fax messages",
+      "to": "receiver",
+      "type": "COLLECTS"
+    },
+    {
+      "from": "sender",
+      "to": "fax messages",
+      "type": "SENDS_TO"
+    },
+    {
+      "from": "receiver",
+      "to": "ISM-1075",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-080",
+  "entities": [
+    {
+      "id": "server rooms",
+      "type": "FACILITY",
+      "text": "Physical security rooms for equipment"
+    },
+    {
+      "id": "communications rooms",
+      "type": "FACILITY",
+      "text": "Rooms for communication equipment"
+    },
+    {
+      "id": "security containers",
+      "type": "FACILITY",
+      "text": "Secure storage containers"
+    },
+    {
+      "id": "secure rooms",
+      "type": "FACILITY",
+      "text": "Protected rooms for sensitive equipment"
+    },
+    {
+      "id": "servers",
+      "type": "DEVICE",
+      "text": "Computing hardware"
+    },
+    {
+      "id": "network devices",
+      "type": "DEVICE",
+      "text": "Networking hardware"
+    },
+    {
+      "id": "cryptographic equipment",
+      "type": "DEVICE",
+      "text": "Encryption hardware"
+    },
+    {
+      "id": "security zones",
+      "type": "SECURITY_CONCEPT",
+      "text": "Security classification areas"
+    },
+    {
+      "id": "keys",
+      "type": "SECURITY_DEVICE",
+      "text": "Physical access keys"
+    },
+    {
+      "id": "access mechanisms",
+      "type": "SECURITY_DEVICE",
+      "text": "Access control mechanisms"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1053",
+      "to": "ISM-1530",
+      "type": "SECURED_IN"
+    },
+    {
+      "from": "ISM-1053",
+      "to": "ISM-1530",
+      "type": "SECURED_IN"
+    },
+    {
+      "from": "ISM-1530",
+      "to": "ISM-0813",
+      "type": "SECURED_IN"
+    },
+    {
+      "from": "ISM-1530",
+      "to": "ISM-0813",
+      "type": "SECURED_IN"
+    },
+    {
+      "from": "ISM-1053",
+      "to": "ISM-1530",
+      "type": "SECURED_IN"
+    },
+    {
+      "from": "ISM-1053",
+      "to": "ISM-1530",
+      "type": "SECURED_IN"
+    },
+    {
+      "from": "ISM-1053",
+      "to": "ISM-1530",
+      "type": "SECURED_IN"
+    },
+    {
+      "from": "ISM-1053",
+      "to": "ISM-1530",
+      "type": "CLASSIFIED_BY"
+    },
+    {
+      "from": "ISM-1074",
+      "to": "ISM-0813",
+      "type": "CONTROLS_ACCESS_TO"
+    },
+    {
+      "from": "ISM-1074",
+      "to": "ISM-0813",
+      "type": "CONTROLS_ACCESS_TO"
+    }
+  ]
+}

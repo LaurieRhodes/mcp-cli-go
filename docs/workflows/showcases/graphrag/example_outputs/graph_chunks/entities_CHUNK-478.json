@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-478",
+  "entities": [
+    {
+      "id": "DH modulus",
+      "type": "CONCEPT",
+      "text": "Diffie-Hellman modulus for cryptographic security"
+    },
+    {
+      "id": "IPsec connections",
+      "type": "PROCESS",
+      "text": "Internet Protocol Security connections"
+    },
+    {
+      "id": "ISM-0999",
+      "type": "CONTROL",
+      "text": "Information Security Manual control requirement"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "DH modulus",
+      "to": "ISM-0999",
+      "type": "DEFINES"
+    },
+    {
+      "from": "IPsec connections",
+      "to": "IPsec connections",
+      "type": "REQUIRES"
+    }
+  ]
+}

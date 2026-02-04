@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-461",
+  "entities": [
+    {
+      "id": "TLS",
+      "type": "CONCEPT",
+      "text": "Transport Layer Security protocol"
+    },
+    {
+      "id": "Secure Sockets Layer",
+      "type": "CONCEPT",
+      "text": "Older security protocol replaced by TLS"
+    },
+    {
+      "id": "TLS version 1.3",
+      "type": "CONCEPT",
+      "text": "Latest TLS version for secure connections"
+    },
+    {
+      "id": "AES-GCM",
+      "type": "CONCEPT",
+      "text": "Encryption algorithm for TLS"
+    },
+    {
+      "id": "DH/ECDH",
+      "type": "CONCEPT",
+      "text": "Key establishment methods for TLS"
+    },
+    {
+      "id": "SHA-2",
+      "type": "CONCEPT",
+      "text": "Cryptographic hash function for certificates and authentication"
+    },
+    {
+      "id": "Perfect Forward Secrecy",
+      "type": "CONCEPT",
+      "text": "Security property ensuring past sessions remain secure"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security protocols"
+    },
+    {
+      "id": "TLS configuration",
+      "type": "PROCESS",
+      "text": "Process of setting up TLS with security controls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TLS",
+      "to": "Organisation",
+      "type": "TLS configuration"
+    },
+    {
+      "from": "Secure Sockets Layer",
+      "to": "TLS version 1.3",
+      "type": "AES-GCM"
+    }
+  ]
+}

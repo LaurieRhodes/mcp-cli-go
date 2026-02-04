@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-140",
+  "entities": [
+    {
+      "id": "TOP SECRET systems",
+      "type": "CONCEPT",
+      "text": "Systems classified as TOP SECRET"
+    },
+    {
+      "id": "non-TOP SECRET systems",
+      "type": "CONCEPT",
+      "text": "Systems not classified as TOP SECRET"
+    },
+    {
+      "id": "TOP SECRET patch panels",
+      "type": "CONCEPT",
+      "text": "Patch panels for TOP SECRET systems"
+    },
+    {
+      "id": "non-TOP SECRET patch panels",
+      "type": "CONCEPT",
+      "text": "Patch panels for non-TOP SECRET systems"
+    },
+    {
+      "id": "TOP SECRET cabinets",
+      "type": "CONCEPT",
+      "text": "Cabinets containing TOP SECRET systems"
+    },
+    {
+      "id": "non-TOP SECRET cabinets",
+      "type": "CONCEPT",
+      "text": "Cabinets containing non-TOP SECRET systems"
+    },
+    {
+      "id": "unauthorised personnel",
+      "type": "ACTOR",
+      "text": "Individuals without proper authorization"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TOP SECRET systems",
+      "to": "TOP SECRET patch panels",
+      "type": "non-TOP SECRET patch panels"
+    },
+    {
+      "from": "non-TOP SECRET systems",
+      "to": "TOP SECRET cabinets",
+      "type": "non-TOP SECRET cabinets"
+    }
+  ]
+}

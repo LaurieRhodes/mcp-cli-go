@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-301",
+  "entities": [
+    {
+      "id": "unprivileged accounts",
+      "type": "ACTOR",
+      "text": "Standard user accounts with limited permissions"
+    },
+    {
+      "id": "privileged accounts",
+      "type": "ACTOR",
+      "text": "Accounts with elevated permissions for administrative tasks"
+    },
+    {
+      "id": "break glass accounts",
+      "type": "ACTOR",
+      "text": "Emergency access accounts for critical situations"
+    },
+    {
+      "id": "service accounts",
+      "type": "ACTOR",
+      "text": "Accounts used by applications and services"
+    },
+    {
+      "id": "interactive authentication",
+      "type": "PROCESS",
+      "text": "Authentication requiring user interaction"
+    },
+    {
+      "id": "non-interactive authentication",
+      "type": "PROCESS",
+      "text": "Authentication without user interaction"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "unprivileged accounts",
+      "to": "interactive authentication",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "privileged accounts",
+      "to": "non-interactive authentication",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

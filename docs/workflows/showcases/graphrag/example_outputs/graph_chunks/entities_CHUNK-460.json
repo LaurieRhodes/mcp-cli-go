@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-460",
+  "entities": [
+    {
+      "id": "ICT equipment/software implementing TLS",
+      "type": "CONCEPT",
+      "text": "ICT equipment or software implementing Transport Layer Security"
+    },
+    {
+      "id": "AACAs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Algorithms"
+    },
+    {
+      "id": "AACPs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Protocols"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Algorithms section",
+      "type": "CONCEPT",
+      "text": "Section containing approved cryptographic algorithms"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Protocols section",
+      "type": "CONCEPT",
+      "text": "Section containing approved cryptographic protocols"
+    },
+    {
+      "id": "Guidelines",
+      "type": "CONCEPT",
+      "text": "Policy guidelines document"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment/software implementing TLS",
+      "to": "AACAs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ICT equipment/software implementing TLS",
+      "to": "AACPs",
+      "type": "REQUIRES"
+    }
+  ]
+}

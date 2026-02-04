@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-416",
+  "entities": [
+    {
+      "id": "WPA3-Enterprise",
+      "type": "TECHNOLOGY",
+      "text": "Wireless security protocol using 802.1X authentication"
+    },
+    {
+      "id": "802.1X authentication",
+      "type": "PROTOCOL",
+      "text": "Network authentication protocol for port-based access control"
+    },
+    {
+      "id": "EAP-TLS",
+      "type": "PROTOCOL",
+      "text": "Extensible Authentication Protocol-Transport Layer Security for secure authentication"
+    },
+    {
+      "id": "Public Key Infrastructure",
+      "type": "INFRASTRUCTURE",
+      "text": "Framework for managing digital certificates and encryption keys"
+    },
+    {
+      "id": "RADIUS server",
+      "type": "SYSTEM",
+      "text": "Remote Access Dial-In User Service for authentication, authorization, and accounting"
+    },
+    {
+      "id": "X.509 certificates",
+      "type": "TECHNOLOGY",
+      "text": "Digital certificates used for authentication and encryption"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "WPA3-Enterprise",
+      "to": "802.1X authentication",
+      "type": "USES"
+    },
+    {
+      "from": "802.1X authentication",
+      "to": "EAP-TLS",
+      "type": "REQUIRES"
+    }
+  ]
+}

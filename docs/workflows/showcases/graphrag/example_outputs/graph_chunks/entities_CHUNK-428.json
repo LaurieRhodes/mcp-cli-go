@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-428",
+  "entities": [
+    {
+      "id": "content delivery networks (CDNs)",
+      "type": "CONCEPT",
+      "text": "Networks that cache and deliver content from geographically dispersed locations"
+    },
+    {
+      "id": "origin servers",
+      "type": "CONCEPT",
+      "text": "Servers under an organisation's control that host original content"
+    },
+    {
+      "id": "web servers",
+      "type": "CONCEPT",
+      "text": "Servers that host web content and applications"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Potential attacker seeking to bypass CDN protections"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity using CDNs for online services"
+    },
+    {
+      "id": "management networks",
+      "type": "CONCEPT",
+      "text": "Networks authorized for administrative access"
+    },
+    {
+      "id": "high availability",
+      "type": "CONCEPT",
+      "text": "Requirement for continuous website availability"
+    },
+    {
+      "id": "website hosting",
+      "type": "CONCEPT",
+      "text": "Service of hosting websites on servers"
+    },
+    {
+      "id": "web application security",
+      "type": "CONCEPT",
+      "text": "Security measures for web applications"
+    },
+    {
+      "id": "denial-of-service attack mitigations",
+      "type": "CONCEPT",
+      "text": "Protections against DoS attacks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "content delivery networks (CDNs)",
+      "to": "origin servers",
+      "type": "organisation"
+    },
+    {
+      "from": "origin servers",
+      "to": "web servers",
+      "type": "content delivery networks (CDNs)"
+    }
+  ]
+}

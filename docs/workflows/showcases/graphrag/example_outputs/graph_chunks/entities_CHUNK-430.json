@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-430",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Information security concept"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Policy document"
+    },
+    {
+      "id": "cloud service providers",
+      "type": "ACTOR",
+      "text": "Service provider"
+    },
+    {
+      "id": "managed services and cloud services",
+      "type": "CONCEPT",
+      "text": "Service delivery model"
+    },
+    {
+      "id": "business continuity and disaster recovery planning",
+      "type": "CONCEPT",
+      "text": "Resilience planning"
+    },
+    {
+      "id": "Guidelines for Cyber Security Roles",
+      "type": "DOCUMENT",
+      "text": "Policy document"
+    },
+    {
+      "id": "Chief Information Security Officer",
+      "type": "ACTOR",
+      "text": "Security role"
+    },
+    {
+      "id": "denial-of-service attacks",
+      "type": "CONCEPT",
+      "text": "Cyber attack type"
+    },
+    {
+      "id": "ACSC's Preparing for and Responding to Denial-of-Service Attacks publication",
+      "type": "DOCUMENT",
+      "text": "Guidance publication"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "cloud service providers",
+      "type": "business continuity and disaster recovery planning"
+    },
+    {
+      "from": "Guidelines for Procurement and Outsourcing",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "Guidelines for Cyber Security Roles"
+    }
+  ]
+}

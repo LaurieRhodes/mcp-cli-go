@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-150",
+  "entities": [
+    {
+      "id": "telephone systems",
+      "type": "SYSTEM",
+      "text": "Communication systems for voice conversations"
+    },
+    {
+      "id": "cryptographic equipment",
+      "type": "SYSTEM",
+      "text": "Equipment enabling different security levels for conversations"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Staff members who use telephone systems"
+    },
+    {
+      "id": "information sensitivity",
+      "type": "CONCEPT",
+      "text": "Classification levels of information that can be discussed"
+    },
+    {
+      "id": "security risks",
+      "type": "CONCEPT",
+      "text": "Potential threats from using insecure communication systems"
+    },
+    {
+      "id": "visual indication",
+      "type": "FEATURE",
+      "text": "Visual cues showing connection security level"
+    },
+    {
+      "id": "non-secure telephone systems",
+      "type": "SYSTEM",
+      "text": "Telephone systems without cryptographic protection"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "telephone systems",
+      "to": "cryptographic equipment",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "personnel",
+      "to": "visual indication",
+      "type": "PROVIDES"
+    }
+  ]
+}

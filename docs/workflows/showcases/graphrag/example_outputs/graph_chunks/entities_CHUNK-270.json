@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-270",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Risk management practices for cybersecurity in supply chains"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Official guidelines document for procurement and outsourcing"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Further information",
+      "to": "cyber supply chain risk management section",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "procurement and outsourcing guidelines",
+      "type": "CONTAINS"
+    }
+  ]
+}

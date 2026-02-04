@@ -1,0 +1,22 @@
+{
+  "chunk_id": "CHUNK-110",
+  "entities": [
+    {
+      "id": "cable protective sheath",
+      "type": "CONCEPT",
+      "text": "Protective covering for cables"
+    },
+    {
+      "id": "conduit",
+      "type": "CONCEPT",
+      "text": "Enclosure for routing cables"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cable protective sheath",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    }
+  ]
+}

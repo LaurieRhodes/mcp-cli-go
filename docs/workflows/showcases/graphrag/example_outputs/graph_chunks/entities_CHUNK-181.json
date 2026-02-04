@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-181",
+  "entities": [
+    {
+      "id": "organisation-owned mobile device",
+      "type": "CONCEPT",
+      "text": "Mobile devices owned by the organization for accessing systems/data"
+    },
+    {
+      "id": "ASD-approved platform",
+      "type": "CONCEPT",
+      "text": "Platform approved by Australian Signals Directorate"
+    },
+    {
+      "id": "ACSC guidance",
+      "type": "CONCEPT",
+      "text": "Guidance from Australian Cyber Security Centre"
+    },
+    {
+      "id": "ISM-1482",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Employees accessing systems/data"
+    },
+    {
+      "id": "security configuration",
+      "type": "PROCESS",
+      "text": "Configuration process for security settings"
+    },
+    {
+      "id": "separation of work and personal data",
+      "type": "PROCESS",
+      "text": "Process to separate work and personal data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation-owned mobile device",
+      "to": "ASD-approved platform",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "organisation-owned mobile device",
+      "to": "ACSC guidance",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "organisation-owned mobile device",
+      "to": "separation of work and personal data",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "personnel",
+      "to": "organisation-owned mobile device",
+      "type": "USES"
+    },
+    {
+      "from": "ISM-1482",
+      "to": "organisation-owned mobile device",
+      "type": "DEFINES"
+    }
+  ]
+}

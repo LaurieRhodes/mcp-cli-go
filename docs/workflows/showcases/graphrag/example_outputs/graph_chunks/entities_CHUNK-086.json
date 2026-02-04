@@ -1,0 +1,92 @@
+{
+  "chunk_id": "CHUNK-086",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information technology equipment"
+    },
+    {
+      "id": "Media",
+      "type": "CONCEPT",
+      "text": "Storage media for data"
+    },
+    {
+      "id": "Cryptography",
+      "type": "CONCEPT",
+      "text": "Science of secure communication"
+    },
+    {
+      "id": "Security zones",
+      "type": "CONCEPT",
+      "text": "Areas with defined security levels"
+    },
+    {
+      "id": "Security containers",
+      "type": "CONCEPT",
+      "text": "Physical containers for protection"
+    },
+    {
+      "id": "Secure rooms",
+      "type": "CONCEPT",
+      "text": "Protected rooms for sensitive operations"
+    },
+    {
+      "id": "AGD PSPF",
+      "type": "DOCUMENT",
+      "text": "Australian Government Department Protective Security Policy Framework"
+    },
+    {
+      "id": "Physical security policy",
+      "type": "DOCUMENT",
+      "text": "Policy for protecting entity resources"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "Guidelines for ICT Equipment",
+      "type": "HAS_GUIDELINES"
+    },
+    {
+      "from": "Media",
+      "to": "Guidelines for Media",
+      "type": "HAS_GUIDELINES"
+    },
+    {
+      "from": "Media",
+      "to": "Guidelines for Cryptography",
+      "type": "HAS_GUIDELINES"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "AGD PSPF",
+      "type": "PROTECTED_BY"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "AGD PSPF",
+      "type": "PROTECTED_BY"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "AGD PSPF",
+      "type": "PROTECTED_BY"
+    },
+    {
+      "from": "Security zones",
+      "to": "Physical security policy",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Security containers",
+      "to": "Physical security policy",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Secure rooms",
+      "to": "Physical security policy",
+      "type": "DEFINES"
+    }
+  ]
+}

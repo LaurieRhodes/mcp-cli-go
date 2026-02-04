@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-247",
+  "entities": [
+    {
+      "id": "hybrid hard drives",
+      "type": "CONCEPT",
+      "text": "Storage devices combining magnetic and flash media"
+    },
+    {
+      "id": "non-volatile magnetic media",
+      "type": "CONCEPT",
+      "text": "Magnetic storage component"
+    },
+    {
+      "id": "circuit board",
+      "type": "CONCEPT",
+      "text": "Electronic board containing flash memory"
+    },
+    {
+      "id": "non-volatile flash memory media",
+      "type": "CONCEPT",
+      "text": "Flash-based storage component"
+    },
+    {
+      "id": "sanitising",
+      "type": "PROCESS",
+      "text": "Process of securely erasing data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "hybrid hard drives",
+      "to": "hybrid hard drives",
+      "type": "circuit board"
+    },
+    {
+      "from": "non-volatile magnetic media",
+      "to": "circuit board",
+      "type": "non-volatile flash memory media"
+    }
+  ]
+}

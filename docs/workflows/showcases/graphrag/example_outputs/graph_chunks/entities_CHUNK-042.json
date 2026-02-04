@@ -1,0 +1,92 @@
+{
+  "chunk_id": "CHUNK-042",
+  "entities": [
+    {
+      "id": "incident_management_policy",
+      "type": "POLICY",
+      "text": "incident management policy"
+    },
+    {
+      "id": "incident_response_plan",
+      "type": "PLAN",
+      "text": "incident response plan"
+    },
+    {
+      "id": "ISM-0576",
+      "type": "CONTROL",
+      "text": "ISM Control 0576: Incident management policy development and maintenance"
+    },
+    {
+      "id": "ISM-1784",
+      "type": "CONTROL",
+      "text": "ISM Control 1784: Annual exercising of incident management policy"
+    },
+    {
+      "id": "malicious_activity",
+      "type": "THREAT",
+      "text": "malicious activity on networks and hosts"
+    },
+    {
+      "id": "cyber_security_events",
+      "type": "EVENT_TYPE",
+      "text": "cyber security events"
+    },
+    {
+      "id": "cyber_security_incidents",
+      "type": "EVENT_TYPE",
+      "text": "cyber security incidents"
+    },
+    {
+      "id": "networks",
+      "type": "INFRASTRUCTURE",
+      "text": "networks"
+    },
+    {
+      "id": "hosts",
+      "type": "INFRASTRUCTURE",
+      "text": "hosts"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "incident_management_policy",
+      "to": "incident_response_plan",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "incident_management_policy",
+      "to": "malicious_activity",
+      "type": "COVERS"
+    },
+    {
+      "from": "incident_management_policy",
+      "to": "cyber_security_events",
+      "type": "COVERS"
+    },
+    {
+      "from": "incident_management_policy",
+      "to": "cyber_security_incidents",
+      "type": "COVERS"
+    },
+    {
+      "from": "malicious_activity",
+      "to": "networks",
+      "type": "AFFECTS"
+    },
+    {
+      "from": "malicious_activity",
+      "to": "hosts",
+      "type": "AFFECTS"
+    },
+    {
+      "from": "ISM-0576",
+      "to": "incident_management_policy",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "ISM-1784",
+      "to": "incident_management_policy",
+      "type": "GOVERNS"
+    }
+  ]
+}

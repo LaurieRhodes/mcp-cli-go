@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-112",
+  "entities": [
+    {
+      "id": "Cabling infrastructure",
+      "type": "CONCEPT",
+      "text": "Physical cabling systems for data/communications"
+    },
+    {
+      "id": "Endorsed cable installer",
+      "type": "ACTOR",
+      "text": "Certified professional for cable installation"
+    },
+    {
+      "id": "Australian Standards",
+      "type": "CONCEPT",
+      "text": "Australian technical standards and regulations"
+    },
+    {
+      "id": "Personnel safety",
+      "type": "CONCEPT",
+      "text": "Safety of personnel working with infrastructure"
+    },
+    {
+      "id": "System availability",
+      "type": "CONCEPT",
+      "text": "Reliability and uptime of systems"
+    },
+    {
+      "id": "Australian Communications and Media Authority",
+      "type": "ACTOR",
+      "text": "Australian government regulatory authority"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cabling infrastructure",
+      "to": "Endorsed cable installer",
+      "type": "INSTALLED_BY"
+    },
+    {
+      "from": "Cabling infrastructure",
+      "to": "Australian Standards",
+      "type": "COMPLIES_WITH"
+    },
+    {
+      "from": "Cabling infrastructure",
+      "to": "Personnel safety",
+      "type": "ENSURES"
+    },
+    {
+      "from": "Cabling infrastructure",
+      "to": "System availability",
+      "type": "ENSURES"
+    },
+    {
+      "from": "Australian Standards",
+      "to": "Australian Communications and Media Authority",
+      "type": "DIRECTED_BY"
+    }
+  ]
+}

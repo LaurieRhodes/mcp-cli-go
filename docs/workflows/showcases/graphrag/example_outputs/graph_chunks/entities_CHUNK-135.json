@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-135",
+  "entities": [
+    {
+      "id": "transparent wall outlet box covers",
+      "type": "CONCEPT",
+      "text": "Clear plastic covers for wall outlet boxes"
+    },
+    {
+      "id": "cable cross-patching",
+      "type": "PROCESS",
+      "text": "Process of connecting cables between ports"
+    },
+    {
+      "id": "tampering inspection",
+      "type": "PROCESS",
+      "text": "Examination for unauthorized interference"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "transparent wall outlet box covers",
+      "to": "transparent wall outlet box covers",
+      "type": "ENABLES"
+    },
+    {
+      "from": "cable cross-patching",
+      "to": "tampering inspection",
+      "type": "ENABLES"
+    }
+  ]
+}

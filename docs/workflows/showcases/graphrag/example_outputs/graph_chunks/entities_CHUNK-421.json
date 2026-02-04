@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-421",
+  "entities": [
+    {
+      "id": "802.1X authentication",
+      "type": "PROCESS",
+      "text": "Authentication process for network access"
+    },
+    {
+      "id": "RADIUS authentication",
+      "type": "PROCESS",
+      "text": "Authentication, authorization and accounting protocol mediating network access"
+    },
+    {
+      "id": "RADIUS server",
+      "type": "ACTOR",
+      "text": "Server handling RADIUS authentication"
+    },
+    {
+      "id": "authenticators",
+      "type": "ACTOR",
+      "text": "Network devices that authenticate users"
+    },
+    {
+      "id": "RADIUS over Internet Protocol Security",
+      "type": "PROTOCOL",
+      "text": "Encapsulation protocol for securing RADIUS communications"
+    },
+    {
+      "id": "RADIUS over Transport Layer Security",
+      "type": "PROTOCOL",
+      "text": "Encapsulation protocol for securing RADIUS communications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "802.1X authentication",
+      "to": "RADIUS authentication",
+      "type": "authenticators"
+    },
+    {
+      "from": "RADIUS authentication",
+      "to": "authenticators",
+      "type": "RADIUS server"
+    }
+  ]
+}

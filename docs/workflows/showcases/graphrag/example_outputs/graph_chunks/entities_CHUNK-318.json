@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-318",
+  "entities": [
+    {
+      "id": "National Institute of Standards and Technology",
+      "type": "ACTOR",
+      "text": "US federal agency that develops technology standards"
+    },
+    {
+      "id": "Application Container Security Guide",
+      "type": "CONCEPT",
+      "text": "NIST Special Publication 800-190 on container security"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "CONCEPT",
+      "text": "Document covering procurement and outsourcing guidelines"
+    },
+    {
+      "id": "Guidelines for System Management",
+      "type": "CONCEPT",
+      "text": "Document covering system management guidelines"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "CONCEPT",
+      "text": "Document covering system monitoring guidelines"
+    },
+    {
+      "id": "Security Recommendations for Server-based Hypervisor Platforms",
+      "type": "CONCEPT",
+      "text": "NIST Special Publication 800-125A Rev. 1 on hypervisor security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "National Institute of Standards and Technology",
+      "to": "Application Container Security Guide",
+      "type": "DEFINES"
+    },
+    {
+      "from": "National Institute of Standards and Technology",
+      "to": "Security Recommendations for Server-based Hypervisor Platforms",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for Procurement and Outsourcing",
+      "to": "cyber supply chain risk management",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for Procurement and Outsourcing",
+      "to": "managed services and cloud services",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for System Management",
+      "to": "system patching",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for System Monitoring",
+      "to": "event logging and monitoring",
+      "type": "DEFINES"
+    }
+  ]
+}

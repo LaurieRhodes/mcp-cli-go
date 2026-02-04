@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-465",
+  "entities": [
+    {
+      "id": "public key-based authentication",
+      "type": "CONCEPT",
+      "text": "Stronger authentication method for SSH connections"
+    },
+    {
+      "id": "SSH connections",
+      "type": "PROCESS",
+      "text": "Secure Shell connections requiring authentication"
+    },
+    {
+      "id": "SSH private keys",
+      "type": "CONCEPT",
+      "text": "Cryptographic keys requiring protection"
+    },
+    {
+      "id": "passphrases",
+      "type": "CONCEPT",
+      "text": "Authentication credentials for protecting keys"
+    },
+    {
+      "id": "key encryption keys",
+      "type": "CONCEPT",
+      "text": "Cryptographic keys used to encrypt other keys"
+    },
+    {
+      "id": "ISM-0485",
+      "type": "CONCEPT",
+      "text": "Control requiring public key-based authentication for SSH"
+    },
+    {
+      "id": "ISM-1449",
+      "type": "CONCEPT",
+      "text": "Control requiring protection of SSH private keys"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "public key-based authentication",
+      "to": "SSH connections",
+      "type": "DEFINES"
+    },
+    {
+      "from": "SSH private keys",
+      "to": "passphrases",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "SSH private keys",
+      "to": "key encryption keys",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0485",
+      "to": "public key-based authentication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1449",
+      "to": "SSH private keys",
+      "type": "DEFINES"
+    }
+  ]
+}

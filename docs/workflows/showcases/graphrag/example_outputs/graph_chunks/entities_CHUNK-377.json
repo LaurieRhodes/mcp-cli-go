@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-377",
+  "entities": [
+    {
+      "id": "Email distribution lists",
+      "type": "CONCEPT",
+      "text": "Lists used for email communication"
+    },
+    {
+      "id": "Australian Eyes Only data",
+      "type": "CONCEPT",
+      "text": "Classified Australian government data"
+    },
+    {
+      "id": "ISM-0269",
+      "type": "CONTROL",
+      "text": "Information security control for email distribution"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Email distribution lists",
+      "to": "Email distribution lists",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Australian Eyes Only data",
+      "to": "ISM-0269",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

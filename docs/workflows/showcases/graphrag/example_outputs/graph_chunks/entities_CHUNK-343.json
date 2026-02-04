@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-343",
+  "entities": [
+    {
+      "id": "guidelines",
+      "type": "CONCEPT",
+      "text": "These guidelines"
+    },
+    {
+      "id": "traditional application development",
+      "type": "PROCESS",
+      "text": "traditional application development"
+    },
+    {
+      "id": "mobile application development",
+      "type": "PROCESS",
+      "text": "mobile application development"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "guidelines",
+      "to": "traditional application development",
+      "type": "DEFINES"
+    },
+    {
+      "from": "guidelines",
+      "to": "mobile application development",
+      "type": "DEFINES"
+    }
+  ]
+}

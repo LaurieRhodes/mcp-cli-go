@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-210",
+  "entities": [
+    {
+      "id": "ICT equipment patching/updating",
+      "type": "CONCEPT",
+      "text": "Process for maintaining ICT equipment security"
+    },
+    {
+      "id": "Guidelines for System Management",
+      "type": "DOCUMENT",
+      "text": "Official guidance document for system management"
+    },
+    {
+      "id": "Common Criteria products",
+      "type": "CONCEPT",
+      "text": "Security-evaluated ICT products"
+    },
+    {
+      "id": "Common Criteria's Certified Products List",
+      "type": "DOCUMENT",
+      "text": "Official list of certified security products"
+    },
+    {
+      "id": "High assurance ICT equipment",
+      "type": "CONCEPT",
+      "text": "ICT equipment with enhanced security requirements"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment patching/updating",
+      "to": "Guidelines for System Management",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Common Criteria products",
+      "to": "Common Criteria's Certified Products List",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "High assurance ICT equipment",
+      "to": "ACSC",
+      "type": "REQUIRES"
+    }
+  ]
+}

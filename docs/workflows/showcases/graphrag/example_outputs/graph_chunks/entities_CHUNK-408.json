@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-408",
+  "entities": [
+    {
+      "id": "wireless networks",
+      "type": "CONCEPT",
+      "text": "Controls applicable to wireless networks"
+    },
+    {
+      "id": "network design",
+      "type": "CONCEPT",
+      "text": "Prior network design section"
+    },
+    {
+      "id": "configuration",
+      "type": "CONCEPT",
+      "text": "Network configuration section"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-408",
+      "to": "CHUNK-408",
+      "type": "DESCRIBES"
+    },
+    {
+      "from": "CHUNK-408",
+      "to": "CHUNK-408",
+      "type": "EXTENDS"
+    },
+    {
+      "from": "CHUNK-408",
+      "to": "CHUNK-408",
+      "type": "EXTENDS"
+    }
+  ]
+}

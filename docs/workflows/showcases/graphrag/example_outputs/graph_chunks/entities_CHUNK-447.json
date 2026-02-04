@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-447",
+  "entities": [
+    {
+      "id": "DH",
+      "type": "CONCEPT",
+      "text": "Diffie-Hellman key exchange algorithm"
+    },
+    {
+      "id": "2048-bit modulus",
+      "type": "CONCEPT",
+      "text": "2048-bit prime modulus for DH"
+    },
+    {
+      "id": "3072-bit modulus",
+      "type": "CONCEPT",
+      "text": "3072-bit prime modulus for DH"
+    },
+    {
+      "id": "112-bit security strength",
+      "type": "CONCEPT",
+      "text": "112 bits of effective security strength"
+    },
+    {
+      "id": "NIST SP 800-56A Rev. 3",
+      "type": "DOCUMENT",
+      "text": "NIST Special Publication 800-56A Revision 3"
+    },
+    {
+      "id": "ISM-0472",
+      "type": "CONTROL",
+      "text": "ISM Control 0472"
+    },
+    {
+      "id": "ISM-1759",
+      "type": "CONTROL",
+      "text": "ISM Control 1759"
+    },
+    {
+      "id": "ISM-1629",
+      "type": "CONTROL",
+      "text": "ISM Control 1629"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "DH",
+      "to": "2048-bit modulus",
+      "type": "DEFINES"
+    },
+    {
+      "from": "DH",
+      "to": "3072-bit modulus",
+      "type": "DEFINES"
+    },
+    {
+      "from": "2048-bit modulus",
+      "to": "112-bit security strength",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "112-bit security strength",
+      "to": "secure until 2030",
+      "type": "REMAINS"
+    },
+    {
+      "from": "DH",
+      "to": "NIST SP 800-56A Rev. 3",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "ISM-0472",
+      "to": "2048-bit modulus",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1759",
+      "to": "2048-bit modulus",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1629",
+      "to": "3072-bit modulus",
+      "type": "REQUIRES"
+    }
+  ]
+}

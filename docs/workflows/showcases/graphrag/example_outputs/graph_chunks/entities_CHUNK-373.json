@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-373",
+  "entities": [
+    {
+      "id": "non-approved webmail services",
+      "type": "CONCEPT",
+      "text": "Webmail services not approved by the organization"
+    },
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "Individuals accessing webmail services"
+    },
+    {
+      "id": "email content filtering",
+      "type": "PROCESS",
+      "text": "Security control that filters email content"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "non-approved webmail services",
+      "to": "users",
+      "type": "BYPASSES"
+    },
+    {
+      "from": "users",
+      "to": "email content filtering",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-030",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "Cyber security budget",
+      "type": "CONCEPT",
+      "text": "Dedicated funding for cyber security"
+    },
+    {
+      "id": "Cyber security program",
+      "type": "PROCESS",
+      "text": "Organizational cyber security initiatives"
+    },
+    {
+      "id": "Cyber security uplift activities",
+      "type": "PROCESS",
+      "text": "Activities to improve cyber security posture"
+    },
+    {
+      "id": "Cyber security incident response",
+      "type": "PROCESS",
+      "text": "Processes for handling security breaches"
+    },
+    {
+      "id": "ISM-0732 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control 0732"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "CISO",
+      "type": "RECEIVES"
+    },
+    {
+      "from": "Cyber security budget",
+      "to": "Cyber security budget",
+      "type": "MANAGES"
+    }
+  ]
+}

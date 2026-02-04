@@ -1,0 +1,337 @@
+{
+  "chunk_id": "CHUNK-412",
+  "entities": [
+    {
+      "id": "wireless access points",
+      "type": "DEVICE",
+      "text": "Wireless network access devices"
+    },
+    {
+      "id": "Service Set Identifiers (SSIDs)",
+      "type": "NETWORK_IDENTIFIER",
+      "text": "Network identifiers for wireless networks"
+    },
+    {
+      "id": "default SSIDs",
+      "type": "NETWORK_IDENTIFIER",
+      "text": "Pre-configured network identifiers"
+    },
+    {
+      "id": "SSID broadcasting",
+      "type": "NETWORK_FEATURE",
+      "text": "Feature that broadcasts network availability"
+    },
+    {
+      "id": "beacon frames",
+      "type": "NETWORK_FRAME",
+      "text": "Frames that announce network presence"
+    },
+    {
+      "id": "probe requests",
+      "type": "NETWORK_REQUEST",
+      "text": "Requests to discover networks"
+    },
+    {
+      "id": "probe responses",
+      "type": "NETWORK_RESPONSE",
+      "text": "Responses to discovery requests"
+    },
+    {
+      "id": "association requests",
+      "type": "NETWORK_REQUEST",
+      "text": "Requests to join networks"
+    },
+    {
+      "id": "re-association requests",
+      "type": "NETWORK_REQUEST",
+      "text": "Requests to rejoin networks"
+    },
+    {
+      "id": "malicious wireless access point",
+      "type": "DEVICE",
+      "text": "Unauthorized wireless access device"
+    },
+    {
+      "id": "authentication credentials",
+      "type": "CREDENTIAL",
+      "text": "Login information for network access"
+    },
+    {
+      "id": "wireless networks",
+      "type": "NETWORK",
+      "text": "Wireless communication networks"
+    },
+    {
+      "id": "non-public wireless networks",
+      "type": "NETWORK",
+      "text": "Private wireless networks"
+    },
+    {
+      "id": "public wireless networks",
+      "type": "NETWORK",
+      "text": "Publicly accessible wireless networks"
+    },
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "Business or government entity"
+    },
+    {
+      "id": "premises",
+      "type": "LOCATION",
+      "text": "Physical location of organization"
+    },
+    {
+      "id": "functionality",
+      "type": "FUNCTION",
+      "text": "Purpose or use of network"
+    },
+    {
+      "id": "users",
+      "type": "USER",
+      "text": "People using the network"
+    },
+    {
+      "id": "devices",
+      "type": "DEVICE",
+      "text": "Electronic devices"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor"
+    },
+    {
+      "id": "configuration settings",
+      "type": "CONFIGURATION",
+      "text": "Device configuration parameters"
+    },
+    {
+      "id": "weak configuration settings",
+      "type": "CONFIGURATION",
+      "text": "Insecure configuration settings"
+    },
+    {
+      "id": "hardening",
+      "type": "PROCESS",
+      "text": "Security strengthening process"
+    },
+    {
+      "id": "deployment",
+      "type": "PROCESS",
+      "text": "Implementation process"
+    },
+    {
+      "id": "internet",
+      "type": "NETWORK",
+      "text": "Global computer network"
+    },
+    {
+      "id": "hidden SSID",
+      "type": "NETWORK_IDENTIFIER",
+      "text": "Non-broadcast network identifier"
+    },
+    {
+      "id": "legitimate wireless network",
+      "type": "NETWORK",
+      "text": "Authorized wireless network"
+    },
+    {
+      "id": "profile",
+      "type": "ATTRIBUTE",
+      "text": "Visibility level"
+    },
+    {
+      "id": "attention",
+      "type": "ATTRIBUTE",
+      "text": "Notice or focus"
+    },
+    {
+      "id": "steal",
+      "type": "ACTION",
+      "text": "Take without permission"
+    },
+    {
+      "id": "gain access",
+      "type": "ACTION",
+      "text": "Obtain entry"
+    },
+    {
+      "id": "connect",
+      "type": "ACTION",
+      "text": "Establish connection"
+    },
+    {
+      "id": "fooling",
+      "type": "ACTION",
+      "text": "Deceiving"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1710",
+      "to": "ISM-1710",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1316",
+      "to": "ISM-1316",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1316",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1710",
+      "to": "ISM-1710",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1710",
+      "to": "ISM-1710",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1710",
+      "to": "ISM-1710",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1710",
+      "to": "ISM-1710",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1316",
+      "to": "ISM-1316",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1317",
+      "to": "ISM-1317",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1318",
+      "to": "ISM-1318",
+      "type": "CONTROL"
+    }
+  ]
+}

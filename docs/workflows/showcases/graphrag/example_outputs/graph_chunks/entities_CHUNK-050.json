@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-050",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "An entity responsible for handling data spills"
+    },
+    {
+      "id": "data owners",
+      "type": "ACTOR",
+      "text": "Individuals or entities who own the data"
+    },
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "People who interact with the data"
+    },
+    {
+      "id": "data",
+      "type": "CONCEPT",
+      "text": "Information that has been spilled"
+    },
+    {
+      "id": "systems",
+      "type": "CONCEPT",
+      "text": "Computing systems affected by data spill"
+    },
+    {
+      "id": "network connectivity",
+      "type": "CONCEPT",
+      "text": "Network connections to systems"
+    },
+    {
+      "id": "access controls",
+      "type": "CONCEPT",
+      "text": "Security measures to restrict data access"
+    },
+    {
+      "id": "forensic investigations",
+      "type": "CONCEPT",
+      "text": "Investigative processes to analyze data spills"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "data owners",
+      "type": "organisation"
+    },
+    {
+      "from": "data owners",
+      "to": "data",
+      "type": "systems"
+    }
+  ]
+}

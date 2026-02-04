@@ -1,8 +1,9 @@
 package workflow
 
 import (
-	"context"
 	"fmt"
+	"os"
+	"context"
 	"strings"
 	"sync"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/LaurieRhodes/mcp-cli-go/internal/domain/config"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/services/embeddings"
 	infraConfig "github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/config"
+	"github.com/LaurieRhodes/mcp-cli-go/internal/infrastructure/logging"
 	"github.com/LaurieRhodes/mcp-cli-go/internal/providers/ai"
 )
 
@@ -198,6 +200,8 @@ func (le *LoopExecutor) prepareLoopInput(loop *config.LoopV2, iteration int, las
 
 // executeWorkflow executes a workflow and returns its final output
 func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.WorkflowV2, inputData string) (string, error) {
+	fmt.Fprintf(os.Stderr, "[DEBUG_PRINT] executeWorkflow called for: %s\n", workflow.Name)
+	logging.Debug("[LOOP_EXEC] executeWorkflow called for workflow: %s", workflow.Name)
 	// Create sub-orchestrator
 	subLogger := NewLogger(workflow.Execution.Logging, false)
 	// CRITICAL: Inherit output from parent logger (stdout in CLI, stderr in MCP serve mode)
@@ -206,9 +210,22 @@ func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.Wo
 	
 	// Pass through dependencies
 	subOrchestrator.executor.SetAppConfig(le.appConfig)
-	if le.serverManager != nil {
+	
+	// CRITICAL: Initialize subordinate workflow's server manager
+	// This follows the exact same path as standalone workflow execution
+	subordinateServerManager, err := InitializeWorkflowServerManager(workflow, le.appConfig, "config.yaml")
+	if err != nil {
+		return "", fmt.Errorf("failed to initialize subordinate workflow: %w", err)
+	}
+	
+	if subordinateServerManager != nil {
+		// Subordinate workflow has its own skills
+		subOrchestrator.executor.SetServerManager(subordinateServerManager)
+	} else if le.serverManager != nil {
+		// No skills in subordinate - inherit parent's server manager
 		subOrchestrator.executor.SetServerManager(le.serverManager)
 	}
+	
 	subOrchestrator.SetAppConfigForWorkflows(le.appConfig)
 	
 	// Create fresh embedding service for child workflow (like standalone workflows do)
@@ -228,7 +245,7 @@ func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.Wo
 	le.interpolator.CopyLoopVars(subOrchestrator.interpolator)
 	
 	// Execute
-	err := subOrchestrator.Execute(ctx, inputData)
+	err = subOrchestrator.Execute(ctx, inputData)
 	if err != nil {
 		return "", err
 	}
@@ -243,6 +260,7 @@ func (le *LoopExecutor) executeWorkflow(ctx context.Context, workflow *config.Wo
 	
 	return "", fmt.Errorf("no output from workflow")
 }
+
 
 // evaluateCondition uses LLM to evaluate exit condition
 func (le *LoopExecutor) evaluateCondition(ctx context.Context, condition string, output string) (bool, error) {

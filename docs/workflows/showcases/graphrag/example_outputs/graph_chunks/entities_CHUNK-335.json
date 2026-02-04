@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-335",
+  "entities": [
+    {
+      "id": "backup restoration",
+      "type": "PROCESS",
+      "text": "Process of restoring data, software, and configuration settings from backups"
+    },
+    {
+      "id": "disaster recovery exercises",
+      "type": "PROCESS",
+      "text": "Coordinated testing activities for recovery procedures"
+    },
+    {
+      "id": "ISM-1515",
+      "type": "CONTROL",
+      "text": "Control identifier for backup restoration testing"
+    },
+    {
+      "id": "backup dependencies",
+      "type": "CONCEPT",
+      "text": "Dependencies that need to be identified and managed"
+    },
+    {
+      "id": "common point in time",
+      "type": "CONCEPT",
+      "text": "Target restoration timeframe"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "backup restoration",
+      "to": "disaster recovery exercises",
+      "type": "TESTED_IN"
+    },
+    {
+      "from": "disaster recovery exercises",
+      "to": "backup restoration",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "ISM-1515",
+      "to": "backup restoration",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "backup restoration",
+      "to": "backup dependencies",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "backup restoration",
+      "to": "common point in time",
+      "type": "TARGETS"
+    }
+  ]
+}

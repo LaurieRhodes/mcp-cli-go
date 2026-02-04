@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-233",
+  "entities": [
+    {
+      "id": "fax machine",
+      "type": "DEVICE",
+      "text": "Fax machine device"
+    },
+    {
+      "id": "fax machine memory",
+      "type": "STORAGE",
+      "text": "Memory storage in fax machine"
+    },
+    {
+      "id": "paper tray",
+      "type": "COMPONENT",
+      "text": "Paper tray component"
+    },
+    {
+      "id": "fax message",
+      "type": "DOCUMENT",
+      "text": "Fax message document"
+    },
+    {
+      "id": "fax summary page",
+      "type": "DOCUMENT",
+      "text": "Fax summary page document"
+    },
+    {
+      "id": "paper path",
+      "type": "COMPONENT",
+      "text": "Paper path component"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "fax machine",
+      "to": "fax machine memory",
+      "type": "HAS_MEMORY"
+    },
+    {
+      "from": "fax machine",
+      "to": "paper tray",
+      "type": "HAS_COMPONENT"
+    },
+    {
+      "from": "fax machine",
+      "to": "fax message",
+      "type": "TRANSMITS"
+    },
+    {
+      "from": "fax machine",
+      "to": "fax summary page",
+      "type": "GENERATES"
+    },
+    {
+      "from": "fax machine",
+      "to": "paper path",
+      "type": "HAS_COMPONENT"
+    },
+    {
+      "from": "fax machine",
+      "to": "fax machine",
+      "type": "HAS_COMPONENT"
+    }
+  ]
+}

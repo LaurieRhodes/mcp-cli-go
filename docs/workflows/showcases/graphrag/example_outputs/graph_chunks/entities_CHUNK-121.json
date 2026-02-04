@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-121",
+  "entities": [
+    {
+      "id": "SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables classified as SECRET level"
+    },
+    {
+      "id": "TOP SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables classified as TOP SECRET level"
+    },
+    {
+      "id": "cable bands",
+      "type": "CONCEPT",
+      "text": "Colored bands used to identify cable classification"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity responsible for implementing cable banding"
+    },
+    {
+      "id": "inspection points",
+      "type": "LOCATION",
+      "text": "Points where cable bands must be visible"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "organisation",
+      "type": "organisation"
+    },
+    {
+      "from": "SECRET cables",
+      "to": "TOP SECRET cables",
+      "type": "cable bands"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-334",
+  "entities": [
+    {
+      "id": "Backups",
+      "type": "CONCEPT",
+      "text": "Data backups requiring protection"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security controls"
+    },
+    {
+      "id": "Unprivileged accounts",
+      "type": "ACTOR",
+      "text": "User accounts without special privileges"
+    },
+    {
+      "id": "Privileged accounts",
+      "type": "ACTOR",
+      "text": "User accounts with elevated privileges"
+    },
+    {
+      "id": "Backup administrator accounts",
+      "type": "ACTOR",
+      "text": "Special privileged accounts for backup management"
+    },
+    {
+      "id": "Access controls",
+      "type": "PROCESS",
+      "text": "Security mechanisms to restrict access"
+    },
+    {
+      "id": "Retention period",
+      "type": "CONCEPT",
+      "text": "Time period during which backups must be preserved"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "PROTECTS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Backups",
+      "to": "PROTECTS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Access controls",
+      "to": "PREVENTED_FROM_MODIFYING_DELETING",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Backups",
+      "to": "PREVENTED_FROM_MODIFYING_DELETING",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Unprivileged accounts",
+      "to": "PREVENTED_FROM_MODIFYING_DELETING_DURING_RETENTION",
+      "type": "RELATED_TO"
+    }
+  ]
+}

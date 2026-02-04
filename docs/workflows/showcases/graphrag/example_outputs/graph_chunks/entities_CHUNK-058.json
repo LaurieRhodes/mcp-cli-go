@@ -1,0 +1,137 @@
+{
+  "chunk_id": "CHUNK-058",
+  "entities": [
+    {
+      "id": "applications",
+      "type": "CONCEPT",
+      "text": "Software programs and applications"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and communications technology hardware"
+    },
+    {
+      "id": "services",
+      "type": "CONCEPT",
+      "text": "Various services provided"
+    },
+    {
+      "id": "integrity",
+      "type": "PROPERTY",
+      "text": "State of being whole and unaltered"
+    },
+    {
+      "id": "authenticity",
+      "type": "PROPERTY",
+      "text": "State of being genuine and not counterfeit"
+    },
+    {
+      "id": "counterfeit products",
+      "type": "CONCEPT",
+      "text": "Products or services that are fake or unauthorized"
+    },
+    {
+      "id": "suppliers",
+      "type": "ACTOR",
+      "text": "External providers of products and services"
+    },
+    {
+      "id": "acceptance",
+      "type": "PROCESS",
+      "text": "Process of receiving and approving products/services"
+    },
+    {
+      "id": "digital distribution",
+      "type": "CHANNEL",
+      "text": "Electronic methods of delivery"
+    },
+    {
+      "id": "physical distribution",
+      "type": "CHANNEL",
+      "text": "Physical methods of delivery"
+    },
+    {
+      "id": "encrypted communication channels",
+      "type": "TECHNOLOGY",
+      "text": "Secure communication methods that protect data"
+    },
+    {
+      "id": "tracking",
+      "type": "TECHNOLOGY",
+      "text": "Monitoring movement of items"
+    },
+    {
+      "id": "tamper-evident packaging",
+      "type": "TECHNOLOGY",
+      "text": "Packaging that shows evidence of tampering"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "CHUNK-058",
+      "to": "CHUNK-058",
+      "type": "MENTIONED_IN"
+    }
+  ]
+}

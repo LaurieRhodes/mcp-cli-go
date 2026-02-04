@@ -1,0 +1,92 @@
+{
+  "chunk_id": "CHUNK-298",
+  "entities": [
+    {
+      "id": "Microsoft AD DS",
+      "type": "CONCEPT",
+      "text": "Active Directory Domain Services"
+    },
+    {
+      "id": "User accounts",
+      "type": "CONCEPT",
+      "text": "User accounts within AD DS"
+    },
+    {
+      "id": "Service accounts",
+      "type": "CONCEPT",
+      "text": "Accounts for running services"
+    },
+    {
+      "id": "Computer accounts",
+      "type": "CONCEPT",
+      "text": "Accounts for computer systems"
+    },
+    {
+      "id": "Service Principal Names (SPNs)",
+      "type": "CONCEPT",
+      "text": "Unique identifiers for services"
+    },
+    {
+      "id": "Privileged user accounts",
+      "type": "CONCEPT",
+      "text": "Accounts with elevated privileges"
+    },
+    {
+      "id": "Kerberos pre-authentication",
+      "type": "CONCEPT",
+      "text": "Authentication method for Kerberos"
+    },
+    {
+      "id": "Password policies",
+      "type": "CONCEPT",
+      "text": "Rules for password management"
+    },
+    {
+      "id": "Domain administrators group",
+      "type": "CONCEPT",
+      "text": "Highly privileged administrative group"
+    },
+    {
+      "id": "Unconstrained delegation",
+      "type": "CONCEPT",
+      "text": "Delegation without constraints"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Microsoft AD DS",
+      "to": "User accounts",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Service accounts",
+      "to": "SPNs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Service accounts",
+      "to": "Minimum privileges",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Privileged user accounts",
+      "to": "Cannot be delegated",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "User accounts",
+      "to": "Kerberos pre-authentication",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "User accounts",
+      "to": "Password expiration",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Computer accounts",
+      "to": "Domain controllers",
+      "type": "DEFINES"
+    }
+  ]
+}

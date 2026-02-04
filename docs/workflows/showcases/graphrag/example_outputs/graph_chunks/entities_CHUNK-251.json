@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-251",
+  "entities": [
+    {
+      "id": "volatile media",
+      "type": "CONCEPT",
+      "text": "Storage media that loses data when power is removed"
+    },
+    {
+      "id": "TOP SECRET classification",
+      "type": "CONCEPT",
+      "text": "Highest level of security classification"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of removing data from media"
+    },
+    {
+      "id": "remanence effects",
+      "type": "CONCEPT",
+      "text": "Residual data persistence after deletion"
+    },
+    {
+      "id": "ISM-0835",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for volatile media sanitisation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "volatile media",
+      "to": "sanitisation",
+      "type": "remanence effects"
+    },
+    {
+      "from": "TOP SECRET classification",
+      "to": "volatile media",
+      "type": "volatile media"
+    }
+  ]
+}

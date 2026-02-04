@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-061",
+  "entities": [
+    {
+      "id": "Managed service providers",
+      "type": "ACTOR",
+      "text": "Organizations providing managed IT services"
+    },
+    {
+      "id": "IRAP assessor",
+      "type": "ACTOR",
+      "text": "Certified security assessor under IRAP"
+    },
+    {
+      "id": "security assessment",
+      "type": "PROCESS",
+      "text": "Evaluation of security posture and risks"
+    },
+    {
+      "id": "Infosec Registered Assessor Program",
+      "type": "PROGRAM",
+      "text": "Australian government security assessment program"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Managed service providers",
+      "to": "IRAP assessor",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "IRAP assessor",
+      "to": "security assessment",
+      "type": "PERFORMS"
+    }
+  ]
+}

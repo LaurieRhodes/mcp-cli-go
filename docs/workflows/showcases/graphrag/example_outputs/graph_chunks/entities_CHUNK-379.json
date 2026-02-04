@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-379",
+  "entities": [
+    {
+      "id": "Sender Policy Framework (SPF)",
+      "type": "CONCEPT",
+      "text": "Email authentication protocol"
+    },
+    {
+      "id": "DomainKeys Identified Mail (DKIM)",
+      "type": "CONCEPT",
+      "text": "Email authentication protocol"
+    },
+    {
+      "id": "Domain-based Message Authentication, Reporting and Conformance (DMARC)",
+      "type": "CONCEPT",
+      "text": "Email authentication protocol"
+    },
+    {
+      "id": "protective marking checks",
+      "type": "CONCEPT",
+      "text": "Security checks for email classification"
+    },
+    {
+      "id": "centralised email gateways",
+      "type": "SYSTEM",
+      "text": "Centralized email routing system"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Organization implementing email security"
+    },
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "Individuals sending/receiving emails"
+    },
+    {
+      "id": "emails",
+      "type": "DATA",
+      "text": "Electronic mail messages"
+    },
+    {
+      "id": "authenticated and encrypted channel",
+      "type": "PROCESS",
+      "text": "Secure communication method"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "centralised email gateways",
+      "type": "USES"
+    },
+    {
+      "from": "organisation",
+      "to": "SPF",
+      "type": "DEPLOYS"
+    },
+    {
+      "from": "organisation",
+      "to": "DKIM",
+      "type": "DEPLOYS"
+    },
+    {
+      "from": "organisation",
+      "to": "DMARC",
+      "type": "DEPLOYS"
+    },
+    {
+      "from": "organisation",
+      "to": "protective marking checks",
+      "type": "DEPLOYS"
+    },
+    {
+      "from": "users",
+      "to": "emails",
+      "type": "SENDS_RECEIVES"
+    },
+    {
+      "from": "users",
+      "to": "centralised email gateways",
+      "type": "ROUTES_VIA"
+    },
+    {
+      "from": "users",
+      "to": "authenticated and encrypted channel",
+      "type": "USES"
+    },
+    {
+      "from": "users",
+      "to": "centralised email gateways",
+      "type": "ROUTES_VIA"
+    }
+  ]
+}

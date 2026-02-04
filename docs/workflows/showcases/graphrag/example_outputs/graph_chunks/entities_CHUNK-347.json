@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-347",
+  "entities": [
+    {
+      "id": "Application security testing",
+      "type": "CONCEPT",
+      "text": "Process of testing applications for security vulnerabilities"
+    },
+    {
+      "id": "Software developers",
+      "type": "ACTOR",
+      "text": "Individuals who develop software applications"
+    },
+    {
+      "id": "Static application security testing",
+      "type": "PROCESS",
+      "text": "SAST, analyzing source code for vulnerabilities"
+    },
+    {
+      "id": "Dynamic application security testing",
+      "type": "PROCESS",
+      "text": "DAST, testing running applications for vulnerabilities"
+    },
+    {
+      "id": "Independent party",
+      "type": "ACTOR",
+      "text": "Third-party entities used for unbiased testing"
+    },
+    {
+      "id": "Security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Weaknesses in applications that could be exploited"
+    },
+    {
+      "id": "ISM-0402",
+      "type": "CONCEPT",
+      "text": "Control requiring comprehensive testing before release"
+    },
+    {
+      "id": "ISM-1754",
+      "type": "CONCEPT",
+      "text": "Control requiring timely resolution of vulnerabilities"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Application security testing",
+      "to": "Software developers",
+      "type": "ASSISTS"
+    },
+    {
+      "from": "Software developers",
+      "to": "Security vulnerabilities",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "Software developers",
+      "to": "Independent party",
+      "type": "MAY_USE"
+    },
+    {
+      "from": "Application security testing",
+      "to": "Dynamic application security testing",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "Application security testing",
+      "to": "Static application security testing",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "Software developers",
+      "to": "Independent party",
+      "type": "ASSISTS"
+    },
+    {
+      "from": "ISM-0402",
+      "to": "Static application security testing",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1754",
+      "to": "Software developers",
+      "type": "REQUIRES"
+    }
+  ]
+}

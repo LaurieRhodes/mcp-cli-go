@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-048",
+  "entities": [
+    {
+      "id": "service providers",
+      "type": "ENTITY",
+      "text": "Service providers"
+    },
+    {
+      "id": "cybercrime incidents",
+      "type": "EVENT",
+      "text": "Cybercrime incidents"
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "EVENT",
+      "text": "Cyber security incidents"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "reporting of cyber security incidents",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "reporting cybercrime incidents",
+      "to": "ACSC",
+      "type": "REPORTS_TO"
+    },
+    {
+      "from": "reporting cyber security incidents",
+      "to": "ACSC",
+      "type": "REPORTS_TO"
+    }
+  ]
+}

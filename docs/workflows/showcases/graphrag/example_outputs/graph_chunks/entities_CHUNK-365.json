@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-365",
+  "entities": [
+    {
+      "id": "database register",
+      "type": "CONTROL",
+      "text": "A database register is developed, implemented, maintained and verified on a regular basis"
+    },
+    {
+      "id": "organisation databases",
+      "type": "ASSET",
+      "text": "All databases in an organisation and their contents"
+    },
+    {
+      "id": "assets",
+      "type": "ASSET",
+      "text": "Organisation assets that need protection"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1243",
+      "to": "Database register",
+      "type": "CONTROLS"
+    },
+    {
+      "from": "Database register",
+      "to": "Database register",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "Database register",
+      "to": "Organisation",
+      "type": "PROTECTS"
+    }
+  ]
+}

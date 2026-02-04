@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-024",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer responsible for cyber security alignment"
+    },
+    {
+      "id": "cyber security",
+      "type": "CONCEPT",
+      "text": "Protection of digital assets and information"
+    },
+    {
+      "id": "business objectives",
+      "type": "CONCEPT",
+      "text": "Strategic goals and targets of the organization"
+    },
+    {
+      "id": "cyber security steering committee",
+      "type": "ORGANIZATIONAL_STRUCTURE",
+      "text": "Formal governance body comprising key executives"
+    },
+    {
+      "id": "security risk management",
+      "type": "PROCESS",
+      "text": "Activities to identify, assess, and mitigate security risks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "CISO",
+      "type": "RESPONSIBLE_FOR"
+    },
+    {
+      "from": "cyber security",
+      "to": "business objectives",
+      "type": "ALIGNS_WITH"
+    }
+  ]
+}

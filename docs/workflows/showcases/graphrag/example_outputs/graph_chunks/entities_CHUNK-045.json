@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-045",
+  "entities": [
+    {
+      "id": "Cyber security personnel",
+      "type": "ACTOR",
+      "text": "Trained personnel for cyber security operations"
+    },
+    {
+      "id": "Data sources",
+      "type": "CONCEPT",
+      "text": "Sources like event logs for monitoring"
+    },
+    {
+      "id": "Analysis tools",
+      "type": "CONCEPT",
+      "text": "Tools supporting manual/automated analysis"
+    },
+    {
+      "id": "System design/development",
+      "type": "PROCESS",
+      "text": "Activities to add data capture functionality"
+    },
+    {
+      "id": "Cyber security incident detection",
+      "type": "PROCESS",
+      "text": "Process of detecting security incidents"
+    },
+    {
+      "id": "ISM-0120 control",
+      "type": "CONCEPT",
+      "text": "Control requiring access to data and tools"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cyber security incident detection",
+      "to": "Cyber security personnel",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Cyber security incident detection",
+      "to": "Data sources",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Cyber security incident detection",
+      "to": "Analysis tools",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "System design/development",
+      "to": "Data capture functionality",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-0120 control",
+      "to": "Access requirements",
+      "type": "DEFINES"
+    }
+  ]
+}

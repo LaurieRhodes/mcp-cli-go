@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-354",
+  "entities": [
+    {
+      "id": "Web application security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Security vulnerabilities in web applications"
+    },
+    {
+      "id": "Secure input handling",
+      "type": "PROCESS",
+      "text": "Process of handling input securely in web applications"
+    },
+    {
+      "id": "Validation/sanitisation",
+      "type": "PROCESS",
+      "text": "Process of validating and sanitizing input data"
+    },
+    {
+      "id": "Web applications",
+      "type": "ACTOR",
+      "text": "Software applications that run on web servers"
+    },
+    {
+      "id": "Input types",
+      "type": "CONCEPT",
+      "text": "Various types of input data received by web applications"
+    },
+    {
+      "id": "ISM-1240 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control for web application input handling"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Web application security vulnerabilities",
+      "to": "Secure input handling",
+      "type": "CAUSED_BY"
+    },
+    {
+      "from": "Web applications",
+      "to": "Validation/sanitisation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Validation/sanitisation",
+      "to": "Input types",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

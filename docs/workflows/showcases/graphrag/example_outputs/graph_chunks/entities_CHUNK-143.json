@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-143",
+  "entities": [
+    {
+      "id": "Australian Communications and Media Authority",
+      "type": "ACTOR",
+      "text": "Australian communications regulator"
+    },
+    {
+      "id": "SCEC",
+      "type": "ACTOR",
+      "text": "Security equipment certification body"
+    },
+    {
+      "id": "Attorney-General's Department",
+      "type": "ACTOR",
+      "text": "Australian government department"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Communications and Media Authority",
+      "to": "SCEC",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "SCEC",
+      "to": "Attorney-General's Department",
+      "type": "REFERENCES"
+    }
+  ]
+}

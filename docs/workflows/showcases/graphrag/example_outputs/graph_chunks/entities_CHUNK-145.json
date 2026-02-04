@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-145",
+  "entities": [
+    {
+      "id": "Fixed sites outside Australia",
+      "type": "LOCATION",
+      "text": "Geographic locations outside Australian territory"
+    },
+    {
+      "id": "deployed military platforms",
+      "type": "PLATFORM",
+      "text": "Military equipment deployed in operational environments"
+    },
+    {
+      "id": "ACSC",
+      "type": "ORGANIZATION",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "system owners",
+      "type": "ACTOR",
+      "text": "Individuals or organizations responsible for system deployment"
+    },
+    {
+      "id": "systems",
+      "type": "SYSTEM",
+      "text": "Information technology systems"
+    },
+    {
+      "id": "military platforms",
+      "type": "PLATFORM",
+      "text": "Military equipment and vehicles"
+    },
+    {
+      "id": "compromising signals",
+      "type": "SIGNAL",
+      "text": "Signals that could reveal sensitive information"
+    },
+    {
+      "id": "serious consequences",
+      "type": "RISK",
+      "text": "Significant negative outcomes including security breaches"
+    },
+    {
+      "id": "emanation security threat assessment",
+      "type": "PROCESS",
+      "text": "Evaluation of emanation security threats"
+    },
+    {
+      "id": "additional installation criteria",
+      "type": "REQUIREMENT",
+      "text": "Criteria for secure installation based on threat assessment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Fixed sites outside Australia",
+      "to": "deployed military platforms",
+      "type": "VULNERABLE_TO"
+    },
+    {
+      "from": "deployed military platforms",
+      "to": "emanation security threat assessment",
+      "type": "REQUIRES"
+    }
+  ]
+}

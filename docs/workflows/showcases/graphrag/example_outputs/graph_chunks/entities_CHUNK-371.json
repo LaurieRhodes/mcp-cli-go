@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-371",
+  "entities": [
+    {
+      "id": "event logging",
+      "type": "PROCESS",
+      "text": "Process of recording system events"
+    },
+    {
+      "id": "event logging and monitoring section",
+      "type": "CONCEPT",
+      "text": "Section covering logging and monitoring activities"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "CONCEPT",
+      "text": "Document providing system monitoring guidelines"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "event logging",
+      "to": "event logging and monitoring section",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "event logging and monitoring section",
+      "to": "Guidelines for System Monitoring",
+      "type": "PART_OF"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-513",
+  "entities": [
+    {
+      "id": "Archive files",
+      "type": "CONCEPT",
+      "text": "Files that can contain embedded files and bypass filtering"
+    },
+    {
+      "id": "Content filters",
+      "type": "PROCESS",
+      "text": "Systems that check file content for security"
+    },
+    {
+      "id": "Gateways/CDSs",
+      "type": "ACTOR",
+      "text": "Network devices that handle file import/export"
+    },
+    {
+      "id": "ISM-1289",
+      "type": "CONCEPT",
+      "text": "Control requiring unpacking of archive files for filtering"
+    },
+    {
+      "id": "ISM-1290",
+      "type": "CONCEPT",
+      "text": "Control requiring controlled unpacking of archive files"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Archive files",
+      "to": "Content filters",
+      "type": "BYPASS"
+    },
+    {
+      "from": "Content filters",
+      "to": "Archive files",
+      "type": "UNPACK"
+    },
+    {
+      "from": "Gateways/CDSs",
+      "to": "Archive files",
+      "type": "IMPORT/EXPORT"
+    },
+    {
+      "from": "ISM-1289",
+      "to": "Archive files",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1290",
+      "to": "Archive files",
+      "type": "REQUIRES"
+    }
+  ]
+}

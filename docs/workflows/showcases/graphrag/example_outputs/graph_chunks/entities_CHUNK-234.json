@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-234",
+  "entities": [
+    {
+      "id": "media sanitisation",
+      "type": "PROCESS",
+      "text": "The process of cleaning media to remove sensitive data"
+    },
+    {
+      "id": "media destruction",
+      "type": "PROCESS",
+      "text": "The process of destroying media to prevent data recovery"
+    },
+    {
+      "id": "network devices sanitisation",
+      "type": "PROCESS",
+      "text": "The process of cleaning network devices"
+    },
+    {
+      "id": "Guidelines for Media",
+      "type": "DOCUMENT",
+      "text": "Official guidelines document for media handling"
+    },
+    {
+      "id": "Common Criteria's Certified Products List",
+      "type": "DOCUMENT",
+      "text": "Certification documentation for evaluated products"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Guidelines for Media",
+      "to": "media sanitisation",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for Media",
+      "to": "media destruction",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Common Criteria's Certified Products List",
+      "to": "network devices sanitisation",
+      "type": "REQUIRES"
+    }
+  ]
+}

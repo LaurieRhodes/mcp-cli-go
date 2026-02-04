@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-518",
+  "entities": [
+    {
+      "id": "Content conversion",
+      "type": "CONCEPT",
+      "text": "Method to render malicious code harmless by converting file types"
+    },
+    {
+      "id": "Malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful code that can be neutralized through content conversion"
+    },
+    {
+      "id": "File types",
+      "type": "CONCEPT",
+      "text": "Different formats that can be converted between"
+    },
+    {
+      "id": "ISM-1286",
+      "type": "CONTROL",
+      "text": "Security control related to content conversion"
+    },
+    {
+      "id": "Gateways",
+      "type": "SYSTEM",
+      "text": "Systems through which files are imported/exported"
+    },
+    {
+      "id": "CDSs",
+      "type": "SYSTEM",
+      "text": "Content Delivery Systems through which files are imported/exported"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Content conversion",
+      "to": "Malicious code",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Content conversion",
+      "to": "File types",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1286",
+      "to": "Content conversion",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Gateways",
+      "to": "Content conversion",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "CDSs",
+      "to": "Content conversion",
+      "type": "REQUIRES"
+    }
+  ]
+}

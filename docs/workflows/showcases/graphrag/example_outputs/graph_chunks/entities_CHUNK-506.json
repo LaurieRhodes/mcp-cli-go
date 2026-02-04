@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-506",
+  "entities": [
+    {
+      "id": "web content filters",
+      "type": "CONCEPT",
+      "text": "Security tools that filter web content"
+    },
+    {
+      "id": "malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful software or scripts"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Threat actor attempting to deploy malicious code"
+    },
+    {
+      "id": "web content filtering",
+      "type": "PROCESS",
+      "text": "Process of filtering web-based content"
+    },
+    {
+      "id": "client-side active content",
+      "type": "CONCEPT",
+      "text": "Executable content on client side"
+    },
+    {
+      "id": "domain names",
+      "type": "CONCEPT",
+      "text": "Internet addresses for websites"
+    },
+    {
+      "id": "outbound web traffic",
+      "type": "CONCEPT",
+      "text": "Network traffic leaving an organization"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "web content filters",
+      "to": "malicious code",
+      "type": "REDUCES"
+    },
+    {
+      "from": "web content filters",
+      "to": "adversary",
+      "type": "DISRUPTS"
+    },
+    {
+      "from": "web content filtering",
+      "to": "web-based content",
+      "type": "FILTERS"
+    },
+    {
+      "from": "web content filters",
+      "to": "client-side active content",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "web content filtering",
+      "to": "outbound web traffic",
+      "type": "APPLIED_TO"
+    }
+  ]
+}

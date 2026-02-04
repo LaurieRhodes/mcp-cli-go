@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-190",
+  "entities": [
+    {
+      "id": "Paging services",
+      "type": "CONCEPT",
+      "text": "Communication services using paging technology"
+    },
+    {
+      "id": "Messaging services",
+      "type": "CONCEPT",
+      "text": "Various messaging platforms and services"
+    },
+    {
+      "id": "Messaging apps",
+      "type": "CONCEPT",
+      "text": "Application-based messaging platforms"
+    },
+    {
+      "id": "Sensitive data",
+      "type": "CONCEPT",
+      "text": "Confidential or restricted information"
+    },
+    {
+      "id": "Classified data",
+      "type": "CONCEPT",
+      "text": "Officially classified information"
+    },
+    {
+      "id": "ISM-0240",
+      "type": "CONTROL",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Paging services",
+      "to": "Sensitive data",
+      "type": "PROHIBITS"
+    },
+    {
+      "from": "Messaging services",
+      "to": "Sensitive data",
+      "type": "PROHIBITS"
+    },
+    {
+      "from": "Messaging apps",
+      "to": "Sensitive data",
+      "type": "PROHIBITS"
+    },
+    {
+      "from": "ISM-0240",
+      "to": "Paging services",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "ISM-0240",
+      "to": "Messaging services",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "ISM-0240",
+      "to": "Messaging apps",
+      "type": "GOVERNS"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-315",
+  "entities": [
+    {
+      "id": "Type 1 hypervisors",
+      "type": "CONCEPT",
+      "text": "Hypervisors that run on bare metal"
+    },
+    {
+      "id": "Type 2 hypervisors",
+      "type": "CONCEPT",
+      "text": "Hypervisors that run on top of a general purpose operating system"
+    },
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "Software platforms that manage computer hardware"
+    },
+    {
+      "id": "applications",
+      "type": "CONCEPT",
+      "text": "Software programs that perform specific functions"
+    },
+    {
+      "id": "software-based isolation mechanism",
+      "type": "CONCEPT",
+      "text": "Mechanisms for isolating software components"
+    },
+    {
+      "id": "general purpose operating system",
+      "type": "CONCEPT",
+      "text": "OS that provides general computing services"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Type 1 hypervisors",
+      "to": "operating systems",
+      "type": "TREATED_AS"
+    },
+    {
+      "from": "Type 2 hypervisors",
+      "to": "applications",
+      "type": "TREATED_AS"
+    },
+    {
+      "from": "Type 1 hypervisors",
+      "to": "software-based isolation mechanism",
+      "type": "COMBINATION_OF"
+    },
+    {
+      "from": "Type 2 hypervisors",
+      "to": "general purpose operating system",
+      "type": "RUNS_ON"
+    },
+    {
+      "from": "Type 2 hypervisors",
+      "to": "general purpose operating system",
+      "type": "PROVIDED_BY"
+    }
+  ]
+}

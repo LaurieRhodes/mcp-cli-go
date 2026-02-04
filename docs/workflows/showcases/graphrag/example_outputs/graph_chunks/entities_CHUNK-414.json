@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-414",
+  "entities": [
+    {
+      "id": "static IP addresses",
+      "type": "CONCEPT",
+      "text": "Network addressing method using fixed IP addresses"
+    },
+    {
+      "id": "wireless networks",
+      "type": "CONCEPT",
+      "text": "Network infrastructure using wireless communication"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious entity attempting unauthorized access"
+    },
+    {
+      "id": "management overhead",
+      "type": "PROCESS",
+      "text": "Administrative burden and operational complexity"
+    },
+    {
+      "id": "ISM-1319",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "static IP addresses",
+      "to": "adversary",
+      "type": "static IP addresses"
+    },
+    {
+      "from": "wireless networks",
+      "to": "wireless networks",
+      "type": "management overhead"
+    }
+  ]
+}

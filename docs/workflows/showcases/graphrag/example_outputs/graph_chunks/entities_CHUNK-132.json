@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-132",
+  "entities": [
+    {
+      "id": "wall outlet boxes",
+      "type": "CONCEPT",
+      "text": "Main method of connecting cabling infrastructure to workstations"
+    },
+    {
+      "id": "cabling infrastructure",
+      "type": "CONCEPT",
+      "text": "Infrastructure for cable connections"
+    },
+    {
+      "id": "workstations",
+      "type": "CONCEPT",
+      "text": "End-user computing devices"
+    },
+    {
+      "id": "SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables for SECRET classified information"
+    },
+    {
+      "id": "TOP SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables for TOP SECRET classified information"
+    },
+    {
+      "id": "ISM-1105",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for physical security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "wall outlet boxes",
+      "to": "wall outlet boxes",
+      "type": "CONNECTS"
+    },
+    {
+      "from": "cabling infrastructure",
+      "to": "workstations",
+      "type": "CONNECTS"
+    }
+  ]
+}

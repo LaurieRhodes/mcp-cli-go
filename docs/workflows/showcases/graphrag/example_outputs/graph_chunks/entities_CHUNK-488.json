@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-488",
+  "entities": [
+    {
+      "id": "Gateways",
+      "type": "CONCEPT",
+      "text": "Network security devices requiring testing and assessment"
+    },
+    {
+      "id": "IRAP assessor",
+      "type": "ACTOR",
+      "text": "Infosec Registered Assessor Program assessor who conducts security assessments"
+    },
+    {
+      "id": "Security testing",
+      "type": "PROCESS",
+      "text": "Testing of gateways following configuration changes and at regular intervals"
+    },
+    {
+      "id": "Security assessment",
+      "type": "PROCESS",
+      "text": "Formal evaluation of gateway security posture by IRAP assessor"
+    },
+    {
+      "id": "ISM-1037",
+      "type": "CONCEPT",
+      "text": "Control requiring gateway testing following configuration changes"
+    },
+    {
+      "id": "ISM-0100",
+      "type": "CONCEPT",
+      "text": "Control requiring regular security assessments by IRAP assessor"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Gateways",
+      "to": "Gateways",
+      "type": "Security assessment"
+    },
+    {
+      "from": "Security testing",
+      "to": "Security assessment",
+      "type": "IRAP assessor"
+    }
+  ]
+}

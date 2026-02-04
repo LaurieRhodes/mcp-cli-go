@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-384",
+  "entities": [
+    {
+      "id": "DKIM",
+      "type": "TECHNOLOGY",
+      "text": "DomainKeys Identified Mail technology"
+    },
+    {
+      "id": "DKIM records",
+      "type": "TECHNOLOGY",
+      "text": "Public key specification records"
+    },
+    {
+      "id": "DKIM signing",
+      "type": "PROCESS",
+      "text": "Process of enabling DKIM on outgoing emails"
+    },
+    {
+      "id": "DKIM signature",
+      "type": "TECHNOLOGY",
+      "text": "Digital signature in email header"
+    },
+    {
+      "id": "DKIM signatures",
+      "type": "PROCESS",
+      "text": "Process of verifying incoming email signatures"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0861",
+      "to": "ISM-0861",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0861",
+      "to": "ISM-0861",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1026",
+      "to": "ISM-1026",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1027",
+      "to": "ISM-1027",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1027",
+      "to": "ISM-1027",
+      "type": "CONTROL"
+    }
+  ]
+}

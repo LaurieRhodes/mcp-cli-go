@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-207",
+  "entities": [
+    {
+      "id": "evaluated product",
+      "type": "CONCEPT",
+      "text": "A product that has undergone evaluation"
+    },
+    {
+      "id": "unevaluated configuration",
+      "type": "CONCEPT",
+      "text": "Configuration that does not meet evaluation requirements"
+    },
+    {
+      "id": "evaluated configuration",
+      "type": "CONCEPT",
+      "text": "Configuration that meets evaluation requirements"
+    },
+    {
+      "id": "certification report",
+      "type": "DOCUMENT",
+      "text": "Document containing evaluation guidance and requirements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "evaluated product",
+      "to": "unevaluated configuration",
+      "type": "OPERATES_IN"
+    },
+    {
+      "from": "evaluated product",
+      "to": "evaluated configuration",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "evaluated configuration",
+      "to": "certification report",
+      "type": "PROVIDES_GUIDANCE"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-400",
+  "entities": [
+    {
+      "id": "Network-based Intrusion Detection System (NIDS)",
+      "type": "CONCEPT",
+      "text": "System for detecting network intrusions"
+    },
+    {
+      "id": "Network-based Intrusion Prevention System (NIPS)",
+      "type": "CONCEPT",
+      "text": "System for preventing network intrusions"
+    },
+    {
+      "id": "firewall",
+      "type": "CONCEPT",
+      "text": "Network security device"
+    },
+    {
+      "id": "gateways",
+      "type": "CONCEPT",
+      "text": "Network connection points between networks"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity deploying security systems"
+    },
+    {
+      "id": "network traffic",
+      "type": "CONCEPT",
+      "text": "Data packets moving through networks"
+    },
+    {
+      "id": "event logs",
+      "type": "CONCEPT",
+      "text": "Records of security events"
+    },
+    {
+      "id": "alerts",
+      "type": "CONCEPT",
+      "text": "Notifications of security incidents"
+    },
+    {
+      "id": "firewall ruleset",
+      "type": "CONCEPT",
+      "text": "Set of rules defining allowed/denied traffic"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "NIDS",
+      "to": "gateways",
+      "type": "LOCATED_IN"
+    },
+    {
+      "from": "NIPS",
+      "to": "organisation",
+      "type": "DEPLOYED_BY"
+    },
+    {
+      "from": "firewall",
+      "to": "NIDS",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "gateways",
+      "to": "NIPS",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "organisation",
+      "to": "firewall",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "network traffic",
+      "to": "network traffic",
+      "type": "GENERATES"
+    },
+    {
+      "from": "event logs",
+      "to": "event logs",
+      "type": "GENERATES"
+    },
+    {
+      "from": "alerts",
+      "to": "alerts",
+      "type": "CONTRADICTS"
+    },
+    {
+      "from": "firewall ruleset",
+      "to": "firewall ruleset",
+      "type": "RELATED_TO"
+    }
+  ]
+}

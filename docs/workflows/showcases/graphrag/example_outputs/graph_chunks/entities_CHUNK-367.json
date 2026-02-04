@@ -1,0 +1,122 @@
+{
+  "chunk_id": "CHUNK-367",
+  "entities": [
+    {
+      "id": "Database administrators",
+      "type": "ACTOR",
+      "text": "People responsible for managing database systems"
+    },
+    {
+      "id": "Database users",
+      "type": "ACTOR",
+      "text": "People who use database systems for work"
+    },
+    {
+      "id": "Databases",
+      "type": "CONCEPT",
+      "text": "Structured collections of data stored electronically"
+    },
+    {
+      "id": "Database contents",
+      "type": "CONCEPT",
+      "text": "Data stored within database systems"
+    },
+    {
+      "id": "Sensitivity/classification",
+      "type": "CONCEPT",
+      "text": "Level of protection required for data based on its importance"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing database security controls"
+    },
+    {
+      "id": "Work duties",
+      "type": "CONCEPT",
+      "text": "Job responsibilities determining access requirements"
+    },
+    {
+      "id": "Need-to-know principle",
+      "type": "CONCEPT",
+      "text": "Security principle limiting access to necessary information only"
+    },
+    {
+      "id": "Minimum privileges",
+      "type": "CONCEPT",
+      "text": "Security approach granting minimal access required"
+    },
+    {
+      "id": "Database views",
+      "type": "CONCEPT",
+      "text": "Virtual tables presenting specific data subsets"
+    },
+    {
+      "id": "Database roles",
+      "type": "CONCEPT",
+      "text": "Collections of database permissions assigned to users"
+    },
+    {
+      "id": "ISM-0393",
+      "type": "CONTROL",
+      "text": "ISM control requiring database classification"
+    },
+    {
+      "id": "ISM-1255",
+      "type": "CONTROL",
+      "text": "ISM control restricting database user access"
+    },
+    {
+      "id": "ISM-1268",
+      "type": "CONTROL",
+      "text": "ISM control enforcing need-to-know principle"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Database administrators",
+      "to": "Database contents",
+      "type": "KNOW_SENSITIVITY"
+    },
+    {
+      "from": "Database users",
+      "to": "Database contents",
+      "type": "KNOW_SENSITIVITY"
+    },
+    {
+      "from": "Organisation",
+      "to": "Databases",
+      "type": "CLASSIFY"
+    },
+    {
+      "from": "Organisation",
+      "to": "Database contents",
+      "type": "PROTECT"
+    },
+    {
+      "from": "Database users",
+      "to": "Database contents",
+      "type": "RESTRICTED_ACCESS"
+    },
+    {
+      "from": "Need-to-know principle",
+      "to": "Database contents",
+      "type": "ENFORCED_THROUGH"
+    },
+    {
+      "from": "ISM-0393",
+      "to": "Databases",
+      "type": "REQUIRES_CLASSIFICATION"
+    },
+    {
+      "from": "ISM-1255",
+      "to": "Database users",
+      "type": "RESTRICTS_ACCESS"
+    },
+    {
+      "from": "ISM-1268",
+      "to": "Database contents",
+      "type": "ENFORCES_NEED_TO_KNOW"
+    }
+  ]
+}

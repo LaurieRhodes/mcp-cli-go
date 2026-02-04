@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-467",
+  "entities": [
+    {
+      "id": "SSH-agent",
+      "type": "CONCEPT",
+      "text": "SSH key caching program that manages private keys"
+    },
+    {
+      "id": "Key caching programs",
+      "type": "CONCEPT",
+      "text": "Programs similar to SSH-agent that cache keys"
+    },
+    {
+      "id": "Private keys",
+      "type": "CONCEPT",
+      "text": "Cryptographic keys stored on workstations/servers"
+    },
+    {
+      "id": "Screen locks",
+      "type": "PROCESS",
+      "text": "Security mechanism to lock screens after inactivity"
+    },
+    {
+      "id": "Key caches",
+      "type": "PROCESS",
+      "text": "Temporary storage of unlocked private keys"
+    },
+    {
+      "id": "ISM-0489",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for SSH-agent usage"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "SSH-agent",
+      "to": "SSH-agent",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Screen locks",
+      "to": "Key caches",
+      "type": "REQUIRES"
+    }
+  ]
+}

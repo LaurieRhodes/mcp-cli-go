@@ -1,0 +1,132 @@
+{
+  "chunk_id": "CHUNK-314",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Risk management for cyber supply chains"
+    },
+    {
+      "id": "multi-factor authentication",
+      "type": "CONCEPT",
+      "text": "Authentication method requiring multiple verification factors"
+    },
+    {
+      "id": "event logging",
+      "type": "CONCEPT",
+      "text": "Recording system events for monitoring and analysis"
+    },
+    {
+      "id": "randomly generating passphrases",
+      "type": "PROCESS",
+      "text": "Process of creating secure passphrases using random methods"
+    },
+    {
+      "id": "group Managed Service Accounts",
+      "type": "CONCEPT",
+      "text": "Microsoft Windows Server account management feature"
+    },
+    {
+      "id": "Kerberos Key Distribution Center",
+      "type": "SYSTEM",
+      "text": "Active Directory authentication service"
+    },
+    {
+      "id": "Windows Defender Credential Guard",
+      "type": "SYSTEM",
+      "text": "Windows security feature for credential protection"
+    },
+    {
+      "id": "Windows Defender Remote Credential Guard",
+      "type": "SYSTEM",
+      "text": "Windows security feature for remote credential protection"
+    },
+    {
+      "id": "Protective Process Light for LSASS",
+      "type": "SYSTEM",
+      "text": "Security feature for protecting LSASS process"
+    },
+    {
+      "id": "mitigating the use of stolen credentials",
+      "type": "PROCESS",
+      "text": "Processes to prevent credential theft attacks"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Electronic Frontier Foundation",
+      "type": "ACTOR",
+      "text": "Digital rights organization"
+    },
+    {
+      "id": "RANDOM.ORG",
+      "type": "ACTOR",
+      "text": "Online random number service"
+    },
+    {
+      "id": "Microsoft",
+      "type": "ACTOR",
+      "text": "Technology company"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "multi-factor authentication",
+      "to": "ACSC's Implementing Multi-Factor Authentication publication",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "event logging",
+      "to": "Guidelines for System Monitoring",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "randomly generating passphrases",
+      "to": "Electronic Frontier Foundation",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "group Managed Service Accounts",
+      "to": "Microsoft",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Kerberos Key Distribution Center",
+      "to": "Microsoft publications",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Windows Defender Credential Guard",
+      "to": "Microsoft",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Windows Defender Remote Credential Guard",
+      "to": "Microsoft",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Protective Process Light for LSASS",
+      "to": "Microsoft",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "mitigating the use of stolen credentials",
+      "to": "ACSC publication",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "mitigating the use of stolen credentials",
+      "to": "Microsoft publication",
+      "type": "REFERENCES"
+    }
+  ]
+}

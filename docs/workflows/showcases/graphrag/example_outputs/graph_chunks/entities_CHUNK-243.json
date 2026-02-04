@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-243",
+  "entities": [
+    {
+      "id": "Media",
+      "type": "CONCEPT",
+      "text": "Physical storage devices that can be misplaced or stolen"
+    },
+    {
+      "id": "Data Protection",
+      "type": "PROCESS",
+      "text": "Measures to protect data stored on media"
+    },
+    {
+      "id": "Encryption",
+      "type": "PROCESS",
+      "text": "Cryptographic protection applied to media"
+    },
+    {
+      "id": "Media Handling",
+      "type": "PROCESS",
+      "text": "Procedures for managing media based on sensitivity"
+    },
+    {
+      "id": "Cryptographic Equipment/Software",
+      "type": "CONCEPT",
+      "text": "Tools used for encryption"
+    },
+    {
+      "id": "ISM-0831",
+      "type": "CONTROL",
+      "text": "Media handling control requirement"
+    },
+    {
+      "id": "ISM-1059",
+      "type": "CONTROL",
+      "text": "Media encryption control requirement"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Media",
+      "to": "Data Protection",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Data Protection",
+      "to": "Encryption",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Media",
+      "to": "Media Handling",
+      "type": "AFFECTS"
+    },
+    {
+      "from": "Encryption",
+      "to": "Cryptographic Equipment/Software",
+      "type": "BASED_ON"
+    },
+    {
+      "from": "Encryption",
+      "to": "Media Sensitivity",
+      "type": "USES"
+    },
+    {
+      "from": "Media Handling",
+      "to": "ISM-0831",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Media Handling",
+      "to": "ISM-1059",
+      "type": "DEFINES"
+    }
+  ]
+}

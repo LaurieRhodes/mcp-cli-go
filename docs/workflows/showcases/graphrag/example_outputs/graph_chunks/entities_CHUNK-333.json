@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-333",
+  "entities": [
+    {
+      "id": "backups",
+      "type": "CONCEPT",
+      "text": "Data backups for recovery purposes"
+    },
+    {
+      "id": "access controls",
+      "type": "CONCEPT",
+      "text": "Security mechanisms to restrict access"
+    },
+    {
+      "id": "unprivileged accounts",
+      "type": "ACTOR",
+      "text": "Accounts with limited system permissions"
+    },
+    {
+      "id": "privileged accounts",
+      "type": "ACTOR",
+      "text": "Accounts with elevated system permissions"
+    },
+    {
+      "id": "backup administrator accounts",
+      "type": "ACTOR",
+      "text": "Accounts specifically for managing backups"
+    },
+    {
+      "id": "security risk",
+      "type": "CONCEPT",
+      "text": "Potential threat to backup security"
+    },
+    {
+      "id": "unauthorised access",
+      "type": "CONCEPT",
+      "text": "Unauthorized viewing or modification of backups"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "backups",
+      "to": "unprivileged accounts",
+      "type": "privileged accounts"
+    },
+    {
+      "from": "access controls",
+      "to": "backups",
+      "type": "backups"
+    }
+  ]
+}

@@ -182,3 +182,10 @@ type SkillLoadResult struct {
 	Error       error         `json:"error,omitempty"`
 	LoadedFiles []string      `json:"loaded_files,omitempty"`
 }
+
+// HelperScriptRequest represents a request to run a helper script
+type HelperScriptRequest struct {
+	SkillName  string   // Skill containing the script
+	ScriptName string   // Script filename (e.g., "process_chunk.py")
+	Args       []string // Command-line arguments
+}

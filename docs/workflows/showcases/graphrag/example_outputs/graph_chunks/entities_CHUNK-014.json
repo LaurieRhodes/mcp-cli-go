@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-014",
+  "entities": [
+    {
+      "id": "risk management frameworks",
+      "type": "CONCEPT",
+      "text": "Various frameworks and practices for managing risk"
+    },
+    {
+      "id": "IRAP",
+      "type": "PROCESS",
+      "text": "Information Security Registered Assessors Program"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "risk management frameworks",
+      "to": "IRAP",
+      "type": "DEFINES"
+    },
+    {
+      "from": "IRAP",
+      "to": "ACSC",
+      "type": "REQUIRES"
+    }
+  ]
+}

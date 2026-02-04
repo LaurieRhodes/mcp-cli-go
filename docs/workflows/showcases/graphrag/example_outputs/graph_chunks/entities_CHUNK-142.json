@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-142",
+  "entities": [
+    {
+      "id": "TOP SECRET systems",
+      "type": "CONCEPT",
+      "text": "High-security classified systems"
+    },
+    {
+      "id": "Power system",
+      "type": "CONCEPT",
+      "text": "Electrical power infrastructure"
+    },
+    {
+      "id": "Denial of service",
+      "type": "CONCEPT",
+      "text": "Service disruption events"
+    },
+    {
+      "id": "ISM-1123",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "Power distribution board",
+      "type": "CONCEPT",
+      "text": "Electrical distribution equipment"
+    },
+    {
+      "id": "Uninterruptible Power Supply",
+      "type": "CONCEPT",
+      "text": "Backup power system"
+    },
+    {
+      "id": "TOP SECRET ICT equipment",
+      "type": "CONCEPT",
+      "text": "Classified information technology equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TOP SECRET systems",
+      "to": "Power system",
+      "type": "CONTROLS"
+    },
+    {
+      "from": "Power system",
+      "to": "Denial of service",
+      "type": "PREVENTS"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-062",
+  "entities": [
+    {
+      "id": "Outsourced cloud service register",
+      "type": "CONCEPT",
+      "text": "Formal record of outsourced cloud services"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity making security decisions"
+    },
+    {
+      "id": "Security risk assessment",
+      "type": "PROCESS",
+      "text": "Process of evaluating security risks"
+    },
+    {
+      "id": "Outsourced cloud services",
+      "type": "CONCEPT",
+      "text": "Cloud services provided by third parties"
+    },
+    {
+      "id": "ISM-1637",
+      "type": "CONCEPT",
+      "text": "Control for cloud service register"
+    },
+    {
+      "id": "ISM-1638",
+      "type": "CONCEPT",
+      "text": "Control for register contents"
+    },
+    {
+      "id": "ISM-1529",
+      "type": "CONCEPT",
+      "text": "Control for SECRET/TOP SECRET services"
+    },
+    {
+      "id": "Community clouds",
+      "type": "CONCEPT",
+      "text": "Cloud deployment model for classified data"
+    },
+    {
+      "id": "Private clouds",
+      "type": "CONCEPT",
+      "text": "Cloud deployment model for classified data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "PERFORMS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Security risk assessment",
+      "to": "MAINTAINS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Organisation",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Outsourced cloud service register",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ISM-1637",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Outsourced cloud service register",
+      "to": "AFFECTS",
+      "type": "RELATED_TO"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-175",
+  "entities": [
+    {
+      "id": "Fax machines",
+      "type": "DEVICE",
+      "text": "Physical devices for fax communication"
+    },
+    {
+      "id": "MFDs",
+      "type": "DEVICE",
+      "text": "Multifunction devices combining printing, scanning, copying, faxing"
+    },
+    {
+      "id": "Public areas",
+      "type": "LOCATION",
+      "text": "Accessible spaces with visibility"
+    },
+    {
+      "id": "ISM-1036",
+      "type": "CONTROL",
+      "text": "Information Security Manual control identifier"
+    },
+    {
+      "id": "Suspicious use",
+      "type": "ACTIVITY",
+      "text": "Potentially malicious or unauthorized activities"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Fax machines",
+      "to": "MFDs",
+      "type": "LOCATED_IN"
+    },
+    {
+      "from": "Public areas",
+      "to": "Public areas",
+      "type": "LOCATED_IN"
+    }
+  ]
+}

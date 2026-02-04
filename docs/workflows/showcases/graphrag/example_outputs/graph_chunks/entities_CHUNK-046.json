@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-046",
+  "entities": [
+    {
+      "id": "Chief Information Security Officer",
+      "type": "ACTOR",
+      "text": "Senior security officer responsible for incident oversight"
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security breaches or events requiring reporting"
+    },
+    {
+      "id": "legislative obligations",
+      "type": "CONCEPT",
+      "text": "Legal requirements for incident disclosure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Chief Information Security Officer",
+      "to": "cyber security incidents",
+      "type": "REPORTS_TO"
+    },
+    {
+      "from": "cyber security incidents",
+      "to": "legislative obligations",
+      "type": "SUBJECT_TO"
+    }
+  ]
+}

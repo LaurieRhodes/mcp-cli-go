@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-308",
+  "entities": [
+    {
+      "id": "credentials",
+      "type": "CONCEPT",
+      "text": "Authentication information used to verify identity"
+    },
+    {
+      "id": "accounts",
+      "type": "CONCEPT",
+      "text": "User or system identities requiring credentials"
+    },
+    {
+      "id": "ISM-1590",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for credential management"
+    },
+    {
+      "id": "ISM-1847",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for credential change requirements"
+    },
+    {
+      "id": "Kerberos Key Distribution Center",
+      "type": "PROCESS",
+      "text": "Authentication service in Windows Active Directory"
+    },
+    {
+      "id": "KRBTGT",
+      "type": "ACTOR",
+      "text": "Service account for Kerberos authentication"
+    },
+    {
+      "id": "Microsoft Active Directory Domain Services",
+      "type": "PROCESS",
+      "text": "Directory service for managing network resources"
+    },
+    {
+      "id": "domain controllers",
+      "type": "ACTOR",
+      "text": "Servers that respond to authentication requests"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "credentials",
+      "to": "ISM-1590",
+      "type": "ISM-1847"
+    },
+    {
+      "from": "accounts",
+      "to": "credentials",
+      "type": "credentials"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-126",
+  "entities": [
+    {
+      "id": "clear covers",
+      "type": "PHYSICAL_OBJECT",
+      "text": "Transparent protective covers for inspection"
+    },
+    {
+      "id": "enclosed cable reticulation systems",
+      "type": "SYSTEM",
+      "text": "Cable distribution infrastructure"
+    },
+    {
+      "id": "conduits",
+      "type": "PHYSICAL_OBJECT",
+      "text": "Pipes for cable protection"
+    },
+    {
+      "id": "ducts",
+      "type": "PHYSICAL_OBJECT",
+      "text": "Channels for cable routing"
+    },
+    {
+      "id": "cable trays",
+      "type": "PHYSICAL_OBJECT",
+      "text": "Support structures for cables in floors/ceilings"
+    },
+    {
+      "id": "clear plastic",
+      "type": "MATERIAL",
+      "text": "Transparent plastic material"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "shared facilities",
+      "to": "cable reticulation systems",
+      "type": "COMPONENT_OF"
+    },
+    {
+      "from": "shared facilities",
+      "to": "cable reticulation systems",
+      "type": "LOCATED_IN"
+    },
+    {
+      "from": "shared facilities",
+      "to": "cable reticulation systems",
+      "type": "COMPONENT_OF"
+    },
+    {
+      "from": "shared facilities",
+      "to": "cable reticulation systems",
+      "type": "COMPONENT_OF"
+    },
+    {
+      "from": "shared facilities",
+      "to": "cable reticulation systems",
+      "type": "COMPONENT_OF"
+    },
+    {
+      "from": "conduits/ducts/cable trays",
+      "to": "fittings",
+      "type": "MADE_OF"
+    }
+  ]
+}

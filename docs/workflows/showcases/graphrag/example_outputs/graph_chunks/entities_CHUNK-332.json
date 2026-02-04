@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-332",
+  "entities": [
+    {
+      "id": "backups",
+      "type": "CONCEPT",
+      "text": "Data protection copies"
+    },
+    {
+      "id": "ransomware attack",
+      "type": "CONCEPT",
+      "text": "Malicious software attack"
+    },
+    {
+      "id": "business continuity requirements",
+      "type": "CONCEPT",
+      "text": "Organizational recovery needs"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Business entity"
+    },
+    {
+      "id": "system",
+      "type": "CONCEPT",
+      "text": "Computing infrastructure"
+    },
+    {
+      "id": "important data",
+      "type": "CONCEPT",
+      "text": "Critical information"
+    },
+    {
+      "id": "software",
+      "type": "CONCEPT",
+      "text": "Programs and applications"
+    },
+    {
+      "id": "configuration settings",
+      "type": "CONCEPT",
+      "text": "System setup parameters"
+    },
+    {
+      "id": "ISM-1511",
+      "type": "CONTROL",
+      "text": "ISM control for backup frequency"
+    },
+    {
+      "id": "ISM-1810",
+      "type": "CONTROL",
+      "text": "ISM control for backup synchronization"
+    },
+    {
+      "id": "ISM-1811",
+      "type": "CONTROL",
+      "text": "ISM control for backup security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "backups",
+      "to": "organisation",
+      "type": "backups"
+    },
+    {
+      "from": "ransomware attack",
+      "to": "backups",
+      "type": "business continuity requirements"
+    }
+  ]
+}

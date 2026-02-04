@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-329",
+  "entities": [
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "System Patching",
+      "type": "PROCESS",
+      "text": "Process of applying security updates to systems"
+    },
+    {
+      "id": "Assessing Security Vulnerabilities and Applying Patches",
+      "type": "CONCEPT",
+      "text": "ACSC publication on vulnerability assessment and patching"
+    },
+    {
+      "id": "Evaluated Products",
+      "type": "CONCEPT",
+      "text": "Products that have undergone security evaluation"
+    },
+    {
+      "id": "Guidelines for Evaluated Products",
+      "type": "CONCEPT",
+      "text": "Guidelines document for evaluated products"
+    },
+    {
+      "id": "Microsoft Windows",
+      "type": "CONCEPT",
+      "text": "Microsoft operating system"
+    },
+    {
+      "id": "Microsoft Windows Server",
+      "type": "CONCEPT",
+      "text": "Microsoft server operating system"
+    },
+    {
+      "id": "End of Support for Microsoft Windows and Microsoft Windows Server",
+      "type": "CONCEPT",
+      "text": "ACSC publication on Windows end-of-support"
+    },
+    {
+      "id": "User Applications",
+      "type": "CONCEPT",
+      "text": "Software applications used by end-users"
+    },
+    {
+      "id": "Server Applications",
+      "type": "CONCEPT",
+      "text": "Software applications running on servers"
+    },
+    {
+      "id": "Guidelines for System Hardening",
+      "type": "CONCEPT",
+      "text": "Guidelines document for system security hardening"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ACSC",
+      "to": "Assessing Security Vulnerabilities and Applying Patches",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "System Patching",
+      "to": "Assessing Security Vulnerabilities and Applying Patches",
+      "type": "REFERENCED_IN"
+    },
+    {
+      "from": "Evaluated Products",
+      "to": "Guidelines for Evaluated Products",
+      "type": "DEFINED_IN"
+    },
+    {
+      "from": "Microsoft Windows",
+      "to": "End of Support for Microsoft Windows and Microsoft Windows Server",
+      "type": "SUBJECT_OF"
+    },
+    {
+      "from": "Microsoft Windows Server",
+      "to": "End of Support for Microsoft Windows and Microsoft Windows Server",
+      "type": "SUBJECT_OF"
+    },
+    {
+      "from": "User Applications",
+      "to": "Guidelines for System Hardening",
+      "type": "GUIDED_BY"
+    },
+    {
+      "from": "Server Applications",
+      "to": "Guidelines for System Hardening",
+      "type": "GUIDED_BY"
+    }
+  ]
+}

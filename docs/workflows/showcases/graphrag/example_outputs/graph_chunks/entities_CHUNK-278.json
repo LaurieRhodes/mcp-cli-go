@@ -1,0 +1,212 @@
+{
+  "chunk_id": "CHUNK-278",
+  "entities": [
+    {
+      "id": "Application control",
+      "type": "CONCEPT",
+      "text": "Security mechanism to restrict application execution"
+    },
+    {
+      "id": "Workstations",
+      "type": "SYSTEM",
+      "text": "End-user computing devices"
+    },
+    {
+      "id": "Internet-facing servers",
+      "type": "SYSTEM",
+      "text": "Servers accessible from the internet"
+    },
+    {
+      "id": "Non-internet-facing servers",
+      "type": "SYSTEM",
+      "text": "Internal servers not exposed to internet"
+    },
+    {
+      "id": "Executables",
+      "type": "FILE_TYPE",
+      "text": ".exe and .com files"
+    },
+    {
+      "id": "Software libraries",
+      "type": "FILE_TYPE",
+      "text": ".dll and .ocx files"
+    },
+    {
+      "id": "Scripts",
+      "type": "FILE_TYPE",
+      "text": ".ps1, .bat, .cmd, .vbs and .js files"
+    },
+    {
+      "id": "Installers",
+      "type": "FILE_TYPE",
+      "text": ".msi, .msp and .mst files"
+    },
+    {
+      "id": "Compiled HTML",
+      "type": "FILE_TYPE",
+      "text": ".chm files"
+    },
+    {
+      "id": "HTML applications",
+      "type": "FILE_TYPE",
+      "text": ".hta files"
+    },
+    {
+      "id": "Control panel applets",
+      "type": "FILE_TYPE",
+      "text": ".cpl files"
+    },
+    {
+      "id": "Drivers",
+      "type": "FILE_TYPE",
+      "text": "Device drivers"
+    },
+    {
+      "id": "Cryptographic hash rules",
+      "type": "METHOD",
+      "text": "Rules based on file hash values"
+    },
+    {
+      "id": "Publisher certificate rules",
+      "type": "METHOD",
+      "text": "Rules based on digital certificates"
+    },
+    {
+      "id": "Path rules",
+      "type": "METHOD",
+      "text": "Rules based on file location"
+    },
+    {
+      "id": "Microsoft recommended block rules",
+      "type": "RULE_SET",
+      "text": "Microsoft's recommended application block rules"
+    },
+    {
+      "id": "Microsoft recommended driver block rules",
+      "type": "RULE_SET",
+      "text": "Microsoft's recommended driver block rules"
+    },
+    {
+      "id": "Local administrator accounts",
+      "type": "ACCOUNT_TYPE",
+      "text": "Administrative user accounts"
+    },
+    {
+      "id": "Break glass accounts",
+      "type": "ACCOUNT_TYPE",
+      "text": "Emergency access accounts"
+    },
+    {
+      "id": "Event logs",
+      "type": "LOG_TYPE",
+      "text": "Records of allowed/blocked execution events"
+    },
+    {
+      "id": "Central storage",
+      "type": "STORAGE_TYPE",
+      "text": "Centralized log repository"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Application control",
+      "to": "Workstations",
+      "type": "IMPLEMENTED_ON"
+    },
+    {
+      "from": "Application control",
+      "to": "Internet-facing servers",
+      "type": "IMPLEMENTED_ON"
+    },
+    {
+      "from": "Application control",
+      "to": "Non-internet-facing servers",
+      "type": "IMPLEMENTED_ON"
+    },
+    {
+      "from": "Application control",
+      "to": "Executables",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "Software libraries",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "Scripts",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "Installers",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "Compiled HTML",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "HTML applications",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "Control panel applets",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "Drivers",
+      "type": "RESTRICTS"
+    },
+    {
+      "from": "Application control",
+      "to": "Cryptographic hash rules",
+      "type": "IMPLEMENTED_USING"
+    },
+    {
+      "from": "Application control",
+      "to": "Publisher certificate rules",
+      "type": "IMPLEMENTED_USING"
+    },
+    {
+      "from": "Application control",
+      "to": "Path rules",
+      "type": "IMPLEMENTED_USING"
+    },
+    {
+      "from": "Application control",
+      "to": "Microsoft recommended block rules",
+      "type": "IMPLEMENTED"
+    },
+    {
+      "from": "Application control",
+      "to": "Microsoft recommended driver block rules",
+      "type": "IMPLEMENTED"
+    },
+    {
+      "from": "Application control",
+      "to": "Local administrator accounts",
+      "type": "EXCEPTION_FOR"
+    },
+    {
+      "from": "Application control",
+      "to": "Break glass accounts",
+      "type": "EXCEPTION_FOR"
+    },
+    {
+      "from": "Application control",
+      "to": "Event logs",
+      "type": "LOGGED"
+    },
+    {
+      "from": "Application control",
+      "to": "Central storage",
+      "type": "STORED_IN"
+    }
+  ]
+}

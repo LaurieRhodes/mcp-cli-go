@@ -1,0 +1,102 @@
+{
+  "chunk_id": "CHUNK-011",
+  "entities": [
+    {
+      "id": "security assessment",
+      "type": "PROCESS",
+      "text": "Process of evaluating system controls"
+    },
+    {
+      "id": "ASD assessors",
+      "type": "ACTOR",
+      "text": "Australian Signals Directorate assessors"
+    },
+    {
+      "id": "IRAP assessors",
+      "type": "ACTOR",
+      "text": "Infosec Registered Assessors Program assessors"
+    },
+    {
+      "id": "security assessment report",
+      "type": "DOCUMENT",
+      "text": "Report outlining assessment findings"
+    },
+    {
+      "id": "TOP SECRET systems",
+      "type": "SYSTEM",
+      "text": "Highest classification systems"
+    },
+    {
+      "id": "SECRET systems",
+      "type": "SYSTEM",
+      "text": "Lower classification systems"
+    },
+    {
+      "id": "sensitive compartmented information systems",
+      "type": "SYSTEM",
+      "text": "Special compartmented systems"
+    },
+    {
+      "id": "security assessment plan",
+      "type": "DOCUMENT",
+      "text": "Plan documenting assessment scope"
+    },
+    {
+      "id": "system owners",
+      "type": "ACTOR",
+      "text": "Owners of systems being assessed"
+    },
+    {
+      "id": "assessors",
+      "type": "ACTOR",
+      "text": "Individuals conducting assessments"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "security assessment",
+      "to": "ASD assessors",
+      "type": "CAN_BE_DONE_BY"
+    },
+    {
+      "from": "security assessment",
+      "to": "IRAP assessors",
+      "type": "CAN_BE_DONE_BY"
+    },
+    {
+      "from": "security assessment",
+      "to": "security assessment report",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "security assessment",
+      "to": "TOP SECRET systems",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "security assessment",
+      "to": "SECRET systems",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "security assessment",
+      "to": "sensitive compartmented information systems",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "security assessment",
+      "to": "security assessment plan",
+      "type": "DOCUMENTS"
+    },
+    {
+      "from": "security assessment",
+      "to": "system owners",
+      "type": "INVOLVES"
+    },
+    {
+      "from": "security assessment",
+      "to": "assessors",
+      "type": "INVOLVES"
+    }
+  ]
+}

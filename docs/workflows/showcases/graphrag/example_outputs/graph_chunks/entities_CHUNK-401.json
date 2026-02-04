@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-401",
+  "entities": [
+    {
+      "id": "anonymity_networks",
+      "type": "CONCEPT",
+      "text": "Networks like Tor providing anonymous connections"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actors using anonymity networks for attacks"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Organization managing network security"
+    },
+    {
+      "id": "inbound_connections",
+      "type": "PROCESS",
+      "text": "Network connections from anonymity networks to organization services"
+    },
+    {
+      "id": "outbound_connections",
+      "type": "PROCESS",
+      "text": "Network connections from organization to anonymity networks"
+    },
+    {
+      "id": "malware",
+      "type": "ACTOR",
+      "text": "Malicious software using anonymity networks for C2/data exfiltration"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "anonymity_networks",
+      "to": "inbound_connections",
+      "type": "ENABLES"
+    },
+    {
+      "from": "adversary",
+      "to": "inbound_connections",
+      "type": "USES"
+    },
+    {
+      "from": "organisation",
+      "to": "inbound_connections",
+      "type": "BLOCKS"
+    },
+    {
+      "from": "anonymity_networks",
+      "to": "outbound_connections",
+      "type": "ENABLES"
+    },
+    {
+      "from": "malware",
+      "to": "outbound_connections",
+      "type": "USES"
+    },
+    {
+      "from": "organisation",
+      "to": "outbound_connections",
+      "type": "BLOCKS"
+    }
+  ]
+}

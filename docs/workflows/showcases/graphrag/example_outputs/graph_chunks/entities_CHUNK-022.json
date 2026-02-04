@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-022",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer responsible for security leadership"
+    },
+    {
+      "id": "Cyber security leadership and guidance",
+      "type": "CONCEPT",
+      "text": "Concept of providing security direction and oversight"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity that appoints the CISO"
+    },
+    {
+      "id": "ISM-0714 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring CISO appointment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "CISO",
+      "type": "APPOINTS"
+    },
+    {
+      "from": "CISO",
+      "to": "Cyber security leadership and guidance",
+      "type": "PROVIDES"
+    }
+  ]
+}

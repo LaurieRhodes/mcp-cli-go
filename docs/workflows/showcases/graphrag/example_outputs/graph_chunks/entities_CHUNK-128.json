@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-128",
+  "entities": [
+    {
+      "id": "TOP SECRET conduits",
+      "type": "CONCEPT",
+      "text": "Secure communication pathways for TOP SECRET information"
+    },
+    {
+      "id": "Labels",
+      "type": "CONCEPT",
+      "text": "Visual identifiers for conduit classification"
+    },
+    {
+      "id": "ISM-0201",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for conduit labelling"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TOP SECRET conduits",
+      "to": "Labels",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Labels",
+      "to": "ISM-0201",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

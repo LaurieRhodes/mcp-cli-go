@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-453",
+  "entities": [
+    {
+      "id": "Hashing algorithm",
+      "type": "CONCEPT",
+      "text": "Cryptographic function for data integrity"
+    },
+    {
+      "id": "SHA-2 family",
+      "type": "CONCEPT",
+      "text": "Approved hashing algorithm family"
+    },
+    {
+      "id": "SHA-224",
+      "type": "CONCEPT",
+      "text": "224-bit output hashing algorithm"
+    },
+    {
+      "id": "SHA-256",
+      "type": "CONCEPT",
+      "text": "256-bit output hashing algorithm"
+    },
+    {
+      "id": "SHA-384",
+      "type": "CONCEPT",
+      "text": "384-bit output hashing algorithm"
+    },
+    {
+      "id": "ISM-1766",
+      "type": "PROCESS",
+      "text": "Control for OFFICIAL/PROTECTED classification"
+    },
+    {
+      "id": "ISM-1767",
+      "type": "PROCESS",
+      "text": "Control for SECRET classification"
+    },
+    {
+      "id": "ISM-1768",
+      "type": "PROCESS",
+      "text": "Control for TOP SECRET classification"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Hashing algorithm",
+      "to": "SHA-2 family",
+      "type": "DEFINES"
+    },
+    {
+      "from": "SHA-2 family",
+      "to": "SHA-224",
+      "type": "DEFINES"
+    },
+    {
+      "from": "SHA-2 family",
+      "to": "SHA-256",
+      "type": "DEFINES"
+    },
+    {
+      "from": "SHA-2 family",
+      "to": "SHA-384",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1766",
+      "to": "SHA-224",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1767",
+      "to": "SHA-256",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1768",
+      "to": "SHA-384",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-059",
+  "entities": [
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "Australian government cybersecurity agency"
+    },
+    {
+      "id": "Cybersecurity & Infrastructure Security Agency",
+      "type": "ACTOR",
+      "text": "US government cybersecurity agency"
+    },
+    {
+      "id": "National Institute of Standards and Technology",
+      "type": "ACTOR",
+      "text": "US standards organization"
+    },
+    {
+      "id": "Attorney-General's Department",
+      "type": "ACTOR",
+      "text": "Australian government department"
+    },
+    {
+      "id": "Cyber Supply Chain Risk Management",
+      "type": "CONCEPT",
+      "text": "Risk management approach for cyber supply chains"
+    },
+    {
+      "id": "Cyber Supply Chain Risks",
+      "type": "CONCEPT",
+      "text": "Identification of risks in cyber supply chains"
+    },
+    {
+      "id": "ICT supply chain resource library",
+      "type": "RESOURCE",
+      "text": "Library of ICT supply chain resources"
+    },
+    {
+      "id": "Cybersecurity Supply Chain Risk Management Practices for Systems and Organizations",
+      "type": "PUBLICATION",
+      "text": "NIST publication on supply chain risk management"
+    },
+    {
+      "id": "Protective Security Policy Framework",
+      "type": "FRAMEWORK",
+      "text": "Australian government security framework"
+    },
+    {
+      "id": "Security governance for contracted goods and service providers",
+      "type": "POLICY",
+      "text": "Policy for security governance of contracted providers"
+    },
+    {
+      "id": "Guidelines for Evaluated Products",
+      "type": "GUIDELINE",
+      "text": "Guidelines for evaluated ICT products"
+    },
+    {
+      "id": "evaluated product procurement",
+      "type": "PROCESS",
+      "text": "Procurement process for evaluated products"
+    },
+    {
+      "id": "evaluated product use",
+      "type": "PROCESS",
+      "text": "Use process for evaluated products"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Cyber Supply Chain Risk Management",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Cyber Supply Chain Risks",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Cybersecurity & Infrastructure Security Agency",
+      "to": "ICT supply chain resource library",
+      "type": "MAINTAINS"
+    },
+    {
+      "from": "National Institute of Standards and Technology",
+      "to": "Cybersecurity Supply Chain Risk Management Practices for Systems and Organizations",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Attorney-General's Department",
+      "to": "Protective Security Policy Framework",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Guidelines for Evaluated Products",
+      "to": "evaluated product procurement",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Guidelines for Evaluated Products",
+      "to": "evaluated product use",
+      "type": "DEFINES"
+    }
+  ]
+}

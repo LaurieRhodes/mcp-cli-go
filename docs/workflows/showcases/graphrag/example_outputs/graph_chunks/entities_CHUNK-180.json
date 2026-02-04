@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-180",
+  "entities": [
+    {
+      "id": "Privately-owned mobile devices",
+      "type": "CONCEPT",
+      "text": "Mobile devices owned by individuals not the organization"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security controls"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Individuals accessing organizational systems"
+    },
+    {
+      "id": "Legal advice",
+      "type": "PROCESS",
+      "text": "Process of obtaining legal counsel"
+    },
+    {
+      "id": "ASD-approved platform",
+      "type": "CONCEPT",
+      "text": "Platform approved by Australian Signals Directorate"
+    },
+    {
+      "id": "ACSC guidance",
+      "type": "CONCEPT",
+      "text": "Guidance from Australian Cyber Security Centre"
+    },
+    {
+      "id": "Privacy Act 1988",
+      "type": "CONCEPT",
+      "text": "Australian privacy legislation"
+    },
+    {
+      "id": "Archives Act 1983",
+      "type": "CONCEPT",
+      "text": "Australian archives legislation"
+    },
+    {
+      "id": "ISM controls",
+      "type": "CONCEPT",
+      "text": "Information Security Manual controls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "Legal advice",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Organisation",
+      "to": "Privately-owned mobile devices",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Personnel",
+      "to": "ASD-approved platform",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ASD-approved platform",
+      "to": "ACSC guidance",
+      "type": "DEFINES"
+    }
+  ]
+}

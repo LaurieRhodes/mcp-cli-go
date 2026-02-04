@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-230",
+  "entities": [
+    {
+      "id": "hardware failure",
+      "type": "CONDITION",
+      "text": "Hardware malfunction preventing sanitization"
+    },
+    {
+      "id": "empty cartridge",
+      "type": "CONDITION",
+      "text": "Empty printer cartridge"
+    },
+    {
+      "id": "paper jam",
+      "type": "CONDITION",
+      "text": "Paper stuck in printer path"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Sanitising printers and multifunction devices",
+      "to": "Sanitising printers and multifunction devices",
+      "type": "TRIGGERS"
+    },
+    {
+      "from": "Sanitising printers and multifunction devices",
+      "to": "Sanitising printers and multifunction devices",
+      "type": "TRIGGERS"
+    },
+    {
+      "from": "Sanitising printers and multifunction devices",
+      "to": "Sanitising printers and multifunction devices",
+      "type": "TRIGGERS"
+    }
+  ]
+}

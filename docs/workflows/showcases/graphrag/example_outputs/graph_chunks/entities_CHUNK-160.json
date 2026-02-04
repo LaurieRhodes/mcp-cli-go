@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-160",
+  "entities": [
+    {
+      "id": "Video conferencing",
+      "type": "CONCEPT",
+      "text": "Real-time communication technology"
+    },
+    {
+      "id": "IP telephony",
+      "type": "CONCEPT",
+      "text": "Internet Protocol telephony systems"
+    },
+    {
+      "id": "Transport Layer Security",
+      "type": "TECHNOLOGY",
+      "text": "Cryptographic protocol for secure communications"
+    },
+    {
+      "id": "Session Initiation Protocol Secure",
+      "type": "PROTOCOL",
+      "text": "Secure protocol for session initiation"
+    },
+    {
+      "id": "Secure Real-time Transport Protocol",
+      "type": "PROTOCOL",
+      "text": "Secure protocol for real-time transport"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Video conferencing",
+      "to": "Video conferencing",
+      "type": "Transport Layer Security"
+    },
+    {
+      "from": "IP telephony",
+      "to": "IP telephony",
+      "type": "Session Initiation Protocol Secure"
+    }
+  ]
+}

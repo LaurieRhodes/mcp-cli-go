@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-351",
+  "entities": [
+    {
+      "id": "Web application frameworks",
+      "type": "CONCEPT",
+      "text": "Tools/resources for web app development"
+    },
+    {
+      "id": "Software developers",
+      "type": "ACTOR",
+      "text": "Professionals who develop software"
+    },
+    {
+      "id": "Web applications",
+      "type": "CONCEPT",
+      "text": "Applications accessed via web browsers"
+    },
+    {
+      "id": "Session management",
+      "type": "PROCESS",
+      "text": "Managing user sessions in web apps"
+    },
+    {
+      "id": "Input handling",
+      "type": "PROCESS",
+      "text": "Processing user input in web apps"
+    },
+    {
+      "id": "Cryptographic operations",
+      "type": "PROCESS",
+      "text": "Encryption/decryption operations"
+    },
+    {
+      "id": "ISM-1239",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Software developers",
+      "to": "Web application frameworks",
+      "type": "USES"
+    },
+    {
+      "from": "Web application frameworks",
+      "to": "Web applications",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "Web application frameworks",
+      "to": "Session management",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Web application frameworks",
+      "to": "Input handling",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Web application frameworks",
+      "to": "Cryptographic operations",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "ISM-1239",
+      "to": "Web application frameworks",
+      "type": "REQUIRES"
+    }
+  ]
+}

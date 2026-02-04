@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-474",
+  "entities": [
+    {
+      "id": "IPsec connections",
+      "type": "CONCEPT",
+      "text": "Network security protocol for encrypted communications"
+    },
+    {
+      "id": "IKE protocol",
+      "type": "PROCESS",
+      "text": "Key exchange protocol for establishing secure connections"
+    },
+    {
+      "id": "IKE version 2",
+      "type": "PROCESS",
+      "text": "Current version of IKE protocol for key exchange"
+    },
+    {
+      "id": "Manual keying",
+      "type": "PROCESS",
+      "text": "Manual method for establishing keying material"
+    },
+    {
+      "id": "ISM-1233",
+      "type": "CONTROL",
+      "text": "Security control standard for key exchange requirements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "IPsec connections",
+      "to": "IKE protocol",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "IKE protocol",
+      "to": "IKE version 2",
+      "type": "DEFINES"
+    }
+  ]
+}

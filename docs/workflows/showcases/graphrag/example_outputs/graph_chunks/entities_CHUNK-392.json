@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-392",
+  "entities": [
+    {
+      "id": "Network segmentation and segregation",
+      "type": "CONCEPT",
+      "text": "Security control for preventing adversary propagation"
+    },
+    {
+      "id": "Network zones",
+      "type": "CONCEPT",
+      "text": "Segregated areas within networks based on criticality"
+    },
+    {
+      "id": "Administrative infrastructure",
+      "type": "CONCEPT",
+      "text": "Infrastructure used for managing servers"
+    },
+    {
+      "id": "ISM-1181",
+      "type": "CONTROL",
+      "text": "Control requiring network segregation into zones"
+    },
+    {
+      "id": "ISM-1577",
+      "type": "CONTROL",
+      "text": "Control requiring segregation from service provider networks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Network segmentation and segregation",
+      "to": "Network zones",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Network segmentation and segregation",
+      "to": "Administrative infrastructure",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Network segmentation and segregation",
+      "to": "ISM-1181",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Network segmentation and segregation",
+      "to": "ISM-1577",
+      "type": "IMPLEMENTS"
+    }
+  ]
+}

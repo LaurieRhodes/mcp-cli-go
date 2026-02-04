@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-458",
+  "entities": [
+    {
+      "id": "cryptographic equipment",
+      "type": "CONCEPT",
+      "text": "Hardware implementing cryptographic functions"
+    },
+    {
+      "id": "cryptographic software",
+      "type": "CONCEPT",
+      "text": "Software implementing cryptographic functions"
+    },
+    {
+      "id": "unapproved protocols",
+      "type": "CONCEPT",
+      "text": "Protocols not approved by ASD"
+    },
+    {
+      "id": "AACPs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Protocols"
+    },
+    {
+      "id": "high assurance cryptographic protocols",
+      "type": "CONCEPT",
+      "text": "High assurance cryptographic protocols"
+    },
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "Individuals using cryptographic equipment/software"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Organization implementing security controls"
+    },
+    {
+      "id": "security risk",
+      "type": "CONCEPT",
+      "text": "Potential security vulnerability"
+    },
+    {
+      "id": "usage policies",
+      "type": "CONCEPT",
+      "text": "Organizational policies governing protocol usage"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cryptographic equipment",
+      "to": "cryptographic software",
+      "type": "unapproved protocols"
+    },
+    {
+      "from": "unapproved protocols",
+      "to": "unapproved protocols",
+      "type": "security risk"
+    }
+  ]
+}

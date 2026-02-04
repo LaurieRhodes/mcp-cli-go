@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-258",
+  "entities": [
+    {
+      "id": "non-volatile flash memory media",
+      "type": "CONCEPT",
+      "text": "Storage media that retains data without power"
+    },
+    {
+      "id": "wear levelling",
+      "type": "PROCESS",
+      "text": "Technique to distribute write operations evenly across memory blocks"
+    },
+    {
+      "id": "sanitisation processes",
+      "type": "PROCESS",
+      "text": "Procedures to securely erase or overwrite data"
+    },
+    {
+      "id": "SECRET classification",
+      "type": "CONCEPT",
+      "text": "Security classification level"
+    },
+    {
+      "id": "TOP SECRET classification",
+      "type": "CONCEPT",
+      "text": "Highest security classification level"
+    },
+    {
+      "id": "ISM-0360 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "non-volatile flash memory media",
+      "to": "wear levelling",
+      "type": "USES"
+    },
+    {
+      "from": "non-volatile flash memory media",
+      "to": "sanitisation processes",
+      "type": "UNDERGOES"
+    },
+    {
+      "from": "SECRET classification",
+      "to": "non-volatile flash memory media",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "TOP SECRET classification",
+      "to": "non-volatile flash memory media",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "ISM-0360 control",
+      "to": "non-volatile flash memory media",
+      "type": "GOVERNS"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-205",
+  "entities": [
+    {
+      "id": "High Assurance Evaluation Program",
+      "type": "PROGRAM",
+      "text": "Australian government security evaluation program"
+    },
+    {
+      "id": "ACSC",
+      "type": "AGENCY",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "AISEP",
+      "type": "PROGRAM",
+      "text": "Australian Information Security Evaluation Program"
+    },
+    {
+      "id": "Common Criteria",
+      "type": "STANDARD",
+      "text": "International security standard for IT products"
+    },
+    {
+      "id": "Common Criteria's Certified Products List",
+      "type": "RESOURCE",
+      "text": "Official list of certified security products"
+    },
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Management of security risks in supply chains"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Government procurement guidelines document"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "High Assurance Evaluation Program",
+      "to": "AISEP",
+      "type": "Common Criteria"
+    },
+    {
+      "from": "ACSC",
+      "to": "ACSC",
+      "type": "Common Criteria's Certified Products List"
+    }
+  ]
+}

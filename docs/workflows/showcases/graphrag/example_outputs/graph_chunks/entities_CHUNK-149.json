@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-149",
+  "entities": [
+    {
+      "id": "Non-secure telephone systems",
+      "type": "CONCEPT",
+      "text": "Telephone systems vulnerable to interception"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Individuals who may communicate sensitive information"
+    },
+    {
+      "id": "Telephone system usage policy",
+      "type": "PROCESS",
+      "text": "Policy for proper telephone system usage"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Non-secure telephone systems",
+      "to": "Personnel",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Personnel",
+      "to": "Telephone system usage policy",
+      "type": "REQUIRES"
+    }
+  ]
+}

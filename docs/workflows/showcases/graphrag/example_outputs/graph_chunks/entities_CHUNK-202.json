@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-202",
+  "entities": [
+    {
+      "id": "Common Criteria evaluated products",
+      "type": "CONCEPT",
+      "text": "Products assessed under Common Criteria framework"
+    },
+    {
+      "id": "evaluation documentation",
+      "type": "CONCEPT",
+      "text": "Documentation including security target and certification report"
+    },
+    {
+      "id": "ACSC",
+      "type": "ORGANIZATION",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "AISEP",
+      "type": "PROGRAM",
+      "text": "Australian Information Security Evaluation Program"
+    },
+    {
+      "id": "foreign scheme",
+      "type": "CONCEPT",
+      "text": "Evaluation programs outside Australia"
+    },
+    {
+      "id": "product vendor",
+      "type": "ACTOR",
+      "text": "Company selling the product"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Common Criteria evaluated products",
+      "to": "evaluation documentation",
+      "type": "DEFINES"
+    },
+    {
+      "from": "evaluation documentation",
+      "to": "ACSC",
+      "type": "MANAGED_BY"
+    }
+  ]
+}

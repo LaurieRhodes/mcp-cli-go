@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-155",
+  "entities": [
+    {
+      "id": "encrypting communications",
+      "type": "PROCESS",
+      "text": "The process of securing communications through encryption"
+    },
+    {
+      "id": "cryptographic fundamentals",
+      "type": "CONCEPT",
+      "text": "Fundamental concepts and principles of cryptography"
+    },
+    {
+      "id": "Guidelines for Cryptography",
+      "type": "DOCUMENT",
+      "text": "Official document providing guidance on cryptography"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "encrypting communications",
+      "to": "cryptographic fundamentals",
+      "type": "DEFINES"
+    },
+    {
+      "from": "cryptographic fundamentals",
+      "to": "Guidelines for Cryptography",
+      "type": "LOCATED_IN"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-273",
+  "entities": [
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "Software platforms that manage computer hardware and software resources"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Companies that develop and provide operating systems"
+    },
+    {
+      "id": "secure-by-design principles",
+      "type": "CONCEPT",
+      "text": "Approach where security is integrated into design from the beginning"
+    },
+    {
+      "id": "memory-safe programming languages",
+      "type": "CONCEPT",
+      "text": "Programming languages designed to prevent memory-related vulnerabilities"
+    },
+    {
+      "id": "secure programming practices",
+      "type": "CONCEPT",
+      "text": "Methods and techniques for writing secure code"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Weaknesses in software that can be exploited by attackers"
+    },
+    {
+      "id": "patches and updates",
+      "type": "PROCESS",
+      "text": "Fixes and improvements released to address security issues"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "operating systems",
+      "to": "vendors",
+      "type": "vendors"
+    },
+    {
+      "from": "vendors",
+      "to": "secure-by-design principles",
+      "type": "memory-safe programming languages"
+    }
+  ]
+}

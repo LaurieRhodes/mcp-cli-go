@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-013",
+  "entities": [
+    {
+      "id": "system",
+      "type": "CONCEPT",
+      "text": "IT system being monitored"
+    },
+    {
+      "id": "cyber threats",
+      "type": "CONCEPT",
+      "text": "Potential cyber attacks or security incidents"
+    },
+    {
+      "id": "security risks",
+      "type": "CONCEPT",
+      "text": "Potential vulnerabilities or exposures"
+    },
+    {
+      "id": "controls",
+      "type": "CONCEPT",
+      "text": "Security measures and safeguards"
+    },
+    {
+      "id": "continuous monitoring plan",
+      "type": "PROCESS",
+      "text": "Formal plan for ongoing security monitoring"
+    },
+    {
+      "id": "authorising officer",
+      "type": "ACTOR",
+      "text": "Person responsible for authorization decisions"
+    },
+    {
+      "id": "authorisation package",
+      "type": "ARTIFACT",
+      "text": "Documentation supporting authorization decisions"
+    },
+    {
+      "id": "security assessment",
+      "type": "PROCESS",
+      "text": "Formal evaluation of security posture"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "system",
+      "to": "cyber threats",
+      "type": "EXPOSED_TO"
+    },
+    {
+      "from": "system",
+      "to": "security risks",
+      "type": "HAS"
+    },
+    {
+      "from": "system",
+      "to": "controls",
+      "type": "PROTECTED_BY"
+    },
+    {
+      "from": "continuous monitoring plan",
+      "to": "system",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "authorising officer",
+      "to": "authorisation package",
+      "type": "REVIEWS"
+    },
+    {
+      "from": "authorising officer",
+      "to": "security assessment",
+      "type": "REQUIRES"
+    }
+  ]
+}

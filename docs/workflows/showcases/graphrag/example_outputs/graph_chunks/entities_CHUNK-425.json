@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-425",
+  "entities": [
+    {
+      "id": "Wi-Fi Alliance",
+      "type": "ORGANIZATION",
+      "text": "Wi-Fi technologies and certification programs"
+    },
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Risk management for cyber supply chains"
+    },
+    {
+      "id": "evaluated products",
+      "type": "CONCEPT",
+      "text": "Products that have been evaluated for security"
+    },
+    {
+      "id": "encrypting communications",
+      "type": "CONCEPT",
+      "text": "Encryption of communications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Further information",
+      "to": "Wi-Fi Alliance",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Guidelines for Evaluated Products",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "Guidelines for Cryptography",
+      "type": "REFERENCES"
+    }
+  ]
+}

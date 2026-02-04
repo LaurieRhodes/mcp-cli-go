@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-127",
+  "entities": [
+    {
+      "id": "Security Construction and Equipment Committee",
+      "type": "ORGANIZATION",
+      "text": "Australian government committee for security standards"
+    },
+    {
+      "id": "SCEC",
+      "type": "ACRONYM",
+      "text": "Abbreviation for Security Construction and Equipment Committee"
+    },
+    {
+      "id": "TOP SECRET cable reticulation systems",
+      "type": "SYSTEM",
+      "text": "High-security cable systems for classified communications"
+    },
+    {
+      "id": "tamper-evident seals",
+      "type": "EQUIPMENT",
+      "text": "Seals that show evidence of tampering"
+    },
+    {
+      "id": "conduit glue",
+      "type": "MATERIAL",
+      "text": "Adhesive for sealing conduit joints"
+    },
+    {
+      "id": "shared facilities",
+      "type": "LOCATION",
+      "text": "Facilities used by multiple organizations"
+    },
+    {
+      "id": "TOP SECRET conduits",
+      "type": "SYSTEM",
+      "text": "High-security conduits for classified cables"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Security Construction and Equipment Committee",
+      "to": "tamper-evident seals",
+      "type": "DEFINES"
+    },
+    {
+      "from": "SCEC",
+      "to": "TOP SECRET cable reticulation systems",
+      "type": "PROTECTS"
+    }
+  ]
+}

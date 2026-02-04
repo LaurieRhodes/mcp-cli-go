@@ -1,0 +1,102 @@
+{
+  "chunk_id": "CHUNK-364",
+  "entities": [
+    {
+      "id": "functional separation of computing environments",
+      "type": "CONCEPT",
+      "text": "Separation of computing environments for security"
+    },
+    {
+      "id": "virtualisation hardening",
+      "type": "PROCESS",
+      "text": "Process of hardening virtualisation systems"
+    },
+    {
+      "id": "Guidelines for System Hardening",
+      "type": "DOCUMENT",
+      "text": "Document for system hardening guidelines"
+    },
+    {
+      "id": "encrypting communications",
+      "type": "CONCEPT",
+      "text": "Encryption of communication channels"
+    },
+    {
+      "id": "cryptographic fundamentals",
+      "type": "CONCEPT",
+      "text": "Fundamental cryptographic concepts"
+    },
+    {
+      "id": "Guidelines for Cryptography",
+      "type": "DOCUMENT",
+      "text": "Document for cryptography guidelines"
+    },
+    {
+      "id": "network segmentation and segregation",
+      "type": "CONCEPT",
+      "text": "Network security through segmentation"
+    },
+    {
+      "id": "network design and configuration",
+      "type": "PROCESS",
+      "text": "Network design and configuration processes"
+    },
+    {
+      "id": "Guidelines for Networking",
+      "type": "DOCUMENT",
+      "text": "Document for networking guidelines"
+    },
+    {
+      "id": "database management system software",
+      "type": "CONCEPT",
+      "text": "Database management software systems"
+    },
+    {
+      "id": "server application hardening",
+      "type": "PROCESS",
+      "text": "Process of hardening server applications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "functional separation of computing environments",
+      "to": "virtualisation hardening",
+      "type": "DEFINES"
+    },
+    {
+      "from": "encrypting communications",
+      "to": "Guidelines for System Hardening",
+      "type": "FOUND_IN"
+    },
+    {
+      "from": "network segmentation and segregation",
+      "to": "Guidelines for Cryptography",
+      "type": "FOUND_IN"
+    },
+    {
+      "from": "database management system software",
+      "to": "Guidelines for Networking",
+      "type": "FOUND_IN"
+    },
+    {
+      "from": "virtualisation hardening",
+      "to": "server application hardening",
+      "type": "FOUND_IN"
+    },
+    {
+      "from": "cryptographic fundamentals",
+      "to": "Guidelines for System Hardening",
+      "type": "FOUND_IN"
+    },
+    {
+      "from": "network design and configuration",
+      "to": "Guidelines for Cryptography",
+      "type": "FOUND_IN"
+    },
+    {
+      "from": "server application hardening",
+      "to": "Guidelines for Networking",
+      "type": "FOUND_IN"
+    }
+  ]
+}

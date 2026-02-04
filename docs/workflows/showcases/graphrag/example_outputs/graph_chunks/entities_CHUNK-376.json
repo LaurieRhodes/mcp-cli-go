@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-376",
+  "entities": [
+    {
+      "id": "email servers",
+      "type": "SYSTEM",
+      "text": "Email servers that handle email traffic"
+    },
+    {
+      "id": "protective markings",
+      "type": "CONCEPT",
+      "text": "Protective markings indicating sensitivity/classification levels"
+    },
+    {
+      "id": "data spill",
+      "type": "RISK",
+      "text": "Unauthorized data transfer due to inappropriate markings"
+    },
+    {
+      "id": "intended recipients",
+      "type": "ACTOR",
+      "text": "People who should receive emails"
+    },
+    {
+      "id": "senders",
+      "type": "ACTOR",
+      "text": "People who send emails"
+    },
+    {
+      "id": "ISM-0565",
+      "type": "CONTROL",
+      "text": "ISM control requiring email server configuration"
+    },
+    {
+      "id": "ISM-1023",
+      "type": "CONTROL",
+      "text": "ISM control requiring notification of blocked emails"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "email servers",
+      "to": "protective markings",
+      "type": "email servers"
+    },
+    {
+      "from": "protective markings",
+      "to": "data spill",
+      "type": "intended recipients"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-153",
+  "entities": [
+    {
+      "id": "speakerphones",
+      "type": "DEVICE",
+      "text": "Communication devices designed to pick up and transmit conversations"
+    },
+    {
+      "id": "TOP SECRET areas",
+      "type": "LOCATION",
+      "text": "Areas requiring highest level of security classification"
+    },
+    {
+      "id": "audio secure room",
+      "type": "FACILITY",
+      "text": "Room designed to prevent audio eavesdropping"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "speakerphones",
+      "to": "TOP SECRET areas",
+      "type": "PROHIBITED_IN"
+    },
+    {
+      "from": "TOP SECRET areas",
+      "to": "audio secure room",
+      "type": "ALLOWED_IN_IF"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-003",
+  "entities": [
+    {
+      "id": "ISM",
+      "type": "CONCEPT",
+      "text": "Information Security Manual"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "ASD",
+      "type": "ACTOR",
+      "text": "Australian Signals Directorate"
+    },
+    {
+      "id": "Intelligence Services Act 2001",
+      "type": "CONCEPT",
+      "text": "Legislation governing intelligence services"
+    },
+    {
+      "id": "Australian Communications Security Instructions",
+      "type": "CONCEPT",
+      "text": "Security instructions provided by ACSC"
+    },
+    {
+      "id": "Device and application-specific advice",
+      "type": "CONCEPT",
+      "text": "Specific technical guidance for devices and applications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM",
+      "to": "ACSC",
+      "type": "REPRESENTS"
+    },
+    {
+      "from": "ACSC",
+      "to": "ASD",
+      "type": "WITHIN"
+    },
+    {
+      "from": "ASD",
+      "to": "Intelligence Services Act 2001",
+      "type": "OPERATES_UNDER"
+    },
+    {
+      "from": "ACSC",
+      "to": "Australian Communications Security Instructions",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "Device and application-specific advice",
+      "to": "ISM",
+      "type": "PRECEDES_OVER"
+    }
+  ]
+}

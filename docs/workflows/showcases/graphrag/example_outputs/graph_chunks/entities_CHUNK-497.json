@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-497",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cyber supply chain risk management concept"
+    },
+    {
+      "id": "evaluated products",
+      "type": "CONCEPT",
+      "text": "Evaluated products concept"
+    },
+    {
+      "id": "network design and configuration",
+      "type": "PROCESS",
+      "text": "Network design and configuration process"
+    },
+    {
+      "id": "event logging",
+      "type": "PROCESS",
+      "text": "Event logging process"
+    },
+    {
+      "id": "cyber security awareness training",
+      "type": "PROCESS",
+      "text": "Cyber security awareness training process"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for procurement and outsourcing"
+    },
+    {
+      "id": "Guidelines for Evaluated Products",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for evaluated products"
+    },
+    {
+      "id": "Guidelines for Networking",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for networking"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for system monitoring"
+    },
+    {
+      "id": "Guidelines for Personnel Security",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for personnel security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    },
+    {
+      "from": "evaluated products",
+      "to": "Guidelines for Evaluated Products",
+      "type": "DEFINES"
+    },
+    {
+      "from": "network design and configuration",
+      "to": "Guidelines for Networking",
+      "type": "DEFINES"
+    },
+    {
+      "from": "event logging",
+      "to": "Guidelines for System Monitoring",
+      "type": "DEFINES"
+    },
+    {
+      "from": "cyber security awareness training",
+      "to": "Guidelines for Personnel Security",
+      "type": "DEFINES"
+    }
+  ]
+}

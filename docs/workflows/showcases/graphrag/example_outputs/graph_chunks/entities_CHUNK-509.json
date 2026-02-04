@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-509",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Risk management approach for cybersecurity in supply chains"
+    },
+    {
+      "id": "content filtering techniques",
+      "type": "CONCEPT",
+      "text": "Techniques for filtering web content"
+    },
+    {
+      "id": "client-side JavaScript controls",
+      "type": "CONCEPT",
+      "text": "JavaScript security controls for web clients"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Official guidelines document"
+    },
+    {
+      "id": "NoScript project",
+      "type": "RESOURCE",
+      "text": "Open source security project"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Guidelines for Procurement and Outsourcing",
+      "to": "cyber supply chain risk management",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "guidelines",
+      "to": "content filtering techniques",
+      "type": "CONTAINS"
+    }
+  ]
+}

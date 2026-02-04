@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-129",
+  "entities": [
+    {
+      "id": "cables",
+      "type": "CONCEPT",
+      "text": "physical infrastructure"
+    },
+    {
+      "id": "walls",
+      "type": "CONCEPT",
+      "text": "building structure"
+    },
+    {
+      "id": "cable trays",
+      "type": "CONCEPT",
+      "text": "support structure"
+    },
+    {
+      "id": "wall outlet boxes",
+      "type": "CONCEPT",
+      "text": "termination points"
+    },
+    {
+      "id": "flexible conduit",
+      "type": "CONCEPT",
+      "text": "protective covering"
+    },
+    {
+      "id": "plastic conduit",
+      "type": "CONCEPT",
+      "text": "protective covering"
+    },
+    {
+      "id": "ISM-1115",
+      "type": "CONCEPT",
+      "text": "control standard"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cables",
+      "to": "RUN_IN",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "walls",
+      "to": "ORIGINATE_FROM",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cables",
+      "to": "TERMINATE_AT",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cable trays",
+      "to": "PROTECTED_BY",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cables",
+      "to": "PROTECTED_BY",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "wall outlet boxes",
+      "to": "GOVERNED_BY",
+      "type": "RELATED_TO"
+    }
+  ]
+}

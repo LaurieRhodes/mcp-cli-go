@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-182",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "ACTOR",
+      "text": "Portable computing devices like smartphones and tablets"
+    },
+    {
+      "id": "internal storage",
+      "type": "CONCEPT",
+      "text": "Primary non-volatile storage within mobile devices"
+    },
+    {
+      "id": "removable media",
+      "type": "CONCEPT",
+      "text": "External storage media like SD cards or USB drives"
+    },
+    {
+      "id": "encryption",
+      "type": "PROCESS",
+      "text": "Process of converting data into coded form to prevent unauthorized access"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor seeking to compromise security"
+    },
+    {
+      "id": "sensitive data",
+      "type": "CONCEPT",
+      "text": "Information that requires protection due to privacy or security concerns"
+    },
+    {
+      "id": "classified data",
+      "type": "CONCEPT",
+      "text": "Information officially designated as requiring protection against unauthorized disclosure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "mobile devices",
+      "to": "mobile devices",
+      "type": "HAS"
+    },
+    {
+      "from": "internal storage",
+      "to": "removable media",
+      "type": "HAS"
+    }
+  ]
+}

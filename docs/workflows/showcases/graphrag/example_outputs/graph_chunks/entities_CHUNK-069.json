@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-069",
+  "entities": [
+    {
+      "id": "Threat environments",
+      "type": "CONCEPT",
+      "text": "Dynamic threat landscape that changes over time"
+    },
+    {
+      "id": "Security documentation",
+      "type": "PROCESS",
+      "text": "Policies, processes and procedures that need maintenance"
+    },
+    {
+      "id": "Annual review",
+      "type": "PROCESS",
+      "text": "Process of reviewing security documentation at least annually"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Threat environments",
+      "to": "Security documentation",
+      "type": "IMPACTS"
+    },
+    {
+      "from": "Security documentation",
+      "to": "Annual review",
+      "type": "REQUIRES"
+    }
+  ]
+}

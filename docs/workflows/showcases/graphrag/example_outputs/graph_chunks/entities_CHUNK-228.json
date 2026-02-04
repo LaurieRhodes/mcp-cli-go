@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-228",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "EQUIPMENT",
+      "text": "Information and Communications Technology equipment"
+    },
+    {
+      "id": "AUSTEO",
+      "type": "CLASSIFICATION",
+      "text": "Australian Eyes Only classification"
+    },
+    {
+      "id": "AGAO",
+      "type": "CLASSIFICATION",
+      "text": "Australian Government Access Only classification"
+    },
+    {
+      "id": "Australia",
+      "type": "LOCATION",
+      "text": "Country of Australia"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Sanitising highly sensitive ICT equipment",
+      "to": "Sanitising highly sensitive ICT equipment",
+      "type": "LOCATED_IN"
+    },
+    {
+      "from": "Sanitising highly sensitive ICT equipment",
+      "to": "Sanitising highly sensitive ICT equipment",
+      "type": "PROCESSES"
+    },
+    {
+      "from": "Sanitising highly sensitive ICT equipment",
+      "to": "Sanitising highly sensitive ICT equipment",
+      "type": "PROCESSES"
+    },
+    {
+      "from": "Sanitising highly sensitive ICT equipment",
+      "to": "Sanitising highly sensitive ICT equipment",
+      "type": "LOCATED_IN"
+    }
+  ]
+}

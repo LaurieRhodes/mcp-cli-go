@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-047",
+  "entities": [
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "National cyber security agency"
+    },
+    {
+      "id": "Cyber security incident reports",
+      "type": "CONCEPT",
+      "text": "Reports of security incidents"
+    },
+    {
+      "id": "Organisations",
+      "type": "ACTOR",
+      "text": "Entities that experience incidents"
+    },
+    {
+      "id": "Threat environment picture",
+      "type": "CONCEPT",
+      "text": "Understanding of current threats"
+    },
+    {
+      "id": "Cyber security advice/capabilities/techniques",
+      "type": "CONCEPT",
+      "text": "Security guidance and tools"
+    },
+    {
+      "id": "ISM-0140",
+      "type": "CONCEPT",
+      "text": "Security control standard"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Cyber security incident reports",
+      "type": "USES_TO_PROVIDE"
+    },
+    {
+      "from": "Organisations",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "USES_TO_IDENTIFY"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Threat environment picture",
+      "type": "DEVELOPS_BASED_ON"
+    },
+    {
+      "from": "Cyber security incident reports",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "SHOULD_REPORT_TO"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Cyber security advice/capabilities/techniques",
+      "type": "DEFINES_REQUIREMENTS_FOR"
+    },
+    {
+      "from": "Cyber security advice/capabilities/techniques",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Organisations",
+      "to": "Australian Cyber Security Centre (ACSC)",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Organisations",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ISM-0140",
+      "to": "Cyber security incident reports",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Cyber security incident reports",
+      "to": "Organisations",
+      "type": "RELATED_TO"
+    }
+  ]
+}

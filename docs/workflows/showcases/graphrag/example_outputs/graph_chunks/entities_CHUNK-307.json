@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-307",
+  "entities": [
+    {
+      "id": "Break glass accounts",
+      "type": "ACCOUNT",
+      "text": "Emergency access accounts"
+    },
+    {
+      "id": "Local administrator accounts",
+      "type": "ACCOUNT",
+      "text": "Local admin accounts on workstations/servers"
+    },
+    {
+      "id": "Service accounts",
+      "type": "ACCOUNT",
+      "text": "Accounts used by services/applications"
+    },
+    {
+      "id": "Group Managed Service Accounts",
+      "type": "TECHNOLOGY",
+      "text": "Microsoft's automated service account management"
+    },
+    {
+      "id": "Credentials",
+      "type": "SECURITY_ELEMENT",
+      "text": "Authentication information"
+    },
+    {
+      "id": "Microsoft Windows Server",
+      "type": "PLATFORM",
+      "text": "Microsoft server operating system"
+    },
+    {
+      "id": "Adversary",
+      "type": "THREAT_ACTOR",
+      "text": "Malicious actor"
+    },
+    {
+      "id": "Workstations/Servers",
+      "type": "SYSTEM",
+      "text": "Computing devices"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Break glass accounts",
+      "to": "Credentials",
+      "type": "HAS"
+    },
+    {
+      "from": "Local administrator accounts",
+      "to": "Credentials",
+      "type": "HAS"
+    },
+    {
+      "from": "Service accounts",
+      "to": "Credentials",
+      "type": "HAS"
+    },
+    {
+      "from": "Service accounts",
+      "to": "Group Managed Service Accounts",
+      "type": "CAN_BE_CREATED_AS"
+    },
+    {
+      "from": "Break glass accounts, local administrator accounts, service accounts",
+      "to": "long, unique, unpredictable, managed",
+      "type": "SHOULD_BE"
+    },
+    {
+      "from": "Group Managed Service Accounts",
+      "to": "Microsoft Windows Server",
+      "type": "INTRODUCED_FOR"
+    },
+    {
+      "from": "Adversary",
+      "to": "Workstations/Servers",
+      "type": "CAN_COMPROMISE"
+    },
+    {
+      "from": "Workstations/Servers",
+      "to": "Compromised by adversary",
+      "type": "VULNERABLE_TO"
+    }
+  ]
+}

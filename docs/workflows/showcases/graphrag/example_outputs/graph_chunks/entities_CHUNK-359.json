@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-359",
+  "entities": [
+    {
+      "id": "OWASP Application Security Verification Standard",
+      "type": "PUBLICATION",
+      "text": "Web application security standard"
+    },
+    {
+      "id": "OWASP Top Ten Proactive Controls",
+      "type": "PUBLICATION",
+      "text": "Web application security controls"
+    },
+    {
+      "id": "OWASP Top 10",
+      "type": "PUBLICATION",
+      "text": "Web application security risks"
+    },
+    {
+      "id": "ACSC's Implementing Certificates, TLS, HTTPS and Opportunistic TLS",
+      "type": "PUBLICATION",
+      "text": "HTTPS implementation guidance"
+    },
+    {
+      "id": "Transport Layer Security",
+      "type": "SECTION",
+      "text": "TLS implementation guidance"
+    },
+    {
+      "id": "ACSC's Protecting Web Applications and Users",
+      "type": "PUBLICATION",
+      "text": "Web application protection guidance"
+    },
+    {
+      "id": "Securing Content Management Systems",
+      "type": "PUBLICATION",
+      "text": "CMS security guidance"
+    },
+    {
+      "id": "OWASP API Security Top 10",
+      "type": "PUBLICATION",
+      "text": "API security guidance"
+    },
+    {
+      "id": "authentication hardening",
+      "type": "SECTION",
+      "text": "Authentication hardening guidance"
+    },
+    {
+      "id": "event logging and monitoring",
+      "type": "SECTION",
+      "text": "Event logging guidance"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security risks",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "implementing HTTPS",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "using TLS in HTTPS",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "API security",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "strong authentication",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "event logging",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES"
+    }
+  ]
+}

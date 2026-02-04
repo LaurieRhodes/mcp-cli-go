@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-515",
+  "entities": [
+    {
+      "id": "Executable files",
+      "type": "CONCEPT",
+      "text": "Files that can be executed by a computer system"
+    },
+    {
+      "id": "Sandbox",
+      "type": "CONCEPT",
+      "text": "Isolated environment for safe execution and analysis"
+    },
+    {
+      "id": "Suspicious behaviour",
+      "type": "CONCEPT",
+      "text": "Malicious or anomalous activities during execution"
+    },
+    {
+      "id": "ISM-1389",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control identifier"
+    },
+    {
+      "id": "Gateways/CDSs",
+      "type": "ACTOR",
+      "text": "Network entry points or content delivery systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Executable files",
+      "to": "Sandbox",
+      "type": "ANALYZED_IN"
+    },
+    {
+      "from": "Sandbox",
+      "to": "Suspicious behaviour",
+      "type": "DETECTS"
+    },
+    {
+      "from": "ISM-1389",
+      "to": "Executable files",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "Gateways/CDSs",
+      "to": "Executable files",
+      "type": "IMPORTS"
+    }
+  ]
+}

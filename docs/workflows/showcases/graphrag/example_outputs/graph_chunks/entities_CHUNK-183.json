@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-183",
+  "entities": [
+    {
+      "id": "Encryption",
+      "type": "CONCEPT",
+      "text": "Technology for protecting data"
+    },
+    {
+      "id": "Mobile devices",
+      "type": "ACTOR",
+      "text": "Hardware devices that communicate data"
+    },
+    {
+      "id": "Sensitive/classified data",
+      "type": "CONCEPT",
+      "text": "Information requiring protection"
+    },
+    {
+      "id": "Public network infrastructure",
+      "type": "CONCEPT",
+      "text": "Communication networks"
+    },
+    {
+      "id": "ISM-1085",
+      "type": "CONCEPT",
+      "text": "Security control standard"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Mobile devices",
+      "to": "Encryption",
+      "type": "COMMUNICATES"
+    },
+    {
+      "from": "Sensitive/classified data",
+      "to": "Sensitive/classified data",
+      "type": "PROTECTS"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-139",
+  "entities": [
+    {
+      "id": "SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables classified as SECRET level"
+    },
+    {
+      "id": "TOP SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables classified as TOP SECRET level"
+    },
+    {
+      "id": "Patch panels",
+      "type": "CONCEPT",
+      "text": "Network infrastructure for cable termination"
+    },
+    {
+      "id": "ISM-0213 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control 0213"
+    },
+    {
+      "id": "Cross-patching prevention",
+      "type": "PROCESS",
+      "text": "Process of preventing accidental or deliberate cable cross-connection"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "SECRET cables",
+      "to": "Patch panels",
+      "type": "TERMINATED_ON"
+    },
+    {
+      "from": "TOP SECRET cables",
+      "to": "Patch panels",
+      "type": "TERMINATED_ON"
+    },
+    {
+      "from": "Patch panels",
+      "to": "Cross-patching prevention",
+      "type": "ASSISTS_IN"
+    },
+    {
+      "from": "ISM-0213 control",
+      "to": "SECRET cables",
+      "type": "GOVERNS"
+    }
+  ]
+}

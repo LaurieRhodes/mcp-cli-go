@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-363",
+  "entities": [
+    {
+      "id": "production database servers",
+      "type": "CONCEPT",
+      "text": "Database servers used for live/production operations"
+    },
+    {
+      "id": "development and testing activities",
+      "type": "PROCESS",
+      "text": "Software development and testing work processes"
+    },
+    {
+      "id": "development and testing environments",
+      "type": "CONCEPT",
+      "text": "Separate environments for development and testing work"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "development and testing activities",
+      "to": "production database servers",
+      "type": "USES"
+    },
+    {
+      "from": "development and testing environments",
+      "to": "production database servers",
+      "type": "USES"
+    }
+  ]
+}

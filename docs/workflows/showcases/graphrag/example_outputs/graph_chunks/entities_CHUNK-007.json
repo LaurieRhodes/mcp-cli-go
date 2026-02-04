@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-007",
+  "entities": [
+    {
+      "id": "ISM",
+      "type": "ACTOR",
+      "text": "Information Security Manual"
+    },
+    {
+      "id": "NIST",
+      "type": "ACTOR",
+      "text": "National Institute of Standards and Technology"
+    },
+    {
+      "id": "NIST SP 800-37 Rev. 2",
+      "type": "CONCEPT",
+      "text": "Risk Management Framework for Information Systems and Organizations: A System Life Cycle Approach for Security and Privacy"
+    },
+    {
+      "id": "Risk Management Framework",
+      "type": "PROCESS",
+      "text": "Framework for managing security risks"
+    },
+    {
+      "id": "Define the system",
+      "type": "PROCESS",
+      "text": "First step: define system boundaries"
+    },
+    {
+      "id": "Select controls",
+      "type": "PROCESS",
+      "text": "Second step: choose security controls"
+    },
+    {
+      "id": "Implement controls",
+      "type": "PROCESS",
+      "text": "Third step: deploy security controls"
+    },
+    {
+      "id": "Assess controls",
+      "type": "PROCESS",
+      "text": "Fourth step: evaluate control effectiveness"
+    },
+    {
+      "id": "Authorise the system",
+      "type": "PROCESS",
+      "text": "Fifth step: approve system operation"
+    },
+    {
+      "id": "Monitor the system",
+      "type": "PROCESS",
+      "text": "Sixth step: ongoing system oversight"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM",
+      "to": "NIST SP 800-37 Rev. 2",
+      "type": "DRAWS_FROM"
+    },
+    {
+      "from": "ISM",
+      "to": "Risk Management Framework",
+      "type": "USES"
+    },
+    {
+      "from": "Risk Management Framework",
+      "to": "Define the system",
+      "type": "CONTAINS_STEP"
+    },
+    {
+      "from": "Risk Management Framework",
+      "to": "Select controls",
+      "type": "CONTAINS_STEP"
+    },
+    {
+      "from": "Risk Management Framework",
+      "to": "Implement controls",
+      "type": "CONTAINS_STEP"
+    },
+    {
+      "from": "Risk Management Framework",
+      "to": "Assess controls",
+      "type": "CONTAINS_STEP"
+    },
+    {
+      "from": "Risk Management Framework",
+      "to": "Authorise the system",
+      "type": "CONTAINS_STEP"
+    },
+    {
+      "from": "Risk Management Framework",
+      "to": "Monitor the system",
+      "type": "CONTAINS_STEP"
+    }
+  ]
+}

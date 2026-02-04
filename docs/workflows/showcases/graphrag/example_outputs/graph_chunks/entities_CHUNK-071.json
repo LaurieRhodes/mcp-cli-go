@@ -1,0 +1,502 @@
+{
+  "chunk_id": "CHUNK-071",
+  "entities": [
+    {
+      "id": "system security plan",
+      "type": "DOCUMENT",
+      "text": "System security documentation"
+    },
+    {
+      "id": "incident response plan",
+      "type": "DOCUMENT",
+      "text": "Incident response documentation"
+    },
+    {
+      "id": "continuous monitoring plan",
+      "type": "DOCUMENT",
+      "text": "Continuous monitoring documentation"
+    },
+    {
+      "id": "security assessment report",
+      "type": "DOCUMENT",
+      "text": "Security assessment documentation"
+    },
+    {
+      "id": "plan of action and milestones",
+      "type": "DOCUMENT",
+      "text": "Action plan documentation"
+    },
+    {
+      "id": "business continuity plan",
+      "type": "DOCUMENT",
+      "text": "Business continuity planning"
+    },
+    {
+      "id": "disaster recovery plan",
+      "type": "DOCUMENT",
+      "text": "Disaster recovery planning"
+    },
+    {
+      "id": "cyber security communication strategy",
+      "type": "STRATEGY",
+      "text": "Cyber security communication approach"
+    },
+    {
+      "id": "incident management policy",
+      "type": "POLICY",
+      "text": "Incident management framework"
+    },
+    {
+      "id": "cyber security incident register",
+      "type": "REGISTER",
+      "text": "Cyber security incident tracking"
+    },
+    {
+      "id": "supplier relationship management policy",
+      "type": "POLICY",
+      "text": "Supplier relationship framework"
+    },
+    {
+      "id": "approved supplier list",
+      "type": "LIST",
+      "text": "Approved supplier tracking"
+    },
+    {
+      "id": "managed service register",
+      "type": "REGISTER",
+      "text": "Managed service tracking"
+    },
+    {
+      "id": "outsourced cloud service register",
+      "type": "REGISTER",
+      "text": "Outsourced cloud service tracking"
+    },
+    {
+      "id": "authorised Radio Frequency and infrared device register",
+      "type": "REGISTER",
+      "text": "Authorized RF/IR device tracking"
+    },
+    {
+      "id": "cable register",
+      "type": "REGISTER",
+      "text": "Cable infrastructure tracking"
+    },
+    {
+      "id": "floor plan diagram",
+      "type": "DIAGRAM",
+      "text": "Network floor layout"
+    },
+    {
+      "id": "cable labelling process",
+      "type": "PROCESS",
+      "text": "Cable labeling procedures"
+    },
+    {
+      "id": "telephone system usage policy",
+      "type": "POLICY",
+      "text": "Telephone system usage rules"
+    },
+    {
+      "id": "denial of service response plan",
+      "type": "PLAN",
+      "text": "DoS response for video/telephony"
+    },
+    {
+      "id": "fax machine and multifunction device usage policy",
+      "type": "POLICY",
+      "text": "Fax/MFD usage rules"
+    },
+    {
+      "id": "mobile device management policy",
+      "type": "POLICY",
+      "text": "Mobile device management framework"
+    },
+    {
+      "id": "mobile device usage policy",
+      "type": "POLICY",
+      "text": "Mobile device usage rules"
+    },
+    {
+      "id": "mobile device emergency sanitisation process",
+      "type": "PROCESS",
+      "text": "Mobile device emergency cleanup"
+    },
+    {
+      "id": "ICT equipment management policy",
+      "type": "POLICY",
+      "text": "ICT equipment management framework"
+    },
+    {
+      "id": "ICT equipment register",
+      "type": "REGISTER",
+      "text": "ICT equipment inventory"
+    },
+    {
+      "id": "ICT equipment sanitisation process",
+      "type": "PROCESS",
+      "text": "ICT equipment cleanup procedures"
+    },
+    {
+      "id": "ICT equipment destruction process",
+      "type": "PROCESS",
+      "text": "ICT equipment destruction procedures"
+    },
+    {
+      "id": "ICT equipment disposal process",
+      "type": "PROCESS",
+      "text": "ICT equipment disposal procedures"
+    },
+    {
+      "id": "media management policy",
+      "type": "POLICY",
+      "text": "Media management framework"
+    },
+    {
+      "id": "removable media usage policy",
+      "type": "POLICY",
+      "text": "Removable media usage rules"
+    },
+    {
+      "id": "removable media register",
+      "type": "REGISTER",
+      "text": "Removable media inventory"
+    },
+    {
+      "id": "media sanitisation process",
+      "type": "PROCESS",
+      "text": "Media cleanup procedures"
+    },
+    {
+      "id": "media destruction process",
+      "type": "PROCESS",
+      "text": "Media destruction procedures"
+    },
+    {
+      "id": "media disposal process",
+      "type": "PROCESS",
+      "text": "Media disposal procedures"
+    },
+    {
+      "id": "system administration process",
+      "type": "PROCESS",
+      "text": "System administration procedures"
+    },
+    {
+      "id": "patch management process",
+      "type": "PROCESS",
+      "text": "Patch management procedures"
+    },
+    {
+      "id": "software register",
+      "type": "REGISTER",
+      "text": "Software inventory tracking"
+    },
+    {
+      "id": "digital preservation policy",
+      "type": "POLICY",
+      "text": "Digital preservation framework"
+    },
+    {
+      "id": "data backup process",
+      "type": "PROCESS",
+      "text": "Data backup procedures"
+    },
+    {
+      "id": "data restoration process",
+      "type": "PROCESS",
+      "text": "Data restoration procedures"
+    },
+    {
+      "id": "event logging policy",
+      "type": "POLICY",
+      "text": "Event logging framework"
+    },
+    {
+      "id": "vulnerability disclosure policy",
+      "type": "POLICY",
+      "text": "Vulnerability disclosure framework"
+    },
+    {
+      "id": "vulnerability disclosure process",
+      "type": "PROCESS",
+      "text": "Vulnerability disclosure procedures"
+    },
+    {
+      "id": "database register",
+      "type": "REGISTER",
+      "text": "Database inventory tracking"
+    },
+    {
+      "id": "email usage policy",
+      "type": "POLICY",
+      "text": "Email usage rules"
+    },
+    {
+      "id": "network diagram",
+      "type": "DIAGRAM",
+      "text": "Network topology diagram"
+    },
+    {
+      "id": "cryptographic key management process",
+      "type": "PROCESS",
+      "text": "Cryptographic key management"
+    },
+    {
+      "id": "web usage policy",
+      "type": "POLICY",
+      "text": "Web usage rules"
+    },
+    {
+      "id": "data transfer process",
+      "type": "PROCESS",
+      "text": "Data transfer procedures"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "system security plan",
+      "to": "incident response plan",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "incident response plan",
+      "to": "continuous monitoring plan",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "continuous monitoring plan",
+      "to": "security assessment report",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "security assessment report",
+      "to": "plan of action and milestones",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "plan of action and milestones",
+      "to": "business continuity plan",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "business continuity plan",
+      "to": "disaster recovery plan",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "disaster recovery plan",
+      "to": "cyber security communication strategy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cyber security communication strategy",
+      "to": "incident management policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "incident management policy",
+      "to": "cyber security incident register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cyber security incident register",
+      "to": "supplier relationship management policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "supplier relationship management policy",
+      "to": "approved supplier list",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "approved supplier list",
+      "to": "managed service register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "managed service register",
+      "to": "outsourced cloud service register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "outsourced cloud service register",
+      "to": "authorised Radio Frequency and infrared device register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "authorised Radio Frequency and infrared device register",
+      "to": "cable register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cable register",
+      "to": "floor plan diagram",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "floor plan diagram",
+      "to": "cable labelling process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cable labelling process",
+      "to": "telephone system usage policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "telephone system usage policy",
+      "to": "denial of service response plan",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "denial of service response plan",
+      "to": "fax machine and multifunction device usage policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "fax machine and multifunction device usage policy",
+      "to": "mobile device management policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "mobile device management policy",
+      "to": "mobile device usage policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "mobile device usage policy",
+      "to": "mobile device emergency sanitisation process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "mobile device emergency sanitisation process",
+      "to": "ICT equipment management policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ICT equipment management policy",
+      "to": "ICT equipment register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ICT equipment register",
+      "to": "ICT equipment sanitisation process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ICT equipment sanitisation process",
+      "to": "ICT equipment destruction process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ICT equipment destruction process",
+      "to": "ICT equipment disposal process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ICT equipment disposal process",
+      "to": "media management policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "media management policy",
+      "to": "removable media usage policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "removable media usage policy",
+      "to": "removable media register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "removable media register",
+      "to": "media sanitisation process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "media sanitisation process",
+      "to": "media destruction process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "media destruction process",
+      "to": "media disposal process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "media disposal process",
+      "to": "system administration process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "system administration process",
+      "to": "patch management process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "patch management process",
+      "to": "software register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "software register",
+      "to": "digital preservation policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "digital preservation policy",
+      "to": "data backup process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "data backup process",
+      "to": "data restoration process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "data restoration process",
+      "to": "event logging policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "event logging policy",
+      "to": "vulnerability disclosure policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "vulnerability disclosure policy",
+      "to": "vulnerability disclosure process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "vulnerability disclosure process",
+      "to": "database register",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "database register",
+      "to": "email usage policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "email usage policy",
+      "to": "network diagram",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "network diagram",
+      "to": "cryptographic key management process",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "cryptographic key management process",
+      "to": "web usage policy",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "web usage policy",
+      "to": "data transfer process",
+      "type": "RELATED_TO"
+    }
+  ]
+}

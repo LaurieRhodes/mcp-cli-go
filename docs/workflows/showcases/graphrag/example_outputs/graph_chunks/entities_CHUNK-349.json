@@ -1,0 +1,92 @@
+{
+  "chunk_id": "CHUNK-349",
+  "entities": [
+    {
+      "id": "Trustworthy Computing Security Development Lifecycle",
+      "type": "CONCEPT",
+      "text": "Microsoft secure development lifecycle model"
+    },
+    {
+      "id": "Secure Software Development Framework",
+      "type": "CONCEPT",
+      "text": "NIST SP 800-218 framework for secure software development"
+    },
+    {
+      "id": "Software Memory Safety publication",
+      "type": "CONCEPT",
+      "text": "NSA publication on memory-safe programming languages"
+    },
+    {
+      "id": "Secure programming practices",
+      "type": "CONCEPT",
+      "text": "Carnegie Mellon SEI guidance on secure programming"
+    },
+    {
+      "id": "Software Bill of Materials",
+      "type": "CONCEPT",
+      "text": "NTIA publication on minimum elements for SBOM"
+    },
+    {
+      "id": "Vulnerability disclosure program",
+      "type": "PROCESS",
+      "text": "Program for reporting and managing vulnerabilities"
+    },
+    {
+      "id": "Vulnerability disclosure policy",
+      "type": "CONCEPT",
+      "text": "Policy for handling vulnerability disclosures"
+    },
+    {
+      "id": "Security.txt file",
+      "type": "CONCEPT",
+      "text": "File format for security contact information"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Microsoft",
+      "to": "Trustworthy Computing Security Development Lifecycle",
+      "type": "DEFINES"
+    },
+    {
+      "from": "NIST",
+      "to": "Secure Software Development Framework",
+      "type": "DEFINES"
+    },
+    {
+      "from": "NSA",
+      "to": "Software Memory Safety publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Carnegie Mellon University SEI",
+      "to": "Secure programming practices",
+      "type": "DEFINES"
+    },
+    {
+      "from": "NTIA",
+      "to": "Software Bill of Materials",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Vulnerability disclosure program",
+      "to": "Vulnerability disclosure policy",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Vulnerability disclosure policy",
+      "to": "disclose.io",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Security.txt file",
+      "to": "ACSC",
+      "type": "REFERENCES"
+    }
+  ]
+}

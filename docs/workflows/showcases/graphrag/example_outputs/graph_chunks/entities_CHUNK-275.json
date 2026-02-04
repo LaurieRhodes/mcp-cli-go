@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-275",
+  "entities": [
+    {
+      "id": "Standard Operating Environment (SOE)",
+      "type": "CONCEPT",
+      "text": "Standardized and consistent operating environment for workstations and servers"
+    },
+    {
+      "id": "Users",
+      "type": "ACTOR",
+      "text": "Individuals who setup and configure workstations"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Threat actor seeking network foothold"
+    },
+    {
+      "id": "Third parties/service providers",
+      "type": "ACTOR",
+      "text": "External providers of SOE solutions"
+    },
+    {
+      "id": "Organization",
+      "type": "ACTOR",
+      "text": "Entity implementing security controls"
+    },
+    {
+      "id": "Automated build process",
+      "type": "PROCESS",
+      "text": "Automated method for creating SOEs"
+    },
+    {
+      "id": "Golden image",
+      "type": "CONCEPT",
+      "text": "Pre-configured system image for deployment"
+    },
+    {
+      "id": "Malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful software or code in SOEs"
+    },
+    {
+      "id": "Scanning process",
+      "type": "PROCESS",
+      "text": "Process to detect malicious code in SOEs"
+    },
+    {
+      "id": "Annual review process",
+      "type": "PROCESS",
+      "text": "Regular review and update of SOEs"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Standard Operating Environment (SOE)",
+      "to": "Standard Operating Environment (SOE)",
+      "type": "Standard Operating Environment (SOE)"
+    },
+    {
+      "from": "Users",
+      "to": "Third parties/service providers",
+      "type": "Organization"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-239",
+  "entities": [
+    {
+      "id": "removable media register",
+      "type": "CONCEPT",
+      "text": "A system for tracking removable media"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The entity implementing the register"
+    },
+    {
+      "id": "removable media",
+      "type": "CONCEPT",
+      "text": "Storage devices that can be removed"
+    },
+    {
+      "id": "ISM-1713",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "verification process",
+      "type": "PROCESS",
+      "text": "Regular checking of the register"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "removable media register",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "removable media register",
+      "to": "removable media",
+      "type": "TRACKS"
+    },
+    {
+      "from": "ISM-1713",
+      "to": "removable media register",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "organisation",
+      "to": "verification process",
+      "type": "PERFORMS"
+    }
+  ]
+}

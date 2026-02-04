@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-244",
+  "entities": [
+    {
+      "id": "Sanitising media before first use",
+      "type": "PROCESS",
+      "text": "Process of cleaning media before initial use"
+    },
+    {
+      "id": "cyber supply chain risks",
+      "type": "RISK_TYPE",
+      "text": "Risks associated with supply chain cybersecurity"
+    },
+    {
+      "id": "malicious code",
+      "type": "THREAT_TYPE",
+      "text": "Harmful software code"
+    },
+    {
+      "id": "security domain",
+      "type": "SECURITY_CONCEPT",
+      "text": "Logical security boundary"
+    },
+    {
+      "id": "data spills",
+      "type": "SECURITY_INCIDENT",
+      "text": "Unauthorized data exposure"
+    },
+    {
+      "id": "ISM-1600",
+      "type": "CONTROL_ID",
+      "text": "Information Security Manual control 1600"
+    },
+    {
+      "id": "ISM-1642",
+      "type": "CONTROL_ID",
+      "text": "Information Security Manual control 1642"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Sanitising media before first use",
+      "to": "cyber supply chain risks",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "Sanitising media before first use",
+      "to": "malicious code",
+      "type": "CAN_CONTAIN"
+    },
+    {
+      "from": "Sanitising media before first use",
+      "to": "security domain",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "Sanitising media before first use",
+      "to": "data spills",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "Sanitising media before first use",
+      "to": "ISM-1600",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Sanitising media before first use",
+      "to": "ISM-1642",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Sanitising media before first use",
+      "to": "N/A",
+      "type": "N/A"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "query": "email encryption",
+  "description": "Query about email security and encryption",
+  "expected_results": {
+    "matching_entities": 93,
+    "related_entities": 375,
+    "relevant_chunks": 325
+  },
+  "sample_entities": [
+    "Lists used for email communication",
+    "Information security control for email distribution",
+    "Technical term: TLS encryption",
+    "Technical term: opportunistic TLS encryption"
+  ]
+}

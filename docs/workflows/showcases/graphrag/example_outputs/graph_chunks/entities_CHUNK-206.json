@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-206",
+  "entities": [
+    {
+      "id": "evaluated product",
+      "type": "CONCEPT",
+      "text": "A product that has undergone evaluation"
+    },
+    {
+      "id": "evaluated configuration",
+      "type": "CONCEPT",
+      "text": "A specific configuration state of an evaluated product"
+    },
+    {
+      "id": "operating",
+      "type": "PROCESS",
+      "text": "The action of functioning or running"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "evaluated product",
+      "to": "evaluated configuration",
+      "type": "DEFINES"
+    },
+    {
+      "from": "evaluated product",
+      "to": "operating",
+      "type": "REQUIRES"
+    }
+  ]
+}

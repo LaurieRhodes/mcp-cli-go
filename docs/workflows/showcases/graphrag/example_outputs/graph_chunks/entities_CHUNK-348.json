@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-348",
+  "entities": [
+    {
+      "id": "vulnerability disclosure program",
+      "type": "CONCEPT",
+      "text": "Program to assist with secure development and maintenance of products and services"
+    },
+    {
+      "id": "security researchers",
+      "type": "ACTOR",
+      "text": "Members of the public who can responsibly report security vulnerabilities"
+    },
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "Independent coordinator for vulnerability reporting when direct reporting is not practical"
+    },
+    {
+      "id": "vulnerability disclosure policy",
+      "type": "CONCEPT",
+      "text": "Publicly available policy covering vulnerability disclosure procedures"
+    },
+    {
+      "id": "vulnerability disclosure processes",
+      "type": "PROCESS",
+      "text": "Processes for receiving, verifying, resolving and reporting security vulnerabilities"
+    },
+    {
+      "id": "security.txt file",
+      "type": "ARTIFACT",
+      "text": "File hosted on internet-facing domains to assist in responsible disclosure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "vulnerability disclosure program",
+      "to": "security researchers",
+      "type": "DEFINES"
+    },
+    {
+      "from": "vulnerability disclosure program",
+      "to": "vulnerability disclosure policy",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "vulnerability disclosure program",
+      "to": "vulnerability disclosure processes",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "vulnerability disclosure program",
+      "to": "security.txt file",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "security researchers",
+      "type": "COORDINATES"
+    }
+  ]
+}

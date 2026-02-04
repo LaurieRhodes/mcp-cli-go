@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-294",
+  "entities": [
+    {
+      "id": "server applications",
+      "type": "CONCEPT",
+      "text": "Software applications running on servers"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Weaknesses in software that can be exploited"
+    },
+    {
+      "id": "exploitation techniques",
+      "type": "CONCEPT",
+      "text": "Methods used to take advantage of security vulnerabilities"
+    },
+    {
+      "id": "internet-facing applications",
+      "type": "CONCEPT",
+      "text": "Applications accessible from the internet"
+    },
+    {
+      "id": "web hosting software",
+      "type": "CONCEPT",
+      "text": "Software specifically for hosting websites"
+    },
+    {
+      "id": "ISM-1483",
+      "type": "CONTROL",
+      "text": "Information Security Manual control requiring latest releases of internet-facing server applications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "server applications",
+      "to": "security vulnerabilities",
+      "type": "EXPOSES_TO"
+    },
+    {
+      "from": "security vulnerabilities",
+      "to": "exploitation techniques",
+      "type": "ENABLES"
+    }
+  ]
+}

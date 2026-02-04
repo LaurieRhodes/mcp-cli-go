@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-136",
+  "entities": [
+    {
+      "id": "TOP SECRET fibre-optic fly leads",
+      "type": "CONCEPT",
+      "text": "TOP SECRET fibre-optic fly leads used for connections"
+    },
+    {
+      "id": "cabling infrastructure",
+      "type": "CONCEPT",
+      "text": "Infrastructure for running cables"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and communications technology equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TOP SECRET fibre-optic fly leads",
+      "to": "TOP SECRET fibre-optic fly leads",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "cabling infrastructure",
+      "to": "ICT equipment",
+      "type": "CONNECTS_TO"
+    }
+  ]
+}

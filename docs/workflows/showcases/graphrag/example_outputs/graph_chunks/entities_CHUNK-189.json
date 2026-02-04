@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-189",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "DEVICE",
+      "text": "Mobile devices that can process voice and data"
+    },
+    {
+      "id": "personnel",
+      "type": "PERSON",
+      "text": "Personnel using mobile devices"
+    },
+    {
+      "id": "voice communications",
+      "type": "COMMUNICATION_TYPE",
+      "text": "Voice communications component"
+    },
+    {
+      "id": "data communications",
+      "type": "COMMUNICATION_TYPE",
+      "text": "Data communications component"
+    },
+    {
+      "id": "sensitivity",
+      "type": "ATTRIBUTE",
+      "text": "Sensitivity level of information"
+    },
+    {
+      "id": "classification",
+      "type": "ATTRIBUTE",
+      "text": "Classification level of information"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-189",
+      "to": "CHUNK-189",
+      "type": "MENTIONS"
+    },
+    {
+      "from": "CHUNK-189",
+      "to": "CHUNK-189",
+      "type": "MENTIONS"
+    },
+    {
+      "from": "CHUNK-189",
+      "to": "CHUNK-189",
+      "type": "HAS_COMPONENT"
+    },
+    {
+      "from": "CHUNK-189",
+      "to": "CHUNK-189",
+      "type": "HAS_COMPONENT"
+    },
+    {
+      "from": "CHUNK-189",
+      "to": "CHUNK-189",
+      "type": "HAS_ATTRIBUTE"
+    },
+    {
+      "from": "CHUNK-189",
+      "to": "CHUNK-189",
+      "type": "HAS_ATTRIBUTE"
+    }
+  ]
+}

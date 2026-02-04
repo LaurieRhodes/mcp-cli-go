@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-393",
+  "entities": [
+    {
+      "id": "Virtual Local Area Networks (VLANs)",
+      "type": "CONCEPT",
+      "text": "Technology for creating logically separate networks within a physical network"
+    },
+    {
+      "id": "Multiprotocol Label Switching",
+      "type": "CONCEPT",
+      "text": "Network routing protocol considered equivalent to VLANs"
+    },
+    {
+      "id": "Network segmentation",
+      "type": "PROCESS",
+      "text": "Process of dividing network into smaller segments"
+    },
+    {
+      "id": "Network segregation",
+      "type": "PROCESS",
+      "text": "Process of isolating network traffic"
+    },
+    {
+      "id": "Security domain",
+      "type": "CONCEPT",
+      "text": "Domain with defined security requirements"
+    },
+    {
+      "id": "Data spill",
+      "type": "EVENT",
+      "text": "Unauthorized data transfer between networks"
+    },
+    {
+      "id": "Network devices",
+      "type": "DEVICE",
+      "text": "Hardware managing VLAN configurations"
+    },
+    {
+      "id": "VLAN trunks",
+      "type": "DEVICE",
+      "text": "Connections carrying multiple VLAN traffic"
+    },
+    {
+      "id": "Physical network interfaces",
+      "type": "DEVICE",
+      "text": "Physical ports on network devices"
+    },
+    {
+      "id": "Organisation's networks",
+      "type": "NETWORK",
+      "text": "Internal organizational network infrastructure"
+    },
+    {
+      "id": "Public network infrastructure",
+      "type": "NETWORK",
+      "text": "External internet or public network infrastructure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Virtual Local Area Networks (VLANs)",
+      "to": "Virtual Local Area Networks (VLANs)",
+      "type": "Virtual Local Area Networks (VLANs)"
+    },
+    {
+      "from": "Network segmentation",
+      "to": "Network segregation",
+      "type": "Security domain"
+    }
+  ]
+}

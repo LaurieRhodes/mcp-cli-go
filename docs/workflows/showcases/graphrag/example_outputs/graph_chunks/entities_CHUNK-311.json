@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-311",
+  "entities": [
+    {
+      "id": "User sessions",
+      "type": "CONCEPT",
+      "text": "Sessions created by users on workstations"
+    },
+    {
+      "id": "Workstations",
+      "type": "ACTOR",
+      "text": "Computer systems used by employees"
+    },
+    {
+      "id": "Session termination",
+      "type": "PROCESS",
+      "text": "Process of ending user sessions"
+    },
+    {
+      "id": "Workstation restart",
+      "type": "PROCESS",
+      "text": "Process of restarting computer systems"
+    },
+    {
+      "id": "ISM-0853",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control for session termination"
+    },
+    {
+      "id": "System maintenance",
+      "type": "PROCESS",
+      "text": "Regular maintenance activities for systems"
+    },
+    {
+      "id": "Adversary removal",
+      "type": "PROCESS",
+      "text": "Removing unauthorized access from systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Session termination",
+      "to": "User sessions",
+      "type": "TERMINATES"
+    },
+    {
+      "from": "Workstation restart",
+      "to": "Workstations",
+      "type": "RESTARTS"
+    },
+    {
+      "from": "ISM-0853",
+      "to": "Session termination",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-0853",
+      "to": "Workstation restart",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Session termination",
+      "to": "Adversary removal",
+      "type": "ASSISTS"
+    },
+    {
+      "from": "Workstation restart",
+      "to": "System maintenance",
+      "type": "ASSISTS"
+    }
+  ]
+}

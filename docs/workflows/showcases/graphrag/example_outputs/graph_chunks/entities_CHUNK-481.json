@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-481",
+  "entities": [
+    {
+      "id": "Gateways",
+      "type": "CONCEPT",
+      "text": "Network security devices managing data flows between different security domains"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre - government cybersecurity agency"
+    },
+    {
+      "id": "Cross Domain Solutions",
+      "type": "CONCEPT",
+      "text": "Solutions for connecting different security domains with classified information"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Gateways",
+      "to": "Gateways",
+      "type": "GUIDED_BY"
+    },
+    {
+      "from": "ACSC",
+      "to": "Cross Domain Solutions",
+      "type": "RELATES_TO"
+    }
+  ]
+}

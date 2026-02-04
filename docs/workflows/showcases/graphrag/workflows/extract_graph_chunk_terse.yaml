@@ -1,0 +1,28 @@
+$schema: "workflow/v2.0"
+name: extract_graph_chunk_terse
+version: 1.0.0
+description: Ultra-directive extraction - NO EXPLANATIONS
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  timeout: 2m
+
+steps:
+  - name: extract
+    skills: [python-context-builder]
+    max_iterations: 5
+    run: |
+      Input: {{input}}
+      
+      CRITICAL: DO NOT EXPLAIN. DO NOT DESCRIBE. JUST EXECUTE.
+      
+      Extract entities from content. Call tool immediately:
+      
+      skills_run_helper_script(
+        skill_name="python-context-builder",
+        script_name="save_graph_entities_production.py",
+        args=["{{chunk_id}}", "entity1|entity2", "TYPE1|TYPE2", "desc1|desc2", "from1|from2", "to1|to2", "REL1|REL2"]
+      )
+      
+      Reply ONLY with tool result. NO COMMENTARY.

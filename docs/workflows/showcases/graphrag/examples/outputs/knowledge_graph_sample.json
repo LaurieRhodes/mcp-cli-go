@@ -1,0 +1,862 @@
+{
+  "total_nodes": 2337,
+  "total_edges": 2313,
+  "sample_nodes": [
+    {
+      "id": "Email distribution lists",
+      "type": "CONCEPT",
+      "text": "Lists used for email communication",
+      "source_chunks": [
+        "CHUNK-377"
+      ]
+    },
+    {
+      "id": "Australian Eyes Only data",
+      "type": "CONCEPT",
+      "text": "Classified Australian government data",
+      "source_chunks": [
+        "CHUNK-377"
+      ]
+    },
+    {
+      "id": "ISM-0269",
+      "type": "CONTROL",
+      "text": "Information security control for email distribution",
+      "source_chunks": [
+        "CHUNK-377"
+      ]
+    },
+    {
+      "id": "mobile devices",
+      "type": "CONCEPT",
+      "text": "Portable electronic devices that can be easily lost or stolen",
+      "source_chunks": [
+        "CHUNK-192",
+        "CHUNK-197",
+        "CHUNK-182",
+        "CHUNK-186",
+        "CHUNK-177",
+        "CHUNK-179",
+        "CHUNK-196",
+        "CHUNK-189",
+        "CHUNK-195"
+      ]
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Individuals responsible for mobile device security",
+      "source_chunks": [
+        "CHUNK-192",
+        "CHUNK-103",
+        "CHUNK-170",
+        "CHUNK-173",
+        "CHUNK-087",
+        "CHUNK-215",
+        "CHUNK-092",
+        "CHUNK-032",
+        "CHUNK-189",
+        "CHUNK-195",
+        "CHUNK-181",
+        "CHUNK-150"
+      ]
+    },
+    {
+      "id": "supervision",
+      "type": "PROCESS",
+      "text": "Ongoing monitoring and oversight of mobile devices",
+      "source_chunks": [
+        "CHUNK-192",
+        "CHUNK-267"
+      ]
+    },
+    {
+      "id": "encryption",
+      "type": "CONCEPT",
+      "text": "Data protection technology for mobile devices",
+      "source_chunks": [
+        "CHUNK-192",
+        "CHUNK-436",
+        "CHUNK-182",
+        "CHUNK-361",
+        "CHUNK-512",
+        "CHUNK-152",
+        "CHUNK-151",
+        "CHUNK-437",
+        "CHUNK-498"
+      ]
+    },
+    {
+      "id": "security briefcase",
+      "type": "CONCEPT",
+      "text": "Secure container for transporting mobile devices",
+      "source_chunks": [
+        "CHUNK-192"
+      ]
+    },
+    {
+      "id": "satchel/pouch/transit bag",
+      "type": "CONCEPT",
+      "text": "Approved containers for secure mobile device transport",
+      "source_chunks": [
+        "CHUNK-192"
+      ]
+    },
+    {
+      "id": "software-based isolation mechanism",
+      "type": "CONCEPT",
+      "text": "Mechanism for sharing physical server hardware",
+      "source_chunks": [
+        "CHUNK-317",
+        "CHUNK-315"
+      ]
+    },
+    {
+      "id": "physical server",
+      "type": "CONCEPT",
+      "text": "Hardware that hosts computing environments",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "computing environment",
+      "type": "CONCEPT",
+      "text": "Operating system or application running on shared hardware",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "hypervisor",
+      "type": "CONCEPT",
+      "text": "Type of isolation mechanism for virtual machines",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "application container",
+      "type": "CONCEPT",
+      "text": "Type of isolation mechanism using shared kernel",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Entity that might compromise computing environments",
+      "source_chunks": [
+        "CHUNK-317",
+        "CHUNK-305",
+        "CHUNK-412",
+        "CHUNK-282",
+        "CHUNK-405",
+        "CHUNK-274",
+        "CHUNK-428",
+        "CHUNK-401",
+        "CHUNK-277",
+        "CHUNK-182",
+        "CHUNK-295",
+        "CHUNK-414",
+        "CHUNK-289",
+        "CHUNK-500",
+        "CHUNK-152",
+        "CHUNK-410",
+        "CHUNK-506",
+        "CHUNK-321",
+        "CHUNK-396",
+        "CHUNK-380",
+        "CHUNK-398",
+        "CHUNK-052",
+        "CHUNK-296"
+      ]
+    },
+    {
+      "id": "vendor",
+      "type": "ACTOR",
+      "text": "Provider of isolation mechanism software",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "administrative interface",
+      "type": "CONCEPT",
+      "text": "Management interface for isolation mechanism",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "underlying operating system",
+      "type": "CONCEPT",
+      "text": "Base OS of physical server",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "patches/updates",
+      "type": "PROCESS",
+      "text": "Security vulnerability remediation",
+      "source_chunks": [
+        "CHUNK-317",
+        "CHUNK-293",
+        "CHUNK-327"
+      ]
+    },
+    {
+      "id": "integrity monitoring",
+      "type": "PROCESS",
+      "text": "Security monitoring activity",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "log monitoring",
+      "type": "PROCESS",
+      "text": "Security monitoring activity",
+      "source_chunks": [
+        "CHUNK-317"
+      ]
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "PROCESS",
+      "text": "Response to cyber security incidents",
+      "source_chunks": [
+        "CHUNK-033",
+        "CHUNK-487",
+        "CHUNK-390",
+        "CHUNK-048",
+        "CHUNK-066",
+        "CHUNK-504",
+        "CHUNK-046",
+        "CHUNK-041"
+      ]
+    },
+    {
+      "id": "cyber supply chain risk management",
+      "type": "PROCESS",
+      "text": "Management of cyber supply chain risks",
+      "source_chunks": [
+        "CHUNK-033",
+        "CHUNK-205",
+        "CHUNK-314",
+        "CHUNK-246",
+        "CHUNK-499",
+        "CHUNK-497",
+        "CHUNK-501",
+        "CHUNK-521",
+        "CHUNK-489",
+        "CHUNK-523",
+        "CHUNK-300",
+        "CHUNK-219",
+        "CHUNK-407",
+        "CHUNK-425",
+        "CHUNK-285",
+        "CHUNK-291",
+        "CHUNK-509",
+        "CHUNK-270",
+        "CHUNK-430",
+        "CHUNK-505",
+        "CHUNK-224"
+      ]
+    },
+    {
+      "id": "procurement of outsourced services",
+      "type": "PROCESS",
+      "text": "Procurement of outsourced services",
+      "source_chunks": [
+        "CHUNK-033",
+        "CHUNK-489"
+      ]
+    },
+    {
+      "id": "cyber security awareness training programs",
+      "type": "PROCESS",
+      "text": "Cyber security awareness training programs",
+      "source_chunks": [
+        "CHUNK-033"
+      ]
+    },
+    {
+      "id": "public key-based authentication",
+      "type": "CONCEPT",
+      "text": "Stronger authentication method for SSH connections",
+      "source_chunks": [
+        "CHUNK-465"
+      ]
+    },
+    {
+      "id": "SSH connections",
+      "type": "PROCESS",
+      "text": "Secure Shell connections requiring authentication",
+      "source_chunks": [
+        "CHUNK-465"
+      ]
+    },
+    {
+      "id": "SSH private keys",
+      "type": "CONCEPT",
+      "text": "Cryptographic keys requiring protection",
+      "source_chunks": [
+        "CHUNK-465"
+      ]
+    },
+    {
+      "id": "passphrases",
+      "type": "CONCEPT",
+      "text": "Authentication credentials for protecting keys",
+      "source_chunks": [
+        "CHUNK-465",
+        "CHUNK-305"
+      ]
+    },
+    {
+      "id": "key encryption keys",
+      "type": "CONCEPT",
+      "text": "Cryptographic keys used to encrypt other keys",
+      "source_chunks": [
+        "CHUNK-465"
+      ]
+    },
+    {
+      "id": "ISM-0485",
+      "type": "CONCEPT",
+      "text": "Control requiring public key-based authentication for SSH",
+      "source_chunks": [
+        "CHUNK-465"
+      ]
+    },
+    {
+      "id": "ISM-1449",
+      "type": "CONCEPT",
+      "text": "Control requiring protection of SSH private keys",
+      "source_chunks": [
+        "CHUNK-465"
+      ]
+    },
+    {
+      "id": "Traditional network firewalls",
+      "type": "CONCEPT",
+      "text": "Traditional network security devices",
+      "source_chunks": [
+        "CHUNK-281"
+      ]
+    },
+    {
+      "id": "Malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful software programs",
+      "source_chunks": [
+        "CHUNK-281",
+        "CHUNK-275",
+        "CHUNK-518",
+        "CHUNK-283",
+        "CHUNK-280"
+      ]
+    },
+    {
+      "id": "Software firewalls",
+      "type": "CONCEPT",
+      "text": "Application-level security software",
+      "source_chunks": [
+        "CHUNK-281"
+      ]
+    },
+    {
+      "id": "Workstations",
+      "type": "ACTOR",
+      "text": "End-user computing devices",
+      "source_chunks": [
+        "CHUNK-281",
+        "CHUNK-278",
+        "CHUNK-162",
+        "CHUNK-311",
+        "CHUNK-280",
+        "CHUNK-172"
+      ]
+    },
+    {
+      "id": "Servers",
+      "type": "ACTOR",
+      "text": "Server computing devices",
+      "source_chunks": [
+        "CHUNK-281"
+      ]
+    },
+    {
+      "id": "Network connections",
+      "type": "PROCESS",
+      "text": "Network communication links",
+      "source_chunks": [
+        "CHUNK-281"
+      ]
+    },
+    {
+      "id": "Applications",
+      "type": "PROCESS",
+      "text": "Software programs",
+      "source_chunks": [
+        "CHUNK-281",
+        "CHUNK-055"
+      ]
+    },
+    {
+      "id": "Services",
+      "type": "PROCESS",
+      "text": "System services",
+      "source_chunks": [
+        "CHUNK-281",
+        "CHUNK-055"
+      ]
+    },
+    {
+      "id": "automated asset discovery tool",
+      "type": "CONCEPT",
+      "text": "Tool for identifying assets",
+      "source_chunks": [
+        "CHUNK-326"
+      ]
+    },
+    {
+      "id": "vulnerability scanner",
+      "type": "CONCEPT",
+      "text": "Tool for scanning vulnerabilities",
+      "source_chunks": [
+        "CHUNK-326"
+      ]
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The entity implementing controls",
+      "source_chunks": [
+        "CHUNK-326",
+        "CHUNK-239",
+        "CHUNK-332",
+        "CHUNK-305",
+        "CHUNK-204",
+        "CHUNK-049",
+        "CHUNK-104",
+        "CHUNK-020",
+        "CHUNK-082",
+        "CHUNK-412",
+        "CHUNK-293",
+        "CHUNK-028",
+        "CHUNK-274",
+        "CHUNK-428",
+        "CHUNK-208",
+        "CHUNK-327",
+        "CHUNK-050",
+        "CHUNK-287",
+        "CHUNK-401",
+        "CHUNK-427",
+        "CHUNK-458",
+        "CHUNK-006",
+        "CHUNK-510",
+        "CHUNK-057",
+        "CHUNK-001",
+        "CHUNK-325",
+        "CHUNK-502",
+        "CHUNK-195",
+        "CHUNK-188",
+        "CHUNK-015",
+        "CHUNK-328",
+        "CHUNK-426",
+        "CHUNK-337",
+        "CHUNK-065",
+        "CHUNK-005",
+        "CHUNK-121",
+        "CHUNK-379",
+        "CHUNK-498",
+        "CHUNK-400"
+      ]
+    },
+    {
+      "id": "patch/update application process",
+      "type": "PROCESS",
+      "text": "Process of applying patches",
+      "source_chunks": [
+        "CHUNK-326"
+      ]
+    },
+    {
+      "id": "asset discovery process",
+      "type": "PROCESS",
+      "text": "Process of identifying assets",
+      "source_chunks": [
+        "CHUNK-326"
+      ]
+    },
+    {
+      "id": "vulnerability scanning process",
+      "type": "PROCESS",
+      "text": "Process of scanning for vulnerabilities",
+      "source_chunks": [
+        "CHUNK-326"
+      ]
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Security weaknesses",
+      "source_chunks": [
+        "CHUNK-326",
+        "CHUNK-273",
+        "CHUNK-294",
+        "CHUNK-293",
+        "CHUNK-282",
+        "CHUNK-327",
+        "CHUNK-212",
+        "CHUNK-287",
+        "CHUNK-288",
+        "CHUNK-328"
+      ]
+    },
+    {
+      "id": "internet-facing services",
+      "type": "CONCEPT",
+      "text": "Services exposed to internet",
+      "source_chunks": [
+        "CHUNK-326",
+        "CHUNK-327"
+      ]
+    },
+    {
+      "id": "office productivity suites",
+      "type": "CONCEPT",
+      "text": "Software like Microsoft Office",
+      "source_chunks": [
+        "CHUNK-326",
+        "CHUNK-327",
+        "CHUNK-289",
+        "CHUNK-286",
+        "CHUNK-288"
+      ]
+    },
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "System software",
+      "source_chunks": [
+        "CHUNK-326",
+        "CHUNK-273",
+        "CHUNK-274",
+        "CHUNK-327",
+        "CHUNK-517",
+        "CHUNK-324",
+        "CHUNK-325",
+        "CHUNK-315",
+        "CHUNK-328",
+        "CHUNK-341"
+      ]
+    }
+  ],
+  "sample_edges": [
+    {
+      "from": "Email distribution lists",
+      "to": "Email distribution lists",
+      "type": "CONTAINS",
+      "source_chunk": "CHUNK-377"
+    },
+    {
+      "from": "Australian Eyes Only data",
+      "to": "ISM-0269",
+      "type": "GOVERNED_BY",
+      "source_chunk": "CHUNK-377"
+    },
+    {
+      "from": "personnel",
+      "to": "mobile devices",
+      "type": "mobile devices",
+      "source_chunk": "CHUNK-192"
+    },
+    {
+      "from": "mobile devices",
+      "to": "encryption",
+      "type": "security briefcase",
+      "source_chunk": "CHUNK-192"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "USES",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "physical server",
+      "to": "RUNS_ON",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "computing environment",
+      "to": "IS_A",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "IS_A",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "hypervisor",
+      "to": "COMPROMISES",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "PROVIDES",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "application container",
+      "to": "HAS",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "HAS",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "adversary",
+      "to": "REQUIRES",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "computing environment",
+      "to": "REQUIRES",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "vendor",
+      "to": "REQUIRES",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "REQUIRES",
+      "type": "RELATED_TO",
+      "source_chunk": "CHUNK-317"
+    },
+    {
+      "from": "cyber security incidents",
+      "to": "cyber supply chain risk management",
+      "type": "HAS_GUIDELINES",
+      "source_chunk": "CHUNK-033"
+    },
+    {
+      "from": "cyber supply chain risk management",
+      "to": "procurement of outsourced services",
+      "type": "HAS_GUIDELINES",
+      "source_chunk": "CHUNK-033"
+    },
+    {
+      "from": "public key-based authentication",
+      "to": "SSH connections",
+      "type": "DEFINES",
+      "source_chunk": "CHUNK-465"
+    },
+    {
+      "from": "SSH private keys",
+      "to": "passphrases",
+      "type": "REQUIRES",
+      "source_chunk": "CHUNK-465"
+    },
+    {
+      "from": "SSH private keys",
+      "to": "key encryption keys",
+      "type": "REQUIRES",
+      "source_chunk": "CHUNK-465"
+    },
+    {
+      "from": "ISM-0485",
+      "to": "public key-based authentication",
+      "type": "DEFINES",
+      "source_chunk": "CHUNK-465"
+    },
+    {
+      "from": "ISM-1449",
+      "to": "SSH private keys",
+      "type": "DEFINES",
+      "source_chunk": "CHUNK-465"
+    },
+    {
+      "from": "Traditional network firewalls",
+      "to": "Software firewalls",
+      "type": "Software firewalls",
+      "source_chunk": "CHUNK-281"
+    },
+    {
+      "from": "Malicious code",
+      "to": "Traditional network firewalls",
+      "type": "Workstations",
+      "source_chunk": "CHUNK-281"
+    },
+    {
+      "from": "organisation",
+      "to": "automated asset discovery tool",
+      "type": "USES",
+      "source_chunk": "CHUNK-326"
+    },
+    {
+      "from": "organisation",
+      "to": "vulnerability scanner",
+      "type": "USES",
+      "source_chunk": "CHUNK-326"
+    },
+    {
+      "from": "asset discovery process",
+      "to": "vulnerability scanning process",
+      "type": "SUPPORTS",
+      "source_chunk": "CHUNK-326"
+    },
+    {
+      "from": "vulnerability scanner",
+      "to": "security vulnerabilities",
+      "type": "IDENTIFIES",
+      "source_chunk": "CHUNK-326"
+    },
+    {
+      "from": "vulnerability scanner",
+      "to": "missing patches/updates",
+      "type": "IDENTIFIES",
+      "source_chunk": "CHUNK-326"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security risks",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "implementing HTTPS",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "using TLS in HTTPS",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "API security",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "strong authentication",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "event logging",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "Further information",
+      "to": "web application security",
+      "type": "REFERENCES",
+      "source_chunk": "CHUNK-359"
+    },
+    {
+      "from": "temporary access",
+      "to": "personnel",
+      "type": "GRANTS",
+      "source_chunk": "CHUNK-103"
+    },
+    {
+      "from": "personnel",
+      "to": "access controls",
+      "type": "SUBJECT_TO",
+      "source_chunk": "CHUNK-103"
+    },
+    {
+      "from": "temporary access",
+      "to": "ISM-0441",
+      "type": "GOVERNED_BY",
+      "source_chunk": "CHUNK-103"
+    },
+    {
+      "from": "temporary access",
+      "to": "ISM-0443",
+      "type": "GOVERNED_BY",
+      "source_chunk": "CHUNK-103"
+    },
+    {
+      "from": "temporary access",
+      "to": "caveated information",
+      "type": "EXCLUDES",
+      "source_chunk": "CHUNK-103"
+    },
+    {
+      "from": "SSH-agent",
+      "to": "SSH-agent",
+      "type": "REQUIRES",
+      "source_chunk": "CHUNK-467"
+    },
+    {
+      "from": "Screen locks",
+      "to": "Key caches",
+      "type": "REQUIRES",
+      "source_chunk": "CHUNK-467"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "REQUIRES",
+      "source_chunk": "CHUNK-159"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "REQUIRES",
+      "source_chunk": "CHUNK-159"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "REQUIRES",
+      "source_chunk": "CHUNK-159"
+    }
+  ]
+}

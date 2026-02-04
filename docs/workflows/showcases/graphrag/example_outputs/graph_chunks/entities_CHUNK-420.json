@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-420",
+  "entities": [
+    {
+      "id": "WPA3 standard",
+      "type": "STANDARD",
+      "text": "Wireless Protected Access 3 standard"
+    },
+    {
+      "id": "Fast Basic Service Set Transition (FT)",
+      "type": "FEATURE",
+      "text": "802.11r feature for improved mobility and reduced authentication lag"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Protocol",
+      "type": "PROTOCOL",
+      "text": "Australian Signals Directorate approved cryptographic protocol"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "WPA3 standard",
+      "to": "Fast Basic Service Set Transition (FT)",
+      "type": "SPECIFIES"
+    },
+    {
+      "from": "Fast Basic Service Set Transition (FT)",
+      "to": "ASD-Approved Cryptographic Protocol",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-082",
+  "entities": [
+    {
+      "id": "Radio Frequency (RF) devices",
+      "type": "CONCEPT",
+      "text": "Wireless communication devices that can record/transmit audio or data"
+    },
+    {
+      "id": "infrared (IR) devices",
+      "type": "CONCEPT",
+      "text": "Wireless communication devices using infrared technology"
+    },
+    {
+      "id": "SECRET areas",
+      "type": "LOCATION",
+      "text": "Areas handling SECRET classified information"
+    },
+    {
+      "id": "TOP SECRET areas",
+      "type": "LOCATION",
+      "text": "Areas handling TOP SECRET classified information"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The entity responsible for security policies"
+    },
+    {
+      "id": "authorised RF and IR device register",
+      "type": "ARTIFACT",
+      "text": "Formal record of approved RF/IR devices in secure areas"
+    },
+    {
+      "id": "security measures",
+      "type": "PROCESS",
+      "text": "Procedures to detect and respond to unauthorized devices"
+    },
+    {
+      "id": "unauthorised RF and IR devices",
+      "type": "CONCEPT",
+      "text": "RF/IR devices not approved for secure areas"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "Radio Frequency (RF) devices",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "organisation",
+      "to": "infrared (IR) devices",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "organisation",
+      "to": "SECRET areas",
+      "type": "MAINTAINS"
+    },
+    {
+      "from": "organisation",
+      "to": "TOP SECRET areas",
+      "type": "VERIFIES"
+    },
+    {
+      "from": "organisation",
+      "to": "authorised RF and IR device register",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "organisation",
+      "to": "security measures",
+      "type": "DETECTS_RESPONDS_TO"
+    }
+  ]
+}

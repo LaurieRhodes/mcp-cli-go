@@ -1,0 +1,37 @@
+$schema: "workflow/v2.0"
+name: ask_graphrag
+version: 1.0.0
+description: Query GraphRAG knowledge graph
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  timeout: 3m
+
+env:
+  graph_file: "/outputs/rlm_poc/knowledge_graph.json"
+  chunks_dir: "/outputs/rlm_poc/graph_chunks"
+  results_file: "/outputs/rlm_poc/query_results.json"
+  chunks_file: "/outputs/rlm_poc/chunks.json"
+
+steps:
+  - name: query_graph
+    skills: [python-context-builder]
+    max_iterations: 2
+    run: |
+      Input data: {{input}}
+      
+      Execute query_graphrag.py script with the question from input.
+      
+      Call skills_run_helper_script tool:
+      {
+        "skill_name": "python-context-builder",
+        "script_name": "query_graphrag.py",
+        "args": [
+          "{{input.question}}",
+          "/outputs/rlm_poc/knowledge_graph.json",
+          "/outputs/rlm_poc/graph_chunks",
+          "/outputs/rlm_poc/query_results.json",
+          "2"
+        ]
+      }

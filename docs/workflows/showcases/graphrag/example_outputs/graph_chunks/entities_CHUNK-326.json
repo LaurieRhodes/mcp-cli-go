@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-326",
+  "entities": [
+    {
+      "id": "automated asset discovery tool",
+      "type": "CONCEPT",
+      "text": "Tool for identifying assets"
+    },
+    {
+      "id": "vulnerability scanner",
+      "type": "CONCEPT",
+      "text": "Tool for scanning vulnerabilities"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The entity implementing controls"
+    },
+    {
+      "id": "patch/update application process",
+      "type": "PROCESS",
+      "text": "Process of applying patches"
+    },
+    {
+      "id": "asset discovery process",
+      "type": "PROCESS",
+      "text": "Process of identifying assets"
+    },
+    {
+      "id": "vulnerability scanning process",
+      "type": "PROCESS",
+      "text": "Process of scanning for vulnerabilities"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Security weaknesses"
+    },
+    {
+      "id": "internet-facing services",
+      "type": "CONCEPT",
+      "text": "Services exposed to internet"
+    },
+    {
+      "id": "office productivity suites",
+      "type": "CONCEPT",
+      "text": "Software like Microsoft Office"
+    },
+    {
+      "id": "operating systems",
+      "type": "CONCEPT",
+      "text": "System software"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "automated asset discovery tool",
+      "type": "USES"
+    },
+    {
+      "from": "organisation",
+      "to": "vulnerability scanner",
+      "type": "USES"
+    },
+    {
+      "from": "asset discovery process",
+      "to": "vulnerability scanning process",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "vulnerability scanner",
+      "to": "security vulnerabilities",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "vulnerability scanner",
+      "to": "missing patches/updates",
+      "type": "IDENTIFIES"
+    }
+  ]
+}

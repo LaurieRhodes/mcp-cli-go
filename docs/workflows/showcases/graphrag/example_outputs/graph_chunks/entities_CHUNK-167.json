@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-167",
+  "entities": [
+    {
+      "id": "Australian Signals Directorate",
+      "type": "ACTOR",
+      "text": "Australian government intelligence agency"
+    },
+    {
+      "id": "High Assurance Cryptographic Equipment",
+      "type": "CONCEPT",
+      "text": "Cryptographic equipment approved for classified communications"
+    },
+    {
+      "id": "Australian Cyber Security Centre",
+      "type": "ACTOR",
+      "text": "Australian government cybersecurity agency"
+    },
+    {
+      "id": "Classified fax messages",
+      "type": "CONCEPT",
+      "text": "Fax messages containing classified information"
+    },
+    {
+      "id": "Processes and procedures",
+      "type": "PROCESS",
+      "text": "Methods for handling classified communications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Signals Directorate",
+      "to": "High Assurance Cryptographic Equipment",
+      "type": "Australian Cyber Security Centre"
+    },
+    {
+      "from": "High Assurance Cryptographic Equipment",
+      "to": "Classified fax messages",
+      "type": "Processes and procedures"
+    }
+  ]
+}

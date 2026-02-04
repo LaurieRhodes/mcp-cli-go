@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-435",
+  "entities": [
+    {
+      "id": "Cryptographic key management processes",
+      "type": "CONCEPT",
+      "text": "Processes for managing cryptographic keys"
+    },
+    {
+      "id": "Cryptographic key management procedures",
+      "type": "CONCEPT",
+      "text": "Procedures supporting key management"
+    },
+    {
+      "id": "Cryptographic keys",
+      "type": "CONCEPT",
+      "text": "Digital keys used for encryption"
+    },
+    {
+      "id": "Hardware and software",
+      "type": "CONCEPT",
+      "text": "Physical and software components"
+    },
+    {
+      "id": "ISM-0507 control",
+      "type": "CONTROL",
+      "text": "Information Security Manual control 0507"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cryptographic key management processes",
+      "to": "Cryptographic key management procedures",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Cryptographic key management processes",
+      "to": "Cryptographic keys",
+      "type": "MANAGES"
+    },
+    {
+      "from": "Cryptographic key management processes",
+      "to": "Hardware and software",
+      "type": "ASSOCIATED_WITH"
+    },
+    {
+      "from": "Cryptographic key management processes",
+      "to": "ISM-0507 control",
+      "type": "IMPLEMENTS"
+    }
+  ]
+}

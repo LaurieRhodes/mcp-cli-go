@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-511",
+  "entities": [
+    {
+      "id": "content filters",
+      "type": "CONCEPT",
+      "text": "Filters that inspect content for unauthorized or malicious code"
+    },
+    {
+      "id": "gateways",
+      "type": "SYSTEM",
+      "text": "Network entry/exit points for traffic"
+    },
+    {
+      "id": "CDSs",
+      "type": "SYSTEM",
+      "text": "Content Delivery Systems that distribute content"
+    },
+    {
+      "id": "malicious content",
+      "type": "CONCEPT",
+      "text": "Content identified as harmful or containing malicious code"
+    },
+    {
+      "id": "suspicious content",
+      "type": "CONCEPT",
+      "text": "Content that appears abnormal or potentially harmful"
+    },
+    {
+      "id": "active content",
+      "type": "CONCEPT",
+      "text": "Dynamic content like scripts that can execute"
+    },
+    {
+      "id": "security testing",
+      "type": "PROCESS",
+      "text": "Rigorous testing to ensure filter effectiveness"
+    },
+    {
+      "id": "content filtering checks",
+      "type": "PROCESS",
+      "text": "Process of examining files for malicious content"
+    },
+    {
+      "id": "quarantine",
+      "type": "PROCESS",
+      "text": "Isolation of suspicious content pending review"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "content filters",
+      "to": "content filters",
+      "type": "PERFORMS_FUNCTION_IN"
+    },
+    {
+      "from": "gateways",
+      "to": "CDSs",
+      "type": "PERFORMS_FUNCTION_IN"
+    }
+  ]
+}

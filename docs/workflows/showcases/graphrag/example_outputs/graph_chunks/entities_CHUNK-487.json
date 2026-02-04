@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-487",
+  "entities": [
+    {
+      "id": "gateway event logs",
+      "type": "SYSTEM",
+      "text": "Logs from gateway systems"
+    },
+    {
+      "id": "gateways",
+      "type": "SYSTEM",
+      "text": "Network gateway devices"
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "EVENT",
+      "text": "Security breach events"
+    },
+    {
+      "id": "central storage",
+      "type": "PROCESS",
+      "text": "Centralized log storage process"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Gateway event logging and alerting",
+      "to": "Gateway event logging and alerting",
+      "type": "HAS"
+    },
+    {
+      "from": "Gateway event logging and alerting",
+      "to": "Gateway event logging and alerting",
+      "type": "MONITORS"
+    },
+    {
+      "from": "Gateway event logging and alerting",
+      "to": "Gateway event logging and alerting",
+      "type": "DETECTS"
+    },
+    {
+      "from": "Gateway event logging and alerting",
+      "to": "Gateway event logging and alerting",
+      "type": "REQUIRES"
+    }
+  ]
+}

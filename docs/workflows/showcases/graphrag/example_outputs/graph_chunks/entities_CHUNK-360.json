@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-360",
+  "entities": [
+    {
+      "id": "database servers",
+      "type": "CONCEPT",
+      "text": "Database servers that store data"
+    },
+    {
+      "id": "web servers",
+      "type": "CONCEPT",
+      "text": "Web servers that serve content"
+    },
+    {
+      "id": "functional separation",
+      "type": "PROCESS",
+      "text": "The process of separating functions between systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "database servers",
+      "to": "web servers",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "web servers",
+      "to": "functional separation",
+      "type": "DEFINES"
+    }
+  ]
+}

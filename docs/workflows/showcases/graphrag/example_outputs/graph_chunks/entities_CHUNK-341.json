@@ -1,0 +1,192 @@
+{
+  "chunk_id": "CHUNK-341",
+  "entities": [
+    {
+      "id": "event logs",
+      "type": "CONCEPT",
+      "text": "Logs recording system activities and events"
+    },
+    {
+      "id": "system monitoring",
+      "type": "PROCESS",
+      "text": "Continuous observation of system operations"
+    },
+    {
+      "id": "incident response",
+      "type": "PROCESS",
+      "text": "Activities to address security incidents"
+    },
+    {
+      "id": "Cross Domain Solutions",
+      "type": "ACTOR",
+      "text": "Systems enabling data transfer between security domains"
+    },
+    {
+      "id": "databases",
+      "type": "ACTOR",
+      "text": "Structured data storage systems"
+    },
+    {
+      "id": "Domain Name System services",
+      "type": "ACTOR",
+      "text": "DNS resolution services"
+    },
+    {
+      "id": "email servers",
+      "type": "ACTOR",
+      "text": "Mail transfer and storage systems"
+    },
+    {
+      "id": "gateways",
+      "type": "ACTOR",
+      "text": "Network access control points"
+    },
+    {
+      "id": "multifunction devices",
+      "type": "ACTOR",
+      "text": "Multi-purpose hardware devices"
+    },
+    {
+      "id": "operating systems",
+      "type": "ACTOR",
+      "text": "Core system software"
+    },
+    {
+      "id": "remote access services",
+      "type": "ACTOR",
+      "text": "Systems enabling remote connections"
+    },
+    {
+      "id": "security services",
+      "type": "ACTOR",
+      "text": "Security monitoring and protection systems"
+    },
+    {
+      "id": "server applications",
+      "type": "ACTOR",
+      "text": "Server-side software applications"
+    },
+    {
+      "id": "system access",
+      "type": "ACTOR",
+      "text": "Access control mechanisms"
+    },
+    {
+      "id": "user applications",
+      "type": "ACTOR",
+      "text": "End-user software applications"
+    },
+    {
+      "id": "web applications",
+      "type": "ACTOR",
+      "text": "Browser-based applications"
+    },
+    {
+      "id": "web proxies",
+      "type": "ACTOR",
+      "text": "Web traffic intermediary systems"
+    },
+    {
+      "id": "ISM-0859",
+      "type": "CONCEPT",
+      "text": "Control requiring event log retention"
+    },
+    {
+      "id": "ISM-0991",
+      "type": "CONCEPT",
+      "text": "Control specifying retention periods"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "event logs",
+      "to": "system monitoring",
+      "type": "INTEGRAL_TO"
+    },
+    {
+      "from": "system monitoring",
+      "to": "incident response",
+      "type": "INTEGRAL_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "Cross Domain Solutions",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "databases",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "Domain Name System services",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "email servers",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "gateways",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "multifunction devices",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "operating systems",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "remote access services",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "security services",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "server applications",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "system access",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "user applications",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "web applications",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "web proxies",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "event logs",
+      "to": "event logs",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "ISM-0859",
+      "to": "event logs",
+      "type": "DEFINES"
+    }
+  ]
+}

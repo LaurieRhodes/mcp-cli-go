@@ -1,0 +1,25 @@
+$schema: "workflow/v2.0"
+name: rebuild_graph
+version: 1.0.0
+description: Rebuild knowledge graph from all entity files
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  timeout: 5m
+
+steps:
+  - name: build
+    skills: [python-context-builder]
+    max_iterations: 2
+    run: |
+      Call skills_run_helper_script tool.
+      Parameters:
+      {
+        "skill_name": "python-context-builder",
+        "script_name": "build_knowledge_graph.py",
+        "args": [
+          "/outputs/rlm_poc/graph_chunks",
+          "/outputs/rlm_poc/knowledge_graph"
+        ]
+      }

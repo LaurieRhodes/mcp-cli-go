@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-510",
+  "entities": [
+    {
+      "id": "content filtering techniques",
+      "type": "CONCEPT",
+      "text": "Techniques for filtering content as part of security implementation"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The entity implementing content filtering"
+    },
+    {
+      "id": "gateways",
+      "type": "SYSTEM",
+      "text": "Network gateways for traffic control"
+    },
+    {
+      "id": "CDSs",
+      "type": "SYSTEM",
+      "text": "Content Delivery Systems for content distribution"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "gateways",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "organisation",
+      "to": "CDSs",
+      "type": "USES"
+    }
+  ]
+}

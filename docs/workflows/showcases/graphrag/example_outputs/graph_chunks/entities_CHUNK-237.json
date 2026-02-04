@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-237",
+  "entities": [
+    {
+      "id": "Media management policy",
+      "type": "CONCEPT",
+      "text": "Policy for managing storage media"
+    },
+    {
+      "id": "Sensitive/classified data",
+      "type": "CONCEPT",
+      "text": "Data requiring protection"
+    },
+    {
+      "id": "Removable media usage policy",
+      "type": "CONCEPT",
+      "text": "Policy for removable media usage"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity developing policies"
+    },
+    {
+      "id": "ISM-1549",
+      "type": "PROCESS",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Media management policy",
+      "to": "Sensitive/classified data",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "Media management policy",
+      "to": "Removable media usage policy",
+      "type": "TIED_TO"
+    },
+    {
+      "from": "Organisation",
+      "to": "Media management policy",
+      "type": "DEVELOPS_IMPLEMENTS_MAINTAINS"
+    },
+    {
+      "from": "ISM-1549",
+      "to": "Media management policy",
+      "type": "REQUIRES"
+    }
+  ]
+}

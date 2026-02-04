@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-154",
+  "entities": [
+    {
+      "id": "off-hook protection features",
+      "type": "CONCEPT",
+      "text": "Features that prevent accidental audio coupling"
+    },
+    {
+      "id": "telephone systems",
+      "type": "SYSTEM",
+      "text": "Communication systems in sensitive areas"
+    },
+    {
+      "id": "push-to-talk handsets",
+      "type": "DEVICE",
+      "text": "Handsets with push-to-talk functionality"
+    },
+    {
+      "id": "push-to-talk headsets",
+      "type": "DEVICE",
+      "text": "Headsets with push-to-talk functionality"
+    },
+    {
+      "id": "speakerphones",
+      "type": "DEVICE",
+      "text": "Audio output devices"
+    },
+    {
+      "id": "background conversations",
+      "type": "CONCEPT",
+      "text": "Unintended audio that could be overheard"
+    },
+    {
+      "id": "SECRET areas",
+      "type": "LOCATION",
+      "text": "Areas with SECRET classification"
+    },
+    {
+      "id": "TOP SECRET areas",
+      "type": "LOCATION",
+      "text": "Areas with TOP SECRET classification"
+    },
+    {
+      "id": "microphone",
+      "type": "DEVICE",
+      "text": "Audio input device"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "off-hook protection features",
+      "to": "telephone systems",
+      "type": "push-to-talk handsets"
+    },
+    {
+      "from": "telephone systems",
+      "to": "push-to-talk handsets",
+      "type": "SECRET areas"
+    }
+  ]
+}

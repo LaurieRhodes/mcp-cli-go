@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-083",
+  "entities": [
+    {
+      "id": "perimeter security",
+      "type": "CONCEPT",
+      "text": "Security measures at facility boundaries"
+    },
+    {
+      "id": "unauthorised people",
+      "type": "ACTOR",
+      "text": "Individuals without proper authorization"
+    },
+    {
+      "id": "workstation displays",
+      "type": "CONCEPT",
+      "text": "Computer monitor screens"
+    },
+    {
+      "id": "keyboards",
+      "type": "CONCEPT",
+      "text": "Input devices"
+    },
+    {
+      "id": "blinds/curtains/privacy films",
+      "type": "CONCEPT",
+      "text": "Physical barriers for privacy"
+    },
+    {
+      "id": "workstation positioning",
+      "type": "PROCESS",
+      "text": "Strategic placement of workstations"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "perimeter security",
+      "to": "unauthorised people",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "blinds/curtains/privacy films",
+      "to": "workstation displays",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "workstation positioning",
+      "to": "workstation displays",
+      "type": "PROTECTS"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-085",
+  "entities": [
+    {
+      "id": "ICT equipment and media",
+      "type": "CONCEPT",
+      "text": "Physical ICT assets requiring protection"
+    },
+    {
+      "id": "Hard drives",
+      "type": "CONCEPT",
+      "text": "Storage devices for data"
+    },
+    {
+      "id": "Sensitive/classified data",
+      "type": "CONCEPT",
+      "text": "Confidential information requiring protection"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security measures"
+    },
+    {
+      "id": "Security measures",
+      "type": "PROCESS",
+      "text": "Procedures to protect ICT assets"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment and media",
+      "to": "Organisation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Organisation",
+      "to": "Security measures",
+      "type": "DEFINES"
+    }
+  ]
+}

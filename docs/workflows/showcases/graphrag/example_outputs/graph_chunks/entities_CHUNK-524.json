@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-524",
+  "entities": [
+    {
+      "id": "manual data transfers",
+      "type": "CONCEPT",
+      "text": "Manual data transfer methods"
+    },
+    {
+      "id": "data transfers using gateways",
+      "type": "CONCEPT",
+      "text": "Data transfers using gateway technology"
+    },
+    {
+      "id": "Cross Domain Solutions (CDSs)",
+      "type": "CONCEPT",
+      "text": "Cross Domain Solutions for secure data transfer"
+    },
+    {
+      "id": "content filtering section",
+      "type": "CONCEPT",
+      "text": "Content filtering requirements section"
+    },
+    {
+      "id": "Guidelines for Gateways",
+      "type": "DOCUMENT",
+      "text": "Official guidelines document for gateways"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "manual data transfers",
+      "to": "data transfers using gateways",
+      "type": "DEFINES"
+    },
+    {
+      "from": "data transfers using gateways",
+      "to": "Cross Domain Solutions (CDSs)",
+      "type": "DEFINES"
+    },
+    {
+      "from": "data transfers using gateways",
+      "to": "content filtering section",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "content filtering section",
+      "to": "Guidelines for Gateways",
+      "type": "PART_OF"
+    }
+  ]
+}

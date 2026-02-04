@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-208",
+  "entities": [
+    {
+      "id": "latest patched version",
+      "type": "CONCEPT",
+      "text": "Most recent version with security patches applied"
+    },
+    {
+      "id": "older unpatched version",
+      "type": "CONCEPT",
+      "text": "Previous version without security updates"
+    },
+    {
+      "id": "evaluated product",
+      "type": "CONCEPT",
+      "text": "Product that has undergone security evaluation"
+    },
+    {
+      "id": "patches",
+      "type": "PROCESS",
+      "text": "Software updates to fix vulnerabilities"
+    },
+    {
+      "id": "new functionality",
+      "type": "CONCEPT",
+      "text": "Additional features not included in original evaluation"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity responsible for security decisions"
+    },
+    {
+      "id": "security risk",
+      "type": "CONCEPT",
+      "text": "Potential threat to system security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "latest patched version",
+      "to": "patches",
+      "type": "organisation"
+    },
+    {
+      "from": "older unpatched version",
+      "to": "evaluated product",
+      "type": "security risk"
+    }
+  ]
+}

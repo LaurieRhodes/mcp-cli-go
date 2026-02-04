@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-191",
+  "entities": [
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Individuals who use mobile devices"
+    },
+    {
+      "id": "Mobile devices",
+      "type": "CONCEPT",
+      "text": "Devices used to view/communicate data"
+    },
+    {
+      "id": "Sensitive/classified data",
+      "type": "CONCEPT",
+      "text": "Protected information"
+    },
+    {
+      "id": "Privacy filters",
+      "type": "CONCEPT",
+      "text": "Screen protection technology"
+    },
+    {
+      "id": "Public locations",
+      "type": "CONCEPT",
+      "text": "Areas like transport, lounges, coffee shops"
+    },
+    {
+      "id": "ISM controls",
+      "type": "PROCESS",
+      "text": "Security controls: ISM-0866, ISM-1145, ISM-1644"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Personnel",
+      "to": "Mobile devices",
+      "type": "USES"
+    },
+    {
+      "from": "Mobile devices",
+      "to": "Sensitive/classified data",
+      "type": "VIEWS/COMMUNICATES"
+    }
+  ]
+}

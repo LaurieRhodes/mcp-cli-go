@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-006",
+  "entities": [
+    {
+      "id": "cyber security guidelines",
+      "type": "CONCEPT",
+      "text": "Practical guidance for protecting systems and data"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security measures"
+    },
+    {
+      "id": "systems and data",
+      "type": "CONCEPT",
+      "text": "Assets to be protected from threats"
+    },
+    {
+      "id": "cyber threats",
+      "type": "CONCEPT",
+      "text": "Potential dangers to systems and data"
+    },
+    {
+      "id": "governance",
+      "type": "CONCEPT",
+      "text": "Security management framework"
+    },
+    {
+      "id": "physical security",
+      "type": "CONCEPT",
+      "text": "Protection of physical assets"
+    },
+    {
+      "id": "personnel security",
+      "type": "CONCEPT",
+      "text": "Security measures for personnel"
+    },
+    {
+      "id": "information and communications technology security",
+      "type": "CONCEPT",
+      "text": "Technical security controls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security guidelines",
+      "to": "organisation",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "organisation",
+      "to": "systems and data",
+      "type": "PROTECTS"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-077",
+  "entities": [
+    {
+      "id": "security assessment",
+      "type": "PROCESS",
+      "text": "Assessment process for evaluating system security"
+    },
+    {
+      "id": "security assessment report",
+      "type": "CONCEPT",
+      "text": "Report documenting security assessment findings"
+    },
+    {
+      "id": "plan of action and milestones",
+      "type": "CONCEPT",
+      "text": "Document tracking weaknesses and remediation actions"
+    },
+    {
+      "id": "system owner",
+      "type": "ACTOR",
+      "text": "Person responsible for the system"
+    },
+    {
+      "id": "assessor",
+      "type": "ACTOR",
+      "text": "Person conducting the security assessment"
+    },
+    {
+      "id": "system's identified weaknesses",
+      "type": "CONCEPT",
+      "text": "Vulnerabilities found during security assessment"
+    },
+    {
+      "id": "recommended remediation actions",
+      "type": "CONCEPT",
+      "text": "Actions recommended to fix identified weaknesses"
+    },
+    {
+      "id": "ISM-1564 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring POAM"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "security assessment",
+      "to": "security assessment report",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "security assessment",
+      "to": "plan of action and milestones",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "system owner",
+      "to": "plan of action and milestones",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "plan of action and milestones",
+      "to": "system's identified weaknesses",
+      "type": "TRACKS"
+    },
+    {
+      "from": "plan of action and milestones",
+      "to": "recommended remediation actions",
+      "type": "TRACKS"
+    },
+    {
+      "from": "ISM-1564 control",
+      "to": "plan of action and milestones",
+      "type": "DEFINES"
+    }
+  ]
+}

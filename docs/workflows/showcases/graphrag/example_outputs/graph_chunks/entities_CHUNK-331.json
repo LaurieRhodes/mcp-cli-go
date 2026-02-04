@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-331",
+  "entities": [
+    {
+      "id": "Data backup processes",
+      "type": "PROCESS",
+      "text": "Processes for backing up organizational data"
+    },
+    {
+      "id": "Data restoration processes",
+      "type": "PROCESS",
+      "text": "Processes for restoring organizational data from backups"
+    },
+    {
+      "id": "Business continuity planning",
+      "type": "CONCEPT",
+      "text": "Planning for maintaining business operations during disruptions"
+    },
+    {
+      "id": "Disaster recovery planning",
+      "type": "CONCEPT",
+      "text": "Planning for recovering from catastrophic events"
+    },
+    {
+      "id": "Digital preservation policy",
+      "type": "CONCEPT",
+      "text": "Policy governing long-term preservation of digital assets"
+    },
+    {
+      "id": "ISM-1547",
+      "type": "CONTROL",
+      "text": "ISM control requiring data backup processes"
+    },
+    {
+      "id": "ISM-1548",
+      "type": "CONTROL",
+      "text": "ISM control requiring data restoration processes"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Data backup processes",
+      "to": "Business continuity planning",
+      "type": "PART_OF"
+    },
+    {
+      "from": "Data backup processes",
+      "to": "Disaster recovery planning",
+      "type": "PART_OF"
+    },
+    {
+      "from": "Data backup processes",
+      "to": "Digital preservation policy",
+      "type": "PART_OF"
+    },
+    {
+      "from": "Data restoration processes",
+      "to": "Business continuity planning",
+      "type": "PART_OF"
+    },
+    {
+      "from": "Data restoration processes",
+      "to": "Disaster recovery planning",
+      "type": "PART_OF"
+    },
+    {
+      "from": "Data restoration processes",
+      "to": "Digital preservation policy",
+      "type": "PART_OF"
+    },
+    {
+      "from": "ISM-1547",
+      "to": "Data backup processes",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1548",
+      "to": "Data restoration processes",
+      "type": "DEFINES"
+    }
+  ]
+}

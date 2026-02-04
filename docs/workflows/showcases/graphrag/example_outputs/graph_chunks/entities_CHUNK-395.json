@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-395",
+  "entities": [
+    {
+      "id": "Network Access Controls",
+      "type": "CONCEPT",
+      "text": "Security mechanisms that control network access"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Threat actor attempting unauthorized access"
+    },
+    {
+      "id": "Network Devices",
+      "type": "CONCEPT",
+      "text": "Hardware devices connected to networks"
+    },
+    {
+      "id": "Network Segments",
+      "type": "CONCEPT",
+      "text": "Logical divisions of networks"
+    },
+    {
+      "id": "Network Traffic",
+      "type": "CONCEPT",
+      "text": "Data flow across networks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Network Access Controls",
+      "to": "Adversary",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "Network Access Controls",
+      "to": "Network Devices",
+      "type": "CONTROLS"
+    },
+    {
+      "from": "Network Access Controls",
+      "to": "Network Traffic",
+      "type": "LIMITS"
+    },
+    {
+      "from": "Network Access Controls",
+      "to": "Network Segments",
+      "type": "PROTECTS"
+    }
+  ]
+}

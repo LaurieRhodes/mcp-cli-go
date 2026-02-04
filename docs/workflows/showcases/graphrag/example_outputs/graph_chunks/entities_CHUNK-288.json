@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-288",
+  "entities": [
+    {
+      "id": "user applications",
+      "type": "CONCEPT",
+      "text": "Software applications used by end-users"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Weaknesses in software that can be compromised"
+    },
+    {
+      "id": "exploitation techniques",
+      "type": "CONCEPT",
+      "text": "Methods used to take advantage of security vulnerabilities"
+    },
+    {
+      "id": "office productivity suites",
+      "type": "CONCEPT",
+      "text": "Software for document creation and editing"
+    },
+    {
+      "id": "web browsers",
+      "type": "CONCEPT",
+      "text": "Software for accessing web content"
+    },
+    {
+      "id": "email clients",
+      "type": "CONCEPT",
+      "text": "Software for sending and receiving email"
+    },
+    {
+      "id": "PDF software",
+      "type": "CONCEPT",
+      "text": "Software for viewing and creating PDF documents"
+    },
+    {
+      "id": "security products",
+      "type": "CONCEPT",
+      "text": "Software designed to protect systems and data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "user applications",
+      "to": "user applications",
+      "type": "security vulnerabilities"
+    },
+    {
+      "from": "security vulnerabilities",
+      "to": "exploitation techniques",
+      "type": "exploitation techniques"
+    }
+  ]
+}

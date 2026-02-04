@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-051",
+  "entities": [
+    {
+      "id": "malicious code",
+      "type": "CONCEPT",
+      "text": "Malicious software or code that infects systems"
+    },
+    {
+      "id": "infected systems",
+      "type": "CONCEPT",
+      "text": "Computer systems compromised by malicious code"
+    },
+    {
+      "id": "antivirus software",
+      "type": "CONCEPT",
+      "text": "Security software for detecting and removing malware"
+    },
+    {
+      "id": "system restoration",
+      "type": "PROCESS",
+      "text": "Process of restoring systems from backups or rebuilding"
+    },
+    {
+      "id": "known good backup",
+      "type": "CONCEPT",
+      "text": "Verified clean backup for system recovery"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "malicious code",
+      "to": "infected systems",
+      "type": "INFECTS"
+    },
+    {
+      "from": "infected systems",
+      "to": "antivirus software",
+      "type": "SCANNED_BY"
+    },
+    {
+      "from": "infected systems",
+      "to": "system restoration",
+      "type": "RECOVERED_BY"
+    },
+    {
+      "from": "system restoration",
+      "to": "known good backup",
+      "type": "USES"
+    }
+  ]
+}

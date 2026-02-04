@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-119",
+  "entities": [
+    {
+      "id": "Cables for foreign systems",
+      "type": "PHYSICAL_INFRASTRUCTURE",
+      "text": "Physical cables belonging to foreign systems"
+    },
+    {
+      "id": "Australian facilities",
+      "type": "LOCATION",
+      "text": "Australian government or organizational facilities"
+    },
+    {
+      "id": "Labelling process",
+      "type": "PROCESS",
+      "text": "Process of applying labels to cables"
+    },
+    {
+      "id": "ISM-1640",
+      "type": "CONTROL_REFERENCE",
+      "text": "Information Security Manual control reference"
+    },
+    {
+      "id": "Cross-patching prevention",
+      "type": "SECURITY_OBJECTIVE",
+      "text": "Preventing unintended connections between systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cables for foreign systems",
+      "to": "Australian facilities",
+      "type": "Labelling process"
+    },
+    {
+      "from": "Australian facilities",
+      "to": "Labelling process",
+      "type": "Cross-patching prevention"
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "chunk_id": "CHUNK-164",
+  "entities": [
+    {
+      "id": "Microphones",
+      "type": "CONCEPT",
+      "text": "Audio recording devices including headsets and USB handsets"
+    },
+    {
+      "id": "Webcams",
+      "type": "CONCEPT",
+      "text": "Video recording devices"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Threat actor who creates/uses malicious software"
+    },
+    {
+      "id": "Malicious applications",
+      "type": "PROCESS",
+      "text": "Software designed to compromise systems"
+    },
+    {
+      "id": "ISM-0559",
+      "type": "CONCEPT",
+      "text": "Control prohibiting microphone/webcam use with non-SECRET workstations in SECRET areas"
+    },
+    {
+      "id": "ISM-1450",
+      "type": "CONCEPT",
+      "text": "Control prohibiting microphone/webcam use with non-TOP SECRET workstations in TOP SECRET areas"
+    },
+    {
+      "id": "SECRET areas",
+      "type": "CONCEPT",
+      "text": "Areas classified as SECRET security level"
+    },
+    {
+      "id": "TOP SECRET areas",
+      "type": "CONCEPT",
+      "text": "Areas classified as TOP SECRET security level"
+    },
+    {
+      "id": "Non-SECRET workstations",
+      "type": "CONCEPT",
+      "text": "Workstations not cleared for SECRET information"
+    },
+    {
+      "id": "Non-TOP SECRET workstations",
+      "type": "CONCEPT",
+      "text": "Workstations not cleared for TOP SECRET information"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Microphones",
+      "to": "Webcams",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Webcams",
+      "to": "Malicious applications",
+      "type": "CREATES"
+    },
+    {
+      "from": "Adversary",
+      "to": "Microphones",
+      "type": "ACTIVATES"
+    },
+    {
+      "from": "Malicious applications",
+      "to": "Webcams",
+      "type": "ACTIVATES"
+    },
+    {
+      "from": "ISM-0559",
+      "to": "Microphones",
+      "type": "REGULATES"
+    },
+    {
+      "from": "Microphones",
+      "to": "Webcams",
+      "type": "REGULATES"
+    },
+    {
+      "from": "ISM-0559",
+      "to": "Microphones",
+      "type": "REGULATES"
+    },
+    {
+      "from": "Webcams",
+      "to": "Webcams",
+      "type": "REGULATES"
+    },
+    {
+      "from": "ISM-1450",
+      "to": "SECRET areas",
+      "type": "POSES_RISK_IN"
+    },
+    {
+      "from": "Microphones",
+      "to": "SECRET areas",
+      "type": "POSES_RISK_IN"
+    },
+    {
+      "from": "ISM-1450",
+      "to": "TOP SECRET areas",
+      "type": "POSES_RISK_IN"
+    },
+    {
+      "from": "Webcams",
+      "to": "TOP SECRET areas",
+      "type": "POSES_RISK_IN"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-001",
+  "entities": [
+    {
+      "id": "Information Security Manual",
+      "type": "DOCUMENT",
+      "text": "Official security manual"
+    },
+    {
+      "id": "ISM",
+      "type": "ACRONYM",
+      "text": "Abbreviation for Information Security Manual"
+    },
+    {
+      "id": "cyber security framework",
+      "type": "FRAMEWORK",
+      "text": "Security framework for protection"
+    },
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "Entity implementing security"
+    },
+    {
+      "id": "risk management framework",
+      "type": "FRAMEWORK",
+      "text": "Framework for managing risks"
+    },
+    {
+      "id": "systems",
+      "type": "SYSTEM",
+      "text": "IT infrastructure"
+    },
+    {
+      "id": "data",
+      "type": "DATA",
+      "text": "Information assets"
+    },
+    {
+      "id": "cyber threats",
+      "type": "THREAT",
+      "text": "Security risks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "DEFINES"
+    },
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "ABBREVIATION_OF"
+    },
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "USES"
+    },
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "CHUNK-001",
+      "to": "CHUNK-001",
+      "type": "PROTECTS_AGAINST"
+    }
+  ]
+}

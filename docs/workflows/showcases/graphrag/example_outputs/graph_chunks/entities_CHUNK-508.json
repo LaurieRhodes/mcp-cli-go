@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-508",
+  "entities": [
+    {
+      "id": "organisation-approved list of domain names",
+      "type": "Policy Control",
+      "text": "List of allowed domain names approved by organization"
+    },
+    {
+      "id": "web content filters",
+      "type": "Security Tool",
+      "text": "Tools that filter web content based on policies"
+    },
+    {
+      "id": "malicious domain names",
+      "type": "Threat",
+      "text": "Domain names used for malicious purposes"
+    },
+    {
+      "id": "dynamic domain names",
+      "type": "Threat",
+      "text": "Domain names that can change frequently"
+    },
+    {
+      "id": "IP addresses",
+      "type": "Network Element",
+      "text": "Numerical addresses used to access websites"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "domain names",
+      "type": "implements"
+    },
+    {
+      "from": "gateways",
+      "to": "traffic",
+      "type": "filters"
+    },
+    {
+      "from": "adversary",
+      "to": "command and control infrastructure",
+      "type": "blocks"
+    },
+    {
+      "from": "adversary",
+      "to": "command and control infrastructure",
+      "type": "blocks"
+    },
+    {
+      "from": "users",
+      "to": "websites",
+      "type": "accesses"
+    }
+  ]
+}

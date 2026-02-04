@@ -1,0 +1,132 @@
+{
+  "chunk_id": "CHUNK-021",
+  "entities": [
+    {
+      "id": "Chief Information Security Officer (CISO)",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer role"
+    },
+    {
+      "id": "Technical skills",
+      "type": "CONCEPT",
+      "text": "Technical capabilities required"
+    },
+    {
+      "id": "Soft skills",
+      "type": "CONCEPT",
+      "text": "Interpersonal and management skills"
+    },
+    {
+      "id": "Business acumen",
+      "type": "CONCEPT",
+      "text": "Understanding of business operations"
+    },
+    {
+      "id": "Leadership",
+      "type": "CONCEPT",
+      "text": "Ability to lead teams and initiatives"
+    },
+    {
+      "id": "Communications",
+      "type": "CONCEPT",
+      "text": "Effective communication abilities"
+    },
+    {
+      "id": "Relationship building",
+      "type": "CONCEPT",
+      "text": "Building professional relationships"
+    },
+    {
+      "id": "Continuous learning",
+      "type": "PROCESS",
+      "text": "Ongoing education process"
+    },
+    {
+      "id": "Up-skilling",
+      "type": "PROCESS",
+      "text": "Skill enhancement activities"
+    },
+    {
+      "id": "Cyber threat landscape",
+      "type": "CONCEPT",
+      "text": "Evolving cybersecurity threats"
+    },
+    {
+      "id": "New technologies",
+      "type": "CONCEPT",
+      "text": "Emerging technological developments"
+    },
+    {
+      "id": "Innovation",
+      "type": "CONCEPT",
+      "text": "Creative problem-solving"
+    },
+    {
+      "id": "Imagination",
+      "type": "CONCEPT",
+      "text": "Visionary thinking"
+    },
+    {
+      "id": "Cyber security strategies",
+      "type": "CONCEPT",
+      "text": "Organizational security plans"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Technical skills",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Soft skills",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Business acumen",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Leadership",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Communications",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Relationship building",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Continuous learning",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Up-skilling",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Innovation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Imagination",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Chief Information Security Officer (CISO)",
+      "to": "Cyber security strategies",
+      "type": "DEFINES"
+    }
+  ]
+}

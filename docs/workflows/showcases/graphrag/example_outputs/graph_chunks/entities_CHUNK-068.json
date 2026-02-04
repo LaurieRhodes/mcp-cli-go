@@ -1,0 +1,102 @@
+{
+  "chunk_id": "CHUNK-068",
+  "entities": [
+    {
+      "id": "security documentation",
+      "type": "CONCEPT",
+      "text": "Documentation describing security controls and measures"
+    },
+    {
+      "id": "system owners",
+      "type": "ACTOR",
+      "text": "Individuals responsible for system management"
+    },
+    {
+      "id": "appropriate authority",
+      "type": "ACTOR",
+      "text": "Entity with approval authority for security documentation"
+    },
+    {
+      "id": "system security plan",
+      "type": "CONCEPT",
+      "text": "Document outlining system security measures"
+    },
+    {
+      "id": "incident response plan",
+      "type": "CONCEPT",
+      "text": "Plan for responding to security incidents"
+    },
+    {
+      "id": "continuous monitoring plan",
+      "type": "CONCEPT",
+      "text": "Plan for ongoing security monitoring"
+    },
+    {
+      "id": "authorising officer",
+      "type": "ACTOR",
+      "text": "Officer authorized to approve system security"
+    },
+    {
+      "id": "Chief Information Security Officer",
+      "type": "ACTOR",
+      "text": "Senior executive responsible for organizational security"
+    },
+    {
+      "id": "security architecture",
+      "type": "CONCEPT",
+      "text": "Overall design and structure of system security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "security documentation",
+      "to": "appropriate authority",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "appropriate authority",
+      "to": "security documentation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "system owners",
+      "to": "security documentation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "security documentation",
+      "to": "authorising officer",
+      "type": "APPROVES"
+    },
+    {
+      "from": "authorising officer",
+      "to": "security architecture",
+      "type": "APPROVES"
+    },
+    {
+      "from": "security architecture",
+      "to": "Chief Information Security Officer",
+      "type": "APPROVES"
+    },
+    {
+      "from": "Chief Information Security Officer",
+      "to": "organisational-level security documentation",
+      "type": "APPROVES"
+    },
+    {
+      "from": "organisational-level security documentation",
+      "to": "authorising officer",
+      "type": "APPROVES"
+    },
+    {
+      "from": "authorising officer",
+      "to": "system-specific security documentation",
+      "type": "APPROVES"
+    },
+    {
+      "from": "system-specific security documentation",
+      "to": "security architecture",
+      "type": "APPROVES"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-323",
+  "entities": [
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "Australian government cybersecurity agency"
+    },
+    {
+      "id": "Secure Administration publication",
+      "type": "DOCUMENT",
+      "text": "Publication on secure administration practices"
+    },
+    {
+      "id": "Privileged accounts",
+      "type": "CONCEPT",
+      "text": "Accounts with elevated system access"
+    },
+    {
+      "id": "Multi-factor authentication",
+      "type": "CONCEPT",
+      "text": "Authentication method requiring multiple verification factors"
+    },
+    {
+      "id": "Event logging",
+      "type": "CONCEPT",
+      "text": "Recording of system activities for monitoring"
+    },
+    {
+      "id": "Network segmentation and segregation",
+      "type": "CONCEPT",
+      "text": "Network security technique dividing networks into segments"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Privileged accounts",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Secure Administration publication",
+      "to": "System administration activities",
+      "type": "USED_FOR"
+    }
+  ]
+}

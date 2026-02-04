@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-091",
+  "entities": [
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Security personnel who post personal information online"
+    },
+    {
+      "id": "Personal Information",
+      "type": "CONCEPT",
+      "text": "Information posted to online services/social media"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actors who exploit personal information"
+    },
+    {
+      "id": "Online Services",
+      "type": "CONCEPT",
+      "text": "Social media and other online platforms"
+    },
+    {
+      "id": "Privacy Settings",
+      "type": "CONCEPT",
+      "text": "Security controls available on online services"
+    },
+    {
+      "id": "Security Risks",
+      "type": "CONCEPT",
+      "text": "Risks associated with posting personal information"
+    },
+    {
+      "id": "ISM-0821",
+      "type": "CONTROL",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Personnel",
+      "to": "Personal Information",
+      "type": "Adversary"
+    },
+    {
+      "from": "Personal Information",
+      "to": "Adversary",
+      "type": "Personnel"
+    }
+  ]
+}

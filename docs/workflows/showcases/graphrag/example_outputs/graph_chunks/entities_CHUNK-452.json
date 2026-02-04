@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-452",
+  "entities": [
+    {
+      "id": "RSA",
+      "type": "ALGORITHM",
+      "text": "Rivest-Shamir-Adleman encryption algorithm"
+    },
+    {
+      "id": "RSA modulus",
+      "type": "PARAMETER",
+      "text": "Modulus size for RSA keys"
+    },
+    {
+      "id": "digital signatures",
+      "type": "FUNCTION",
+      "text": "Digital signature function"
+    },
+    {
+      "id": "encryption session keys",
+      "type": "KEY_TYPE",
+      "text": "Session keys for encryption"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0476",
+      "to": "2030",
+      "type": "HAS_PARAMETER"
+    },
+    {
+      "from": "ISM-1765",
+      "to": "Mar-22",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0477",
+      "to": "Mar-22",
+      "type": "USED_FOR"
+    },
+    {
+      "from": "ISM-0477",
+      "to": "Mar-22",
+      "type": "REQUIRES"
+    }
+  ]
+}

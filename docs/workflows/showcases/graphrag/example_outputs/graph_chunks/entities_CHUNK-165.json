@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-165",
+  "entities": [
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "The entity implementing the plan"
+    },
+    {
+      "id": "Denial of service response plan",
+      "type": "PROCESS",
+      "text": "Plan for responding to DoS attacks"
+    },
+    {
+      "id": "ISM-1019",
+      "type": "CONCEPT",
+      "text": "Control requirement for DoS response plan"
+    },
+    {
+      "id": "ISM-1805",
+      "type": "CONCEPT",
+      "text": "Control requirement for DoS response plan content"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "ISM-1019",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "Denial of service response plan",
+      "to": "Denial of service response plan",
+      "type": "REQUIRES"
+    }
+  ]
+}

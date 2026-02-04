@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-124",
+  "entities": [
+    {
+      "id": "cable reticulation systems",
+      "type": "CONCEPT",
+      "text": "Infrastructure systems for organizing cables"
+    },
+    {
+      "id": "cable bundles",
+      "type": "CONCEPT",
+      "text": "Groups of cables bundled together"
+    },
+    {
+      "id": "conduits",
+      "type": "CONCEPT",
+      "text": "Protective tubes or channels for cables"
+    },
+    {
+      "id": "dividing partition",
+      "type": "CONCEPT",
+      "text": "Physical separator between cable bundles/conduits"
+    },
+    {
+      "id": "visible gap",
+      "type": "CONCEPT",
+      "text": "Space between cable bundles/conduits"
+    },
+    {
+      "id": "cable inspection",
+      "type": "PROCESS",
+      "text": "Examination of cables for maintenance/security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cable reticulation systems",
+      "to": "cable reticulation systems",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "cable bundles",
+      "to": "conduits",
+      "type": "CONTAINS"
+    }
+  ]
+}

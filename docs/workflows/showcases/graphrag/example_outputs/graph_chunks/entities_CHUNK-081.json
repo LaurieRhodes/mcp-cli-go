@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-081",
+  "entities": [
+    {
+      "id": "network devices",
+      "type": "CONCEPT",
+      "text": "Network devices in public areas"
+    },
+    {
+      "id": "physical security",
+      "type": "CONCEPT",
+      "text": "Security measures to protect devices"
+    },
+    {
+      "id": "unauthorised access",
+      "type": "CONCEPT",
+      "text": "Unauthorized access to devices"
+    },
+    {
+      "id": "factory default settings",
+      "type": "CONCEPT",
+      "text": "Factory default settings of devices"
+    },
+    {
+      "id": "network access controls",
+      "type": "CONCEPT",
+      "text": "Network access control mechanisms"
+    },
+    {
+      "id": "console ports",
+      "type": "CONCEPT",
+      "text": "Console ports on network devices"
+    },
+    {
+      "id": "factory reset buttons",
+      "type": "CONCEPT",
+      "text": "Factory reset buttons on devices"
+    },
+    {
+      "id": "security containers",
+      "type": "CONCEPT",
+      "text": "Security containers for device protection"
+    },
+    {
+      "id": "public areas",
+      "type": "CONCEPT",
+      "text": "Public areas where devices are located"
+    },
+    {
+      "id": "physical damage",
+      "type": "CONCEPT",
+      "text": "Physical damage to devices"
+    },
+    {
+      "id": "interruption of services",
+      "type": "CONCEPT",
+      "text": "Service interruption due to device issues"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "network devices",
+      "to": "network devices",
+      "type": "unauthorised access"
+    },
+    {
+      "from": "public areas",
+      "to": "physical security",
+      "type": "network devices"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-215",
+  "entities": [
+    {
+      "id": "protective markings",
+      "type": "CONCEPT",
+      "text": "Labels applied to ICT equipment to indicate sensitivity/classification"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and Communications Technology equipment"
+    },
+    {
+      "id": "high assurance ICT equipment",
+      "type": "CONCEPT",
+      "text": "ICT equipment with higher security requirements"
+    },
+    {
+      "id": "protective markings scheme",
+      "type": "CONCEPT",
+      "text": "Documented scheme for marking ICT equipment"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Staff who need training on marking schemes"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "protective markings",
+      "to": "protective markings scheme",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "personnel",
+      "type": "REQUIRES_TRAINING"
+    }
+  ]
+}

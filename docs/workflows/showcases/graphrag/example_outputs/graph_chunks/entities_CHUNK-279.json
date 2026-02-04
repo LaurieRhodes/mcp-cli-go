@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-279",
+  "entities": [
+    {
+      "id": "PowerShell",
+      "type": "CONCEPT",
+      "text": "Microsoft scripting language for system administration"
+    },
+    {
+      "id": "Windows PowerShell 2.0",
+      "type": "CONCEPT",
+      "text": "Older vulnerable version of PowerShell"
+    },
+    {
+      "id": "Constrained Language Mode",
+      "type": "CONCEPT",
+      "text": "Security mode limiting PowerShell capabilities"
+    },
+    {
+      "id": "PowerShell event logs",
+      "type": "CONCEPT",
+      "text": "Logs for monitoring PowerShell activities"
+    },
+    {
+      "id": "Protected Event Logging",
+      "type": "CONCEPT",
+      "text": "Security feature protecting event logs"
+    },
+    {
+      "id": "System administrators",
+      "type": "ACTOR",
+      "text": "Users who legitimately use PowerShell"
+    },
+    {
+      "id": "Adversaries",
+      "type": "ACTOR",
+      "text": "Threat actors who exploit PowerShell"
+    },
+    {
+      "id": "ISM controls",
+      "type": "CONCEPT",
+      "text": "Information Security Manual controls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "PowerShell",
+      "to": "Windows PowerShell 2.0",
+      "type": "DEFINES"
+    },
+    {
+      "from": "PowerShell",
+      "to": "Constrained Language Mode",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "PowerShell",
+      "to": "PowerShell event logs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "PowerShell event logs",
+      "to": "Protected Event Logging",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "System administrators",
+      "to": "PowerShell",
+      "type": "USES"
+    },
+    {
+      "from": "Adversaries",
+      "to": "PowerShell",
+      "type": "USES"
+    },
+    {
+      "from": "ISM controls",
+      "to": "PowerShell",
+      "type": "GOVERN"
+    }
+  ]
+}

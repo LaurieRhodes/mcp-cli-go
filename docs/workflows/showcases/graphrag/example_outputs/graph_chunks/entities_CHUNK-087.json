@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-087",
+  "entities": [
+    {
+      "id": "cyber security awareness training",
+      "type": "CONCEPT",
+      "text": "Training program for security awareness"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "All organizational personnel"
+    },
+    {
+      "id": "privileged users",
+      "type": "ACTOR",
+      "text": "Personnel with elevated responsibilities"
+    },
+    {
+      "id": "privileged user training",
+      "type": "CONCEPT",
+      "text": "Specialized training for privileged users"
+    },
+    {
+      "id": "ISM-0252",
+      "type": "PROCESS",
+      "text": "Control for cyber security awareness training"
+    },
+    {
+      "id": "ISM-1565",
+      "type": "PROCESS",
+      "text": "Control for annual training requirements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security awareness training",
+      "to": "personnel",
+      "type": "PROVIDED_TO"
+    },
+    {
+      "from": "personnel",
+      "to": "privileged users",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "privileged users",
+      "to": "privileged user training",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "cyber security awareness training",
+      "to": "ISM-0252",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "cyber security awareness training",
+      "to": "ISM-1565",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

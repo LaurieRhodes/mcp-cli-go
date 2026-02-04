@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-122",
+  "entities": [
+    {
+      "id": "Cable inspectability",
+      "type": "CONCEPT",
+      "text": "The ability to inspect cabling infrastructure"
+    },
+    {
+      "id": "ISM-1112",
+      "type": "CONTROL",
+      "text": "Security control requiring cable inspectability through removable panels"
+    },
+    {
+      "id": "ISM-1119",
+      "type": "CONTROL",
+      "text": "Security control requiring cables inspectable at 5-meter intervals"
+    },
+    {
+      "id": "TOP SECRET areas",
+      "type": "LOCATION",
+      "text": "Areas requiring fully inspectable cables"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cable inspectability",
+      "to": "Cable inspectability",
+      "type": "Cable inspectability"
+    },
+    {
+      "from": "ISM-1112",
+      "to": "ISM-1119",
+      "type": "TOP SECRET areas"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-134",
+  "entities": [
+    {
+      "id": "Wall outlet boxes",
+      "type": "CONCEPT",
+      "text": "Physical infrastructure components for network connections"
+    },
+    {
+      "id": "SECRET systems",
+      "type": "CONCEPT",
+      "text": "Security classification requiring salmon pink wall outlet boxes"
+    },
+    {
+      "id": "TOP SECRET systems",
+      "type": "CONCEPT",
+      "text": "Security classification requiring red wall outlet boxes"
+    },
+    {
+      "id": "OFFICIAL systems",
+      "type": "CONCEPT",
+      "text": "Security classification where wall outlet boxes cannot be salmon pink or red"
+    },
+    {
+      "id": "PROTECTED systems",
+      "type": "CONCEPT",
+      "text": "Security classification where wall outlet boxes cannot be salmon pink or red"
+    },
+    {
+      "id": "ISM-1822",
+      "type": "CONCEPT",
+      "text": "Control requiring consistent color for individual system wall outlet boxes"
+    },
+    {
+      "id": "ISM-1107",
+      "type": "CONCEPT",
+      "text": "Control requiring OFFICIAL and PROTECTED wall outlet boxes not be salmon pink or red"
+    },
+    {
+      "id": "ISM-1720",
+      "type": "CONCEPT",
+      "text": "Control requiring SECRET wall outlet boxes be salmon pink"
+    },
+    {
+      "id": "ISM-1721",
+      "type": "CONCEPT",
+      "text": "Control requiring TOP SECRET wall outlet boxes be red"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Wall outlet boxes",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "SECRET systems",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Wall outlet boxes",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "TOP SECRET systems",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Wall outlet boxes",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "OFFICIAL systems",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Wall outlet boxes",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "PROTECTED systems",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "ISM-1822",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    }
+  ]
+}

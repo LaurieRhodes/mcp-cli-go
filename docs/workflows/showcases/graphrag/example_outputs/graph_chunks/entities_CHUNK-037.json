@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-037",
+  "entities": [
+    {
+      "id": "Information Security Manual",
+      "type": "CONCEPT",
+      "text": "Official security guidance document"
+    },
+    {
+      "id": "Risk Management Framework",
+      "type": "PROCESS",
+      "text": "Six-step framework for managing security risks"
+    },
+    {
+      "id": "Monitoring Systems",
+      "type": "PROCESS",
+      "text": "Process of observing systems and environments"
+    },
+    {
+      "id": "Applying a risk-based approach to cyber security",
+      "type": "CONCEPT",
+      "text": "Methodology for cybersecurity implementation"
+    },
+    {
+      "id": "Event logging and monitoring",
+      "type": "CONCEPT",
+      "text": "Process of recording and analyzing system events"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "CONCEPT",
+      "text": "Document providing monitoring guidelines"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Information Security Manual",
+      "to": "Risk Management Framework",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Risk Management Framework",
+      "to": "Applying a risk-based approach to cyber security",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Monitoring Systems",
+      "to": "Event logging and monitoring",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Event logging and monitoring",
+      "to": "Guidelines for System Monitoring",
+      "type": "DEFINED_IN"
+    }
+  ]
+}

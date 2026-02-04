@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-231",
+  "entities": [
+    {
+      "id": "televisions",
+      "type": "DEVICE",
+      "text": "All types of televisions"
+    },
+    {
+      "id": "computer monitors",
+      "type": "DEVICE",
+      "text": "All types of computer monitors"
+    },
+    {
+      "id": "Cathode Ray Tube monitors",
+      "type": "DEVICE",
+      "text": "CRT monitors affected by burn-in"
+    },
+    {
+      "id": "plasma screens",
+      "type": "DEVICE",
+      "text": "Plasma screens affected by burn-in"
+    },
+    {
+      "id": "Liquid Crystal Display",
+      "type": "DEVICE",
+      "text": "LCD screens affected by image persistence"
+    },
+    {
+      "id": "Organic Light Emitting Diode screens",
+      "type": "DEVICE",
+      "text": "OLED screens affected by image persistence"
+    },
+    {
+      "id": "burn-in",
+      "type": "PHENOMENON",
+      "text": "Data retention issue affecting CRT and plasma screens"
+    },
+    {
+      "id": "image persistence",
+      "type": "PHENOMENON",
+      "text": "Data retention issue affecting LCD and OLED screens"
+    },
+    {
+      "id": "ISM-1076",
+      "type": "CONTROL",
+      "text": "Control for sanitising televisions and computer monitors"
+    },
+    {
+      "id": "ISM-1222",
+      "type": "CONTROL",
+      "text": "Control for sanitising with minor burn-in or image persistence"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "13",
+      "to": "24",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "29",
+      "to": "46",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "137",
+      "to": "162",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "167",
+      "to": "181",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "215",
+      "to": "237",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "242",
+      "to": "278",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "201",
+      "to": "208",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "298",
+      "to": "315",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "946",
+      "to": "954",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "1204",
+      "to": "1212",
+      "type": "MENTIONED_IN"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-146",
+  "entities": [
+    {
+      "id": "emanation security threats",
+      "type": "CONCEPT",
+      "text": "Security threats from electromagnetic emissions"
+    },
+    {
+      "id": "system life cycle",
+      "type": "PROCESS",
+      "text": "Complete development and deployment timeline"
+    },
+    {
+      "id": "emanation security threat assessment",
+      "type": "PROCESS",
+      "text": "Evaluation of emanation security risks"
+    },
+    {
+      "id": "ISM-0246 control",
+      "type": "CONCEPT",
+      "text": "Australian Information Security Manual control"
+    },
+    {
+      "id": "cost implications",
+      "type": "CONCEPT",
+      "text": "Financial impact of security implementation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "emanation security threats",
+      "to": "system life cycle",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "system life cycle",
+      "to": "emanation security threat assessment",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "emanation security threat assessment",
+      "to": "cost implications",
+      "type": "AFFECTS"
+    },
+    {
+      "from": "ISM-0246 control",
+      "to": "emanation security threats",
+      "type": "GOVERNS"
+    }
+  ]
+}

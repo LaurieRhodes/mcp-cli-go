@@ -1,0 +1,34 @@
+$schema: "workflow/v2.0"
+name: extract_graph_chunk_production_deepseek
+version: 1.0.0
+description: Production entity extraction with DeepSeek direct API
+
+execution:
+  provider: deepseek
+  model: deepseek-chat
+  timeout: 2m
+
+steps:
+  - name: extract_and_save
+    skills: [python-context-builder]
+    max_iterations: 2
+    run: |
+      Read: {{input}}
+      Extract: chunk_id, content
+      
+      Identify entities and relationships. Output as pipe-separated strings.
+      
+      Call skills_run_helper_script tool:
+      {
+        "skill_name": "python-context-builder",
+        "script_name": "save_graph_entities_production.py",
+        "args": [
+          "{{chunk_id}}",
+          "entity1|entity2|entity3",
+          "CONCEPT|ACTOR|PROCESS",
+          "description1|description2|description3",
+          "entity1|entity2",
+          "entity2|entity3",
+          "DEFINES|REQUIRES"
+        ]
+      }

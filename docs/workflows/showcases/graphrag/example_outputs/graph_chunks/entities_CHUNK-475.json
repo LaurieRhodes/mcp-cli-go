@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-475",
+  "entities": [
+    {
+      "id": "AES",
+      "type": "CONCEPT",
+      "text": "Advanced Encryption Standard"
+    },
+    {
+      "id": "IPsec",
+      "type": "CONCEPT",
+      "text": "Internet Protocol Security"
+    },
+    {
+      "id": "IKE version 2",
+      "type": "CONCEPT",
+      "text": "Internet Key Exchange version 2"
+    },
+    {
+      "id": "Cipher Block Chaining",
+      "type": "CONCEPT",
+      "text": "Encryption mode"
+    },
+    {
+      "id": "Counter Mode",
+      "type": "CONCEPT",
+      "text": "Encryption mode"
+    },
+    {
+      "id": "Counter with Cipher Block Chaining Message Authentication Code",
+      "type": "CONCEPT",
+      "text": "Encryption mode"
+    },
+    {
+      "id": "Galois/Counter Mode",
+      "type": "CONCEPT",
+      "text": "Encryption mode"
+    },
+    {
+      "id": "ENCR_AES_GCM_16",
+      "type": "CONCEPT",
+      "text": "Specific AES-GCM encryption algorithm"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "AES",
+      "to": "IPsec",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "IPsec",
+      "to": "IKE version 2",
+      "type": "SUPPORTS"
+    }
+  ]
+}

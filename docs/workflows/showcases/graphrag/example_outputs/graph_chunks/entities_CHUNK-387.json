@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-387",
+  "entities": [
+    {
+      "id": "suspicious emails",
+      "type": "CONCEPT",
+      "text": "Emails that appear suspicious based on certain characteristics"
+    },
+    {
+      "id": "email source address",
+      "type": "CONCEPT",
+      "text": "The originating address of an email message"
+    },
+    {
+      "id": "email gateway",
+      "type": "SYSTEM",
+      "text": "Network component that filters and processes incoming/outgoing email traffic"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "suspicious emails",
+      "to": "email source address",
+      "type": "CHARACTERIZED_BY"
+    },
+    {
+      "from": "email source address",
+      "to": "email gateway",
+      "type": "PROCESSED_BY"
+    }
+  ]
+}

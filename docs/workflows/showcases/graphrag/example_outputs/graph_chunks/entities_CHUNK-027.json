@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-027",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "business continuity plan",
+      "type": "PROCESS",
+      "text": "Plan for maintaining business operations during disruptions"
+    },
+    {
+      "id": "disaster recovery plan",
+      "type": "PROCESS",
+      "text": "Plan for recovering from disasters"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "CISO",
+      "type": "CONTRIBUTES_TO"
+    },
+    {
+      "from": "business continuity plan",
+      "to": "disaster recovery plan",
+      "type": "CONTRIBUTES_TO"
+    }
+  ]
+}

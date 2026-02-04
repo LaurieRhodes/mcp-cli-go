@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-095",
+  "entities": [
+    {
+      "id": "Access requirements documentation",
+      "type": "CONCEPT",
+      "text": "Documentation of access requirements for systems and resources"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Individuals requiring access to systems"
+    },
+    {
+      "id": "System security plan",
+      "type": "CONCEPT",
+      "text": "Plan containing security requirements for a system"
+    },
+    {
+      "id": "Employment screening",
+      "type": "PROCESS",
+      "text": "Process of vetting personnel before granting access"
+    },
+    {
+      "id": "Security clearance",
+      "type": "CONCEPT",
+      "text": "Official authorization to access classified information"
+    },
+    {
+      "id": "Briefings",
+      "type": "PROCESS",
+      "text": "Training sessions for personnel before system access"
+    },
+    {
+      "id": "System access",
+      "type": "PROCESS",
+      "text": "Process of accessing a system and its resources"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Access requirements documentation",
+      "to": "Personnel",
+      "type": "Personnel"
+    },
+    {
+      "from": "Personnel",
+      "to": "Employment screening",
+      "type": "Security clearance"
+    }
+  ]
+}

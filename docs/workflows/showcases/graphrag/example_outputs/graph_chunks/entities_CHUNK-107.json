@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-107",
+  "entities": [
+    {
+      "id": "Facilities in Australia",
+      "type": "CONCEPT",
+      "text": "Geographical scope for applicability"
+    },
+    {
+      "id": "New cabling infrastructure",
+      "type": "CONCEPT",
+      "text": "Type of infrastructure covered"
+    },
+    {
+      "id": "Installations or upgrades",
+      "type": "PROCESS",
+      "text": "Activities covered by the section"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Facilities in Australia",
+      "to": "New cabling infrastructure",
+      "type": "DEFINES"
+    },
+    {
+      "from": "New cabling infrastructure",
+      "to": "Installations or upgrades",
+      "type": "REQUIRES"
+    }
+  ]
+}

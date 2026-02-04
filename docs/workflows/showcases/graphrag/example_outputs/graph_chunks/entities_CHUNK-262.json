@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-262",
+  "entities": [
+    {
+      "id": "Media types incapable of sanitisation",
+      "type": "CONCEPT",
+      "text": "Media types that cannot be cleaned"
+    },
+    {
+      "id": "ISM-0350 control",
+      "type": "ACTOR",
+      "text": "Security control requiring destruction"
+    },
+    {
+      "id": "Destruction process",
+      "type": "PROCESS",
+      "text": "Process of destroying media before disposal"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Media types incapable of sanitisation",
+      "to": "Destruction process",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0350 control",
+      "to": "Destruction process",
+      "type": "DEFINES"
+    }
+  ]
+}

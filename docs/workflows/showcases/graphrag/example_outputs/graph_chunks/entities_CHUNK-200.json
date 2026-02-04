@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-200",
+  "entities": [
+    {
+      "id": "CCRA schemes",
+      "type": "CONCEPT",
+      "text": "Schemes under Common Criteria Recognition Arrangement"
+    },
+    {
+      "id": "Cryptographic Algorithm Validation Program",
+      "type": "PROCESS",
+      "text": "Program for validating cryptographic algorithms"
+    },
+    {
+      "id": "Cryptographic and Security Testing laboratories",
+      "type": "ACTOR",
+      "text": "Laboratories performing cryptographic evaluations"
+    },
+    {
+      "id": "United States' National Voluntary Laboratory Accreditation Program",
+      "type": "ACTOR",
+      "text": "US accreditation program for testing laboratories"
+    },
+    {
+      "id": "ISO/IEC 17025:2017",
+      "type": "STANDARD",
+      "text": "International standard for testing laboratory competence"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CCRA schemes",
+      "to": "Cryptographic Algorithm Validation Program",
+      "type": "Cryptographic and Security Testing laboratories"
+    },
+    {
+      "from": "Cryptographic Algorithm Validation Program",
+      "to": "Cryptographic and Security Testing laboratories",
+      "type": "United States' National Voluntary Laboratory Accreditation Program"
+    }
+  ]
+}

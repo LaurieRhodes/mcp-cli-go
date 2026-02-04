@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-043",
+  "entities": [
+    {
+      "id": "cyber security incident register",
+      "type": "CONCEPT",
+      "text": "A system for tracking security incidents"
+    },
+    {
+      "id": "remediation activities",
+      "type": "PROCESS",
+      "text": "Actions taken to address security incidents"
+    },
+    {
+      "id": "risk assessment activities",
+      "type": "PROCESS",
+      "text": "Evaluation of security risks"
+    },
+    {
+      "id": "ISM-0125",
+      "type": "CONTROL",
+      "text": "Australian ISM control requirement"
+    },
+    {
+      "id": "ISM-1803",
+      "type": "CONTROL",
+      "text": "Australian ISM control requirement"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security incident register",
+      "to": "remediation activities",
+      "type": "ENABLES"
+    },
+    {
+      "from": "cyber security incident register",
+      "to": "risk assessment activities",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "ISM-0125",
+      "to": "cyber security incident register",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1803",
+      "to": "cyber security incident register",
+      "type": "REQUIRES"
+    }
+  ]
+}

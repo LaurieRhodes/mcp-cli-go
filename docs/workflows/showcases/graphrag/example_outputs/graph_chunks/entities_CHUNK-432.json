@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-432",
+  "entities": [
+    {
+      "id": "Encryption of data at rest",
+      "type": "TECHNOLOGY",
+      "text": "Protects data stored on devices"
+    },
+    {
+      "id": "Encryption of data in transit",
+      "type": "TECHNOLOGY",
+      "text": "Protects data during transmission"
+    },
+    {
+      "id": "Sensitive or classified data",
+      "type": "DATA",
+      "text": "Data requiring protection"
+    },
+    {
+      "id": "ICT equipment and media",
+      "type": "INFRASTRUCTURE",
+      "text": "Hardware and storage devices"
+    },
+    {
+      "id": "Public network infrastructure",
+      "type": "INFRASTRUCTURE",
+      "text": "Network infrastructure for communication"
+    },
+    {
+      "id": "Organisation",
+      "type": "ORGANIZATION",
+      "text": "Entity implementing security measures"
+    },
+    {
+      "id": "Adversary",
+      "type": "THREAT_ACTOR",
+      "text": "Malicious actor seeking unauthorized access"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Encryption of data at rest",
+      "to": "Sensitive or classified data",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "Encryption of data in transit",
+      "to": "Sensitive or classified data",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "Sensitive or classified data",
+      "to": "ICT equipment and media",
+      "type": "STORED_ON"
+    },
+    {
+      "from": "Sensitive or classified data",
+      "to": "Public network infrastructure",
+      "type": "TRANSMITTED_OVER"
+    },
+    {
+      "from": "Sensitive or classified data",
+      "to": "Organisation",
+      "type": "IMPLEMENTED_BY"
+    },
+    {
+      "from": "Organisation",
+      "to": "Encryption of data at rest",
+      "type": "USES"
+    },
+    {
+      "from": "Adversary",
+      "to": "Sensitive or classified data",
+      "type": "SEEKS_ACCESS_TO"
+    }
+  ]
+}

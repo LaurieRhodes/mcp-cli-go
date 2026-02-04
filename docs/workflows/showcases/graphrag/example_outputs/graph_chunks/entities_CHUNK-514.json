@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-514",
+  "entities": [
+    {
+      "id": "Antivirus scanning",
+      "type": "PROCESS",
+      "text": "Process of scanning files for malicious content"
+    },
+    {
+      "id": "Multiple scanning engines",
+      "type": "TECHNOLOGY",
+      "text": "Use of different antivirus engines to increase detection"
+    },
+    {
+      "id": "Malicious files",
+      "type": "THREAT",
+      "text": "Files containing harmful code or malware"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Antivirus scanning",
+      "to": "Multiple scanning engines",
+      "type": "USES"
+    },
+    {
+      "from": "Multiple scanning engines",
+      "to": "Malicious files",
+      "type": "DETECTS"
+    }
+  ]
+}

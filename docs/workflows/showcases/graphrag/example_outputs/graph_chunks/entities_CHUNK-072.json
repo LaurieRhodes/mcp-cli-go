@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-072",
+  "entities": [
+    {
+      "id": "System-specific security documentation",
+      "type": "CONCEPT",
+      "text": "Security documentation for specific systems"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Individuals responsible for developing documentation"
+    },
+    {
+      "id": "Business requirements",
+      "type": "CONCEPT",
+      "text": "Organizational needs and constraints"
+    },
+    {
+      "id": "Technologies",
+      "type": "CONCEPT",
+      "text": "Technological components and systems"
+    },
+    {
+      "id": "Cyber security matters",
+      "type": "CONCEPT",
+      "text": "Cybersecurity considerations and threats"
+    },
+    {
+      "id": "Documentation framework",
+      "type": "CONCEPT",
+      "text": "Framework for organizing security documentation"
+    },
+    {
+      "id": "Higher level security documentation",
+      "type": "CONCEPT",
+      "text": "Consolidated documentation covering multiple systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Personnel",
+      "to": "System-specific security documentation",
+      "type": "System-specific security documentation"
+    },
+    {
+      "from": "System-specific security documentation",
+      "to": "Business requirements",
+      "type": "Technologies"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-008",
+  "entities": [
+    {
+      "id": "system",
+      "type": "CONCEPT",
+      "text": "The system being designed"
+    },
+    {
+      "id": "security objectives",
+      "type": "CONCEPT",
+      "text": "Security goals based on confidentiality, integrity, availability"
+    },
+    {
+      "id": "system security plan",
+      "type": "DOCUMENT",
+      "text": "Document describing system characteristics"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "system",
+      "to": "security objectives",
+      "type": "DEFINES"
+    },
+    {
+      "from": "security objectives",
+      "to": "system security plan",
+      "type": "DOCUMENTS_IN"
+    }
+  ]
+}

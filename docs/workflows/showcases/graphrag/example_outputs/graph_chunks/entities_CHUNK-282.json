@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-282",
+  "entities": [
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Software developers who may make coding mistakes"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor who develops exploits to take advantage of vulnerabilities"
+    },
+    {
+      "id": "antivirus software",
+      "type": "CONCEPT",
+      "text": "Software designed to detect and prevent malware"
+    },
+    {
+      "id": "security vulnerabilities",
+      "type": "CONCEPT",
+      "text": "Flaws in software that can be exploited"
+    },
+    {
+      "id": "exploits",
+      "type": "CONCEPT",
+      "text": "Malicious code developed to take advantage of security vulnerabilities"
+    },
+    {
+      "id": "workstations",
+      "type": "CONCEPT",
+      "text": "Computing devices used by end-users"
+    },
+    {
+      "id": "servers",
+      "type": "CONCEPT",
+      "text": "Computing systems that provide services"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "vendors",
+      "to": "adversary",
+      "type": "exploits"
+    },
+    {
+      "from": "security vulnerabilities",
+      "to": "exploits",
+      "type": "security vulnerabilities"
+    }
+  ]
+}

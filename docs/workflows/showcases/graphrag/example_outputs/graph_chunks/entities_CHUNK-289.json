@@ -1,0 +1,157 @@
+{
+  "chunk_id": "CHUNK-289",
+  "entities": [
+    {
+      "id": "user applications",
+      "type": "CONCEPT",
+      "text": "Applications used by end-users"
+    },
+    {
+      "id": "default state",
+      "type": "CONCEPT",
+      "text": "Initial deployment configuration without security modifications"
+    },
+    {
+      "id": "insecure operating environment",
+      "type": "CONCEPT",
+      "text": "Environment vulnerable to security threats"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor seeking to compromise systems"
+    },
+    {
+      "id": "networks",
+      "type": "CONCEPT",
+      "text": "Computer networks and infrastructure"
+    },
+    {
+      "id": "office productivity suites",
+      "type": "CONCEPT",
+      "text": "Software suites for document creation and editing"
+    },
+    {
+      "id": "web browsers",
+      "type": "CONCEPT",
+      "text": "Software for accessing and displaying web content"
+    },
+    {
+      "id": "email clients",
+      "type": "CONCEPT",
+      "text": "Software for sending and receiving email"
+    },
+    {
+      "id": "PDF software",
+      "type": "CONCEPT",
+      "text": "Software for creating and viewing PDF documents"
+    },
+    {
+      "id": "security products",
+      "type": "CONCEPT",
+      "text": "Software for protecting systems from threats"
+    },
+    {
+      "id": "configuration settings",
+      "type": "CONCEPT",
+      "text": "Settings that control application behavior and security"
+    },
+    {
+      "id": "secure state",
+      "type": "CONCEPT",
+      "text": "Application configuration that minimizes security risks"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "vendors",
+      "type": "ACTOR",
+      "text": "Software and hardware manufacturers"
+    },
+    {
+      "id": "hardening guidance",
+      "type": "CONCEPT",
+      "text": "Documentation providing security configuration recommendations"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "user applications",
+      "to": "default state",
+      "type": "DEPLOYED_IN"
+    },
+    {
+      "from": "default state",
+      "to": "insecure operating environment",
+      "type": "LEADS_TO"
+    },
+    {
+      "from": "default state",
+      "to": "adversary",
+      "type": "ALLOWS"
+    },
+    {
+      "from": "insecure operating environment",
+      "to": "adversary",
+      "type": "GAINS_FOOTHOLD_ON"
+    },
+    {
+      "from": "insecure operating environment",
+      "to": "networks",
+      "type": "TARGETED_FOR"
+    },
+    {
+      "from": "office productivity suites",
+      "to": "exploitation",
+      "type": "TARGETED_FOR"
+    },
+    {
+      "from": "web browsers",
+      "to": "exploitation",
+      "type": "TARGETED_FOR"
+    },
+    {
+      "from": "email clients",
+      "to": "exploitation",
+      "type": "TARGETED_FOR"
+    },
+    {
+      "from": "PDF software",
+      "to": "exploitation",
+      "type": "TARGETED_FOR"
+    },
+    {
+      "from": "security products",
+      "to": "exploitation",
+      "type": "ALLOWS_CONFIGURATION"
+    },
+    {
+      "from": "configuration settings",
+      "to": "secure state",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "ACSC",
+      "to": "hardening guidance",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "vendors",
+      "to": "hardening guidance",
+      "type": "ASSISTS_IN_HARDENING"
+    },
+    {
+      "from": "hardening guidance",
+      "to": "configuration",
+      "type": "PREFERRED_OVER"
+    },
+    {
+      "from": "ACSC hardening guidance",
+      "to": "vendor hardening guidance",
+      "type": "RELATED_TO"
+    }
+  ]
+}

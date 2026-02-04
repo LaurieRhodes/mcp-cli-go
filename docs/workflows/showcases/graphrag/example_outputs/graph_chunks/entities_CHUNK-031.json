@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-031",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ROLE",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "cyber security workforce",
+      "type": "GROUP",
+      "text": "Cyber security workforce within organisation"
+    },
+    {
+      "id": "cyber security personnel",
+      "type": "GROUP",
+      "text": "Cyber security personnel within organisation"
+    },
+    {
+      "id": "cyber security managers",
+      "type": "ROLE",
+      "text": "Cyber security managers"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "cyber security workforce",
+      "type": "RESPONSIBLE_FOR"
+    },
+    {
+      "from": "CISO",
+      "to": "cyber security personnel",
+      "type": "OVERSEES"
+    },
+    {
+      "from": "CISO",
+      "to": "cyber security managers",
+      "type": "DELEGATES_TO"
+    },
+    {
+      "from": "CISO",
+      "to": "cyber security personnel",
+      "type": "PROVIDES_AUTHORITY_TO"
+    }
+  ]
+}

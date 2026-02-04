@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-504",
+  "entities": [
+    {
+      "id": "web proxy event logs",
+      "type": "CONCEPT",
+      "text": "Logs from web proxy servers that record website access events"
+    },
+    {
+      "id": "web proxies",
+      "type": "CONCEPT",
+      "text": "Network infrastructure components that handle web traffic"
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security breaches or attacks on computer systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "web proxy event logs",
+      "to": "web proxies",
+      "type": "CAPTURES"
+    },
+    {
+      "from": "web proxy event logs",
+      "to": "cyber security incidents",
+      "type": "ASSISTS_IN"
+    }
+  ]
+}

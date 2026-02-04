@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-353",
+  "entities": [
+    {
+      "id": "Web APIs",
+      "type": "CONCEPT",
+      "text": "Web application programming interfaces that facilitate data exchange"
+    },
+    {
+      "id": "Authentication",
+      "type": "PROCESS",
+      "text": "Process of verifying client identity"
+    },
+    {
+      "id": "Authorization",
+      "type": "PROCESS",
+      "text": "Process of determining client permissions"
+    },
+    {
+      "id": "OWASP API Security Top 10",
+      "type": "STANDARD",
+      "text": "Security standard for web API vulnerabilities"
+    },
+    {
+      "id": "Data access",
+      "type": "ACTIVITY",
+      "text": "Accessing data through web APIs"
+    },
+    {
+      "id": "Data modification",
+      "type": "ACTIVITY",
+      "text": "Modifying data through web APIs"
+    },
+    {
+      "id": "Clients",
+      "type": "ACTOR",
+      "text": "Entities that call web APIs"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Web APIs",
+      "to": "Web APIs",
+      "type": "Clients"
+    },
+    {
+      "from": "Authentication",
+      "to": "Authorization",
+      "type": "Web APIs"
+    }
+  ]
+}

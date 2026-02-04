@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-512",
+  "entities": [
+    {
+      "id": "encryption",
+      "type": "CONCEPT",
+      "text": "Technology that obscures data to prevent unauthorized access"
+    },
+    {
+      "id": "content filtering",
+      "type": "PROCESS",
+      "text": "Process of inspecting data for malicious content"
+    },
+    {
+      "id": "gateways",
+      "type": "SYSTEM",
+      "text": "Network entry/exit points for data transfer"
+    },
+    {
+      "id": "CDSs",
+      "type": "SYSTEM",
+      "text": "Content Delivery Systems for data distribution"
+    },
+    {
+      "id": "data spill",
+      "type": "RISK",
+      "text": "Unauthorized transfer of classified data"
+    },
+    {
+      "id": "ISM-1293",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for encrypted file handling"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "encryption",
+      "to": "gateways",
+      "type": "BY_PASSES"
+    },
+    {
+      "from": "content filtering",
+      "to": "content filtering",
+      "type": "REQUIRES"
+    }
+  ]
+}

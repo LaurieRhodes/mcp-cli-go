@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-405",
+  "entities": [
+    {
+      "id": "unused physical ports",
+      "type": "CONCEPT",
+      "text": "Physical network ports that are not in use"
+    },
+    {
+      "id": "network devices",
+      "type": "CONCEPT",
+      "text": "Networking hardware equipment"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor seeking unauthorized access"
+    },
+    {
+      "id": "physical access",
+      "type": "PROCESS",
+      "text": "Physical entry to network infrastructure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "unused physical ports",
+      "to": "network devices",
+      "type": "PART_OF"
+    },
+    {
+      "from": "network devices",
+      "to": "unused physical ports",
+      "type": "MODIFIES"
+    },
+    {
+      "from": "disabling",
+      "to": "adversary",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "unused physical ports",
+      "to": "physical access",
+      "type": "TARGETS"
+    },
+    {
+      "from": "adversary",
+      "to": "network devices",
+      "type": "RELATED_TO"
+    }
+  ]
+}

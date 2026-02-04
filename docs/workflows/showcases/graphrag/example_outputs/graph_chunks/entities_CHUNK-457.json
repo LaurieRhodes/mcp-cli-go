@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-457",
+  "entities": [
+    {
+      "id": "ASD-Approved Cryptographic Protocols",
+      "type": "CONCEPT",
+      "text": "Australian Signals Directorate approved cryptographic protocols"
+    },
+    {
+      "id": "AACPs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Algorithms and Protocols"
+    },
+    {
+      "id": "Industry and Academic Communities",
+      "type": "ACTOR",
+      "text": "Communities that scrutinize cryptographic protocols"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ASD-Approved Cryptographic Protocols",
+      "to": "ASD-Approved Cryptographic Protocols",
+      "type": "DEFINES"
+    },
+    {
+      "from": "AACPs",
+      "to": "Industry and Academic Communities",
+      "type": "REQUIRES_SCRUTINY"
+    }
+  ]
+}

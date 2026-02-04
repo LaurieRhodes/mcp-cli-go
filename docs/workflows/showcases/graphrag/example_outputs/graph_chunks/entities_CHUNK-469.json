@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-469",
+  "entities": [
+    {
+      "id": "ICT equipment/software implementing S/MIME",
+      "type": "CONCEPT",
+      "text": "ICT equipment or software that implements S/MIME"
+    },
+    {
+      "id": "AACAs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Algorithms"
+    },
+    {
+      "id": "AACPs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Protocols"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Algorithms section",
+      "type": "CONCEPT",
+      "text": "Section containing approved cryptographic algorithms"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Protocols section",
+      "type": "CONCEPT",
+      "text": "Section containing approved cryptographic protocols"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment/software implementing S/MIME",
+      "to": "AACAs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ICT equipment/software implementing S/MIME",
+      "to": "AACPs",
+      "type": "REQUIRES"
+    }
+  ]
+}

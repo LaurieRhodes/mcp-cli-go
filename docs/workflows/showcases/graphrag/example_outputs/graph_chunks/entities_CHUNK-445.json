@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-445",
+  "entities": [
+    {
+      "id": "Cryptographic equipment/software",
+      "type": "CONCEPT",
+      "text": "Hardware/software that performs cryptographic functions"
+    },
+    {
+      "id": "Unapproved algorithms",
+      "type": "CONCEPT",
+      "text": "Algorithms not approved by ASD for security use"
+    },
+    {
+      "id": "AACAs",
+      "type": "CONCEPT",
+      "text": "ASD-Approved Cryptographic Algorithms"
+    },
+    {
+      "id": "High assurance cryptographic algorithms",
+      "type": "CONCEPT",
+      "text": "Cryptographic algorithms with high assurance levels"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security controls"
+    },
+    {
+      "id": "Users",
+      "type": "ACTOR",
+      "text": "Individuals using cryptographic systems"
+    },
+    {
+      "id": "Security risk",
+      "type": "CONCEPT",
+      "text": "Potential threat to information security"
+    },
+    {
+      "id": "Usage policies",
+      "type": "PROCESS",
+      "text": "Formal guidelines for algorithm usage"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cryptographic equipment/software",
+      "to": "Unapproved algorithms",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Unapproved algorithms",
+      "to": "Security risk",
+      "type": "CREATES"
+    },
+    {
+      "from": "Organisation",
+      "to": "AACAs",
+      "type": "ENFORCES"
+    },
+    {
+      "from": "AACAs",
+      "to": "Cryptographic equipment/software",
+      "type": "USES"
+    },
+    {
+      "from": "Organisation",
+      "to": "Unapproved algorithms",
+      "type": "DISABLES"
+    },
+    {
+      "from": "Unapproved algorithms",
+      "to": "Cryptographic equipment/software",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Organisation",
+      "to": "Users",
+      "type": "ADVISES"
+    },
+    {
+      "from": "Users",
+      "to": "Usage policies",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Users",
+      "to": "Unapproved algorithms",
+      "type": "USES"
+    },
+    {
+      "from": "Unapproved algorithms",
+      "to": "Usage policies",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-389",
+  "entities": [
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "Australian government cybersecurity agency"
+    },
+    {
+      "id": "National Institute of Standards and Technology (NIST)",
+      "type": "ACTOR",
+      "text": "US standards organization"
+    },
+    {
+      "id": "Opportunistic TLS encryption",
+      "type": "PROCESS",
+      "text": "Email encryption method"
+    },
+    {
+      "id": "SPF",
+      "type": "PROCESS",
+      "text": "Sender Policy Framework for email authentication"
+    },
+    {
+      "id": "DKIM",
+      "type": "PROCESS",
+      "text": "DomainKeys Identified Mail for email authentication"
+    },
+    {
+      "id": "DMARC",
+      "type": "PROCESS",
+      "text": "Domain-based Message Authentication, Reporting & Conformance"
+    },
+    {
+      "id": "email content filtering",
+      "type": "PROCESS",
+      "text": "Filtering of email content for security"
+    },
+    {
+      "id": "email service providers",
+      "type": "ACTOR",
+      "text": "Providers of email marketing/filtering services"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Implementing Certificates, TLS, HTTPS and Opportunistic TLS publication",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "How to Combat Fake Emails publication",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Marketing and Filtering Email Service Providers publication",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Malicious Email Mitigation Strategies publication",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Guidelines for Gateways",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "National Institute of Standards and Technology (NIST)",
+      "to": "email security publications",
+      "type": "PUBLISHES"
+    }
+  ]
+}

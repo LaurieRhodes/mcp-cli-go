@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-039",
+  "entities": [
+    {
+      "id": "cyber security incident",
+      "type": "CONCEPT",
+      "text": "An unwanted/unexpected cyber security event that compromises or could compromise business operations"
+    },
+    {
+      "id": "cyber security event",
+      "type": "CONCEPT",
+      "text": "Individual security occurrences that can be part of incidents"
+    },
+    {
+      "id": "business operations",
+      "type": "CONCEPT",
+      "text": "Organizational activities that can be compromised by security incidents"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security incident",
+      "to": "cyber security event",
+      "type": "DEFINES"
+    },
+    {
+      "from": "cyber security incident",
+      "to": "business operations",
+      "type": "COMPROMISES"
+    }
+  ]
+}

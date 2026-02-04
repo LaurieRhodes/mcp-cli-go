@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-361",
+  "entities": [
+    {
+      "id": "database servers",
+      "type": "SYSTEM",
+      "text": "Database servers that store data"
+    },
+    {
+      "id": "web servers",
+      "type": "SYSTEM",
+      "text": "Web servers that serve applications"
+    },
+    {
+      "id": "data",
+      "type": "DATA",
+      "text": "Information transmitted between systems"
+    },
+    {
+      "id": "encryption",
+      "type": "SECURITY_CONTROL",
+      "text": "Process of securing data in transit"
+    },
+    {
+      "id": "ISM-1277",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for encryption"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "database servers",
+      "to": "data",
+      "type": "COMMUNICATES_WITH"
+    },
+    {
+      "from": "web servers",
+      "to": "encryption",
+      "type": "REQUIRES"
+    }
+  ]
+}

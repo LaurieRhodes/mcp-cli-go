@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-502",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "An entity that develops and implements policies"
+    },
+    {
+      "id": "web usage policy",
+      "type": "CONCEPT",
+      "text": "A policy governing web usage"
+    },
+    {
+      "id": "web services",
+      "type": "CONCEPT",
+      "text": "Online services accessed via internet"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "web usage policy",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "web usage policy",
+      "to": "web services",
+      "type": "GOVERNING"
+    }
+  ]
+}

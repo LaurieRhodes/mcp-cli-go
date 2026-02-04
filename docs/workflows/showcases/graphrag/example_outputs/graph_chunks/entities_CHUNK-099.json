@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-099",
+  "entities": [
+    {
+      "id": "validation of access requests",
+      "type": "PROCESS",
+      "text": "Validation of privileged access requests when first made"
+    },
+    {
+      "id": "limited access scope",
+      "type": "PRINCIPLE",
+      "text": "Limiting access to only required duties"
+    },
+    {
+      "id": "adversary targeting",
+      "type": "THREAT",
+      "text": "Targeting by adversaries due to elevated access"
+    },
+    {
+      "id": "security posture monitoring",
+      "type": "PROCESS",
+      "text": "Monitoring of system security posture"
+    },
+    {
+      "id": "malicious behavior detection",
+      "type": "PROCESS",
+      "text": "Detection of malicious activities"
+    },
+    {
+      "id": "Essential Eight",
+      "type": "FRAMEWORK",
+      "text": "Australian Essential Eight Maturity Model"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Privileged access to systems",
+      "to": "ISM-1507",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Privileged access to systems",
+      "to": "ISM-1508",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Privileged access to systems",
+      "to": "ISM-1175",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "Privileged access to systems",
+      "to": "ISM-1650",
+      "type": "ENABLES"
+    },
+    {
+      "from": "Privileged access to systems",
+      "to": "ISM-1650",
+      "type": "ENABLES"
+    },
+    {
+      "from": "Privileged access to systems",
+      "to": "ISM-1507",
+      "type": "ALIGNS_WITH"
+    }
+  ]
+}

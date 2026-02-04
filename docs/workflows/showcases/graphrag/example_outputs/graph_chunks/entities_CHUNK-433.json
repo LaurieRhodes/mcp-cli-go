@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-433",
+  "entities": [
+    {
+      "id": "ISO/IEC 19790:2012",
+      "type": "STANDARD",
+      "text": "International standard for cryptographic module security requirements"
+    },
+    {
+      "id": "ISO/IEC 24759:2017",
+      "type": "STANDARD",
+      "text": "International standard for cryptographic module test requirements"
+    },
+    {
+      "id": "FIPS 140-3",
+      "type": "STANDARD",
+      "text": "US standard for cryptographic module security requirements"
+    },
+    {
+      "id": "NIST SP 180-140",
+      "type": "STANDARD",
+      "text": "US standard for FIPS 140-3 derived test requirements"
+    },
+    {
+      "id": "Cryptographic modules",
+      "type": "CONCEPT",
+      "text": "Hardware/software modules for cryptography"
+    },
+    {
+      "id": "CMVP",
+      "type": "ORGANIZATION",
+      "text": "Cryptographic Module Validation Program"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISO/IEC 19790:2012",
+      "to": "ISO/IEC 24759:2017",
+      "type": "DEFINES"
+    },
+    {
+      "from": "FIPS 140-3",
+      "to": "ISO/IEC 19790:2012",
+      "type": "BASED_UPON"
+    },
+    {
+      "from": "NIST SP 180-140",
+      "to": "ISO/IEC 24759:2017",
+      "type": "BASED_UPON"
+    },
+    {
+      "from": "CMVP",
+      "to": "NIST SP 180-140",
+      "type": "UPDATES"
+    }
+  ]
+}

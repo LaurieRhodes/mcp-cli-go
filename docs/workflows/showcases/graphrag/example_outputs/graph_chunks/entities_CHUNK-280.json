@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-280",
+  "entities": [
+    {
+      "id": "Host-based Intrusion Prevention System",
+      "type": "CONCEPT",
+      "text": "System that uses behavior-based detection to identify and block anomalous behavior"
+    },
+    {
+      "id": "Security products",
+      "type": "CONCEPT",
+      "text": "Products that detect malicious code using signatures"
+    },
+    {
+      "id": "Malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful software code that can compromise systems"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Threat actor who creates malicious code variants"
+    },
+    {
+      "id": "Workstations",
+      "type": "CONCEPT",
+      "text": "End-user computing devices"
+    },
+    {
+      "id": "Critical servers",
+      "type": "CONCEPT",
+      "text": "Important servers essential for operations"
+    },
+    {
+      "id": "High-value servers",
+      "type": "CONCEPT",
+      "text": "Servers containing valuable data or services"
+    },
+    {
+      "id": "Security vendors",
+      "type": "ACTOR",
+      "text": "Companies that provide security signatures and updates"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Host-based Intrusion Prevention System",
+      "to": "Security products",
+      "type": "COMPLEMENTS"
+    },
+    {
+      "from": "Security products",
+      "to": "Malicious code",
+      "type": "DETECTS"
+    },
+    {
+      "from": "Adversary",
+      "to": "Malicious code",
+      "type": "CREATES"
+    },
+    {
+      "from": "Host-based Intrusion Prevention System",
+      "to": "Workstations",
+      "type": "IMPLEMENTED_ON"
+    },
+    {
+      "from": "Host-based Intrusion Prevention System",
+      "to": "Critical servers",
+      "type": "IMPLEMENTED_ON"
+    },
+    {
+      "from": "Host-based Intrusion Prevention System",
+      "to": "High-value servers",
+      "type": "IMPLEMENTED_ON"
+    }
+  ]
+}

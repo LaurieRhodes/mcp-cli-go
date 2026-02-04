@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-493",
+  "entities": [
+    {
+      "id": "CDSs",
+      "type": "CONCEPT",
+      "text": "Cross Domain Solutions"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity performing CDS activities"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Planning/Designing/Implementing CDS connectivity",
+      "type": "PROCESS",
+      "text": "Process of planning, designing, implementing CDS connectivity"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "Organisation",
+      "type": "Planning/Designing/Implementing CDS connectivity"
+    },
+    {
+      "from": "Planning/Designing/Implementing CDS connectivity",
+      "to": "ACSC",
+      "type": "ACSC"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "chunk_id": "CHUNK-530",
+  "entities": [
+    {
+      "id": "Data transfer logs",
+      "type": "CONCEPT",
+      "text": "Records of data imports and exports from systems"
+    },
+    {
+      "id": "Data transfers",
+      "type": "PROCESS",
+      "text": "Movement of data between systems using various methods"
+    },
+    {
+      "id": "Monitoring activities",
+      "type": "PROCESS",
+      "text": "Periodic verification of data transfer logs"
+    },
+    {
+      "id": "ISM-1586",
+      "type": "CONCEPT",
+      "text": "Control requiring logging of all data transfers"
+    },
+    {
+      "id": "ISM-1294",
+      "type": "CONCEPT",
+      "text": "Control defining use of data transfer logs"
+    },
+    {
+      "id": "ISM-0660",
+      "type": "CONCEPT",
+      "text": "Control requiring verification of logs"
+    },
+    {
+      "id": "SECRET systems",
+      "type": "CONCEPT",
+      "text": "Classified systems requiring partial verification"
+    },
+    {
+      "id": "TOP SECRET systems",
+      "type": "CONCEPT",
+      "text": "Highest classified systems requiring full verification"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Potential threat actor attempting malicious activities"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Data transfer logs",
+      "to": "Data transfers",
+      "type": "RECORDS"
+    },
+    {
+      "from": "Data transfers",
+      "to": "Monitoring activities",
+      "type": "VERIFIES"
+    },
+    {
+      "from": "ISM-1586",
+      "to": "Data transfer logs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Data transfer logs",
+      "to": "Data transfer logs",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1294",
+      "to": "Data transfer logs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Data transfer logs",
+      "to": "Data transfer logs",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "ISM-0660",
+      "to": "Data transfer logs",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "Data transfer logs",
+      "to": "SECRET systems",
+      "type": "IDENTIFIES"
+    },
+    {
+      "from": "Monitoring activities",
+      "to": "TOP SECRET systems",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Data transfer logs",
+      "to": "Adversary",
+      "type": "RELATED_TO"
+    }
+  ]
+}

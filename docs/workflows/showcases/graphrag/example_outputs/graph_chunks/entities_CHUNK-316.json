@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-316",
+  "entities": [
+    {
+      "id": "Containers",
+      "type": "CONCEPT",
+      "text": "Container technology for system deployment"
+    },
+    {
+      "id": "Containerised systems",
+      "type": "CONCEPT",
+      "text": "Systems running in container environments"
+    },
+    {
+      "id": "Non-containerised systems",
+      "type": "CONCEPT",
+      "text": "Traditional systems not using containers"
+    },
+    {
+      "id": "Security controls",
+      "type": "CONCEPT",
+      "text": "Security measures and safeguards"
+    },
+    {
+      "id": "Patching process",
+      "type": "PROCESS",
+      "text": "System update and maintenance procedure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Containers",
+      "to": "Containerised systems",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Containerised systems",
+      "to": "Security controls",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Containerised systems",
+      "to": "Non-containerised systems",
+      "type": "COMPARES_TO"
+    },
+    {
+      "from": "Security controls",
+      "to": "Patching process",
+      "type": "INCLUDES"
+    }
+  ]
+}

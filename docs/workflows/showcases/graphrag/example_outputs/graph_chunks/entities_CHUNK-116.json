@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-116",
+  "entities": [
+    {
+      "id": "cable labelling processes",
+      "type": "PROCESS",
+      "text": "Well documented processes for labeling cables"
+    },
+    {
+      "id": "cable labelling procedures",
+      "type": "PROCEDURE",
+      "text": "Supporting procedures for cable labeling"
+    },
+    {
+      "id": "cable verification and fault finding",
+      "type": "ACTIVITY",
+      "text": "Activities to verify cables and find faults"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cable labelling processes",
+      "to": "cable labelling processes",
+      "type": "DEFINES"
+    },
+    {
+      "from": "cable labelling procedures",
+      "to": "cable verification and fault finding",
+      "type": "SUPPORTS"
+    }
+  ]
+}

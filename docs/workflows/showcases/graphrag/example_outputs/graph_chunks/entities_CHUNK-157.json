@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-157",
+  "entities": [
+    {
+      "id": "video conferencing network",
+      "type": "CONCEPT",
+      "text": "Network for video conferencing"
+    },
+    {
+      "id": "IP telephony network",
+      "type": "CONCEPT",
+      "text": "Network for IP telephony"
+    },
+    {
+      "id": "security domain",
+      "type": "CONCEPT",
+      "text": "Different security classification"
+    },
+    {
+      "id": "Guidelines for Gateways",
+      "type": "PROCESS",
+      "text": "Document with gateway requirements"
+    },
+    {
+      "id": "analog telephone network",
+      "type": "CONCEPT",
+      "text": "Traditional telephone network"
+    },
+    {
+      "id": "Public Switched Telephone Network (PSTN)",
+      "type": "CONCEPT",
+      "text": "Public telephone network"
+    },
+    {
+      "id": "data network",
+      "type": "CONCEPT",
+      "text": "Digital data network"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "video conferencing network",
+      "to": "Guidelines for Gateways",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "IP telephony network",
+      "to": "Guidelines for Gateways",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "analog telephone network",
+      "to": "Guidelines for Gateways",
+      "type": "NOT_REQUIRES"
+    },
+    {
+      "from": "PSTN",
+      "to": "analog telephone network",
+      "type": "IS_A"
+    }
+  ]
+}

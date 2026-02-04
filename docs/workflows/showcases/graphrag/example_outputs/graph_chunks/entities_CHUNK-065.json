@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-065",
+  "entities": [
+    {
+      "id": "service providers",
+      "type": "ACTOR",
+      "text": "Third-party entities performing contracted duties"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The organization contracting service providers"
+    },
+    {
+      "id": "customer systems and data",
+      "type": "CONCEPT",
+      "text": "Systems and data belonging to customers"
+    },
+    {
+      "id": "contractual arrangements",
+      "type": "CONCEPT",
+      "text": "Legal agreements specifying access requirements"
+    },
+    {
+      "id": "unauthorised access",
+      "type": "CONCEPT",
+      "text": "Unauthorized access to systems or data"
+    },
+    {
+      "id": "cyber security incident",
+      "type": "CONCEPT",
+      "text": "Security breach requiring immediate reporting"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "service providers",
+      "to": "organisation",
+      "type": "service providers"
+    },
+    {
+      "from": "organisation",
+      "to": "customer systems and data",
+      "type": "customer systems and data"
+    }
+  ]
+}

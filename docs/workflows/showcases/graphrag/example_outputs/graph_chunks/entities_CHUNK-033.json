@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-033",
+  "entities": [
+    {
+      "id": "cyber security incidents",
+      "type": "PROCESS",
+      "text": "Response to cyber security incidents"
+    },
+    {
+      "id": "cyber supply chain risk management",
+      "type": "PROCESS",
+      "text": "Management of cyber supply chain risks"
+    },
+    {
+      "id": "procurement of outsourced services",
+      "type": "PROCESS",
+      "text": "Procurement of outsourced services"
+    },
+    {
+      "id": "cyber security awareness training programs",
+      "type": "PROCESS",
+      "text": "Cyber security awareness training programs"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security incidents",
+      "to": "cyber supply chain risk management",
+      "type": "HAS_GUIDELINES"
+    },
+    {
+      "from": "cyber supply chain risk management",
+      "to": "procurement of outsourced services",
+      "type": "HAS_GUIDELINES"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-464",
+  "entities": [
+    {
+      "id": "SSH version 1",
+      "type": "TECHNOLOGY",
+      "text": "Insecure SSH protocol with vulnerabilities"
+    },
+    {
+      "id": "SSH version 2",
+      "type": "TECHNOLOGY",
+      "text": "Secure SSH protocol replacement"
+    },
+    {
+      "id": "OpenSSH",
+      "type": "TECHNOLOGY",
+      "text": "SSH implementation"
+    },
+    {
+      "id": "SSH daemon",
+      "type": "COMPONENT",
+      "text": "SSH server component"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-1506",
+      "to": "ISM-1506",
+      "type": "REPLACES"
+    },
+    {
+      "from": "ISM-1506",
+      "to": "ISM-1506",
+      "type": "DISABLED_BY"
+    },
+    {
+      "from": "ISM-0484",
+      "to": "ISM-0484",
+      "type": "IMPLEMENTED_BY"
+    },
+    {
+      "from": "ISM-0484",
+      "to": "ISM-0484",
+      "type": "CONFIGURED_BY"
+    }
+  ]
+}

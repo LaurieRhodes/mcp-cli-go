@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-439",
+  "entities": [
+    {
+      "id": "User authentication",
+      "type": "ACTOR",
+      "text": "User performing authentication to encryption"
+    },
+    {
+      "id": "Encryption functionality",
+      "type": "CONCEPT",
+      "text": "Security feature of ICT equipment/media"
+    },
+    {
+      "id": "ICT equipment/media",
+      "type": "CONCEPT",
+      "text": "Physical devices or storage media"
+    },
+    {
+      "id": "Encrypted data",
+      "type": "CONCEPT",
+      "text": "Protected information accessible after authentication"
+    },
+    {
+      "id": "Original sensitivity/classification",
+      "type": "CONCEPT",
+      "text": "Security level designation for handling"
+    },
+    {
+      "id": "Deauthentication",
+      "type": "PROCESS",
+      "text": "Ending authenticated session"
+    },
+    {
+      "id": "ISM-0462",
+      "type": "CONCEPT",
+      "text": "Control identifier for encryption handling"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "User authentication",
+      "to": "Encryption functionality",
+      "type": "TRIGGERS"
+    },
+    {
+      "from": "Encryption functionality",
+      "to": "Encrypted data",
+      "type": "PROVIDES_ACCESS_TO"
+    },
+    {
+      "from": "ICT equipment/media",
+      "to": "Original sensitivity/classification",
+      "type": "HAS"
+    },
+    {
+      "from": "Encryption functionality",
+      "to": "Encrypted data",
+      "type": "PROVIDES_ACCESS_TO"
+    },
+    {
+      "from": "Deauthentication",
+      "to": "Encryption functionality",
+      "type": "RE-ESTABLISHES_PROTECTION"
+    },
+    {
+      "from": "ISM-0462",
+      "to": "Encryption functionality",
+      "type": "GOVERNS"
+    }
+  ]
+}

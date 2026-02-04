@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-268",
+  "entities": [
+    {
+      "id": "Accountable material",
+      "type": "CONCEPT",
+      "text": "Sensitive information requiring special handling"
+    },
+    {
+      "id": "Media storing accountable material",
+      "type": "CONCEPT",
+      "text": "Storage devices containing sensitive information"
+    },
+    {
+      "id": "Destruction process",
+      "type": "PROCESS",
+      "text": "Secure destruction procedure"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Security-cleared individuals"
+    },
+    {
+      "id": "Destruction certificate",
+      "type": "CONCEPT",
+      "text": "Documentation of completed destruction"
+    },
+    {
+      "id": "ISM-0372",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "ISM-0373",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Media storing accountable material",
+      "to": "Destruction process",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Destruction process",
+      "to": "Personnel",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Personnel",
+      "to": "Destruction certificate",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Personnel",
+      "to": "ISM-0372",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Destruction process",
+      "to": "ISM-0373",
+      "type": "DEFINES"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-507",
+  "entities": [
+    {
+      "id": "Hypertext Transfer Protocol Secure",
+      "type": "CONCEPT",
+      "text": "Encrypted web protocol"
+    },
+    {
+      "id": "Transport Layer Security inspection",
+      "type": "PROCESS",
+      "text": "Security inspection technique"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security controls"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Hypertext Transfer Protocol Secure",
+      "to": "Organisation",
+      "type": "bypasses"
+    },
+    {
+      "from": "Organisation",
+      "to": "Transport Layer Security inspection",
+      "type": "should implement"
+    }
+  ]
+}

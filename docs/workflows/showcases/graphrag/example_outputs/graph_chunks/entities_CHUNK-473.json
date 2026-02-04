@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-473",
+  "entities": [
+    {
+      "id": "IPsec",
+      "type": "CONCEPT",
+      "text": "Network security protocol suite"
+    },
+    {
+      "id": "Authentication Header (AH) protocol",
+      "type": "CONCEPT",
+      "text": "Authentication protocol for IP packets"
+    },
+    {
+      "id": "Encapsulating Security Payload (ESP) protocol",
+      "type": "CONCEPT",
+      "text": "Authentication and encryption protocol for payload"
+    },
+    {
+      "id": "Virtual Private Network (VPN)",
+      "type": "CONCEPT",
+      "text": "Secure network connection style"
+    },
+    {
+      "id": "Internet Key Exchange (IKE) version 2",
+      "type": "CONCEPT",
+      "text": "Key management protocol version 2"
+    },
+    {
+      "id": "ISM-0496",
+      "type": "CONTROL",
+      "text": "Security control standard for IPsec"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "IPsec",
+      "to": "AH protocol",
+      "type": "DEFINES"
+    },
+    {
+      "from": "IPsec",
+      "to": "ESP protocol",
+      "type": "DEFINES"
+    },
+    {
+      "from": "VPN",
+      "to": "authentication",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "VPN",
+      "to": "encryption",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "AH protocol",
+      "to": "authentication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ESP protocol",
+      "to": "authentication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "IKEv2",
+      "to": "doesn't support AH+ESP combined",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ESP",
+      "to": "should be used for IPsec connections",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0496",
+      "to": "requires ESP for IPsec",
+      "type": "REQUIRES"
+    }
+  ]
+}

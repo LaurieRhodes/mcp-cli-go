@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-378",
+  "entities": [
+    {
+      "id": "Australian Government's email protective marking standard",
+      "type": "CONCEPT",
+      "text": "Email protective marking standard for Australian Government"
+    },
+    {
+      "id": "Attorney-General's Department",
+      "type": "ACTOR",
+      "text": "Australian Government department responsible for protective security"
+    },
+    {
+      "id": "Protective Security Policy Framework",
+      "type": "PROCESS",
+      "text": "Framework for protective security policies"
+    },
+    {
+      "id": "Sensitive and classified information policy",
+      "type": "PROCESS",
+      "text": "Policy for handling sensitive and classified information"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Government's email protective marking standard",
+      "to": "Attorney-General's Department",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Attorney-General's Department",
+      "to": "Protective Security Policy Framework",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-417",
+  "entities": [
+    {
+      "id": "802.1X authentication",
+      "type": "CONCEPT",
+      "text": "Security protocol for network access control"
+    },
+    {
+      "id": "supplicants",
+      "type": "ACTOR",
+      "text": "Devices requesting network access"
+    },
+    {
+      "id": "authenticators",
+      "type": "ACTOR",
+      "text": "Network devices controlling access"
+    },
+    {
+      "id": "wireless access points",
+      "type": "ACTOR",
+      "text": "Wireless network infrastructure"
+    },
+    {
+      "id": "authentication servers",
+      "type": "ACTOR",
+      "text": "Servers verifying credentials"
+    },
+    {
+      "id": "ISM-1322",
+      "type": "PROCESS",
+      "text": "Security control requiring evaluation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "802.1X authentication",
+      "to": "supplicants",
+      "type": "DEFINES"
+    },
+    {
+      "from": "802.1X authentication",
+      "to": "authenticators",
+      "type": "DEFINES"
+    },
+    {
+      "from": "802.1X authentication",
+      "to": "wireless access points",
+      "type": "DEFINES"
+    },
+    {
+      "from": "802.1X authentication",
+      "to": "authentication servers",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1322",
+      "to": "supplicants",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1322",
+      "to": "authenticators",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1322",
+      "to": "wireless access points",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1322",
+      "to": "authentication servers",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-309",
+  "entities": [
+    {
+      "id": "credentials",
+      "type": "CONCEPT",
+      "text": "Written down credentials and dedicated devices for authentication"
+    },
+    {
+      "id": "systems",
+      "type": "SYSTEM",
+      "text": "Systems that credentials authenticate to"
+    },
+    {
+      "id": "authentication",
+      "type": "PROCESS",
+      "text": "Process of verifying identity"
+    },
+    {
+      "id": "Windows Defender Credential Guard",
+      "type": "SECURITY_TOOL",
+      "text": "Microsoft security feature for credential protection"
+    },
+    {
+      "id": "hardware security module",
+      "type": "SECURITY_DEVICE",
+      "text": "Physical device for secure credential storage"
+    },
+    {
+      "id": "password manager",
+      "type": "SECURITY_TOOL",
+      "text": "Software for managing and storing credentials"
+    },
+    {
+      "id": "database",
+      "type": "DATABASE",
+      "text": "Data storage system for credentials"
+    },
+    {
+      "id": "cached credentials",
+      "type": "CONCEPT",
+      "text": "Previously stored login credentials for offline access"
+    },
+    {
+      "id": "LSASS",
+      "type": "PROCESS",
+      "text": "Local Security Authority Subsystem Service in Windows"
+    },
+    {
+      "id": "UEFI lock",
+      "type": "SECURITY_FEATURE",
+      "text": "Unified Extensible Firmware Interface security lock"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    },
+    {
+      "from": "Protecting credentials",
+      "to": "Protecting credentials",
+      "type": "HAS_ENTITY"
+    }
+  ]
+}

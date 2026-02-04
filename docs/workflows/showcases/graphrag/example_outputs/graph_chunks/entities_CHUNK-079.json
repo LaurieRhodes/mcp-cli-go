@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-079",
+  "entities": [
+    {
+      "id": "defence-in-depth principle",
+      "type": "CONCEPT",
+      "text": "Security principle using successive layers of protection"
+    },
+    {
+      "id": "security zone",
+      "type": "CONCEPT",
+      "text": "Protected area for facilities containing systems"
+    },
+    {
+      "id": "deployable platforms",
+      "type": "CONCEPT",
+      "text": "Mobile or transportable platforms requiring physical security"
+    },
+    {
+      "id": "physical security certification authority",
+      "type": "ACTOR",
+      "text": "Authority responsible for certifying physical security measures"
+    },
+    {
+      "id": "systems",
+      "type": "CONCEPT",
+      "text": "Computer systems requiring protection"
+    },
+    {
+      "id": "facilities",
+      "type": "CONCEPT",
+      "text": "Buildings or locations housing systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "defence-in-depth principle",
+      "to": "security zone",
+      "type": "systems"
+    },
+    {
+      "from": "security zone",
+      "to": "systems",
+      "type": "facilities"
+    }
+  ]
+}

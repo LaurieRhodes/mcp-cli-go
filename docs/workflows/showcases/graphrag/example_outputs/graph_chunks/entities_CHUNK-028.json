@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-028",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "cyber security communications strategy",
+      "type": "PROCESS",
+      "text": "Strategy for communicating cyber security vision"
+    },
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "The organization where the CISO works"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "cyber security communications strategy",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "cyber security communications strategy",
+      "to": "organisation",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

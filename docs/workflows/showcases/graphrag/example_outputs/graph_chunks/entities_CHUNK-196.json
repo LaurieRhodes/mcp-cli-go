@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-196",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "DEVICE",
+      "text": "Portable computing devices"
+    },
+    {
+      "id": "overseas travel",
+      "type": "ACTIVITY",
+      "text": "International travel"
+    },
+    {
+      "id": "organisation's systems and data",
+      "type": "ASSET",
+      "text": "Organizational IT infrastructure and information"
+    },
+    {
+      "id": "removable media",
+      "type": "DEVICE",
+      "text": "Portable storage devices"
+    },
+    {
+      "id": "high or extreme risk countries",
+      "type": "LOCATION",
+      "text": "Countries with elevated security risks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "0",
+      "to": "113",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "0",
+      "to": "113",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "0",
+      "to": "113",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "0",
+      "to": "113",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "0",
+      "to": "113",
+      "type": "MENTIONED_IN"
+    }
+  ]
+}

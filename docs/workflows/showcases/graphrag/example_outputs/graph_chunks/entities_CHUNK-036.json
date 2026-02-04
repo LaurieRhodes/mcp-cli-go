@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-036",
+  "entities": [
+    {
+      "id": "System owners",
+      "type": "ACTOR",
+      "text": "Responsible for system security"
+    },
+    {
+      "id": "Authorising officer",
+      "type": "ACTOR",
+      "text": "Oversees system authorization"
+    },
+    {
+      "id": "Security status reporting",
+      "type": "PROCESS",
+      "text": "Process of reporting security status"
+    },
+    {
+      "id": "ISM-1587 control",
+      "type": "CONCEPT",
+      "text": "ISM control requiring annual reporting"
+    },
+    {
+      "id": "Annual reporting requirement",
+      "type": "CONCEPT",
+      "text": "Requirement for annual security reporting"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "System owners",
+      "to": "Authorising officer",
+      "type": "REPORTS_TO"
+    },
+    {
+      "from": "Authorising officer",
+      "to": "Security status reporting",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "System owners",
+      "to": "Annual reporting requirement",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Security status reporting",
+      "to": "ISM-1587 control",
+      "type": "DEFINED_BY"
+    }
+  ]
+}

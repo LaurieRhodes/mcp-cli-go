@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-516",
+  "entities": [
+    {
+      "id": "organisation-approved list of allowed file types",
+      "type": "CONCEPT",
+      "text": "List of approved file types to reduce network attack surface"
+    },
+    {
+      "id": "content filter in email gateway",
+      "type": "PROCESS",
+      "text": "Email gateway component that filters content based on allowed file types"
+    },
+    {
+      "id": "Microsoft Office files",
+      "type": "CONCEPT",
+      "text": "Microsoft Office file formats (Word, Excel, PowerPoint, etc.)"
+    },
+    {
+      "id": "Portable Document Format (PDF) files",
+      "type": "CONCEPT",
+      "text": "PDF document format"
+    },
+    {
+      "id": "ISM-0649 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring file type filtering"
+    },
+    {
+      "id": "gateways/CDSs",
+      "type": "PROCESS",
+      "text": "Network components (gateways or content delivery systems) that handle file import/export"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation-approved list of allowed file types",
+      "to": "content filter in email gateway",
+      "type": "DEFINES"
+    },
+    {
+      "from": "content filter in email gateway",
+      "to": "Microsoft Office files",
+      "type": "ALLOWS"
+    },
+    {
+      "from": "content filter in email gateway",
+      "to": "Portable Document Format (PDF) files",
+      "type": "ALLOWS"
+    },
+    {
+      "from": "ISM-0649 control",
+      "to": "gateways/CDSs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "gateways/CDSs",
+      "to": "allowed file types",
+      "type": "FILTERS"
+    }
+  ]
+}

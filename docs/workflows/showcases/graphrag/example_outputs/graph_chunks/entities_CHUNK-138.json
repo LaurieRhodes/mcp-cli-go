@@ -1,0 +1,117 @@
+{
+  "chunk_id": "CHUNK-138",
+  "entities": [
+    {
+      "id": "cabinets",
+      "type": "CONCEPT",
+      "text": "Physical enclosures for cable termination"
+    },
+    {
+      "id": "SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables classified as SECRET"
+    },
+    {
+      "id": "TOP SECRET cables",
+      "type": "CONCEPT",
+      "text": "Cables classified as TOP SECRET"
+    },
+    {
+      "id": "ISM-1098",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for SECRET cable termination"
+    },
+    {
+      "id": "ISM-1100",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for TOP SECRET cable termination"
+    },
+    {
+      "id": "cross-patching",
+      "type": "CONCEPT",
+      "text": "Accidental or deliberate connection between different security levels"
+    },
+    {
+      "id": "inspection",
+      "type": "PROCESS",
+      "text": "Process of examining cables for compliance"
+    },
+    {
+      "id": "cables",
+      "type": "CONCEPT",
+      "text": "Physical cables for data transmission"
+    },
+    {
+      "id": "division plate",
+      "type": "CONCEPT",
+      "text": "Physical barrier separating cables in cabinet"
+    },
+    {
+      "id": "individual cabinet",
+      "type": "CONCEPT",
+      "text": "Dedicated cabinet for specific cable type"
+    },
+    {
+      "id": "TOP SECRET cabinet",
+      "type": "CONCEPT",
+      "text": "Dedicated cabinet for TOP SECRET cables only"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cabinets",
+      "to": "cross-patching",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "SECRET cables",
+      "to": "individual cabinet",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "SECRET cables",
+      "to": "division plate",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "TOP SECRET cables",
+      "to": "TOP SECRET cabinet",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "cabinets",
+      "to": "inspection",
+      "type": "ASSISTS"
+    },
+    {
+      "from": "cross-patching",
+      "to": "prevention",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "inspection",
+      "to": "easier",
+      "type": "ASSISTS"
+    },
+    {
+      "from": "cables",
+      "to": "cables",
+      "type": "TERMINATED_IN"
+    },
+    {
+      "from": "division plate",
+      "to": "SECRET cables",
+      "type": "SEPARATES"
+    },
+    {
+      "from": "individual cabinet",
+      "to": "SECRET cables",
+      "type": "TERMINATED_IN"
+    },
+    {
+      "from": "TOP SECRET cabinet",
+      "to": "TOP SECRET cables",
+      "type": "TERMINATED_IN"
+    }
+  ]
+}

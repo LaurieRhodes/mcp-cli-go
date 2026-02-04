@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-089",
+  "entities": [
+    {
+      "id": "Online services",
+      "type": "SERVICE",
+      "text": "Email, internet forums, messaging apps, social media direct messaging"
+    },
+    {
+      "id": "Personnel",
+      "type": "PEOPLE",
+      "text": "Organizational staff members"
+    },
+    {
+      "id": "Adversary",
+      "type": "THREAT_ACTOR",
+      "text": "Malicious actor attempting to elicit information"
+    },
+    {
+      "id": "Sensitive information",
+      "type": "INFORMATION",
+      "text": "Confidential data requiring protection"
+    },
+    {
+      "id": "Classified information",
+      "type": "INFORMATION",
+      "text": "Official government or organizational secrets"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0817",
+      "to": "Reporting suspicious contact via online services",
+      "type": "DESCRIBED_IN"
+    },
+    {
+      "from": "ISM-0817",
+      "to": "Reporting suspicious contact via online services",
+      "type": "ADVISED_ABOUT"
+    },
+    {
+      "from": "ISM-0817",
+      "to": "Reporting suspicious contact via online services",
+      "type": "USED_BY"
+    },
+    {
+      "from": "ISM-0817",
+      "to": "Reporting suspicious contact via online services",
+      "type": "ATTEMPTED_TO_ELICIT"
+    },
+    {
+      "from": "ISM-0817",
+      "to": "Reporting suspicious contact via online services",
+      "type": "ATTEMPTED_TO_ELICIT"
+    }
+  ]
+}

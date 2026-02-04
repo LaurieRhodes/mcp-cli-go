@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-372",
+  "entities": [
+    {
+      "id": "Email services",
+      "type": "CONCEPT",
+      "text": "Email communication systems"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing the policy"
+    },
+    {
+      "id": "Email usage policy",
+      "type": "PROCESS",
+      "text": "Policy development and maintenance process"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "Email usage policy",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Email usage policy",
+      "to": "Email services",
+      "type": "GOVERNS"
+    }
+  ]
+}

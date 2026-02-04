@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-325",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "Entity that develops and maintains software registers"
+    },
+    {
+      "id": "software registers",
+      "type": "REGISTER",
+      "text": "Registers containing version and patch history information"
+    },
+    {
+      "id": "workstations",
+      "type": "DEVICE",
+      "text": "Computing devices used by individuals"
+    },
+    {
+      "id": "servers",
+      "type": "DEVICE",
+      "text": "Computing devices providing services"
+    },
+    {
+      "id": "network devices",
+      "type": "DEVICE",
+      "text": "Devices that connect and manage network traffic"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "EQUIPMENT",
+      "text": "Information and Communication Technology equipment"
+    },
+    {
+      "id": "applications",
+      "type": "SOFTWARE",
+      "text": "Programs and applications installed on systems"
+    },
+    {
+      "id": "drivers",
+      "type": "SOFTWARE",
+      "text": "Software that controls hardware devices"
+    },
+    {
+      "id": "operating systems",
+      "type": "SOFTWARE",
+      "text": "Core system software managing hardware and resources"
+    },
+    {
+      "id": "firmware",
+      "type": "SOFTWARE",
+      "text": "Low-level software embedded in hardware"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "0",
+      "to": "0",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "HAS_REGISTER"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "HAS_REGISTER"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "HAS_REGISTER"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "HAS_REGISTER"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "TRACKED_IN"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "TRACKED_IN"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "TRACKED_IN"
+    },
+    {
+      "from": "0",
+      "to": "0",
+      "type": "TRACKED_IN"
+    }
+  ]
+}

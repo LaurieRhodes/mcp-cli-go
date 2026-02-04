@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-261",
+  "entities": [
+    {
+      "id": "Media destruction processes",
+      "type": "CONCEPT",
+      "text": "Processes for destroying media"
+    },
+    {
+      "id": "Media destruction procedures",
+      "type": "CONCEPT",
+      "text": "Procedures for destroying media"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "The organization implementing media destruction"
+    },
+    {
+      "id": "Media destruction",
+      "type": "PROCESS",
+      "text": "The act of destroying media"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Media destruction processes",
+      "to": "Organisation",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Media destruction procedures",
+      "to": "Media destruction",
+      "type": "REQUIRES"
+    }
+  ]
+}

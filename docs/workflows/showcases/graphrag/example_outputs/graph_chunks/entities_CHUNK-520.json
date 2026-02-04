@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-520",
+  "entities": [
+    {
+      "id": "integrity protection",
+      "type": "CONCEPT",
+      "text": "Methods like digital signatures or cryptographic checksums that protect file integrity"
+    },
+    {
+      "id": "content filters",
+      "type": "PROCESS",
+      "text": "Systems that verify file integrity during processing"
+    },
+    {
+      "id": "gateways/CDSs",
+      "type": "PROCESS",
+      "text": "Network gateways or content delivery systems that handle file transfers"
+    },
+    {
+      "id": "ISM-0677",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control for file integrity validation"
+    },
+    {
+      "id": "file integrity validation",
+      "type": "PROCESS",
+      "text": "The process of checking file integrity through verification methods"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "integrity protection",
+      "to": "content filters",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "gateways/CDSs",
+      "to": "file integrity validation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0677",
+      "to": "file integrity validation",
+      "type": "DEFINES"
+    }
+  ]
+}

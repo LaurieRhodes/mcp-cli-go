@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-413",
+  "entities": [
+    {
+      "id": "MAC address",
+      "type": "CONCEPT",
+      "text": "Unique identifier for network devices"
+    },
+    {
+      "id": "MAC address filtering",
+      "type": "PROCESS",
+      "text": "Security mechanism to control network access"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting unauthorized access"
+    },
+    {
+      "id": "Wireless networks",
+      "type": "CONCEPT",
+      "text": "Network infrastructure using wireless communication"
+    },
+    {
+      "id": "Rogue devices",
+      "type": "CONCEPT",
+      "text": "Unauthorized or malicious devices"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "MAC address filtering",
+      "to": "MAC address",
+      "type": "USES"
+    },
+    {
+      "from": "MAC address filtering",
+      "to": "Wireless networks",
+      "type": "CONTROLS_ACCESS_TO"
+    },
+    {
+      "from": "Adversary",
+      "to": "MAC address",
+      "type": "CAN_DETERMINE"
+    },
+    {
+      "from": "MAC address filtering",
+      "to": "Rogue devices",
+      "type": "PREVENTS_ACCESS"
+    }
+  ]
+}

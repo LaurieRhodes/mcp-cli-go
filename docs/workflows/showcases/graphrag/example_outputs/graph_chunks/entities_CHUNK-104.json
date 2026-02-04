@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-104",
+  "entities": [
+    {
+      "id": "break glass account",
+      "type": "CONCEPT",
+      "text": "Emergency access account with highest privileges"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing emergency access"
+    },
+    {
+      "id": "custodian",
+      "type": "ACTOR",
+      "text": "Person responsible for break glass account"
+    },
+    {
+      "id": "emergency access method",
+      "type": "PROCESS",
+      "text": "Documented method for emergency system access"
+    },
+    {
+      "id": "authentication processes",
+      "type": "PROCESS",
+      "text": "Normal authentication procedures"
+    },
+    {
+      "id": "administrative activities",
+      "type": "PROCESS",
+      "text": "Activities performed using break glass accounts"
+    },
+    {
+      "id": "break glass event logs",
+      "type": "CONCEPT",
+      "text": "Logs capturing break glass account usage"
+    },
+    {
+      "id": "credentials",
+      "type": "CONCEPT",
+      "text": "Authentication credentials for break glass accounts"
+    },
+    {
+      "id": "password managers",
+      "type": "CONCEPT",
+      "text": "Tools for automated credential management"
+    },
+    {
+      "id": "ISM controls",
+      "type": "CONCEPT",
+      "text": "Information Security Manual controls governing emergency access"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "break glass account",
+      "type": "break glass account"
+    },
+    {
+      "from": "break glass account",
+      "to": "emergency access method",
+      "type": "credentials"
+    }
+  ]
+}

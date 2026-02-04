@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-066",
+  "entities": [
+    {
+      "id": "outsourced cloud services",
+      "type": "CONCEPT",
+      "text": "Cloud services provided by external vendors"
+    },
+    {
+      "id": "outsourced gateway services",
+      "type": "CONCEPT",
+      "text": "Gateway services provided by external vendors"
+    },
+    {
+      "id": "managed service providers",
+      "type": "ACTOR",
+      "text": "External service providers managing IT services"
+    },
+    {
+      "id": "cloud computing",
+      "type": "CONCEPT",
+      "text": "Computing services delivered over the internet"
+    },
+    {
+      "id": "cloud services",
+      "type": "CONCEPT",
+      "text": "Various cloud-based services"
+    },
+    {
+      "id": "cloud service providers",
+      "type": "ACTOR",
+      "text": "Organizations providing cloud services"
+    },
+    {
+      "id": "IRAP",
+      "type": "PROCESS",
+      "text": "Information Security Registered Assessors Program"
+    },
+    {
+      "id": "secure cloud computing",
+      "type": "CONCEPT",
+      "text": "Cloud computing with security measures"
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security breaches or events"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "outsourced cloud services",
+      "to": "Guidelines for Networking",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "outsourced gateway services",
+      "to": "Guidelines for Gateways",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "managed service providers",
+      "to": "ACSC publications",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "cloud computing",
+      "to": "NIST SP 800-145",
+      "type": "DEFINES"
+    },
+    {
+      "from": "cloud services",
+      "to": "ACSC publications",
+      "type": "SECURES"
+    },
+    {
+      "from": "cloud service providers",
+      "to": "ACSC publications",
+      "type": "ASSESSES"
+    },
+    {
+      "from": "IRAP",
+      "to": "ACSC",
+      "type": "MANAGES"
+    },
+    {
+      "from": "secure cloud computing",
+      "to": "DTA Secure Cloud Strategy",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "cyber security incidents",
+      "to": "Guidelines for Cyber Security Incidents",
+      "type": "REPORTS"
+    }
+  ]
+}

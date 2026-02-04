@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-106",
+  "entities": [
+    {
+      "id": "Attorney-General's Department",
+      "type": "ACTOR",
+      "text": "Government department responsible for protective security"
+    },
+    {
+      "id": "Protective Security Policy Framework",
+      "type": "CONCEPT",
+      "text": "Framework for security policy and access controls"
+    },
+    {
+      "id": "Government Security Committee",
+      "type": "ACTOR",
+      "text": "Committee overseeing government security"
+    },
+    {
+      "id": "Australian Government Security Caveat Guidelines",
+      "type": "CONCEPT",
+      "text": "Guidelines for handling sensitive government information"
+    },
+    {
+      "id": "Protective Security Policy GovTEAMS community",
+      "type": "ACTOR",
+      "text": "Online community for security policy"
+    },
+    {
+      "id": "Australian Security Intelligence Organisation",
+      "type": "ACTOR",
+      "text": "National security intelligence agency"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Restricting Administrative Privileges publication",
+      "type": "CONCEPT",
+      "text": "Publication on restricting administrative privileges"
+    },
+    {
+      "id": "Guidelines for System Management",
+      "type": "CONCEPT",
+      "text": "Guidelines for managing IT systems"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "CONCEPT",
+      "text": "Guidelines for monitoring IT systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Attorney-General's Department",
+      "to": "Protective Security Policy Framework",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Government Security Committee",
+      "to": "Australian Government Security Caveat Guidelines",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ACSC",
+      "to": "Restricting Administrative Privileges publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Protective Security Policy Framework",
+      "to": "Access to information policy",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Guidelines for System Management",
+      "to": "system administration section",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Guidelines for System Monitoring",
+      "to": "event logging and monitoring section",
+      "type": "CONTAINS"
+    }
+  ]
+}

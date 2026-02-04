@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-356",
+  "entities": [
+    {
+      "id": "Web browser-based controls",
+      "type": "CONCEPT",
+      "text": "Security controls implemented via browser headers"
+    },
+    {
+      "id": "Content-Security-Policy",
+      "type": "CONCEPT",
+      "text": "Security policy for content restrictions"
+    },
+    {
+      "id": "HSTS",
+      "type": "CONCEPT",
+      "text": "HTTP Strict Transport Security for secure connections"
+    },
+    {
+      "id": "X-Frame-Options",
+      "type": "CONCEPT",
+      "text": "Frame embedding restrictions"
+    },
+    {
+      "id": "Web applications",
+      "type": "ACTOR",
+      "text": "Applications that serve web content"
+    },
+    {
+      "id": "Security policy in response headers",
+      "type": "PROCESS",
+      "text": "Policy settings in HTTP response headers"
+    },
+    {
+      "id": "ISM-1424",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Web browser-based controls",
+      "to": "Content-Security-Policy",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Web applications",
+      "to": "HSTS",
+      "type": "REQUIRES"
+    }
+  ]
+}

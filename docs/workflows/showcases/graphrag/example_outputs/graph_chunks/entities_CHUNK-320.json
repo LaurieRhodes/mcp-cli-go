@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-320",
+  "entities": [
+    {
+      "id": "system administration processes",
+      "type": "CONCEPT",
+      "text": "Processes for managing system administration"
+    },
+    {
+      "id": "system administration procedures",
+      "type": "CONCEPT",
+      "text": "Procedures supporting system administration processes"
+    },
+    {
+      "id": "system administrators",
+      "type": "ACTOR",
+      "text": "Individuals responsible for system administration"
+    },
+    {
+      "id": "administrative activities",
+      "type": "PROCESS",
+      "text": "Activities performed by system administrators"
+    },
+    {
+      "id": "change management processes",
+      "type": "PROCESS",
+      "text": "Processes for managing changes to systems"
+    },
+    {
+      "id": "security documentation",
+      "type": "CONCEPT",
+      "text": "Documentation related to system security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "system administration processes",
+      "to": "system administration procedures",
+      "type": "DEFINES"
+    },
+    {
+      "from": "system administrators",
+      "to": "administrative activities",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "administrative activities",
+      "to": "change management processes",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "system administrators",
+      "to": "security documentation",
+      "type": "MAINTAINS"
+    }
+  ]
+}

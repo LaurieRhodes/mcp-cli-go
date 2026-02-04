@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-398",
+  "entities": [
+    {
+      "id": "security measures",
+      "type": "CONCEPT",
+      "text": "Protective controls implemented for network security"
+    },
+    {
+      "id": "network management traffic",
+      "type": "CONCEPT",
+      "text": "Specialized traffic used for managing network infrastructure"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious entity attempting unauthorized access"
+    },
+    {
+      "id": "ISM-1006",
+      "type": "CONCEPT",
+      "text": "Specific security control identifier from Information Security Manual"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "security measures",
+      "to": "security measures",
+      "type": "ISM-1006"
+    },
+    {
+      "from": "network management traffic",
+      "to": "adversary",
+      "type": "security measures"
+    }
+  ]
+}

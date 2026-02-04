@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-020",
+  "entities": [
+    {
+      "id": "cyber security principles",
+      "type": "CONCEPT",
+      "text": "A set of security guidelines or standards"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "An entity implementing security principles"
+    },
+    {
+      "id": "maturity model",
+      "type": "PROCESS",
+      "text": "A framework for assessing implementation levels"
+    },
+    {
+      "id": "implementation",
+      "type": "PROCESS",
+      "text": "The act of putting principles into practice"
+    },
+    {
+      "id": "assessment",
+      "type": "PROCESS",
+      "text": "The evaluation of implementation effectiveness"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "organisation",
+      "type": "maturity model"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "maturity model",
+      "type": "cyber security principles"
+    }
+  ]
+}

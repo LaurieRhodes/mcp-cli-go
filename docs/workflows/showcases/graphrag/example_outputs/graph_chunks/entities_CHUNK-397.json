@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-397",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Hardware and software systems including servers and network devices"
+    },
+    {
+      "id": "Networked management interfaces",
+      "type": "CONCEPT",
+      "text": "Administrative access points for managing ICT equipment"
+    },
+    {
+      "id": "Internet",
+      "type": "CONCEPT",
+      "text": "Public global network"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious entity seeking to exploit vulnerabilities"
+    },
+    {
+      "id": "Compensating controls",
+      "type": "PROCESS",
+      "text": "Additional security measures when ideal controls aren't possible"
+    },
+    {
+      "id": "Administrative infrastructure",
+      "type": "CONCEPT",
+      "text": "Segregated management systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "Networked management interfaces",
+      "type": "HAS"
+    },
+    {
+      "from": "Networked management interfaces",
+      "to": "Internet",
+      "type": "SHOULD_NOT_EXPOSE"
+    }
+  ]
+}

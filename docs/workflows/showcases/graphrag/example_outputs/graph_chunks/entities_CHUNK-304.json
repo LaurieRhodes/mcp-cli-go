@@ -1,0 +1,117 @@
+{
+  "chunk_id": "CHUNK-304",
+  "entities": [
+    {
+      "id": "Multi-factor authentication",
+      "type": "CONCEPT",
+      "text": "Authentication using two or more different factors"
+    },
+    {
+      "id": "Memorised secrets",
+      "type": "CONCEPT",
+      "text": "Passwords or PINs that users remember"
+    },
+    {
+      "id": "Privileged users",
+      "type": "ROLE",
+      "text": "Users with elevated system access"
+    },
+    {
+      "id": "Remote access solutions",
+      "type": "SYSTEM",
+      "text": "Systems allowing remote network access"
+    },
+    {
+      "id": "Important data repositories",
+      "type": "SYSTEM",
+      "text": "Storage systems containing critical data"
+    },
+    {
+      "id": "Jump server authentication",
+      "type": "SYSTEM",
+      "text": "Server used as intermediary for administrative access"
+    },
+    {
+      "id": "Biometrics",
+      "type": "TECHNOLOGY",
+      "text": "Biological characteristics for authentication"
+    },
+    {
+      "id": "Short Message Service",
+      "type": "TECHNOLOGY",
+      "text": "SMS text messaging service"
+    },
+    {
+      "id": "Voice over Internet Protocol",
+      "type": "TECHNOLOGY",
+      "text": "Internet-based voice communication"
+    },
+    {
+      "id": "Phishing-resistant multi-factor authentication",
+      "type": "CONCEPT",
+      "text": "MFA resistant to real-time phishing attacks"
+    },
+    {
+      "id": "Multi-factor authentication event logs",
+      "type": "SYSTEM",
+      "text": "Logs recording MFA authentication events"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0974",
+      "to": "ISM-1684",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1560",
+      "to": "ISM-1561",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1173",
+      "to": "ISM-1504",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1173",
+      "to": "ISM-1679",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1505",
+      "to": "ISM-1680",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0974",
+      "to": "ISM-1681",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0974",
+      "to": "ISM-1505",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0974",
+      "to": "ISM-1401",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0974",
+      "to": "ISM-1682",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1682",
+      "to": "ISM-1683",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-1683",
+      "to": "ISM-1684",
+      "type": "CONTROL"
+    }
+  ]
+}

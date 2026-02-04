@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-265",
+  "entities": [
+    {
+      "id": "accounting and verification processes",
+      "type": "PROCESS",
+      "text": "Normal accounting and verification processes"
+    },
+    {
+      "id": "destruction method",
+      "type": "METHOD",
+      "text": "Destruction method used"
+    },
+    {
+      "id": "classified waste",
+      "type": "WASTE_TYPE",
+      "text": "Classified waste"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "SECRET",
+      "to": "media waste particles",
+      "type": "EXEMPT_FROM"
+    },
+    {
+      "from": "TOP SECRET",
+      "to": "media waste particles",
+      "type": "APPLIED_TO"
+    },
+    {
+      "from": "SECRET",
+      "to": "media waste particles",
+      "type": "STORED_AS"
+    }
+  ]
+}

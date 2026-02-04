@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-444",
+  "entities": [
+    {
+      "id": "Algorithm",
+      "type": "CONCEPT",
+      "text": "Cryptographic algorithms in general"
+    },
+    {
+      "id": "SHA-2",
+      "type": "CONCEPT",
+      "text": "Secure Hashing Algorithm 2"
+    },
+    {
+      "id": "AES",
+      "type": "CONCEPT",
+      "text": "Advanced Encryption Standard"
+    },
+    {
+      "id": "RSA",
+      "type": "CONCEPT",
+      "text": "RSA encryption algorithm"
+    },
+    {
+      "id": "CNSA 1.0",
+      "type": "CONCEPT",
+      "text": "Commercial National Security Algorithm Suite"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Algorithm",
+      "to": "SHA-2",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Algorithm",
+      "to": "AES",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Algorithm",
+      "to": "RSA",
+      "type": "MENTIONS"
+    },
+    {
+      "from": "Algorithm",
+      "to": "CNSA 1.0",
+      "type": "REFERENCES"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-321",
+  "entities": [
+    {
+      "id": "privileged accounts",
+      "type": "CONCEPT",
+      "text": "Accounts with elevated access rights"
+    },
+    {
+      "id": "unprivileged accounts",
+      "type": "CONCEPT",
+      "text": "Accounts with standard user rights"
+    },
+    {
+      "id": "system administrators",
+      "type": "ACTOR",
+      "text": "IT staff responsible for system management"
+    },
+    {
+      "id": "privileged operating environments",
+      "type": "CONCEPT",
+      "text": "Dedicated environment for privileged operations"
+    },
+    {
+      "id": "unprivileged operating environments",
+      "type": "CONCEPT",
+      "text": "Standard user environment for daily tasks"
+    },
+    {
+      "id": "virtualisation-based solution",
+      "type": "CONCEPT",
+      "text": "Virtual machine or container-based separation approach"
+    },
+    {
+      "id": "physical workstations",
+      "type": "CONCEPT",
+      "text": "Physical computer hardware separation"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting to compromise systems"
+    },
+    {
+      "id": "administrative activities",
+      "type": "PROCESS",
+      "text": "Tasks performed by system administrators with elevated privileges"
+    },
+    {
+      "id": "local administrator accounts",
+      "type": "CONCEPT",
+      "text": "Built-in administrator accounts on individual systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "privileged accounts",
+      "to": "system administrators",
+      "type": "system administrators"
+    },
+    {
+      "from": "system administrators",
+      "to": "privileged operating environments",
+      "type": "unprivileged operating environments"
+    }
+  ]
+}

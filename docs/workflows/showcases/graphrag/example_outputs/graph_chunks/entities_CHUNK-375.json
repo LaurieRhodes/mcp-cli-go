@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-375",
+  "entities": [
+    {
+      "id": "protective marking",
+      "type": "TOOL",
+      "text": "Tools for applying protective markings"
+    },
+    {
+      "id": "email content filters",
+      "type": "SYSTEM",
+      "text": "Filters that check email protective markings"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0271",
+      "to": "ISM-1089",
+      "type": "CONTROLS"
+    },
+    {
+      "from": "ISM-0271",
+      "to": "ISM-1089",
+      "type": "CONTROLS"
+    }
+  ]
+}

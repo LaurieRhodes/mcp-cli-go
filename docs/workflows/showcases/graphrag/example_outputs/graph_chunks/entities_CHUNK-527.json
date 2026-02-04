@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-527",
+  "entities": [
+    {
+      "id": "manually importing data",
+      "type": "PROCESS",
+      "text": "Importing data manually to systems"
+    },
+    {
+      "id": "removable media",
+      "type": "DEVICE",
+      "text": "Storage media like USB drives"
+    },
+    {
+      "id": "malicious content",
+      "type": "THREAT",
+      "text": "Harmful software or code"
+    },
+    {
+      "id": "active content",
+      "type": "THREAT",
+      "text": "Executable code that can run"
+    },
+    {
+      "id": "security checks",
+      "type": "PROCESS",
+      "text": "Verification processes for security"
+    },
+    {
+      "id": "quarantine",
+      "type": "PROCESS",
+      "text": "Isolation of suspicious data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0657",
+      "to": "ISM-1778",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0657",
+      "to": "ISM-1778",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0657",
+      "to": "ISM-1778",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0657",
+      "to": "ISM-1778",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0657",
+      "to": "ISM-1778",
+      "type": "CONTROL"
+    },
+    {
+      "from": "ISM-0657",
+      "to": "ISM-1778",
+      "type": "CONTROL"
+    }
+  ]
+}

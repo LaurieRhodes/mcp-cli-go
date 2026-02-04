@@ -1,0 +1,27 @@
+{
+  "chunk_id": "CHUNK-018",
+  "entities": [
+    {
+      "id": "detect principles",
+      "type": "CONCEPT",
+      "text": "Set of principles related to detection"
+    },
+    {
+      "id": "principles",
+      "type": "CONCEPT",
+      "text": "General principles or guidelines"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "detect principles",
+      "to": "detect principles",
+      "type": "DEFINES"
+    },
+    {
+      "from": "principles",
+      "to": "principles",
+      "type": "IS_A"
+    }
+  ]
+}

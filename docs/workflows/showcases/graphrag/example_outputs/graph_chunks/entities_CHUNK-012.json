@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-012",
+  "entities": [
+    {
+      "id": "authorising officer",
+      "type": "ACTOR",
+      "text": "Person responsible for granting authorization"
+    },
+    {
+      "id": "system owner",
+      "type": "ACTOR",
+      "text": "Person responsible for the system"
+    },
+    {
+      "id": "authorization package",
+      "type": "CONCEPT",
+      "text": "Documentation required for authorization decision"
+    },
+    {
+      "id": "security risks",
+      "type": "CONCEPT",
+      "text": "Risks associated with system operation"
+    },
+    {
+      "id": "authorization to operate",
+      "type": "PROCESS",
+      "text": "Formal approval for system operation"
+    },
+    {
+      "id": "Director-General ASD",
+      "type": "ACTOR",
+      "text": "Authorizing officer for TOP SECRET systems"
+    },
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "remediation actions",
+      "type": "PROCESS",
+      "text": "Actions to address security deficiencies"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "authorising officer",
+      "to": "authorization to operate",
+      "type": "authorization to operate"
+    },
+    {
+      "from": "system owner",
+      "to": "authorization package",
+      "type": "security risks"
+    }
+  ]
+}

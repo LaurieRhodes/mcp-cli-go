@@ -1,0 +1,107 @@
+{
+  "chunk_id": "CHUNK-529",
+  "entities": [
+    {
+      "id": "manual data export",
+      "type": "PROCESS",
+      "text": "Process of manually exporting data from systems"
+    },
+    {
+      "id": "protective markings",
+      "type": "CONCEPT",
+      "text": "Security classifications or markings on data"
+    },
+    {
+      "id": "data spill",
+      "type": "CONCEPT",
+      "text": "Unauthorized disclosure of sensitive data"
+    },
+    {
+      "id": "SECRET systems",
+      "type": "CONCEPT",
+      "text": "Systems handling SECRET classified information"
+    },
+    {
+      "id": "TOP SECRET systems",
+      "type": "CONCEPT",
+      "text": "Systems handling TOP SECRET classified information"
+    },
+    {
+      "id": "digital signatures",
+      "type": "CONCEPT",
+      "text": "Cryptographic signatures for data integrity"
+    },
+    {
+      "id": "keyword checks",
+      "type": "PROCESS",
+      "text": "Scanning for specific keywords in textual data"
+    },
+    {
+      "id": "security checks",
+      "type": "PROCESS",
+      "text": "Security validation procedures"
+    },
+    {
+      "id": "data quarantine",
+      "type": "PROCESS",
+      "text": "Isolating data pending review"
+    },
+    {
+      "id": "ISM-1187",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "ISM-0669",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "ISM-1779",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "manual data export",
+      "to": "protective markings",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "manual data export",
+      "to": "data spill",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "SECRET systems",
+      "to": "digital signatures",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "TOP SECRET systems",
+      "to": "digital signatures",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "SECRET systems",
+      "to": "keyword checks",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "TOP SECRET systems",
+      "to": "keyword checks",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "security checks",
+      "to": "data quarantine",
+      "type": "TRIGGERS"
+    },
+    {
+      "from": "data quarantine",
+      "to": "review",
+      "type": "PRECEDES"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-437",
+  "entities": [
+    {
+      "id": "encryption",
+      "type": "CONCEPT",
+      "text": "Protection of data from unauthorised access or manipulation"
+    },
+    {
+      "id": "cryptographic equipment",
+      "type": "CONCEPT",
+      "text": "Hardware/software for cryptographic operations"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Protocol",
+      "type": "CONCEPT",
+      "text": "Approved cryptographic protocol for data protection"
+    },
+    {
+      "id": "Common Criteria evaluation",
+      "type": "PROCESS",
+      "text": "Evaluation process for cryptographic equipment/software"
+    },
+    {
+      "id": "ASD-approved HACE",
+      "type": "CONCEPT",
+      "text": "High Assurance Cryptographic Equipment for SECRET/TOP SECRET"
+    },
+    {
+      "id": "network infrastructure",
+      "type": "CONCEPT",
+      "text": "Infrastructure for data communication"
+    },
+    {
+      "id": "data sensitivity",
+      "type": "CONCEPT",
+      "text": "Classification level of data (OFFICIAL, PROTECTED, SECRET, TOP SECRET)"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "encryption",
+      "to": "cryptographic equipment",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "network infrastructure",
+      "to": "data sensitivity",
+      "type": "DEPENDS_ON"
+    }
+  ]
+}

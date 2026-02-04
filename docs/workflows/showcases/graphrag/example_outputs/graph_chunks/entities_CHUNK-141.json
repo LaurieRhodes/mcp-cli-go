@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-141",
+  "entities": [
+    {
+      "id": "Audio secure rooms",
+      "type": "CONCEPT",
+      "text": "Physical security infrastructure designed to prevent audio conversations from being overheard"
+    },
+    {
+      "id": "Australian Security Intelligence Organisation",
+      "type": "ACTOR",
+      "text": "Government intelligence agency responsible for security consultation"
+    },
+    {
+      "id": "TOP SECRET audio secure rooms",
+      "type": "CONCEPT",
+      "text": "Specific classification level of audio secure rooms requiring highest protection"
+    },
+    {
+      "id": "ISM-0198",
+      "type": "PROCESS",
+      "text": "Security control governing TOP SECRET audio secure room requirements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Audio secure rooms",
+      "to": "Australian Security Intelligence Organisation",
+      "type": "ISM-0198"
+    },
+    {
+      "from": "TOP SECRET audio secure rooms",
+      "to": "TOP SECRET audio secure rooms",
+      "type": "TOP SECRET audio secure rooms"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-352",
+  "entities": [
+    {
+      "id": "HTTPS",
+      "type": "PROTOCOL",
+      "text": "Hypertext Transfer Protocol Secure"
+    },
+    {
+      "id": "TLS",
+      "type": "PROTOCOL",
+      "text": "Transport Layer Security encryption"
+    },
+    {
+      "id": "Web applications",
+      "type": "SYSTEM",
+      "text": "Web-based software applications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "HTTPS",
+      "to": "HTTPS",
+      "type": "SECURES"
+    },
+    {
+      "from": "TLS",
+      "to": "Web applications",
+      "type": "PROTECTS"
+    }
+  ]
+}

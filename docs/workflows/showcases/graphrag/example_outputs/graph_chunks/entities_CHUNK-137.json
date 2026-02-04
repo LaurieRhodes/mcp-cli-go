@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-137",
+  "entities": [
+    {
+      "id": "cable reticulation systems",
+      "type": "CONCEPT",
+      "text": "Systems for routing cables"
+    },
+    {
+      "id": "cabinets",
+      "type": "CONCEPT",
+      "text": "Storage units for equipment"
+    },
+    {
+      "id": "unauthorised modifications",
+      "type": "CONCEPT",
+      "text": "Unauthorized changes to systems"
+    },
+    {
+      "id": "tampering",
+      "type": "CONCEPT",
+      "text": "Interference with systems"
+    },
+    {
+      "id": "inspection",
+      "type": "PROCESS",
+      "text": "Process of examining cables"
+    },
+    {
+      "id": "server rooms",
+      "type": "LOCATION",
+      "text": "Rooms containing servers"
+    },
+    {
+      "id": "communications rooms",
+      "type": "LOCATION",
+      "text": "Rooms for communications"
+    },
+    {
+      "id": "TOP SECRET areas",
+      "type": "LOCATION",
+      "text": "Areas with highest security classification"
+    },
+    {
+      "id": "boundary",
+      "type": "CONCEPT",
+      "text": "Edge or perimeter of cabinet"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cable reticulation systems",
+      "to": "cabinets",
+      "type": "cable reticulation systems"
+    },
+    {
+      "from": "cabinets",
+      "to": "unauthorised modifications",
+      "type": "tampering"
+    }
+  ]
+}

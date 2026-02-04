@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-026",
+  "entities": [
+    {
+      "id": "CISO",
+      "type": "ACTOR",
+      "text": "Chief Information Security Officer"
+    },
+    {
+      "id": "Cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security incidents within the organization"
+    },
+    {
+      "id": "Incident response",
+      "type": "PROCESS",
+      "text": "Process of responding to security incidents"
+    },
+    {
+      "id": "Crisis management",
+      "type": "PROCESS",
+      "text": "Managing major security incidents"
+    },
+    {
+      "id": "Senior executive/Board",
+      "type": "ACTOR",
+      "text": "Organization's senior leadership"
+    },
+    {
+      "id": "Internal teams",
+      "type": "ACTOR",
+      "text": "Internal organizational teams"
+    },
+    {
+      "id": "External stakeholders",
+      "type": "ACTOR",
+      "text": "External parties involved"
+    },
+    {
+      "id": "ISM-0733",
+      "type": "CONTROL",
+      "text": "ISM control requiring CISO awareness"
+    },
+    {
+      "id": "ISM-1618",
+      "type": "CONTROL",
+      "text": "ISM control requiring CISO oversight"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CISO",
+      "to": "CISO",
+      "type": "CISO"
+    },
+    {
+      "from": "Cyber security incidents",
+      "to": "Incident response",
+      "type": "Crisis management"
+    }
+  ]
+}

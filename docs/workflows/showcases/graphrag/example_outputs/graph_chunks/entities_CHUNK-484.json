@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-484",
+  "entities": [
+    {
+      "id": "Gateways",
+      "type": "SYSTEM",
+      "text": "Network devices that connect different networks"
+    },
+    {
+      "id": "Administrative activities",
+      "type": "ACTIVITY",
+      "text": "Activities performed to manage gateways"
+    },
+    {
+      "id": "Secure path",
+      "type": "REQUIREMENT",
+      "text": "Isolated communication path for management"
+    },
+    {
+      "id": "Connected networks",
+      "type": "NETWORK",
+      "text": "Networks connected through gateways"
+    },
+    {
+      "id": "Security domains",
+      "type": "DOMAIN",
+      "text": "Different security classifications"
+    },
+    {
+      "id": "System administrators",
+      "type": "ROLE",
+      "text": "Personnel responsible for gateway management"
+    },
+    {
+      "id": "ISM-1774",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for gateway management"
+    },
+    {
+      "id": "ISM-0629",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for gateway security domains"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "MANAGED_VIA"
+    },
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "PERFORMED_ON"
+    },
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "REQUIRED_FOR"
+    },
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "CONNECTED_TO"
+    },
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "CLASSIFIED_AS"
+    },
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "RESPONSIBLE_FOR"
+    },
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "APPLIES_TO"
+    },
+    {
+      "from": "System administration of gateways",
+      "to": "System administration of gateways",
+      "type": "APPLIES_TO"
+    }
+  ]
+}

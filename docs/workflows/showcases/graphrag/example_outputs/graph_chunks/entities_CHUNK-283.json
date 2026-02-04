@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-283",
+  "entities": [
+    {
+      "id": "Device access control software",
+      "type": "CONCEPT",
+      "text": "Software used to control device access"
+    },
+    {
+      "id": "Removable media and mobile devices",
+      "type": "CONCEPT",
+      "text": "External storage and mobile devices"
+    },
+    {
+      "id": "Workstations and servers",
+      "type": "CONCEPT",
+      "text": "Computer systems"
+    },
+    {
+      "id": "External communication interfaces",
+      "type": "CONCEPT",
+      "text": "Hardware interfaces for device connections"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor"
+    },
+    {
+      "id": "Direct Memory Access (DMA)",
+      "type": "CONCEPT",
+      "text": "Memory access capability"
+    },
+    {
+      "id": "Encryption keys",
+      "type": "CONCEPT",
+      "text": "Cryptographic keys"
+    },
+    {
+      "id": "Malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful software"
+    },
+    {
+      "id": "FireWire, ExpressCard, Thunderbolt",
+      "type": "CONCEPT",
+      "text": "Specific DMA-capable interfaces"
+    },
+    {
+      "id": "ISM-1418",
+      "type": "CONCEPT",
+      "text": "Security control"
+    },
+    {
+      "id": "ISM-0343",
+      "type": "CONCEPT",
+      "text": "Security control"
+    },
+    {
+      "id": "ISM-0345",
+      "type": "CONCEPT",
+      "text": "Security control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Device access control software",
+      "to": "Device access control software",
+      "type": "Adversary"
+    },
+    {
+      "from": "Removable media and mobile devices",
+      "to": "Workstations and servers",
+      "type": "External communication interfaces"
+    }
+  ]
+}

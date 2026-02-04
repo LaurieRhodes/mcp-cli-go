@@ -1,0 +1,17 @@
+{
+  "chunk_id": "CHUNK-528",
+  "entities": [
+    {
+      "id": "Essential Eight",
+      "type": "FRAMEWORK",
+      "text": "Australian cybersecurity framework"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cybersecurity",
+      "to": "framework",
+      "type": "RELATES_TO"
+    }
+  ]
+}

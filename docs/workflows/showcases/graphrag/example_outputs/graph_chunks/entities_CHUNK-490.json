@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-490",
+  "entities": [
+    {
+      "id": "Cross Domain Solution (CDS)",
+      "type": "CONCEPT",
+      "text": "System for mitigating security risks between domains"
+    },
+    {
+      "id": "Security domains",
+      "type": "CONCEPT",
+      "text": "Different security domains"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Personnel involved in CDS activities"
+    },
+    {
+      "id": "Security-enforcing functions",
+      "type": "CONCEPT",
+      "text": "Functions that enforce security"
+    },
+    {
+      "id": "Hardware/software components",
+      "type": "CONCEPT",
+      "text": "Components making up CDS subsystems"
+    },
+    {
+      "id": "Controls",
+      "type": "CONCEPT",
+      "text": "Applicable security measures"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cross Domain Solution (CDS)",
+      "to": "Cross Domain Solution (CDS)",
+      "type": "Cross Domain Solution (CDS)"
+    },
+    {
+      "from": "Security domains",
+      "to": "Security-enforcing functions",
+      "type": "Hardware/software components"
+    }
+  ]
+}

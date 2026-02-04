@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-096",
+  "entities": [
+    {
+      "id": "uniquely identifiable users",
+      "type": "CONCEPT",
+      "text": "Users who can be uniquely identified for accountability"
+    },
+    {
+      "id": "Australian Eyes Only (AUSTEO) data",
+      "type": "CONCEPT",
+      "text": "Australian government classified data"
+    },
+    {
+      "id": "Australian Government Access Only (AGAO) data",
+      "type": "CONCEPT",
+      "text": "Australian government restricted access data"
+    },
+    {
+      "id": "Releasable To (REL) data",
+      "type": "CONCEPT",
+      "text": "Data with specific release classifications"
+    },
+    {
+      "id": "foreign nationals",
+      "type": "ACTOR",
+      "text": "Non-Australian citizens with system access"
+    },
+    {
+      "id": "shared user accounts",
+      "type": "CONCEPT",
+      "text": "Accounts used by multiple personnel"
+    },
+    {
+      "id": "contractors",
+      "type": "ACTOR",
+      "text": "External personnel working under contract"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "uniquely identifiable users",
+      "to": "uniquely identifiable users",
+      "type": "DEFINES"
+    },
+    {
+      "from": "shared user accounts",
+      "to": "foreign nationals",
+      "type": "REQUIRES"
+    }
+  ]
+}

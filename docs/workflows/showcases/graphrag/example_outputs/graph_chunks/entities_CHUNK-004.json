@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-004",
+  "entities": [
+    {
+      "id": "ISM",
+      "type": "CONCEPT",
+      "text": "Information Security Manual"
+    },
+    {
+      "id": "Legislation",
+      "type": "CONCEPT",
+      "text": "Legal framework"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity subject to compliance"
+    },
+    {
+      "id": "Archives Act 1983",
+      "type": "LEGAL_DOCUMENT",
+      "text": "Australian archives legislation"
+    },
+    {
+      "id": "Privacy Act 1988",
+      "type": "LEGAL_DOCUMENT",
+      "text": "Australian privacy legislation"
+    },
+    {
+      "id": "Security of Critical Infrastructure Act 2018",
+      "type": "LEGAL_DOCUMENT",
+      "text": "Australian critical infrastructure security legislation"
+    },
+    {
+      "id": "Telecommunications (Interception and Access) Act 1979",
+      "type": "LEGAL_DOCUMENT",
+      "text": "Australian telecommunications interception legislation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Organisation",
+      "to": "ISM",
+      "type": "COMPLIES_WITH"
+    },
+    {
+      "from": "Legislation",
+      "to": "ISM",
+      "type": "OVERRIDES"
+    },
+    {
+      "from": "Legislation",
+      "to": "ISM",
+      "type": "TAKES_PRECEDENCE_OVER"
+    },
+    {
+      "from": "Organisation",
+      "to": "Archives Act 1983",
+      "type": "ENCOURAGES_FAMILIARITY"
+    },
+    {
+      "from": "Organisation",
+      "to": "Privacy Act 1988",
+      "type": "ENCOURAGES_FAMILIARITY"
+    },
+    {
+      "from": "Organisation",
+      "to": "Security of Critical Infrastructure Act 2018",
+      "type": "ENCOURAGES_FAMILIARITY"
+    },
+    {
+      "from": "Organisation",
+      "to": "Telecommunications (Interception and Access) Act 1979",
+      "type": "ENCOURAGES_FAMILIARITY"
+    }
+  ]
+}

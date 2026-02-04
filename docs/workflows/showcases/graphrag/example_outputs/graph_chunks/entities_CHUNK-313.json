@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-313",
+  "entities": [
+    {
+      "id": "logon banner",
+      "type": "CONCEPT",
+      "text": "Displayed before system access to remind users of security responsibilities"
+    },
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "Individuals who access systems and acknowledge security responsibilities"
+    },
+    {
+      "id": "security responsibilities",
+      "type": "CONCEPT",
+      "text": "Obligations users must follow when accessing systems"
+    },
+    {
+      "id": "system access",
+      "type": "PROCESS",
+      "text": "Process of granting entry to computer systems"
+    },
+    {
+      "id": "legal advice",
+      "type": "PROCESS",
+      "text": "Process of obtaining legal guidance for banner wording"
+    },
+    {
+      "id": "ISM-0408",
+      "type": "CONTROL",
+      "text": "ISM control requiring logon banners with user acknowledgment"
+    },
+    {
+      "id": "ISM-0979",
+      "type": "CONTROL",
+      "text": "ISM control requiring legal advice for banner wording"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "logon banner",
+      "to": "logon banner",
+      "type": "logon banner"
+    },
+    {
+      "from": "users",
+      "to": "security responsibilities",
+      "type": "system access"
+    }
+  ]
+}

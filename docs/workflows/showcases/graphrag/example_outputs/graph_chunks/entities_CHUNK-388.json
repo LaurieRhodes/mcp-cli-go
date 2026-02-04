@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-388",
+  "entities": [
+    {
+      "id": "Notifications of undeliverable emails",
+      "type": "CONCEPT",
+      "text": "Email delivery failure notifications"
+    },
+    {
+      "id": "Receiving email servers",
+      "type": "ACTOR",
+      "text": "Email servers that receive and process incoming emails"
+    },
+    {
+      "id": "SPF",
+      "type": "CONCEPT",
+      "text": "Email authentication method to verify sender addresses"
+    },
+    {
+      "id": "Legitimate senders",
+      "type": "ACTOR",
+      "text": "Authorized email senders"
+    },
+    {
+      "id": "Innocent third parties",
+      "type": "ACTOR",
+      "text": "Unintended recipients of undeliverable notifications"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Receiving email servers",
+      "to": "Notifications of undeliverable emails",
+      "type": "SPF"
+    },
+    {
+      "from": "Notifications of undeliverable emails",
+      "to": "Legitimate senders",
+      "type": "Legitimate senders"
+    }
+  ]
+}

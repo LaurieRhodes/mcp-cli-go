@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-075",
+  "entities": [
+    {
+      "id": "continuous monitoring plan",
+      "type": "PROCESS",
+      "text": "Plan to proactively identify, prioritize and respond to security vulnerabilities"
+    },
+    {
+      "id": "vulnerability scans",
+      "type": "TECHNIQUE",
+      "text": "Automated checks for known security vulnerabilities using software tools"
+    },
+    {
+      "id": "vulnerability assessments",
+      "type": "TECHNIQUE",
+      "text": "Review of system architecture or in-depth hands-on assessment"
+    },
+    {
+      "id": "penetration tests",
+      "type": "TECHNIQUE",
+      "text": "Real-world scenario testing to achieve specific goals like compromising critical components"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "continuous monitoring plan",
+      "to": "security vulnerabilities",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "continuous monitoring plan",
+      "to": "security vulnerabilities",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "continuous monitoring plan",
+      "to": "security vulnerabilities",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "continuous monitoring plan",
+      "to": "critical system components",
+      "type": "INCLUDES"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "chunk_id": "CHUNK-016",
+  "entities": [
+    {
+      "id": "govern principles",
+      "type": "CONCEPT",
+      "text": "The governing principles for the organization"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "CHUNK-016",
+      "to": "CHUNK-016",
+      "type": "DEFINES"
+    }
+  ]
+}

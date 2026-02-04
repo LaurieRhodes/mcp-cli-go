@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-390",
+  "entities": [
+    {
+      "id": "network documentation",
+      "type": "CONCEPT",
+      "text": "Documentation depicting current network state"
+    },
+    {
+      "id": "network diagrams",
+      "type": "CONCEPT",
+      "text": "Visual representations of network connections"
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security events requiring response"
+    },
+    {
+      "id": "third party",
+      "type": "ACTOR",
+      "text": "External service providers"
+    },
+    {
+      "id": "public tender documentation",
+      "type": "CONCEPT",
+      "text": "Public procurement documentation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "network documentation",
+      "to": "network documentation",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "network diagrams",
+      "to": "cyber security incidents",
+      "type": "ASSISTS"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-522",
+  "entities": [
+    {
+      "id": "peripheral switches",
+      "type": "CONCEPT",
+      "text": "Hardware devices for sharing peripherals between systems"
+    },
+    {
+      "id": "data isolation",
+      "type": "CONCEPT",
+      "text": "Prevention of data transfer between connected systems"
+    },
+    {
+      "id": "security domains",
+      "type": "CONCEPT",
+      "text": "Logical boundaries for security classification"
+    },
+    {
+      "id": "evaluated peripheral switches",
+      "type": "CONCEPT",
+      "text": "Peripheral switches that have undergone security evaluation"
+    },
+    {
+      "id": "assurance levels",
+      "type": "CONCEPT",
+      "text": "Levels of confidence in security measures"
+    },
+    {
+      "id": "system classification",
+      "type": "CONCEPT",
+      "text": "Categorization of systems by sensitivity"
+    },
+    {
+      "id": "ISM-0591",
+      "type": "CONTROL",
+      "text": "ISM control for peripheral switch usage"
+    },
+    {
+      "id": "ISM-1457",
+      "type": "CONTROL",
+      "text": "ISM control for evaluated peripheral switches"
+    },
+    {
+      "id": "ISM-1480",
+      "type": "CONTROL",
+      "text": "ISM control for high assurance evaluation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "peripheral switches",
+      "to": "peripheral switches",
+      "type": "assurance levels"
+    },
+    {
+      "from": "data isolation",
+      "to": "assurance levels",
+      "type": "system classification"
+    }
+  ]
+}

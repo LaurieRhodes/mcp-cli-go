@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-241",
+  "entities": [
+    {
+      "id": "media classification",
+      "type": "CONCEPT",
+      "text": "Classification of media based on data sensitivity"
+    },
+    {
+      "id": "security clearance",
+      "type": "CONCEPT",
+      "text": "Authorization level for personnel access"
+    },
+    {
+      "id": "system authorization",
+      "type": "PROCESS",
+      "text": "Process of authorizing system usage"
+    },
+    {
+      "id": "data sensitivity",
+      "type": "CONCEPT",
+      "text": "Level of data protection required"
+    },
+    {
+      "id": "ISM-0323",
+      "type": "CONTROL",
+      "text": "ISM control for media classification"
+    },
+    {
+      "id": "ISM-0337",
+      "type": "CONTROL",
+      "text": "ISM control for system authorization"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "media classification",
+      "to": "media classification",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "security clearance",
+      "to": "system authorization",
+      "type": "REQUIRES"
+    }
+  ]
+}

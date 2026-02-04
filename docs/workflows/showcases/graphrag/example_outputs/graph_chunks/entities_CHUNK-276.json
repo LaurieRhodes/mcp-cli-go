@@ -1,0 +1,127 @@
+{
+  "chunk_id": "CHUNK-276",
+  "entities": [
+    {
+      "id": "Operating systems",
+      "type": "CONCEPT",
+      "text": "Core subject being hardened"
+    },
+    {
+      "id": "Australian Cyber Security Centre (ACSC)",
+      "type": "ACTOR",
+      "text": "Government agency providing hardening guidance"
+    },
+    {
+      "id": "Vendors",
+      "type": "ACTOR",
+      "text": "Software/hardware vendors providing hardening guidance"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Threat actor who could gain foothold"
+    },
+    {
+      "id": "Hardening guidance",
+      "type": "PROCESS",
+      "text": "Security configuration recommendations"
+    },
+    {
+      "id": "Default accounts/credentials",
+      "type": "CONCEPT",
+      "text": "Pre-configured system accounts"
+    },
+    {
+      "id": "Automatic execution features",
+      "type": "CONCEPT",
+      "text": "Removable media auto-run features"
+    },
+    {
+      "id": "Internet Explorer 11",
+      "type": "CONCEPT",
+      "text": "Legacy browser component"
+    },
+    {
+      "id": ".NET Framework 3.5",
+      "type": "CONCEPT",
+      "text": "Legacy framework component"
+    },
+    {
+      "id": "Operating system exploit protection",
+      "type": "CONCEPT",
+      "text": "Security feature for exploit mitigation"
+    },
+    {
+      "id": "Boot security features",
+      "type": "CONCEPT",
+      "text": "Boot security features (Early Launch Antimalware, Secure Boot, Trusted Boot, Measured Boot)"
+    },
+    {
+      "id": "Unprivileged users",
+      "type": "ACTOR",
+      "text": "Users without administrative rights"
+    },
+    {
+      "id": "Script execution engines",
+      "type": "CONCEPT",
+      "text": "Scripting environments that could be abused"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Cyber Security Centre (ACSC)",
+      "to": "Hardening guidance",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "Vendors",
+      "to": "Hardening guidance",
+      "type": "PRODUCES"
+    },
+    {
+      "from": "Hardening guidance",
+      "to": "Operating systems",
+      "type": "IMPLEMENTED_ON"
+    },
+    {
+      "from": "Hardening guidance",
+      "to": "Operating systems",
+      "type": "SHOULD_BE_CHANGED_ON"
+    },
+    {
+      "from": "Default accounts/credentials",
+      "to": "Operating systems",
+      "type": "SHOULD_BE_DISABLED_ON"
+    },
+    {
+      "from": "Automatic execution features",
+      "to": "Operating systems",
+      "type": "SHOULD_BE_DISABLED_REMOVED"
+    },
+    {
+      "from": "Internet Explorer 11",
+      "to": "Operating systems",
+      "type": "SHOULD_BE_DISABLED_REMOVED"
+    },
+    {
+      "from": ".NET Framework 3.5",
+      "to": "Operating systems",
+      "type": "SHOULD_BE_ENABLED_ON"
+    },
+    {
+      "from": "Operating system exploit protection",
+      "to": "Operating systems",
+      "type": "SHOULD_BE_ENABLED_ON"
+    },
+    {
+      "from": "Boot security features",
+      "to": "Operating systems",
+      "type": "SHOULD_BE_PREVENTED_FROM_BYPASSING"
+    },
+    {
+      "from": "Unprivileged users",
+      "to": "security functionality",
+      "type": "RELATED_TO"
+    }
+  ]
+}

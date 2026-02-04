@@ -1,0 +1,92 @@
+{
+  "chunk_id": "CHUNK-172",
+  "entities": [
+    {
+      "id": "MFDs",
+      "type": "ACTOR",
+      "text": "Multifunction Devices"
+    },
+    {
+      "id": "Authentication measures",
+      "type": "CONCEPT",
+      "text": "Security verification methods"
+    },
+    {
+      "id": "Workstations",
+      "type": "ACTOR",
+      "text": "User computing devices"
+    },
+    {
+      "id": "Multi-factor authentication",
+      "type": "CONCEPT",
+      "text": "Multiple authentication factors"
+    },
+    {
+      "id": "Users",
+      "type": "ACTOR",
+      "text": "System users"
+    },
+    {
+      "id": "Sensitive/classified documents",
+      "type": "CONCEPT",
+      "text": "Protected information"
+    },
+    {
+      "id": "Event logs",
+      "type": "CONCEPT",
+      "text": "System activity records"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "MFDs",
+      "to": "Authentication measures",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Authentication measures",
+      "to": "Workstations",
+      "type": "SAME_STRENGTH_AS"
+    },
+    {
+      "from": "Authentication measures",
+      "to": "MFDs",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Workstations",
+      "to": "Multi-factor authentication",
+      "type": "AUTHENTICATES_TO"
+    },
+    {
+      "from": "MFDs",
+      "to": "Users",
+      "type": "PREVENTS_UNAUTHORIZED_PRINTING"
+    },
+    {
+      "from": "Multi-factor authentication",
+      "to": "MFDs",
+      "type": "ASSISTS_COLLECTION"
+    },
+    {
+      "from": "Users",
+      "to": "MFDs",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "MFDs",
+      "to": "Sensitive/classified documents",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "MFDs",
+      "to": "Event logs",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Sensitive/classified documents",
+      "to": "MFDs",
+      "type": "RELATED_TO"
+    }
+  ]
+}

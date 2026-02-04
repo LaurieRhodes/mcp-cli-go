@@ -131,6 +131,38 @@ func (sm *SkillsAwareServerManager) generateSkillTools() []domain.Tool {
 	tools = append(tools, executeCodeTool)
 	
 	logging.Info("Generated %d tools from built-in skills", len(tools))
+	
+	// Add run_helper_script tool for direct script execution
+	runHelperScriptTool := domain.Tool{
+		Type: "function",
+		Function: domain.ToolFunction{
+			Name: "skills_run_helper_script",
+			Description: "[HELPER SCRIPT EXECUTION] Directly execute a pre-written helper script from a skill's scripts/ directory. " +
+				"This is more efficient than execute_skill_code for running existing scripts. " +
+				"The script must exist in /skill/scripts/ and can be Python (.py) or Bash (.sh). " +
+				"Input/output files use /outputs/ directory.",
+			Parameters: map[string]interface{}{
+				"type": "object",
+				"properties": map[string]interface{}{
+					"skill_name": map[string]interface{}{
+						"type":        "string",
+						"description": "Name of skill containing the script (e.g., 'python-context-builder')",
+					},
+					"script_name": map[string]interface{}{
+						"type":        "string",
+						"description": "Name of script file in /skill/scripts/ (e.g., 'process_chunk.py')",
+					},
+					"args": map[string]interface{}{
+						"type":        "array",
+						"items":       map[string]interface{}{"type": "string"},
+						"description": "Command-line arguments to pass to the script",
+					},
+				},
+				"required": []string{"skill_name", "script_name"},
+			},
+		},
+	}
+	tools = append(tools, runHelperScriptTool)
 	return tools
 }
 
@@ -142,6 +174,11 @@ func (sm *SkillsAwareServerManager) executeSkillTool(ctx context.Context, toolNa
 	// Special handling for execute_skill_code
 	if actualToolName == "execute_skill_code" {
 		return sm.executeSkillCode(ctx, arguments)
+	}
+	
+	// Special handling for run_helper_script
+	if actualToolName == "run_helper_script" {
+		return sm.runHelperScript(ctx, arguments)
 	}
 	
 	// Find the skill that matches this tool
@@ -224,7 +261,7 @@ func (sm *SkillsAwareServerManager) executeSkillCode(ctx context.Context, argume
 	// Extract required parameters
 	skillName, ok := arguments["skill_name"].(string)
 	if !ok {
-		return "", fmt.Errorf("skill_name is required")
+		return "", fmt.Errorf("skill_name is required - example: execute_skill_code with skill_name=python-context-builder and code=your_python_code")
 	}
 	
 	code, ok := arguments["code"].(string)
@@ -260,6 +297,51 @@ func (sm *SkillsAwareServerManager) executeSkillCode(ctx context.Context, argume
 	result, err := sm.skillService.ExecuteCode(request)
 	if err != nil {
 		return "", fmt.Errorf("code execution failed: %w", err)
+	}
+	
+	// Format result as JSON
+	resultJSON, err := json.Marshal(result)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal execution result: %w", err)
+	}
+	
+	return string(resultJSON), nil
+}
+
+// runHelperScript handles the run_helper_script tool
+func (sm *SkillsAwareServerManager) runHelperScript(ctx context.Context, arguments map[string]interface{}) (string, error) {
+	// Extract required parameters
+	skillName, ok := arguments["skill_name"].(string)
+	if !ok {
+		return "", fmt.Errorf("skill_name is required - example: run_helper_script with skill_name=python-context-builder, script_name=process_chunk.py, args=array")
+	}
+	
+	scriptName, ok := arguments["script_name"].(string)
+	if !ok {
+		return "", fmt.Errorf("script_name is required")
+	}
+	
+	// Extract optional args
+	var args []string
+	if argsArg, ok := arguments["args"].([]interface{}); ok {
+		for _, arg := range argsArg {
+			if argStr, ok := arg.(string); ok {
+				args = append(args, argStr)
+			}
+		}
+	}
+	
+	// Create script execution request
+	request := &domainSkills.HelperScriptRequest{
+		SkillName:  skillName,
+		ScriptName: scriptName,
+		Args:       args,
+	}
+	
+	// Execute the script
+	result, err := sm.skillService.RunHelperScript(request)
+	if err != nil {
+		return "", fmt.Errorf("script execution failed: %w", err)
 	}
 	
 	// Format result as JSON

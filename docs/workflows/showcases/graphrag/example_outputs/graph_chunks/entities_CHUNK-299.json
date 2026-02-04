@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-299",
+  "entities": [
+    {
+      "id": "Microsoft AD DS",
+      "type": "CONCEPT",
+      "text": "Microsoft Active Directory Domain Services"
+    },
+    {
+      "id": "Built-in security groups",
+      "type": "CONCEPT",
+      "text": "Security groups with elevated permissions"
+    },
+    {
+      "id": "Privileged security groups",
+      "type": "CONCEPT",
+      "text": "Security groups with elevated privileges"
+    },
+    {
+      "id": "Protected Users security group",
+      "type": "CONCEPT",
+      "text": "Security group for privileged user accounts"
+    },
+    {
+      "id": "Pre-Windows 2000 Compatible Access security group",
+      "type": "CONCEPT",
+      "text": "Legacy compatibility security group"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting privilege escalation"
+    },
+    {
+      "id": "User accounts",
+      "type": "CONCEPT",
+      "text": "User accounts in the system"
+    },
+    {
+      "id": "ISM-1620",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for privileged security groups"
+    },
+    {
+      "id": "ISM-1845",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for Protected Users group"
+    },
+    {
+      "id": "ISM-1846",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for disabled account cleanup"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Microsoft AD DS",
+      "to": "Built-in security groups",
+      "type": "Privileged security groups"
+    },
+    {
+      "from": "Built-in security groups",
+      "to": "Privileged security groups",
+      "type": "Protected Users security group"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-451",
+  "entities": [
+    {
+      "id": "FIPS 186-4",
+      "type": "STANDARD",
+      "text": "Federal Information Processing Standard for digital signatures"
+    },
+    {
+      "id": "ECDSA",
+      "type": "ALGORITHM",
+      "text": "Elliptic Curve Digital Signature Algorithm"
+    },
+    {
+      "id": "NIST P-256",
+      "type": "CURVE",
+      "text": "NIST elliptic curve with 256-bit key size"
+    },
+    {
+      "id": "NIST P-384",
+      "type": "CURVE",
+      "text": "NIST elliptic curve with 384-bit key size"
+    },
+    {
+      "id": "NIST P-521",
+      "type": "CURVE",
+      "text": "NIST elliptic curve with 521-bit key size"
+    },
+    {
+      "id": "digital signatures",
+      "type": "CONCEPT",
+      "text": "Electronic signatures using cryptographic algorithms"
+    },
+    {
+      "id": "base point order",
+      "type": "CONCEPT",
+      "text": "Mathematical property of elliptic curves"
+    },
+    {
+      "id": "key size",
+      "type": "CONCEPT",
+      "text": "Size of cryptographic key in bits"
+    },
+    {
+      "id": "effective security strength",
+      "type": "CONCEPT",
+      "text": "Actual security level provided by cryptographic implementation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "FIPS 186-4",
+      "to": "ECDSA",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ECDSA",
+      "to": "digital signatures",
+      "type": "USES"
+    }
+  ]
+}

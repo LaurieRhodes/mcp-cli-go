@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-195",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "CONCEPT",
+      "text": "Portable computing devices like laptops, smartphones, tablets"
+    },
+    {
+      "id": "removable media",
+      "type": "CONCEPT",
+      "text": "External storage devices like USB drives, external hard drives"
+    },
+    {
+      "id": "personnel",
+      "type": "ACTOR",
+      "text": "Employees or staff members who use mobile devices"
+    },
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "The company or entity that personnel work for"
+    },
+    {
+      "id": "overseas travel",
+      "type": "CONCEPT",
+      "text": "International travel outside the home country"
+    },
+    {
+      "id": "checked-in luggage",
+      "type": "CONCEPT",
+      "text": "Luggage checked with transportation providers"
+    },
+    {
+      "id": "hotel rooms",
+      "type": "CONCEPT",
+      "text": "Accommodation rooms during travel"
+    },
+    {
+      "id": "hotel room safes",
+      "type": "CONCEPT",
+      "text": "Secure storage within hotel rooms"
+    },
+    {
+      "id": "untrusted people",
+      "type": "ACTOR",
+      "text": "Individuals not authorized or trusted to access devices"
+    },
+    {
+      "id": "credentials",
+      "type": "CONCEPT",
+      "text": "Authentication information like passwords, tokens"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "personnel",
+      "to": "personnel",
+      "type": "personnel"
+    },
+    {
+      "from": "mobile devices",
+      "to": "removable media",
+      "type": "overseas travel"
+    }
+  ]
+}

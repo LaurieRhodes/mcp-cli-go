@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-232",
+  "entities": [
+    {
+      "id": "network devices",
+      "type": "DEVICE",
+      "text": "Network equipment that can store configuration data or credentials"
+    },
+    {
+      "id": "memory",
+      "type": "COMPONENT",
+      "text": "Storage component in network devices that needs cleaning"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of cleaning memory before disposal"
+    },
+    {
+      "id": "vendor sanitisation guidance",
+      "type": "GUIDANCE",
+      "text": "Guidance provided by device manufacturers"
+    },
+    {
+      "id": "evaluation documentation",
+      "type": "DOCUMENTATION",
+      "text": "Documentation from evaluation processes"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "network devices",
+      "to": "memory",
+      "type": "HAS_COMPONENT"
+    },
+    {
+      "from": "network devices",
+      "to": "sanitisation",
+      "type": "REQUIRES_PROCESS"
+    },
+    {
+      "from": "network devices",
+      "to": "vendor sanitisation guidance",
+      "type": "PROVIDES_GUIDANCE"
+    },
+    {
+      "from": "network devices",
+      "to": "evaluation documentation",
+      "type": "PROVIDES_GUIDANCE"
+    },
+    {
+      "from": "network devices",
+      "to": "sanitisation",
+      "type": "INFORMS_PROCESS"
+    }
+  ]
+}

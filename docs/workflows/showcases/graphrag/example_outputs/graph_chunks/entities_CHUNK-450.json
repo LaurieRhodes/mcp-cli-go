@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-450",
+  "entities": [
+    {
+      "id": "FIPS 186-4",
+      "type": "STANDARD",
+      "text": "Federal Information Processing Standard for digital signatures"
+    },
+    {
+      "id": "ECDH",
+      "type": "PROTOCOL",
+      "text": "Elliptic Curve Diffie-Hellman key exchange protocol"
+    },
+    {
+      "id": "NIST P-384",
+      "type": "CURVE",
+      "text": "NIST P-384 elliptic curve"
+    },
+    {
+      "id": "NIST P-256",
+      "type": "CURVE",
+      "text": "NIST P-256 elliptic curve"
+    },
+    {
+      "id": "NIST P-521",
+      "type": "CURVE",
+      "text": "NIST P-521 elliptic curve"
+    },
+    {
+      "id": "encryption session keys",
+      "type": "CONCEPT",
+      "text": "Keys used for encrypting communication sessions"
+    },
+    {
+      "id": "effective security strength",
+      "type": "METRIC",
+      "text": "Measure of cryptographic security in bits"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "FIPS 186-4",
+      "to": "ECDH",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ECDH",
+      "to": "NIST P-384",
+      "type": "RECOMMENDS"
+    },
+    {
+      "from": "ECDH",
+      "to": "NIST P-256",
+      "type": "RECOMMENDS"
+    },
+    {
+      "from": "ECDH",
+      "to": "NIST P-521",
+      "type": "RECOMMENDS"
+    }
+  ]
+}

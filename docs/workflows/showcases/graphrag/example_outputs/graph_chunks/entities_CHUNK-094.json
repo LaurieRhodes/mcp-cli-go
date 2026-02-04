@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-094",
+  "entities": [
+    {
+      "id": "Security clearances",
+      "type": "CONCEPT",
+      "text": "Authorization process for accessing classified information"
+    },
+    {
+      "id": "Australian security clearances",
+      "type": "CONCEPT",
+      "text": "Security clearances issued by Australia"
+    },
+    {
+      "id": "Foreign government security clearances",
+      "type": "CONCEPT",
+      "text": "Security clearances issued by other countries"
+    },
+    {
+      "id": "Australia",
+      "type": "ACTOR",
+      "text": "Country that formally recognizes foreign clearances"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Security clearances",
+      "to": "Australian security clearances",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Security clearances",
+      "to": "Foreign government security clearances",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Foreign government security clearances",
+      "to": "Australia",
+      "type": "REQUIRES"
+    }
+  ]
+}

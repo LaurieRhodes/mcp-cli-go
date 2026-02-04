@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-041",
+  "entities": [
+    {
+      "id": "event logs",
+      "type": "CONCEPT",
+      "text": "Records of system activities and events"
+    },
+    {
+      "id": "cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security breaches or attacks in cyberspace"
+    },
+    {
+      "id": "data sources",
+      "type": "CONCEPT",
+      "text": "Sources of information for monitoring and analysis"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "event logs",
+      "to": "data sources",
+      "type": "ASSISTS_WITH"
+    },
+    {
+      "from": "cyber security incidents",
+      "to": "event logs",
+      "type": "PROVIDES"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-078",
+  "entities": [
+    {
+      "id": "Australian Cyber Security Centre",
+      "type": "ACTOR",
+      "text": "Australian government cybersecurity agency"
+    },
+    {
+      "id": "Information Security Manual webpage",
+      "type": "CONCEPT",
+      "text": "Official cybersecurity guidance webpage"
+    },
+    {
+      "id": "system security plan annex template",
+      "type": "CONCEPT",
+      "text": "Template for security plan annex"
+    },
+    {
+      "id": "cloud controls matrix template",
+      "type": "CONCEPT",
+      "text": "Template for cloud security controls"
+    },
+    {
+      "id": "system-specific security documentation",
+      "type": "CONCEPT",
+      "text": "Documentation for specific systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Australian Cyber Security Centre",
+      "to": "Information Security Manual webpage",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "Information Security Manual webpage",
+      "to": "system security plan annex template",
+      "type": "CONTAINS"
+    }
+  ]
+}

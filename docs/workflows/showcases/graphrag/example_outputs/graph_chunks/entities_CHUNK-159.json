@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-159",
+  "entities": [
+    {
+      "id": "video-aware firewall",
+      "type": "TECHNOLOGY",
+      "text": "Firewall with video traffic awareness"
+    },
+    {
+      "id": "voice-aware firewall",
+      "type": "TECHNOLOGY",
+      "text": "Firewall with voice traffic awareness"
+    },
+    {
+      "id": "proxy",
+      "type": "TECHNOLOGY",
+      "text": "Network proxy device"
+    },
+    {
+      "id": "gateway",
+      "type": "NETWORK_COMPONENT",
+      "text": "Network gateway device"
+    },
+    {
+      "id": "video conferencing",
+      "type": "APPLICATION",
+      "text": "Video conferencing application"
+    },
+    {
+      "id": "IP telephony",
+      "type": "APPLICATION",
+      "text": "IP telephony application"
+    },
+    {
+      "id": "data traffic",
+      "type": "TRAFFIC_TYPE",
+      "text": "Data network traffic"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "PASSES_THROUGH"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "PASSES_THROUGH"
+    },
+    {
+      "from": "ISM-0546",
+      "to": "Jun-22",
+      "type": "TRAFFIC_TYPE"
+    }
+  ]
+}

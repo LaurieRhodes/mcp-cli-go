@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-382",
+  "entities": [
+    {
+      "id": "ISM-0572",
+      "type": "ISM_CONTROL",
+      "text": "Information Security Manual Control ISM-0572"
+    },
+    {
+      "id": "ISM-1589",
+      "type": "ISM_CONTROL",
+      "text": "Information Security Manual Control ISM-1589"
+    },
+    {
+      "id": "Transport Layer Security (TLS)",
+      "type": "ENCRYPTION_PROTOCOL",
+      "text": "Technical term: Transport Layer Security (TLS)"
+    },
+    {
+      "id": "TLS encryption",
+      "type": "ENCRYPTION_PROTOCOL",
+      "text": "Technical term: TLS encryption"
+    },
+    {
+      "id": "opportunistic TLS encryption",
+      "type": "ENCRYPTION_PROTOCOL",
+      "text": "Technical term: opportunistic TLS encryption"
+    },
+    {
+      "id": "downgrade attacks",
+      "type": "SECURITY_THREAT",
+      "text": "Technical term: downgrade attacks"
+    },
+    {
+      "id": "Mail Transfer Agent Strict Transport Security (MTA-STS)",
+      "type": "TECHNICAL_TERM",
+      "text": "Technical term: Mail Transfer Agent Strict Transport Security (MTA-STS)"
+    },
+    {
+      "id": "MTA-STS",
+      "type": "TECHNICAL_TERM",
+      "text": "Technical term: MTA-STS"
+    },
+    {
+      "id": "TLS reporting",
+      "type": "ENCRYPTION_PROTOCOL",
+      "text": "Technical term: TLS reporting"
+    },
+    {
+      "id": "email servers",
+      "type": "SYSTEM_COMPONENT",
+      "text": "Technical term: email servers"
+    },
+    {
+      "id": "domain owners",
+      "type": "STAKEHOLDER",
+      "text": "Technical term: domain owners"
+    },
+    {
+      "id": "encrypted connections",
+      "type": "TECHNICAL_TERM",
+      "text": "Technical term: encrypted connections"
+    },
+    {
+      "id": "public network infrastructure",
+      "type": "TECHNICAL_TERM",
+      "text": "Technical term: public network infrastructure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "TLS encryption",
+      "to": "email interception",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "MTA-STS",
+      "to": "downgrade attacks",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "TLS reporting",
+      "to": "MTA-STS",
+      "type": "SUPPORTS"
+    },
+    {
+      "from": "ISM-0572",
+      "to": "TLS encryption",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1589",
+      "to": "TLS encryption",
+      "type": "REQUIRES"
+    }
+  ]
+}

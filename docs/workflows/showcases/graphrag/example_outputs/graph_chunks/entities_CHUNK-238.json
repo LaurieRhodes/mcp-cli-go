@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-238",
+  "entities": [
+    {
+      "id": "removable media usage policy",
+      "type": "CONCEPT",
+      "text": "Policy governing removable media usage"
+    },
+    {
+      "id": "data spills",
+      "type": "CONCEPT",
+      "text": "Unintentional data exposure incidents"
+    },
+    {
+      "id": "data loss",
+      "type": "CONCEPT",
+      "text": "Permanent data deletion or corruption"
+    },
+    {
+      "id": "data theft",
+      "type": "CONCEPT",
+      "text": "Unauthorized data acquisition"
+    },
+    {
+      "id": "ISM-1359",
+      "type": "CONTROL",
+      "text": "Information Security Manual control requirement"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "removable media usage policy",
+      "to": "data spills",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "removable media usage policy",
+      "to": "data loss",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "removable media usage policy",
+      "to": "data theft",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "ISM-1359",
+      "to": "removable media usage policy",
+      "type": "REQUIRES"
+    }
+  ]
+}

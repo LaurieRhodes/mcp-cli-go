@@ -1,0 +1,77 @@
+{
+  "chunk_id": "CHUNK-296",
+  "entities": [
+    {
+      "id": "server application",
+      "type": "CONCEPT",
+      "text": "Application running on server"
+    },
+    {
+      "id": "local administrator account",
+      "type": "ACTOR",
+      "text": "Privileged account with local admin rights"
+    },
+    {
+      "id": "root account",
+      "type": "ACTOR",
+      "text": "Highest privilege account on Unix/Linux systems"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting to compromise systems"
+    },
+    {
+      "id": "server",
+      "type": "CONCEPT",
+      "text": "Physical or virtual computing system"
+    },
+    {
+      "id": "file system",
+      "type": "CONCEPT",
+      "text": "Storage system for files and directories"
+    },
+    {
+      "id": "ISM-1249",
+      "type": "CONTROL",
+      "text": "Control requiring separate accounts for server apps"
+    },
+    {
+      "id": "ISM-1250",
+      "type": "CONTROL",
+      "text": "Control requiring limited file system access"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "server application",
+      "to": "local administrator account",
+      "type": "OPERATES_AS"
+    },
+    {
+      "from": "server application",
+      "to": "root account",
+      "type": "OPERATES_AS"
+    },
+    {
+      "from": "adversary",
+      "to": "server application",
+      "type": "COMPROMISES"
+    },
+    {
+      "from": "server application",
+      "to": "file system",
+      "type": "ACCESSES"
+    },
+    {
+      "from": "ISM-1249",
+      "to": "server application",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1250",
+      "to": "server application",
+      "type": "REQUIRES"
+    }
+  ]
+}

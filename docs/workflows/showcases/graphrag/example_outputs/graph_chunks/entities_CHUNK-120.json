@@ -1,0 +1,117 @@
+{
+  "chunk_id": "CHUNK-120",
+  "entities": [
+    {
+      "id": "Cable colours",
+      "type": "CONCEPT",
+      "text": "Standard for cable color coding"
+    },
+    {
+      "id": "SECRET systems",
+      "type": "ACTOR",
+      "text": "Systems handling SECRET classified information"
+    },
+    {
+      "id": "TOP SECRET systems",
+      "type": "ACTOR",
+      "text": "Systems handling TOP SECRET classified information"
+    },
+    {
+      "id": "OFFICIAL systems",
+      "type": "ACTOR",
+      "text": "Systems handling OFFICIAL classified information"
+    },
+    {
+      "id": "PROTECTED systems",
+      "type": "ACTOR",
+      "text": "Systems handling PROTECTED classified information"
+    },
+    {
+      "id": "Cable colour designation",
+      "type": "PROCESS",
+      "text": "Process of assigning specific colors to cable types"
+    },
+    {
+      "id": "ISM-1820",
+      "type": "CONCEPT",
+      "text": "Control requiring consistent cable colors"
+    },
+    {
+      "id": "ISM-0926",
+      "type": "CONCEPT",
+      "text": "Control prohibiting salmon pink/red for O/P cables"
+    },
+    {
+      "id": "ISM-1718",
+      "type": "CONCEPT",
+      "text": "Control requiring salmon pink for SECRET cables"
+    },
+    {
+      "id": "ISM-1719",
+      "type": "CONCEPT",
+      "text": "Control requiring red for TOP SECRET cables"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cable colours",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "SECRET systems",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Cable colours",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "TOP SECRET systems",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Cable colours",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "OFFICIAL systems",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Cable colours",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "PROTECTED systems",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "SECRET systems",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "salmon pink",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "TOP SECRET systems",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "red",
+      "to": "DEFINES",
+      "type": "RELATED_TO"
+    }
+  ]
+}

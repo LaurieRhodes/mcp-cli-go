@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-249",
+  "entities": [
+    {
+      "id": "media sanitisation",
+      "type": "PROCESS",
+      "text": "Process for securely erasing media"
+    },
+    {
+      "id": "approved methods",
+      "type": "METHOD",
+      "text": "Authorised techniques for media cleaning"
+    },
+    {
+      "id": "data recovery",
+      "type": "CONCEPT",
+      "text": "Practice of retrieving deleted data"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "media sanitisation",
+      "to": "approved methods",
+      "type": "USES"
+    },
+    {
+      "from": "approved methods",
+      "to": "data recovery",
+      "type": "PREVENTS"
+    }
+  ]
+}

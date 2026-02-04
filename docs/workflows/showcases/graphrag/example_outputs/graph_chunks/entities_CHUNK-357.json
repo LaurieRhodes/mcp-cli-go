@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-357",
+  "entities": [
+    {
+      "id": "Web Application Firewall",
+      "type": "CONCEPT",
+      "text": "Security system that filters and monitors HTTP traffic"
+    },
+    {
+      "id": "Origin Servers",
+      "type": "CONCEPT",
+      "text": "Web servers hosting applications that need protection"
+    },
+    {
+      "id": "IP Addresses",
+      "type": "CONCEPT",
+      "text": "Internet Protocol addresses that identify network devices"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity that owns and controls the infrastructure"
+    },
+    {
+      "id": "Adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting to bypass security"
+    },
+    {
+      "id": "Authorised Management Networks",
+      "type": "CONCEPT",
+      "text": "Networks authorized for management access"
+    },
+    {
+      "id": "ISM-1862 Control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring IP address protection"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Web Application Firewall",
+      "to": "Organisation",
+      "type": "Adversary"
+    },
+    {
+      "from": "Origin Servers",
+      "to": "Origin Servers",
+      "type": "IP Addresses"
+    }
+  ]
+}

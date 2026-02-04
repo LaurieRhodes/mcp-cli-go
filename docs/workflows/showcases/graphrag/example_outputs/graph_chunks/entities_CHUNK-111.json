@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-111",
+  "entities": [
+    {
+      "id": "cable connector types",
+      "type": "CONCEPT",
+      "text": "Physical hardware components for connecting cables"
+    },
+    {
+      "id": "systems",
+      "type": "CONCEPT",
+      "text": "Computer or electronic systems within a facility"
+    },
+    {
+      "id": "facility",
+      "type": "CONCEPT",
+      "text": "Physical location or building containing systems"
+    },
+    {
+      "id": "sensitivity",
+      "type": "CONCEPT",
+      "text": "Security sensitivity level of systems"
+    },
+    {
+      "id": "classification",
+      "type": "CONCEPT",
+      "text": "Security classification level of systems"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cable connector types",
+      "to": "systems",
+      "type": "USED_FOR"
+    },
+    {
+      "from": "systems",
+      "to": "facility",
+      "type": "LOCATED_IN"
+    }
+  ]
+}

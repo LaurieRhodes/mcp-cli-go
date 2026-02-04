@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-242",
+  "entities": [
+    {
+      "id": "media",
+      "type": "CONCEPT",
+      "text": "Storage medium for data"
+    },
+    {
+      "id": "system",
+      "type": "CONCEPT",
+      "text": "Computing device or infrastructure"
+    },
+    {
+      "id": "read-only access",
+      "type": "CONCEPT",
+      "text": "Access that prevents modification of data"
+    },
+    {
+      "id": "sanitisation",
+      "type": "PROCESS",
+      "text": "Process of securely removing data"
+    },
+    {
+      "id": "destruction",
+      "type": "PROCESS",
+      "text": "Process of physically destroying media"
+    },
+    {
+      "id": "sensitivity",
+      "type": "CONCEPT",
+      "text": "Level of protection required for data"
+    },
+    {
+      "id": "classification",
+      "type": "CONCEPT",
+      "text": "Official categorization of data security level"
+    },
+    {
+      "id": "administrative decision",
+      "type": "PROCESS",
+      "text": "Formal approval process for reclassification"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "media",
+      "to": "system",
+      "type": "CONNECTS_TO"
+    },
+    {
+      "from": "system",
+      "to": "read-only access",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "media",
+      "to": "sanitisation",
+      "type": "SUBJECT_TO"
+    },
+    {
+      "from": "read-only access",
+      "to": "destruction",
+      "type": "SUBJECT_TO"
+    },
+    {
+      "from": "media",
+      "to": "sensitivity",
+      "type": "HAS"
+    },
+    {
+      "from": "sensitivity",
+      "to": "classification",
+      "type": "HAS"
+    },
+    {
+      "from": "classification",
+      "to": "reclassification",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "administrative decision",
+      "to": "reclassification",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-113",
+  "entities": [
+    {
+      "id": "fibre-optic cables",
+      "type": "TECHNOLOGY",
+      "text": "Cabling infrastructure that uses light signals for data transmission"
+    },
+    {
+      "id": "copper cables",
+      "type": "TECHNOLOGY",
+      "text": "Traditional cabling infrastructure using electrical signals"
+    },
+    {
+      "id": "electromagnetic emanations",
+      "type": "PHENOMENON",
+      "text": "Electromagnetic radiation emitted by electronic devices"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Fibre-optic cables do not produce, nor are influenced by, electromagnetic emanations",
+      "to": "Fibre-optic cables offer the highest degree of protection from electromagnetic emanation effects",
+      "type": "PROTECTS_FROM"
+    },
+    {
+      "from": "Fibre-optic cables are used for cabling infrastructure instead of copper cables",
+      "to": "Fibre-optic cables replace copper cables for cabling infrastructure",
+      "type": "REPLACES"
+    },
+    {
+      "from": "Fibre-optic cables do not produce, nor are influenced by, electromagnetic emanations",
+      "to": "Electromagnetic emanations can affect copper cables but not fibre-optic cables",
+      "type": "AFFECTS"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-002",
+  "entities": [
+    {
+      "id": "ISM",
+      "type": "CONCEPT",
+      "text": "Information Security Manual"
+    },
+    {
+      "id": "Chief Information Security Officers (CISOs)",
+      "type": "ACTOR",
+      "text": "Senior security leadership role"
+    },
+    {
+      "id": "Chief Information Officers",
+      "type": "ACTOR",
+      "text": "Senior IT leadership role"
+    },
+    {
+      "id": "cyber security professionals",
+      "type": "ACTOR",
+      "text": "Security practitioners"
+    },
+    {
+      "id": "information technology managers",
+      "type": "ACTOR",
+      "text": "IT management professionals"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ISM",
+      "to": "Chief Information Security Officers (CISOs)",
+      "type": "INTENDED_FOR"
+    },
+    {
+      "from": "ISM",
+      "to": "Chief Information Officers",
+      "type": "INTENDED_FOR"
+    },
+    {
+      "from": "ISM",
+      "to": "cyber security professionals",
+      "type": "INTENDED_FOR"
+    },
+    {
+      "from": "ISM",
+      "to": "information technology managers",
+      "type": "INTENDED_FOR"
+    }
+  ]
+}

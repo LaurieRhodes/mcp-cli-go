@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-494",
+  "entities": [
+    {
+      "id": "CDSs",
+      "type": "SYSTEM",
+      "text": "Cross Domain Solutions"
+    },
+    {
+      "id": "network paths",
+      "type": "NETWORK",
+      "text": "Isolated upward and downward network paths"
+    },
+    {
+      "id": "security-enforcing functions",
+      "type": "FUNCTION",
+      "text": "Independent security functions"
+    },
+    {
+      "id": "protocol breaks",
+      "type": "TECHNOLOGY",
+      "text": "Protocol breaks at each network layer"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Separation of data flows",
+      "to": "ISM-0635",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Separation of data flows",
+      "to": "ISM-1522",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Separation of data flows",
+      "to": "ISM-1521",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "Separation of data flows",
+      "to": "ISM-1521",
+      "type": "IMPLEMENTS"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-073",
+  "entities": [
+    {
+      "id": "System Security Plan",
+      "type": "CONCEPT",
+      "text": "A document providing system description and control annex"
+    },
+    {
+      "id": "Stakeholders",
+      "type": "ACTOR",
+      "text": "Representatives involved in developing/maintaining the plan"
+    },
+    {
+      "id": "ISM-0041",
+      "type": "PROCESS",
+      "text": "Control requiring system security plans with descriptions and control annexes"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "System Security Plan",
+      "to": "ISM-0041",
+      "type": "INVOLVES"
+    },
+    {
+      "from": "Stakeholders",
+      "to": "System Security Plan",
+      "type": "REQUIRES"
+    }
+  ]
+}

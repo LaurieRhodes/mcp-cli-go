@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-350",
+  "entities": [
+    {
+      "id": "OWASP",
+      "type": "ORGANIZATION",
+      "text": "Open Web Application Security Project"
+    },
+    {
+      "id": "ISM-0971",
+      "type": "CONTROL",
+      "text": "Information Security Manual Control 0971"
+    },
+    {
+      "id": "ISM-1849",
+      "type": "CONTROL",
+      "text": "Information Security Manual Control 1849"
+    },
+    {
+      "id": "ISM-1850",
+      "type": "CONTROL",
+      "text": "Information Security Manual Control 1850"
+    },
+    {
+      "id": "OWASP Application Security Verification Standard",
+      "type": "STANDARD",
+      "text": "Application security verification standard"
+    },
+    {
+      "id": "OWASP Top Ten Proactive Controls",
+      "type": "CONTROL_FRAMEWORK",
+      "text": "Top ten proactive controls for web application security"
+    },
+    {
+      "id": "OWASP Top 10",
+      "type": "CONTROL_FRAMEWORK",
+      "text": "Top 10 web application security risks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "OWASP",
+      "to": "OWASP",
+      "type": "OWASP"
+    },
+    {
+      "from": "ISM-0971",
+      "to": "ISM-1849",
+      "type": "ISM-1850"
+    }
+  ]
+}

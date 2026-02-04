@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-054",
+  "entities": [
+    {
+      "id": "incident response plans",
+      "type": "CONCEPT",
+      "text": "Plans for responding to security incidents"
+    },
+    {
+      "id": "system-specific security documentation",
+      "type": "DOCUMENT",
+      "text": "Documentation specific to system security"
+    },
+    {
+      "id": "Guidelines for Security Documentation",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for security documentation"
+    },
+    {
+      "id": "malicious code infections",
+      "type": "CONCEPT",
+      "text": "Infections caused by malicious software"
+    },
+    {
+      "id": "National Institute of Standards and Technology",
+      "type": "ORGANIZATION",
+      "text": "US government agency for standards and technology"
+    },
+    {
+      "id": "Special Publication 800-61 Rev. 2",
+      "type": "DOCUMENT",
+      "text": "NIST publication on incident handling"
+    },
+    {
+      "id": "Computer Security Incident Handling Guide",
+      "type": "DOCUMENT",
+      "text": "Guide for handling computer security incidents"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "incident response plans",
+      "to": "system-specific security documentation",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "system-specific security documentation",
+      "to": "Guidelines for Security Documentation",
+      "type": "PART_OF"
+    },
+    {
+      "from": "system-specific security documentation",
+      "to": "malicious code infections",
+      "type": "PUBLISHED_BY"
+    },
+    {
+      "from": "Guidelines for Security Documentation",
+      "to": "National Institute of Standards and Technology",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "malicious code infections",
+      "to": "Special Publication 800-61 Rev. 2",
+      "type": "IS"
+    },
+    {
+      "from": "National Institute of Standards and Technology",
+      "to": "Computer Security Incident Handling Guide",
+      "type": "RELATED_TO"
+    }
+  ]
+}

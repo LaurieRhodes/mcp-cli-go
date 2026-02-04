@@ -1,0 +1,132 @@
+{
+  "chunk_id": "CHUNK-097",
+  "entities": [
+    {
+      "id": "Personnel",
+      "type": "ACTOR",
+      "text": "Personnel seeking access"
+    },
+    {
+      "id": "Manager/Authority",
+      "type": "ACTOR",
+      "text": "Manager or appropriate authority who validates access"
+    },
+    {
+      "id": "Systems/Applications/Data Repositories",
+      "type": "CONCEPT",
+      "text": "Resources being accessed"
+    },
+    {
+      "id": "Unprivileged Access",
+      "type": "CONCEPT",
+      "text": "Type of access being discussed"
+    },
+    {
+      "id": "Access Event Logs",
+      "type": "CONCEPT",
+      "text": "Logs of access activities"
+    },
+    {
+      "id": "Business Requirement",
+      "type": "CONCEPT",
+      "text": "Genuine need for access"
+    },
+    {
+      "id": "Security Posture",
+      "type": "CONCEPT",
+      "text": "Overall security state"
+    },
+    {
+      "id": "Malicious Behaviour",
+      "type": "CONCEPT",
+      "text": "Harmful activities to detect"
+    },
+    {
+      "id": "Cyber Security Incidents",
+      "type": "CONCEPT",
+      "text": "Security breaches"
+    },
+    {
+      "id": "Access Validation",
+      "type": "PROCESS",
+      "text": "Process of validating access requests"
+    },
+    {
+      "id": "Access Limitation",
+      "type": "PROCESS",
+      "text": "Limiting access to required duties"
+    },
+    {
+      "id": "Logging",
+      "type": "PROCESS",
+      "text": "Recording access activities"
+    },
+    {
+      "id": "Central Storage",
+      "type": "PROCESS",
+      "text": "Storing logs centrally"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Personnel",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Manager/Authority",
+      "to": "SEEKS ACCESS TO",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Personnel",
+      "to": "HAS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Systems/Applications/Data Repositories",
+      "to": "VALIDATES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Personnel",
+      "to": "GENERATES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Business Requirement",
+      "to": "MONITORS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Manager/Authority",
+      "to": "DETECTS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Business Requirement",
+      "to": "CONTRIBUTES TO INVESTIGATIONS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Unprivileged Access",
+      "to": "STORED IN",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Access Event Logs",
+      "to": "APPLIES TO",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Access Event Logs",
+      "to": "APPLIES TO",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "Security Posture",
+      "to": "APPLIES TO",
+      "type": "RELATED_TO"
+    }
+  ]
+}

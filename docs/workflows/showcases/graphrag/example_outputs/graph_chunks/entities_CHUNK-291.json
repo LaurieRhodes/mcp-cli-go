@@ -1,0 +1,112 @@
+{
+  "chunk_id": "CHUNK-291",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Cyber supply chain risk management concept"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for procurement and outsourcing"
+    },
+    {
+      "id": "patching or updating user applications",
+      "type": "PROCESS",
+      "text": "Process of patching or updating user applications"
+    },
+    {
+      "id": "Guidelines for System Management",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for system management"
+    },
+    {
+      "id": "implementation and configuration of security products",
+      "type": "PROCESS",
+      "text": "Process of implementing and configuring security products"
+    },
+    {
+      "id": "operating system hardening",
+      "type": "PROCESS",
+      "text": "Operating system hardening process"
+    },
+    {
+      "id": "securely configuring Microsoft Office",
+      "type": "PROCESS",
+      "text": "Process of securely configuring Microsoft Office"
+    },
+    {
+      "id": "ACSC's Hardening Microsoft 365, Office 2021, Office 2019 and Office 2016 publication",
+      "type": "DOCUMENT",
+      "text": "ACSC publication for hardening Microsoft Office products"
+    },
+    {
+      "id": "securely configuring Microsoft Edge web browser",
+      "type": "PROCESS",
+      "text": "Process of securely configuring Microsoft Edge web browser"
+    },
+    {
+      "id": "ACSC's Hardening Microsoft Windows 10 version 21H1 Workstations publication",
+      "type": "DOCUMENT",
+      "text": "ACSC publication for hardening Windows 10 workstations"
+    },
+    {
+      "id": "configuring Microsoft Office macro settings",
+      "type": "PROCESS",
+      "text": "Process of configuring Microsoft Office macro settings"
+    },
+    {
+      "id": "ACSC's Microsoft Office Macro Security publication",
+      "type": "DOCUMENT",
+      "text": "ACSC publication for Microsoft Office macro security"
+    },
+    {
+      "id": "event logging",
+      "type": "PROCESS",
+      "text": "Event logging process"
+    },
+    {
+      "id": "Guidelines for System Monitoring",
+      "type": "DOCUMENT",
+      "text": "Guidelines document for system monitoring"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "Guidelines for Procurement and Outsourcing",
+      "type": "DEFINES"
+    },
+    {
+      "from": "patching or updating user applications",
+      "to": "Guidelines for System Management",
+      "type": "DEFINES"
+    },
+    {
+      "from": "implementation and configuration of security products",
+      "to": "operating system hardening",
+      "type": "DEFINES"
+    },
+    {
+      "from": "securely configuring Microsoft Office",
+      "to": "ACSC's Hardening Microsoft 365, Office 2021, Office 2019 and Office 2016 publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "securely configuring Microsoft Edge web browser",
+      "to": "ACSC's Hardening Microsoft Windows 10 version 21H1 Workstations publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "configuring Microsoft Office macro settings",
+      "to": "ACSC's Microsoft Office Macro Security publication",
+      "type": "DEFINES"
+    },
+    {
+      "from": "event logging",
+      "to": "Guidelines for System Monitoring",
+      "type": "DEFINES"
+    }
+  ]
+}

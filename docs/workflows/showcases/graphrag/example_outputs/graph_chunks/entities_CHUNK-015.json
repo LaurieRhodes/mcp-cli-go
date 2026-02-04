@@ -1,0 +1,92 @@
+{
+  "chunk_id": "CHUNK-015",
+  "entities": [
+    {
+      "id": "cyber security principles",
+      "type": "CONCEPT",
+      "text": "Strategic guidance for protecting systems and data"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security principles"
+    },
+    {
+      "id": "systems",
+      "type": "CONCEPT",
+      "text": "IT infrastructure requiring protection"
+    },
+    {
+      "id": "data",
+      "type": "CONCEPT",
+      "text": "Information assets requiring protection"
+    },
+    {
+      "id": "cyber threats",
+      "type": "CONCEPT",
+      "text": "External security risks"
+    },
+    {
+      "id": "govern",
+      "type": "PROCESS",
+      "text": "Governance activities"
+    },
+    {
+      "id": "protect",
+      "type": "PROCESS",
+      "text": "Protection activities"
+    },
+    {
+      "id": "detect",
+      "type": "PROCESS",
+      "text": "Detection activities"
+    },
+    {
+      "id": "respond",
+      "type": "PROCESS",
+      "text": "Response activities"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security principles",
+      "to": "organisation",
+      "type": "PROVIDES_GUIDANCE_TO"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "systems",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "data",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "cyber threats",
+      "type": "PROTECTS_AGAINST"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "govern",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "protect",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "detect",
+      "type": "INCLUDES"
+    },
+    {
+      "from": "cyber security principles",
+      "to": "respond",
+      "type": "INCLUDES"
+    }
+  ]
+}

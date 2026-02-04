@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-186",
+  "entities": [
+    {
+      "id": "mobile devices",
+      "type": "ACTOR",
+      "text": "Mobile devices that need to connect to the internet"
+    },
+    {
+      "id": "VPN connection",
+      "type": "CONCEPT",
+      "text": "Virtual Private Network connection for secure access"
+    },
+    {
+      "id": "internet gateway",
+      "type": "CONCEPT",
+      "text": "Organisation's gateway providing security functionality"
+    },
+    {
+      "id": "split tunnelling",
+      "type": "CONCEPT",
+      "text": "VPN feature that can increase security risk if not disabled"
+    },
+    {
+      "id": "ACSC security configuration guidance",
+      "type": "CONCEPT",
+      "text": "Australian Cyber Security Centre guidance for mobile device security"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "mobile devices",
+      "to": "VPN connection",
+      "type": "split tunnelling"
+    },
+    {
+      "from": "VPN connection",
+      "to": "internet gateway",
+      "type": "VPN connection"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-102",
+  "entities": [
+    {
+      "id": "system_account_requests_records",
+      "type": "CONCEPT",
+      "text": "Records of system account requests"
+    },
+    {
+      "id": "personnel_accountability",
+      "type": "CONCEPT",
+      "text": "Personnel accountability maintenance"
+    },
+    {
+      "id": "authorisation_records",
+      "type": "CONCEPT",
+      "text": "Records of personnel authorisation details"
+    },
+    {
+      "id": "secure_record_maintenance",
+      "type": "PROCESS",
+      "text": "Secure record maintenance process"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "system_account_requests_records",
+      "to": "authorisation_records",
+      "type": "secure_record_maintenance"
+    },
+    {
+      "from": "personnel_accountability",
+      "to": "personnel_accountability",
+      "type": "system_account_requests_records"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "chunk_id": "CHUNK-123",
+  "entities": [
+    {
+      "id": "cables",
+      "type": "CONCEPT",
+      "text": "Physical transmission medium"
+    },
+    {
+      "id": "OFFICIAL systems",
+      "type": "CONCEPT",
+      "text": "Government classification level"
+    },
+    {
+      "id": "PROTECTED systems",
+      "type": "CONCEPT",
+      "text": "Government classification level"
+    },
+    {
+      "id": "SECRET cables",
+      "type": "CONCEPT",
+      "text": "Highest government classification"
+    },
+    {
+      "id": "TOP SECRET cables",
+      "type": "CONCEPT",
+      "text": "Highest government classification"
+    },
+    {
+      "id": "conduit",
+      "type": "CONCEPT",
+      "text": "Protective enclosure"
+    },
+    {
+      "id": "cable bundle",
+      "type": "CONCEPT",
+      "text": "Group of cables together"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cables",
+      "to": "OFFICIAL systems",
+      "type": "CAN_BE_BUNDLED_WITH"
+    },
+    {
+      "from": "OFFICIAL systems",
+      "to": "PROTECTED systems",
+      "type": "CAN_BE_BUNDLED_WITH"
+    },
+    {
+      "from": "PROTECTED systems",
+      "to": "conduit",
+      "type": "RUN_IN"
+    },
+    {
+      "from": "cables",
+      "to": "cable bundle",
+      "type": "RUN_IN"
+    },
+    {
+      "from": "SECRET cables",
+      "to": "conduit",
+      "type": "RUN_EXCLUSIVELY_IN"
+    },
+    {
+      "from": "TOP SECRET cables",
+      "to": "cable bundle",
+      "type": "RUN_EXCLUSIVELY_IN"
+    },
+    {
+      "from": "conduit",
+      "to": "conduit",
+      "type": "RUN_IN"
+    },
+    {
+      "from": "cable bundle",
+      "to": "cable bundle",
+      "type": "RUN_IN"
+    }
+  ]
+}

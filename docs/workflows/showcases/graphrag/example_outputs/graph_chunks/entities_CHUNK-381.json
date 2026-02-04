@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-381",
+  "entities": [
+    {
+      "id": "open relay email server",
+      "type": "CONCEPT",
+      "text": "Email server configured to allow anyone to send emails through it"
+    },
+    {
+      "id": "email server",
+      "type": "CONCEPT",
+      "text": "Server that handles email transmission"
+    },
+    {
+      "id": "spammers",
+      "type": "ACTOR",
+      "text": "Malicious actors who send unsolicited emails"
+    },
+    {
+      "id": "worms",
+      "type": "ACTOR",
+      "text": "Malicious software that spreads automatically"
+    },
+    {
+      "id": "ISM-0567 control",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control requiring email server restrictions"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "open relay email server",
+      "to": "email server",
+      "type": "IS_A"
+    },
+    {
+      "from": "spammers",
+      "to": "open relay email server",
+      "type": "EXPLOITS"
+    },
+    {
+      "from": "worms",
+      "to": "open relay email server",
+      "type": "EXPLOITS"
+    },
+    {
+      "from": "ISM-0567 control",
+      "to": "email servers",
+      "type": "REQUIRES"
+    }
+  ]
+}

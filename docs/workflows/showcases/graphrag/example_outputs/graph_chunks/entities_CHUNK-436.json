@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-436",
+  "entities": [
+    {
+      "id": "encryption",
+      "type": "CONCEPT",
+      "text": "Security technique for protecting data"
+    },
+    {
+      "id": "full disk encryption",
+      "type": "CONCEPT",
+      "text": "Encryption method covering entire disk"
+    },
+    {
+      "id": "file-based encryption",
+      "type": "CONCEPT",
+      "text": "Encryption method for individual files"
+    },
+    {
+      "id": "cryptographic equipment",
+      "type": "CONCEPT",
+      "text": "Hardware for cryptographic operations"
+    },
+    {
+      "id": "cryptographic software",
+      "type": "CONCEPT",
+      "text": "Software for cryptographic operations"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Algorithm",
+      "type": "CONCEPT",
+      "text": "Approved cryptographic algorithm by ASD"
+    },
+    {
+      "id": "Common Criteria evaluation",
+      "type": "PROCESS",
+      "text": "Security evaluation process"
+    },
+    {
+      "id": "ASD-approved HACE",
+      "type": "CONCEPT",
+      "text": "High Assurance Cryptographic Equipment approved by ASD"
+    },
+    {
+      "id": "data at rest",
+      "type": "CONCEPT",
+      "text": "Data stored on storage media"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "encryption",
+      "to": "full disk encryption",
+      "type": "encryption"
+    },
+    {
+      "from": "full disk encryption",
+      "to": "file-based encryption",
+      "type": "cryptographic equipment"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "chunk_id": "CHUNK-500",
+  "entities": [
+    {
+      "id": "diodes",
+      "type": "CONCEPT",
+      "text": "One-way data flow enforcement devices"
+    },
+    {
+      "id": "unidirectional gateways",
+      "type": "CONCEPT",
+      "text": "Gateways allowing only one-way communication"
+    },
+    {
+      "id": "data flow",
+      "type": "PROCESS",
+      "text": "Movement of data between networks"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting intrusion/exfiltration"
+    },
+    {
+      "id": "organisation networks",
+      "type": "CONCEPT",
+      "text": "Internal organizational networks"
+    },
+    {
+      "id": "public network infrastructure",
+      "type": "CONCEPT",
+      "text": "External public networks"
+    },
+    {
+      "id": "SECRET networks",
+      "type": "CONCEPT",
+      "text": "Classified networks at SECRET level"
+    },
+    {
+      "id": "TOP SECRET networks",
+      "type": "CONCEPT",
+      "text": "Classified networks at TOP SECRET level"
+    },
+    {
+      "id": "high assurance evaluation",
+      "type": "PROCESS",
+      "text": "Rigorous security evaluation process"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "diodes",
+      "to": "unidirectional gateways",
+      "type": "CONTROLS"
+    },
+    {
+      "from": "diodes",
+      "to": "data flow",
+      "type": "ENFORCES"
+    },
+    {
+      "from": "diodes",
+      "to": "adversary",
+      "type": "PROTECTS AGAINST"
+    },
+    {
+      "from": "diodes",
+      "to": "organisation networks",
+      "type": "CONNECTS TO"
+    },
+    {
+      "from": "diodes",
+      "to": "public network infrastructure",
+      "type": "CONNECTS TO"
+    },
+    {
+      "from": "diodes",
+      "to": "SECRET networks",
+      "type": "APPLIES TO"
+    },
+    {
+      "from": "diodes",
+      "to": "TOP SECRET networks",
+      "type": "APPLIES TO"
+    }
+  ]
+}

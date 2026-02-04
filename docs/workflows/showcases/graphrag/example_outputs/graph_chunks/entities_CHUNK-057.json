@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-057",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "An organisation sourcing ICT equipment and services"
+    },
+    {
+      "id": "suppliers",
+      "type": "ORGANIZATION",
+      "text": "Trusted suppliers for sourcing"
+    },
+    {
+      "id": "ICT equipment",
+      "type": "EQUIPMENT",
+      "text": "Information and Communications Technology equipment"
+    },
+    {
+      "id": "applications",
+      "type": "SOFTWARE",
+      "text": "Software applications"
+    },
+    {
+      "id": "services",
+      "type": "SERVICE",
+      "text": "ICT services"
+    },
+    {
+      "id": "spares",
+      "type": "ASSET",
+      "text": "Spare ICT equipment kept in reserve"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "suppliers",
+      "type": "SOURCES_FROM"
+    },
+    {
+      "from": "suppliers",
+      "to": "ICT equipment",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "applications",
+      "type": "USED_IN"
+    },
+    {
+      "from": "applications",
+      "to": "services",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "services",
+      "to": "spares",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "spares",
+      "to": "organisation",
+      "type": "MAINTAINS"
+    }
+  ]
+}

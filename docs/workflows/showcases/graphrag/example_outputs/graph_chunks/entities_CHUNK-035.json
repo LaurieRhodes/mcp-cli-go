@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-035",
+  "entities": [
+    {
+      "id": "risk management framework",
+      "type": "PROCESS",
+      "text": "Six-step framework for managing information security risks"
+    },
+    {
+      "id": "system owners",
+      "type": "ACTOR",
+      "text": "Responsible parties for system security implementation"
+    },
+    {
+      "id": "Information Security Manual",
+      "type": "CONCEPT",
+      "text": "Official security guidelines and standards"
+    },
+    {
+      "id": "controls",
+      "type": "CONCEPT",
+      "text": "Security measures implemented to protect systems"
+    },
+    {
+      "id": "security objectives",
+      "type": "CONCEPT",
+      "text": "Desired security outcomes for systems"
+    },
+    {
+      "id": "authorising officer",
+      "type": "ACTOR",
+      "text": "Officer responsible for authorizing system operation"
+    },
+    {
+      "id": "cyber threats",
+      "type": "CONCEPT",
+      "text": "Potential cybersecurity dangers"
+    },
+    {
+      "id": "security risks",
+      "type": "CONCEPT",
+      "text": "Potential negative security impacts"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "risk management framework",
+      "to": "system owners",
+      "type": "system owners"
+    },
+    {
+      "from": "system owners",
+      "to": "controls",
+      "type": "security objectives"
+    }
+  ]
+}

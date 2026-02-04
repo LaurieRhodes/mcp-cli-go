@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-292",
+  "entities": [
+    {
+      "id": "Microsoft Active Directory Domain Services (AD DS)",
+      "type": "CONCEPT",
+      "text": "Microsoft's directory service for Windows domain networks"
+    },
+    {
+      "id": "database management system software",
+      "type": "CONCEPT",
+      "text": "Software for creating, managing, and querying databases"
+    },
+    {
+      "id": "email server software",
+      "type": "CONCEPT",
+      "text": "Software for sending, receiving, and storing email messages"
+    },
+    {
+      "id": "web hosting software",
+      "type": "CONCEPT",
+      "text": "Software for hosting websites and web applications"
+    },
+    {
+      "id": "user applications",
+      "type": "CONCEPT",
+      "text": "Software applications used by end-users"
+    },
+    {
+      "id": "server applications",
+      "type": "CONCEPT",
+      "text": "Software applications running on servers"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "server applications",
+      "to": "server applications",
+      "type": "server applications"
+    },
+    {
+      "from": "Microsoft Active Directory Domain Services (AD DS)",
+      "to": "database management system software",
+      "type": "email server software"
+    }
+  ]
+}

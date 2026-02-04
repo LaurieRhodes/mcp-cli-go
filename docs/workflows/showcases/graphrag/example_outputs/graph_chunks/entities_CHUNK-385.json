@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-385",
+  "entities": [
+    {
+      "id": "domain alignment",
+      "type": "CONCEPT",
+      "text": "SPF and DKIM checks"
+    },
+    {
+      "id": "malicious emails",
+      "type": "THREAT",
+      "text": "Emails sent to organization"
+    },
+    {
+      "id": "spoofing",
+      "type": "ATTACK",
+      "text": "Adversary attempts to spoof domains"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "domain alignment",
+      "to": "DMARC",
+      "type": "CHECKS"
+    },
+    {
+      "from": "malicious emails",
+      "to": "DMARC",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "spoofing",
+      "to": "DMARC",
+      "type": "DETECTS"
+    }
+  ]
+}

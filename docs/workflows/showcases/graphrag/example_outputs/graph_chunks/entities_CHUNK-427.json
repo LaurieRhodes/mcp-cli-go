@@ -1,0 +1,127 @@
+{
+  "chunk_id": "CHUNK-427",
+  "entities": [
+    {
+      "id": "organisation",
+      "type": "ORGANIZATION",
+      "text": "The entity requiring cloud connectivity"
+    },
+    {
+      "id": "cloud service providers",
+      "type": "ORGANIZATION",
+      "text": "Providers of cloud services"
+    },
+    {
+      "id": "bandwidth",
+      "type": "REQUIREMENT",
+      "text": "Network bandwidth requirement"
+    },
+    {
+      "id": "latency",
+      "type": "REQUIREMENT",
+      "text": "Network latency requirement"
+    },
+    {
+      "id": "availability",
+      "type": "REQUIREMENT",
+      "text": "Service availability requirement"
+    },
+    {
+      "id": "dynamic scaling",
+      "type": "CAPABILITY",
+      "text": "Ability to scale resources dynamically"
+    },
+    {
+      "id": "capacity monitoring",
+      "type": "PROCESS",
+      "text": "Monitoring of service capacity"
+    },
+    {
+      "id": "availability monitoring",
+      "type": "PROCESS",
+      "text": "Monitoring of service availability"
+    },
+    {
+      "id": "anomaly detection",
+      "type": "TECHNIQUE",
+      "text": "Detection of abnormal patterns"
+    },
+    {
+      "id": "ISM-1579",
+      "type": "CONTROL",
+      "text": "ISM control for dynamic scaling verification"
+    },
+    {
+      "id": "ISM-1580",
+      "type": "CONTROL",
+      "text": "ISM control for high availability architecture"
+    },
+    {
+      "id": "ISM-1581",
+      "type": "CONTROL",
+      "text": "ISM control for continuous monitoring"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "DISCUSSES"
+    },
+    {
+      "from": "cloud service providers",
+      "to": "organisation",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "cloud service providers",
+      "to": "organisation",
+      "type": "IMPLEMENTS"
+    },
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "organisation",
+      "to": "online services",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "from": "organisation",
+      "to": "online services",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-052",
+  "entities": [
+    {
+      "id": "intrusion",
+      "type": "PROCESS",
+      "text": "Detection and monitoring of unauthorized system access"
+    },
+    {
+      "id": "legal advice",
+      "type": "CONCEPT",
+      "text": "Professional legal consultation before allowing intrusion to continue"
+    },
+    {
+      "id": "system owners",
+      "type": "ACTOR",
+      "text": "System owners who must be consulted before allowing intrusion activity"
+    },
+    {
+      "id": "intrusion remediation",
+      "type": "PROCESS",
+      "text": "Activities to remove adversary from compromised system"
+    },
+    {
+      "id": "network traffic",
+      "type": "DATA",
+      "text": "Network data captured for analysis post-remediation"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Malicious actor attempting unauthorized access"
+    },
+    {
+      "id": "Telecommunications Act",
+      "type": "LEGISLATION",
+      "text": "Telecommunications (Interception and Access) Act 1979"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "intrusion",
+      "to": "intrusion",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "legal advice",
+      "to": "system owners",
+      "type": "REQUIRES"
+    }
+  ]
+}

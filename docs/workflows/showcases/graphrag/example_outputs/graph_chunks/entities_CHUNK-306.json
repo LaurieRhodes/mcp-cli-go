@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-306",
+  "entities": [
+    {
+      "id": "users",
+      "type": "ACTOR",
+      "text": "Individuals who need authentication credentials"
+    },
+    {
+      "id": "credentials",
+      "type": "CONCEPT",
+      "text": "Authentication tokens or passwords for user accounts"
+    },
+    {
+      "id": "identity verification",
+      "type": "PROCESS",
+      "text": "Process of verifying user identity before issuing credentials"
+    },
+    {
+      "id": "secure communications channel",
+      "type": "CONCEPT",
+      "text": "Secure method for delivering credentials to users"
+    },
+    {
+      "id": "supervisors",
+      "type": "ACTOR",
+      "text": "Authority figures who receive part of split credentials"
+    },
+    {
+      "id": "ISM controls",
+      "type": "CONCEPT",
+      "text": "Information Security Manual controls for credential management"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "users",
+      "to": "identity verification",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "identity verification",
+      "to": "credentials",
+      "type": "DEFINES"
+    }
+  ]
+}

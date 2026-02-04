@@ -1,0 +1,127 @@
+{
+  "chunk_id": "CHUNK-317",
+  "entities": [
+    {
+      "id": "software-based isolation mechanism",
+      "type": "CONCEPT",
+      "text": "Mechanism for sharing physical server hardware"
+    },
+    {
+      "id": "physical server",
+      "type": "CONCEPT",
+      "text": "Hardware that hosts computing environments"
+    },
+    {
+      "id": "computing environment",
+      "type": "CONCEPT",
+      "text": "Operating system or application running on shared hardware"
+    },
+    {
+      "id": "hypervisor",
+      "type": "CONCEPT",
+      "text": "Type of isolation mechanism for virtual machines"
+    },
+    {
+      "id": "application container",
+      "type": "CONCEPT",
+      "text": "Type of isolation mechanism using shared kernel"
+    },
+    {
+      "id": "adversary",
+      "type": "ACTOR",
+      "text": "Entity that might compromise computing environments"
+    },
+    {
+      "id": "vendor",
+      "type": "ACTOR",
+      "text": "Provider of isolation mechanism software"
+    },
+    {
+      "id": "administrative interface",
+      "type": "CONCEPT",
+      "text": "Management interface for isolation mechanism"
+    },
+    {
+      "id": "underlying operating system",
+      "type": "CONCEPT",
+      "text": "Base OS of physical server"
+    },
+    {
+      "id": "patches/updates",
+      "type": "PROCESS",
+      "text": "Security vulnerability remediation"
+    },
+    {
+      "id": "integrity monitoring",
+      "type": "PROCESS",
+      "text": "Security monitoring activity"
+    },
+    {
+      "id": "log monitoring",
+      "type": "PROCESS",
+      "text": "Security monitoring activity"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "software-based isolation mechanism",
+      "to": "USES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "physical server",
+      "to": "RUNS_ON",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "computing environment",
+      "to": "IS_A",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "IS_A",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "hypervisor",
+      "to": "COMPROMISES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "PROVIDES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "application container",
+      "to": "HAS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "HAS",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "adversary",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "computing environment",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "vendor",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "software-based isolation mechanism",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    }
+  ]
+}

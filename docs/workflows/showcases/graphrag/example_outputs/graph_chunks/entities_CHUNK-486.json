@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-486",
+  "entities": [
+    {
+      "id": "RPKI",
+      "type": "CONCEPT",
+      "text": "Resource Public Key Infrastructure"
+    },
+    {
+      "id": "ROA",
+      "type": "CONCEPT",
+      "text": "Route Origin Authorization"
+    },
+    {
+      "id": "BGP",
+      "type": "CONCEPT",
+      "text": "Border Gateway Protocol"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Organisation using security controls"
+    },
+    {
+      "id": "Public IP addresses",
+      "type": "CONCEPT",
+      "text": "Public IP addresses requiring configuration"
+    },
+    {
+      "id": "Autonomous Systems",
+      "type": "CONCEPT",
+      "text": "Autonomous Systems for routing"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "RPKI",
+      "to": "RPKI",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ROA",
+      "to": "BGP",
+      "type": "REDUCES"
+    }
+  ]
+}

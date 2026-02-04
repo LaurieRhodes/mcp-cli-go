@@ -1,0 +1,97 @@
+{
+  "chunk_id": "CHUNK-252",
+  "entities": [
+    {
+      "id": "Non-volatile magnetic media",
+      "type": "CONCEPT",
+      "text": "Storage media that retains data without power"
+    },
+    {
+      "id": "Non-volatile magnetic hard drives",
+      "type": "CONCEPT",
+      "text": "Specific type of magnetic storage"
+    },
+    {
+      "id": "Host-protected area",
+      "type": "CONCEPT",
+      "text": "Hidden area not visible to OS"
+    },
+    {
+      "id": "Device configuration overlay table",
+      "type": "CONCEPT",
+      "text": "Hidden configuration table"
+    },
+    {
+      "id": "Growth defects table",
+      "type": "CONCEPT",
+      "text": "Table tracking bad sectors"
+    },
+    {
+      "id": "Primary defects table",
+      "type": "CONCEPT",
+      "text": "Table of factory-identified bad sectors"
+    },
+    {
+      "id": "ATA secure erase command",
+      "type": "PROCESS",
+      "text": "Firmware command for secure erasure"
+    },
+    {
+      "id": "Sanitisation programs",
+      "type": "ACTOR",
+      "text": "Software for data sanitization"
+    },
+    {
+      "id": "Overwriting software",
+      "type": "ACTOR",
+      "text": "Software for data overwriting"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Non-volatile magnetic media",
+      "to": "Non-volatile magnetic hard drives",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Non-volatile magnetic hard drives",
+      "to": "Host-protected area",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Non-volatile magnetic hard drives",
+      "to": "Device configuration overlay table",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Non-volatile magnetic hard drives",
+      "to": "Growth defects table",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "Non-volatile magnetic hard drives",
+      "to": "Primary defects table",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "ATA secure erase command",
+      "to": "Growth defects table",
+      "type": "OVERWRITES"
+    },
+    {
+      "from": "Sanitisation programs",
+      "to": "Host-protected area",
+      "type": "RESETS"
+    },
+    {
+      "from": "Sanitisation programs",
+      "to": "Device configuration overlay table",
+      "type": "RESETS"
+    },
+    {
+      "from": "Overwriting software",
+      "to": "Non-volatile magnetic media",
+      "type": "SANITIZES"
+    }
+  ]
+}

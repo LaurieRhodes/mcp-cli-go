@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-114",
+  "entities": [
+    {
+      "id": "cable register",
+      "type": "CONCEPT",
+      "text": "Document tracking all cabling information"
+    },
+    {
+      "id": "cable tracing",
+      "type": "PROCESS",
+      "text": "Process of tracing cables for changes or damage"
+    },
+    {
+      "id": "cable changes",
+      "type": "PROCESS",
+      "text": "Modifications to cabling throughout system lifecycle"
+    },
+    {
+      "id": "cable installers",
+      "type": "ACTOR",
+      "text": "Personnel who install cables"
+    },
+    {
+      "id": "cable inspectors",
+      "type": "ACTOR",
+      "text": "Personnel who inspect cables"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cable register",
+      "to": "cable register",
+      "type": "ENABLES"
+    },
+    {
+      "from": "cable tracing",
+      "to": "cable changes",
+      "type": "TRACKS"
+    }
+  ]
+}

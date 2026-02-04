@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-171",
+  "entities": [
+    {
+      "id": "MFD",
+      "type": "DEVICE",
+      "text": "Multifunction Device"
+    },
+    {
+      "id": "digital telephone system",
+      "type": "SYSTEM",
+      "text": "Digital Telephone System"
+    },
+    {
+      "id": "network",
+      "type": "NETWORK",
+      "text": "Network"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "MFD",
+      "to": "digital telephone system",
+      "type": "CONNECTED_TO"
+    },
+    {
+      "from": "digital telephone system",
+      "to": "network",
+      "type": "OPERATES_AT"
+    },
+    {
+      "from": "MFD",
+      "to": "digital telephone system",
+      "type": "BRIDGES"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-227",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and communications technology equipment"
+    },
+    {
+      "id": "media",
+      "type": "CONCEPT",
+      "text": "Storage media within ICT devices"
+    },
+    {
+      "id": "sanitising",
+      "type": "PROCESS",
+      "text": "Process of removing sensitive data"
+    },
+    {
+      "id": "destruction",
+      "type": "PROCESS",
+      "text": "Process of destroying unsanitisable equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "content",
+      "to": "content",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "content",
+      "to": "content",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "content",
+      "to": "content",
+      "type": "MENTIONED_IN"
+    },
+    {
+      "from": "content",
+      "to": "content",
+      "type": "MENTIONED_IN"
+    }
+  ]
+}

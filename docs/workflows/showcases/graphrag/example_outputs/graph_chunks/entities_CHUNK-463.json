@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-463",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and Communications Technology equipment"
+    },
+    {
+      "id": "SSH",
+      "type": "CONCEPT",
+      "text": "Secure Shell protocol"
+    },
+    {
+      "id": "AACAs",
+      "type": "CONCEPT",
+      "text": "Approved Authenticated Encryption with Associated Data algorithms"
+    },
+    {
+      "id": "AACPs",
+      "type": "CONCEPT",
+      "text": "Approved Authenticated Encryption with Associated Data protocols"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Algorithms",
+      "type": "CONCEPT",
+      "text": "Australian Signals Directorate approved cryptographic algorithms"
+    },
+    {
+      "id": "ASD-Approved Cryptographic Protocols",
+      "type": "CONCEPT",
+      "text": "Australian Signals Directorate approved cryptographic protocols"
+    },
+    {
+      "id": "guidelines",
+      "type": "CONCEPT",
+      "text": "Security guidelines document"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "SSH",
+      "type": "USES"
+    },
+    {
+      "from": "SSH",
+      "to": "AACAs",
+      "type": "IMPLEMENTS"
+    }
+  ]
+}

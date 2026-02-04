@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-442",
+  "entities": [
+    {
+      "id": "NIST SP 800-57 Part 1 Rev. 5",
+      "type": "DOCUMENT",
+      "text": "NIST Special Publication for key management"
+    },
+    {
+      "id": "ASD-approved HACE",
+      "type": "SYSTEM",
+      "text": "Australian Signals Directorate-approved High Assurance Cryptographic Equipment"
+    },
+    {
+      "id": "ACSC",
+      "type": "AGENCY",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Cryptographic Module Validation Program",
+      "type": "PROGRAM",
+      "text": "Program for validating cryptographic modules"
+    },
+    {
+      "id": "NIST",
+      "type": "AGENCY",
+      "text": "National Institute of Standards and Technology"
+    },
+    {
+      "id": "Canadian Centre for Cyber Security",
+      "type": "AGENCY",
+      "text": "Canadian cybersecurity agency"
+    },
+    {
+      "id": "Attorney-General's Department's Protective Security Policy Framework",
+      "type": "DOCUMENT",
+      "text": "Australian government security policy framework"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "NIST SP 800-57 Part 1 Rev. 5",
+      "to": "Cryptographic Module Validation Program",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Cryptographic Module Validation Program",
+      "to": "NIST",
+      "type": "OPERATED_BY"
+    }
+  ]
+}

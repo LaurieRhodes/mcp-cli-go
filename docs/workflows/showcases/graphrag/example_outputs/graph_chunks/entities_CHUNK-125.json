@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-125",
+  "entities": [
+    {
+      "id": "shared facilities",
+      "type": "CONCEPT",
+      "text": "Physical locations where multiple entities operate"
+    },
+    {
+      "id": "cables",
+      "type": "CONCEPT",
+      "text": "Physical wiring infrastructure"
+    },
+    {
+      "id": "sealed cable reticulation system",
+      "type": "CONCEPT",
+      "text": "Protective enclosure for cable management"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "shared facilities",
+      "to": "cables",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "cables",
+      "to": "sealed cable reticulation system",
+      "type": "REQUIRES"
+    }
+  ]
+}

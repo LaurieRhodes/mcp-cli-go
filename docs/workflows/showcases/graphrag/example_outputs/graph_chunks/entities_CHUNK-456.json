@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-456",
+  "entities": [
+    {
+      "id": "High assurance cryptographic protocols",
+      "type": "CONCEPT",
+      "text": "Cryptographic protocols for high security"
+    },
+    {
+      "id": "SECRET data",
+      "type": "CONCEPT",
+      "text": "Classified information requiring protection"
+    },
+    {
+      "id": "TOP SECRET data",
+      "type": "CONCEPT",
+      "text": "Highest level classified information"
+    },
+    {
+      "id": "ASD-approved HACE",
+      "type": "CONCEPT",
+      "text": "High Assurance Cryptographic Equipment approved by Australian Signals Directorate"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "High assurance cryptographic protocols",
+      "to": "High assurance cryptographic protocols",
+      "type": "PROTECTS"
+    },
+    {
+      "from": "SECRET data",
+      "to": "TOP SECRET data",
+      "type": "PROTECTS"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-496",
+  "entities": [
+    {
+      "id": "Cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Security events that need prevention"
+    },
+    {
+      "id": "Users",
+      "type": "ACTOR",
+      "text": "Individuals who need training"
+    },
+    {
+      "id": "CDSs",
+      "type": "CONCEPT",
+      "text": "Controlled Digital Systems that need secure use"
+    },
+    {
+      "id": "Training",
+      "type": "PROCESS",
+      "text": "Educational process for users"
+    },
+    {
+      "id": "ISM-0610",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Cyber security incidents",
+      "to": "Users",
+      "type": "PREVENTION_REQUIRES"
+    },
+    {
+      "from": "Users",
+      "to": "CDSs",
+      "type": "USES"
+    },
+    {
+      "from": "Users",
+      "to": "Training",
+      "type": "RECEIVES"
+    },
+    {
+      "from": "Training",
+      "to": "CDSs",
+      "type": "COVERS_SECURE_USE"
+    },
+    {
+      "from": "ISM-0610",
+      "to": "Training",
+      "type": "REQUIRES"
+    }
+  ]
+}

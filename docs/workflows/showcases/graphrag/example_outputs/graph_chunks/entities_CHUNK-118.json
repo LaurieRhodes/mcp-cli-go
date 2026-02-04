@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-118",
+  "entities": [
+    {
+      "id": "structured cabling systems",
+      "type": "CONCEPT",
+      "text": "Systems to support building management and control functions"
+    },
+    {
+      "id": "Australian Standards",
+      "type": "STANDARD",
+      "text": "Standards requiring specified colors for cabling"
+    },
+    {
+      "id": "building management cables",
+      "type": "ARTIFACT",
+      "text": "Cables used for building management functions"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "structured cabling systems",
+      "to": "Australian Standards",
+      "type": "CONTAINS"
+    },
+    {
+      "from": "building management cables",
+      "to": "building management cables",
+      "type": "REQUIRES"
+    }
+  ]
+}

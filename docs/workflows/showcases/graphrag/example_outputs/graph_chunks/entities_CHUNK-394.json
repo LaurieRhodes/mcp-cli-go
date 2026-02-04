@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-394",
+  "entities": [
+    {
+      "id": "IPv6",
+      "type": "TECHNOLOGY",
+      "text": "Internet Protocol version 6"
+    },
+    {
+      "id": "IPv4",
+      "type": "TECHNOLOGY",
+      "text": "Internet Protocol version 4"
+    },
+    {
+      "id": "Stateless Address Autoconfiguration",
+      "type": "PROTOCOL",
+      "text": "IPv6 address configuration method"
+    },
+    {
+      "id": "DHCPv6",
+      "type": "PROTOCOL",
+      "text": "Dynamic Host Configuration Protocol version 6"
+    },
+    {
+      "id": "Network Security Appliances",
+      "type": "DEVICE",
+      "text": "Security devices for IPv6 networks"
+    },
+    {
+      "id": "Tunneling Protocols",
+      "type": "PROTOCOL",
+      "text": "Protocols for IPv4/IPv6 interoperability"
+    },
+    {
+      "id": "Dual-stack Network Devices",
+      "type": "DEVICE",
+      "text": "Network devices supporting both IPv4 and IPv6"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "IPv6",
+      "to": "IPv6",
+      "type": "INTRODUCES_RISK"
+    },
+    {
+      "from": "IPv4",
+      "to": "Stateless Address Autoconfiguration",
+      "type": "USES"
+    }
+  ]
+}

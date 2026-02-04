@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-056",
+  "entities": [
+    {
+      "id": "supplier relationship management policy",
+      "type": "PROCESS",
+      "text": "Policy for managing supplier relationships"
+    },
+    {
+      "id": "approved supplier list",
+      "type": "ARTIFACT",
+      "text": "List of approved suppliers"
+    },
+    {
+      "id": "suppliers",
+      "type": "ACTOR",
+      "text": "External providers of products/services"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "supplier relationship management policy",
+      "to": "supplier relationship management policy",
+      "type": "DEFINES"
+    },
+    {
+      "from": "approved supplier list",
+      "to": "suppliers",
+      "type": "GOVERNS"
+    }
+  ]
+}

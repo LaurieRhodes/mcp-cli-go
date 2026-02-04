@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-281",
+  "entities": [
+    {
+      "id": "Traditional network firewalls",
+      "type": "CONCEPT",
+      "text": "Traditional network security devices"
+    },
+    {
+      "id": "Malicious code",
+      "type": "CONCEPT",
+      "text": "Harmful software programs"
+    },
+    {
+      "id": "Software firewalls",
+      "type": "CONCEPT",
+      "text": "Application-level security software"
+    },
+    {
+      "id": "Workstations",
+      "type": "ACTOR",
+      "text": "End-user computing devices"
+    },
+    {
+      "id": "Servers",
+      "type": "ACTOR",
+      "text": "Server computing devices"
+    },
+    {
+      "id": "Network connections",
+      "type": "PROCESS",
+      "text": "Network communication links"
+    },
+    {
+      "id": "Applications",
+      "type": "PROCESS",
+      "text": "Software programs"
+    },
+    {
+      "id": "Services",
+      "type": "PROCESS",
+      "text": "System services"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Traditional network firewalls",
+      "to": "Software firewalls",
+      "type": "Software firewalls"
+    },
+    {
+      "from": "Malicious code",
+      "to": "Traditional network firewalls",
+      "type": "Workstations"
+    }
+  ]
+}

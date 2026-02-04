@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-049",
+  "entities": [
+    {
+      "id": "cyber security incident",
+      "type": "CONCEPT",
+      "text": "A security breach or attack event"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "The entity experiencing the incident"
+    },
+    {
+      "id": "incident response plan",
+      "type": "PROCESS",
+      "text": "Formal procedure for handling incidents"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security incident",
+      "to": "organisation",
+      "type": "AFFECTS"
+    },
+    {
+      "from": "organisation",
+      "to": "incident response plan",
+      "type": "ENACTS"
+    }
+  ]
+}

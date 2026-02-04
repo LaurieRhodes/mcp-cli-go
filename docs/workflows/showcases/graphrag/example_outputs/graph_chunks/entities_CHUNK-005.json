@@ -1,0 +1,57 @@
+{
+  "chunk_id": "CHUNK-005",
+  "entities": [
+    {
+      "id": "cyber security principles",
+      "type": "CONCEPT",
+      "text": "Strategic guidance for protecting systems and data"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity implementing security measures"
+    },
+    {
+      "id": "systems and data",
+      "type": "CONCEPT",
+      "text": "Assets requiring protection from threats"
+    },
+    {
+      "id": "cyber threats",
+      "type": "CONCEPT",
+      "text": "Potential security risks"
+    },
+    {
+      "id": "govern",
+      "type": "PROCESS",
+      "text": "Governance activities"
+    },
+    {
+      "id": "protect",
+      "type": "PROCESS",
+      "text": "Protection activities"
+    },
+    {
+      "id": "detect",
+      "type": "PROCESS",
+      "text": "Detection activities"
+    },
+    {
+      "id": "respond",
+      "type": "PROCESS",
+      "text": "Response activities"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber security principles",
+      "to": "organisation",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "organisation",
+      "to": "systems and data",
+      "type": "PROTECTS"
+    }
+  ]
+}

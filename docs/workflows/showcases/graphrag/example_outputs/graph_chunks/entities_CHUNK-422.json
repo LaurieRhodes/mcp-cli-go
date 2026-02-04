@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-422",
+  "entities": [
+    {
+      "id": "wireless networks",
+      "type": "CONCEPT",
+      "text": "Network infrastructure that uses radio waves for communication"
+    },
+    {
+      "id": "frequency separation",
+      "type": "PROCESS",
+      "text": "Process of using different frequency bands to reduce interference"
+    },
+    {
+      "id": "802.11b/g (2.4 GHz) channels",
+      "type": "CONCEPT",
+      "text": "Wireless networking standard operating at 2.4 GHz frequency"
+    },
+    {
+      "id": "802.11n (5 GHz) channels",
+      "type": "CONCEPT",
+      "text": "Wireless networking standard operating at 5 GHz frequency"
+    },
+    {
+      "id": "interference",
+      "type": "CONCEPT",
+      "text": "Signal disruption between wireless networks"
+    },
+    {
+      "id": "devices",
+      "type": "ACTOR",
+      "text": "Hardware components that connect to wireless networks"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "wireless networks",
+      "to": "REQUIRES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "frequency separation",
+      "to": "CAUSES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "wireless networks",
+      "to": "REDUCES",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "interference",
+      "to": "ALTERNATIVE_TO",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "frequency separation",
+      "to": "COMPATIBLE_WITH",
+      "type": "RELATED_TO"
+    }
+  ]
+}

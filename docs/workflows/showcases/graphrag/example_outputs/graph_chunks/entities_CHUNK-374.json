@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-374",
+  "entities": [
+    {
+      "id": "protective markings",
+      "type": "CONCEPT",
+      "text": "Security labels applied to emails"
+    },
+    {
+      "id": "emails",
+      "type": "CONCEPT",
+      "text": "Electronic mail communications"
+    },
+    {
+      "id": "data spills",
+      "type": "CONCEPT",
+      "text": "Unauthorized data release events"
+    },
+    {
+      "id": "ISM-0270",
+      "type": "CONTROL",
+      "text": "Information Security Manual control"
+    },
+    {
+      "id": "sensitivity/classification",
+      "type": "CONCEPT",
+      "text": "Level of data protection required"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "protective markings",
+      "to": "emails",
+      "type": "APPLIED_TO"
+    },
+    {
+      "from": "protective markings",
+      "to": "data spills",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "protective markings",
+      "to": "sensitivity/classification",
+      "type": "REFLECTS"
+    },
+    {
+      "from": "ISM-0270",
+      "to": "protective markings",
+      "type": "REQUIRES"
+    }
+  ]
+}

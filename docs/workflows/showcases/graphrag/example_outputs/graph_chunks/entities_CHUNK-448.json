@@ -1,0 +1,72 @@
+{
+  "chunk_id": "CHUNK-448",
+  "entities": [
+    {
+      "id": "DSA",
+      "type": "CONCEPT",
+      "text": "Digital Signature Algorithm"
+    },
+    {
+      "id": "2048-bit modulus",
+      "type": "CONCEPT",
+      "text": "Minimum modulus size for DSA"
+    },
+    {
+      "id": "112-bit security strength",
+      "type": "CONCEPT",
+      "text": "Effective security strength provided by 2048-bit DSA"
+    },
+    {
+      "id": "FIPS 186-4",
+      "type": "STANDARD",
+      "text": "Federal Information Processing Standard for digital signatures"
+    },
+    {
+      "id": "ISM-0473",
+      "type": "CONTROL",
+      "text": "ISM control for DSA security strength"
+    },
+    {
+      "id": "ISM-1630",
+      "type": "CONTROL",
+      "text": "ISM control for DSA modulus requirements"
+    },
+    {
+      "id": "ISM-1760",
+      "type": "CONTROL",
+      "text": "ISM control for DSA parameter generation"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "DSA",
+      "to": "2048-bit modulus",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "2048-bit modulus",
+      "to": "112-bit security strength",
+      "type": "PROVIDES"
+    },
+    {
+      "from": "DSA",
+      "to": "FIPS 186-4",
+      "type": "COMPLIES_WITH"
+    },
+    {
+      "from": "ISM-0473",
+      "to": "112-bit security strength",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ISM-1630",
+      "to": "2048-bit modulus",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1760",
+      "to": "FIPS 186-4",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "chunk_id": "CHUNK-224",
+  "entities": [
+    {
+      "id": "cyber supply chain risk management",
+      "type": "CONCEPT",
+      "text": "Management of risks in cyber supply chains"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "DOCUMENT",
+      "text": "Document providing procurement guidelines"
+    },
+    {
+      "id": "sanitisation of media",
+      "type": "CONCEPT",
+      "text": "Process of cleaning media to remove sensitive data"
+    },
+    {
+      "id": "Guidelines for Media",
+      "type": "DOCUMENT",
+      "text": "Document providing media handling guidelines"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "cyber supply chain risk management",
+      "to": "sanitisation of media",
+      "type": "REFERENCES"
+    },
+    {
+      "from": "Guidelines for Procurement and Outsourcing",
+      "to": "Guidelines for Media",
+      "type": "REFERENCES"
+    }
+  ]
+}

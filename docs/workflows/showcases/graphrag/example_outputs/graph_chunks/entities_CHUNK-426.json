@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-426",
+  "entities": [
+    {
+      "id": "cloud service providers",
+      "type": "ACTOR",
+      "text": "Organizations that provide cloud computing services"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Business entity using cloud services"
+    },
+    {
+      "id": "online services",
+      "type": "CONCEPT",
+      "text": "Digital services accessible over the internet"
+    },
+    {
+      "id": "denial-of-service attacks",
+      "type": "CONCEPT",
+      "text": "Cyber attacks that overwhelm systems"
+    },
+    {
+      "id": "cloud-based hosting",
+      "type": "PROCESS",
+      "text": "Method of hosting services in cloud infrastructure"
+    },
+    {
+      "id": "self-hosted services",
+      "type": "CONCEPT",
+      "text": "Services hosted on organization's own infrastructure"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "cloud service providers",
+      "type": "cloud-based hosting"
+    },
+    {
+      "from": "cloud service providers",
+      "to": "online services",
+      "type": "denial-of-service attacks"
+    }
+  ]
+}

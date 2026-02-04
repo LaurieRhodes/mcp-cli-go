@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-161",
+  "entities": [
+    {
+      "id": "unauthorised devices",
+      "type": "CONCEPT",
+      "text": "Devices without proper authorisation"
+    },
+    {
+      "id": "unauthenticated devices",
+      "type": "CONCEPT",
+      "text": "Devices without authentication credentials"
+    },
+    {
+      "id": "video conferencing network",
+      "type": "SYSTEM",
+      "text": "Network for video conferencing systems"
+    },
+    {
+      "id": "IP telephony network",
+      "type": "SYSTEM",
+      "text": "Network for IP telephony systems"
+    },
+    {
+      "id": "two-way authentication scheme",
+      "type": "PROCESS",
+      "text": "Encrypted non-replayable authentication method"
+    },
+    {
+      "id": "call authentication",
+      "type": "PROCESS",
+      "text": "Process of verifying call legitimacy"
+    },
+    {
+      "id": "authorisation",
+      "type": "PROCESS",
+      "text": "Process of granting permissions"
+    },
+    {
+      "id": "logins",
+      "type": "PROCESS",
+      "text": "Individual user authentication credentials"
+    },
+    {
+      "id": "SECRET conversations",
+      "type": "CLASSIFICATION",
+      "text": "SECRET classification level"
+    },
+    {
+      "id": "TOP SECRET conversations",
+      "type": "CLASSIFICATION",
+      "text": "TOP SECRET classification level"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "unauthorised devices",
+      "to": "unauthenticated devices",
+      "type": "BLOCKS"
+    },
+    {
+      "from": "video conferencing network",
+      "to": "IP telephony network",
+      "type": "BLOCKS"
+    }
+  ]
+}

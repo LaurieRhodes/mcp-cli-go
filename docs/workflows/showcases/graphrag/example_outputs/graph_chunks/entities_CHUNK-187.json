@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-187",
+  "entities": [
+    {
+      "id": "Guidelines for System Hardening",
+      "type": "CONCEPT",
+      "text": "Australian government guidelines for system security hardening"
+    },
+    {
+      "id": "Guidelines for System Management",
+      "type": "CONCEPT",
+      "text": "Australian government guidelines for system management"
+    },
+    {
+      "id": "ACSC",
+      "type": "ACTOR",
+      "text": "Australian Cyber Security Centre"
+    },
+    {
+      "id": "Guidelines for Procurement and Outsourcing",
+      "type": "CONCEPT",
+      "text": "Australian government guidelines for procurement security"
+    },
+    {
+      "id": "Guidelines for Evaluated Products",
+      "type": "CONCEPT",
+      "text": "Australian government guidelines for evaluated products"
+    },
+    {
+      "id": "Guidelines for Cryptography",
+      "type": "CONCEPT",
+      "text": "Australian government guidelines for cryptography"
+    },
+    {
+      "id": "National Institute of Standards and Technology",
+      "type": "ACTOR",
+      "text": "US National Institute of Standards and Technology"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Guidelines for System Hardening",
+      "to": "Guidelines for System Management",
+      "type": "PUBLISHES"
+    },
+    {
+      "from": "ACSC",
+      "to": "ACSC",
+      "type": "PUBLISHES"
+    }
+  ]
+}

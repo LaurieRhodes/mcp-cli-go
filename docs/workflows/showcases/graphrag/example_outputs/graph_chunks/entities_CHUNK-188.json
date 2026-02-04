@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-188",
+  "entities": [
+    {
+      "id": "mobile device",
+      "type": "CONCEPT",
+      "text": "Portable computing devices that leave office environment"
+    },
+    {
+      "id": "organisation",
+      "type": "ACTOR",
+      "text": "Entity that develops and implements policies"
+    },
+    {
+      "id": "mobile device usage policy",
+      "type": "PROCESS",
+      "text": "Formal policy governing mobile device usage"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "organisation",
+      "to": "mobile device usage policy",
+      "type": "DEVELOPS"
+    },
+    {
+      "from": "mobile device usage policy",
+      "to": "mobile device",
+      "type": "GOVERN"
+    }
+  ]
+}

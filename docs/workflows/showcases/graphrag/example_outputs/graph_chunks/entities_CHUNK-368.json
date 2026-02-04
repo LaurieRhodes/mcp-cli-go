@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-368",
+  "entities": [
+    {
+      "id": "Database contents from production environments",
+      "type": "DATA",
+      "text": "Database contents from production environments"
+    },
+    {
+      "id": "Development environments",
+      "type": "ENVIRONMENT",
+      "text": "Development environments"
+    },
+    {
+      "id": "Testing environments",
+      "type": "ENVIRONMENT",
+      "text": "Testing environments"
+    },
+    {
+      "id": "Production environments",
+      "type": "ENVIRONMENT",
+      "text": "Production environments"
+    },
+    {
+      "id": "Protection measures",
+      "type": "SECURITY_CONTROL",
+      "text": "Security protection measures"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Database contents from production environments",
+      "to": "Database contents from production environments",
+      "type": "RESTRICTED_FROM"
+    },
+    {
+      "from": "Development environments",
+      "to": "Testing environments",
+      "type": "RESTRICTED_FROM"
+    }
+  ]
+}

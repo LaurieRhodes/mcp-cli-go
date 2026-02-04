@@ -1,0 +1,32 @@
+{
+  "chunk_id": "CHUNK-366",
+  "entities": [
+    {
+      "id": "Databases",
+      "type": "CONCEPT",
+      "text": "Data storage systems being protected"
+    },
+    {
+      "id": "File-based access controls",
+      "type": "PROCESS",
+      "text": "Security mechanism applied to database files"
+    },
+    {
+      "id": "ISM-1256",
+      "type": "CONCEPT",
+      "text": "Specific security control identifier"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Databases",
+      "to": "File-based access controls",
+      "type": "PROTECTED_BY"
+    },
+    {
+      "from": "File-based access controls",
+      "to": "ISM-1256",
+      "type": "IMPLEMENTS"
+    }
+  ]
+}

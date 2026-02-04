@@ -1,0 +1,52 @@
+{
+  "chunk_id": "CHUNK-063",
+  "entities": [
+    {
+      "id": "Outsourced cloud service providers",
+      "type": "ACTOR",
+      "text": "Organizations providing cloud services"
+    },
+    {
+      "id": "Cloud services",
+      "type": "CONCEPT",
+      "text": "Services offered by cloud providers"
+    },
+    {
+      "id": "IRAP assessor",
+      "type": "ACTOR",
+      "text": "Security assessor conducting IRAP assessments"
+    },
+    {
+      "id": "Security assessment",
+      "type": "PROCESS",
+      "text": "Evaluation process for security posture"
+    },
+    {
+      "id": "ISM-1570",
+      "type": "CONCEPT",
+      "text": "Control identifier for security assessment requirements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Outsourced cloud service providers",
+      "to": "Cloud services",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Cloud services",
+      "to": "Security assessment",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Outsourced cloud service providers",
+      "to": "Security assessment",
+      "type": "PERFORMS"
+    },
+    {
+      "from": "Security assessment",
+      "to": "ISM-1570",
+      "type": "GOVERNED_BY"
+    }
+  ]
+}

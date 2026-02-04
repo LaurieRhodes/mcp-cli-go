@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-100",
+  "entities": [
+    {
+      "id": "privileged accounts",
+      "type": "CONCEPT",
+      "text": "Accounts with elevated system access rights"
+    },
+    {
+      "id": "foreign nationals",
+      "type": "ACTOR",
+      "text": "Individuals who are not citizens of the country"
+    },
+    {
+      "id": "AUSTEO data",
+      "type": "CONCEPT",
+      "text": "Australian Eyes Only classified data"
+    },
+    {
+      "id": "AGAO data",
+      "type": "CONCEPT",
+      "text": "Australian Government Access Only classified data"
+    },
+    {
+      "id": "REL data",
+      "type": "CONCEPT",
+      "text": "Releasable to foreign nationals classified data"
+    },
+    {
+      "id": "seconded foreign nationals",
+      "type": "ACTOR",
+      "text": "Foreign nationals working under secondment arrangements"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "privileged accounts",
+      "to": "foreign nationals",
+      "type": "DEFINES"
+    },
+    {
+      "from": "foreign nationals",
+      "to": "AUSTEO data",
+      "type": "PROHIBITS"
+    }
+  ]
+}

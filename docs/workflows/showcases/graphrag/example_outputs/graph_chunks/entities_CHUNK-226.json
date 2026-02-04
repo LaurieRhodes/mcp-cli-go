@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-226",
+  "entities": [
+    {
+      "id": "ICT equipment destruction processes",
+      "type": "CONCEPT",
+      "text": "Formal processes for destroying ICT equipment"
+    },
+    {
+      "id": "ICT equipment destruction procedures",
+      "type": "CONCEPT",
+      "text": "Supporting procedures for ICT equipment destruction"
+    },
+    {
+      "id": "Organisation",
+      "type": "ACTOR",
+      "text": "Entity carrying out ICT equipment destruction"
+    },
+    {
+      "id": "ISM-1741",
+      "type": "PROCESS",
+      "text": "Control standard for ICT equipment destruction"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment destruction processes",
+      "to": "ICT equipment destruction procedures",
+      "type": "DEFINES"
+    },
+    {
+      "from": "ICT equipment destruction procedures",
+      "to": "Organisation",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-1741",
+      "to": "ICT equipment destruction processes",
+      "type": "REQUIRES"
+    }
+  ]
+}

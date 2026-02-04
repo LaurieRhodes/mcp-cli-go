@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-147",
+  "entities": [
+    {
+      "id": "ICT equipment",
+      "type": "CONCEPT",
+      "text": "Information and Communications Technology equipment"
+    },
+    {
+      "id": "Industry standards",
+      "type": "CONCEPT",
+      "text": "Standards set by industry bodies"
+    },
+    {
+      "id": "Government standards",
+      "type": "CONCEPT",
+      "text": "Standards set by government agencies"
+    },
+    {
+      "id": "Electromagnetic interference/electromagnetic compatibility",
+      "type": "CONCEPT",
+      "text": "Technical standards for electromagnetic emissions and compatibility"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment",
+      "to": "Industry standards",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "Industry standards",
+      "to": "Government standards",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ICT equipment",
+      "to": "Electromagnetic interference/electromagnetic compatibility",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Government standards",
+      "to": "Electromagnetic interference/electromagnetic compatibility",
+      "type": "DEFINES"
+    }
+  ]
+}

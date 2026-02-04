@@ -1,0 +1,42 @@
+{
+  "chunk_id": "CHUNK-217",
+  "entities": [
+    {
+      "id": "ICT equipment classification",
+      "type": "CONCEPT",
+      "text": "Classification of ICT equipment based on data sensitivity"
+    },
+    {
+      "id": "Data sensitivity",
+      "type": "CONCEPT",
+      "text": "Sensitivity or classification level of data"
+    },
+    {
+      "id": "Sanitisation processes",
+      "type": "PROCESS",
+      "text": "Processes for cleaning ICT equipment"
+    },
+    {
+      "id": "Destruction processes",
+      "type": "PROCESS",
+      "text": "Processes for destroying ICT equipment"
+    },
+    {
+      "id": "Disposal processes",
+      "type": "PROCESS",
+      "text": "Processes for disposing ICT equipment"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "ICT equipment classification",
+      "to": "ICT equipment classification",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Data sensitivity",
+      "to": "Sanitisation processes",
+      "type": "REQUIRES"
+    }
+  ]
+}

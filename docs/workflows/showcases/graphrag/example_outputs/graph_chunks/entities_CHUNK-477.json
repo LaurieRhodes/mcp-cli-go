@@ -1,0 +1,67 @@
+{
+  "chunk_id": "CHUNK-477",
+  "entities": [
+    {
+      "id": "HMAC-SHA256",
+      "type": "CONCEPT",
+      "text": "Integrity algorithm"
+    },
+    {
+      "id": "HMAC-SHA384",
+      "type": "CONCEPT",
+      "text": "Integrity algorithm"
+    },
+    {
+      "id": "HMAC-SHA512",
+      "type": "CONCEPT",
+      "text": "Integrity algorithm"
+    },
+    {
+      "id": "AES-GCM",
+      "type": "CONCEPT",
+      "text": "Encryption algorithm"
+    },
+    {
+      "id": "NONE",
+      "type": "CONCEPT",
+      "text": "Integrity algorithm configuration"
+    },
+    {
+      "id": "IPsec connections",
+      "type": "PROCESS",
+      "text": "Network security protocol"
+    },
+    {
+      "id": "ISM-0998",
+      "type": "CONTROL",
+      "text": "Security control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "IPsec connections",
+      "to": "HMAC-SHA256",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "IPsec connections",
+      "to": "HMAC-SHA384",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "IPsec connections",
+      "to": "HMAC-SHA512",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "AES-GCM",
+      "to": "NONE",
+      "type": "ALLOWS"
+    },
+    {
+      "from": "ISM-0998",
+      "to": "Integrity algorithms",
+      "type": "DEFINES"
+    }
+  ]
+}

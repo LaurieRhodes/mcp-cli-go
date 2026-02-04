@@ -1,0 +1,62 @@
+{
+  "chunk_id": "CHUNK-503",
+  "entities": [
+    {
+      "id": "Web proxies",
+      "type": "CONCEPT",
+      "text": "Key component for enforcing web usage policies and preventing cyber security incidents"
+    },
+    {
+      "id": "Web usage policies",
+      "type": "CONCEPT",
+      "text": "Policies that web proxies help enforce"
+    },
+    {
+      "id": "Cyber security incidents",
+      "type": "CONCEPT",
+      "text": "Incidents that web proxies help prevent"
+    },
+    {
+      "id": "ISM-0260",
+      "type": "CONTROL",
+      "text": "Information Security Manual control for web proxies"
+    },
+    {
+      "id": "Web access",
+      "type": "PROCESS",
+      "text": "All web access conducted through web proxies"
+    },
+    {
+      "id": "Internal servers",
+      "type": "ACTOR",
+      "text": "Servers whose web access is conducted through web proxies"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Web proxies",
+      "to": "Web usage policies",
+      "type": "DEFINES"
+    },
+    {
+      "from": "Web proxies",
+      "to": "Cyber security incidents",
+      "type": "PREVENTS"
+    },
+    {
+      "from": "Web proxies",
+      "to": "Web access",
+      "type": "REQUIRES"
+    },
+    {
+      "from": "ISM-0260",
+      "to": "Web proxies",
+      "type": "GOVERNS"
+    },
+    {
+      "from": "Web proxies",
+      "to": "Internal servers",
+      "type": "INCLUDES"
+    }
+  ]
+}

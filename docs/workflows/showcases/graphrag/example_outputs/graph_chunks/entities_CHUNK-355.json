@@ -1,0 +1,47 @@
+{
+  "chunk_id": "CHUNK-355",
+  "entities": [
+    {
+      "id": "cross-site scripting",
+      "type": "CONCEPT",
+      "text": "Type of web security vulnerability"
+    },
+    {
+      "id": "content injection attacks",
+      "type": "CONCEPT",
+      "text": "Category of security attacks"
+    },
+    {
+      "id": "output encoding",
+      "type": "PROCESS",
+      "text": "Security technique for data sanitization"
+    },
+    {
+      "id": "external data sources",
+      "type": "ACTOR",
+      "text": "Untrusted input sources"
+    },
+    {
+      "id": "web applications",
+      "type": "ACTOR",
+      "text": "Software applications that produce output"
+    },
+    {
+      "id": "ISM-1241",
+      "type": "CONCEPT",
+      "text": "Information Security Manual control"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "output encoding",
+      "to": "output encoding",
+      "type": "REDUCES"
+    },
+    {
+      "from": "cross-site scripting",
+      "to": "content injection attacks",
+      "type": "REDUCES"
+    }
+  ]
+}
